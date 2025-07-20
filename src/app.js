@@ -1,6 +1,4 @@
 import { app, h, text } from "./packages/hyperapp/index.js";
-import "./block-component.js";
-import "./ace-editor.js";
 
 // -----------------------------
 // ## Types
@@ -13,7 +11,6 @@ import "./ace-editor.js";
  * @property {number} height
  * @property {number} left
  * @property {number} top
- * @property {string} program
  */
 
 /**
@@ -119,46 +116,6 @@ const RESIZE_HANDLERS = {
     top: block.top,
   }),
 };
-
-const testHyperappProgram = `
-function AddTodo(state) {
-  return {
-    ...state,
-    value: "",
-    todos: state.todos.concat(state.value),
-  };
-}
-
-/**
-* @param {State} state
-* @param {InputEvent} event
-* @returns {State}
-*/
-function NewValue(state, event) {
-  return {
-    ...state,
-    value: event.target.value,
-  };
-}
-const div = document.createElement("div");
-const initialState = { todos: [], value: name };
-app({
-  init: initialState,
-  view: (state) =>
-  h("main", {}, [
-    h("h1", {}, text("To do list")),
-    h("input", { type: "text", oninput: NewValue, value: state.value }),
-    h(
-      "ul",
-      {},
-      state.todos.map((todo) => h("li", {}, text(todo))),
-    ),
-    h("button", { onclick: AddTodo }, text("New!")),
-  ]),
-  node: div,
-});
-this.shadowRoot.appendChild(div);
-         `;
 
 // -----------------------------
 // ## Command Pattern Implementation
@@ -273,7 +230,6 @@ function createAddBlockCommand(currentState) {
     height: 200,
     left: 50,
     top: 50,
-    program: testHyperappProgram,
   };
 
   return {
@@ -422,7 +378,6 @@ function createPasteBlockCommand(currentState, blockData) {
     height: blockData.height,
     left: blockData.left + 20,
     top: blockData.top + 20,
-    program: blockData.program,
   };
 
   return {
@@ -495,7 +450,6 @@ function copySelectedBlock(state) {
     height: selectedBlock.height,
     left: selectedBlock.left,
     top: selectedBlock.top,
-    program: selectedBlock.program,
   };
 
   navigator.clipboard.writeText(JSON.stringify(blockData, null, 2));
@@ -531,8 +485,7 @@ async function pasteBlock(state) {
       typeof blockData.width !== "number" ||
       typeof blockData.height !== "number" ||
       typeof blockData.left !== "number" ||
-      typeof blockData.top !== "number" ||
-      typeof blockData.program !== "string"
+      typeof blockData.top !== "number"
     ) {
       return state; // Invalid block data
     }
@@ -955,8 +908,12 @@ function block(state) {
         },
       },
       [
-        h("block-component", {
-          program: block.program,
+        h("div", {
+          style: {
+            backgroundColor: "black",
+            width: "100%",
+            height: "100%",
+          },
         }),
         ...(isSelected ? Object.keys(RESIZE_HANDLERS).map(ResizeHandle) : []),
         isSelected && blockToolbar(),
@@ -1019,31 +976,6 @@ function toolbar(state) {
         },
       }),
       h("h3", { style: { margin: "3px 0" } }, text(blockTitle)),
-      h("ace-editor", {
-        /**
-         * @param {State} state
-         * @param {Event} event
-         */
-        onaceinput: (state, event) => {
-          return {
-            ...state,
-            blocks: state.blocks.map((block) =>
-              block.id === state.selectedId
-                ? {
-                    ...block,
-                    //@ts-ignore uses custom `value` added to the event
-                    program: event.value,
-                  }
-                : block,
-            ),
-          };
-        },
-        value:
-          state.blocks.find((block) => block.id === state.selectedId)
-            ?.program || "",
-        "dark-mode": state.isDarkMode,
-        style: { display: state.selectedId === null ? "none" : "" },
-      }),
       h("hr", {}),
       h(
         "div",
@@ -1139,11 +1071,7 @@ function main(state) {
           //@ts-ignore
           event.target?.tagName === "TEXTAREA" ||
           //@ts-ignore
-          event.target?.isContentEditable ||
-          //@ts-ignore
-          event.target.closest("ace-editor") ||
-          //@ts-ignore
-          event.target.closest("block-component");
+          event.target?.isContentEditable;
 
         const hasTextSelection =
           (window.getSelection()?.toString() ?? "").length > 0;
@@ -1263,7 +1191,6 @@ async function initialize() {
         height: 200,
         left: 50,
         top: 50,
-        program: "",
       },
     ],
   };
