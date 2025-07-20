@@ -83,10 +83,13 @@ hr {
 .block {
   cursor: move;
   position: absolute;
+  left: 0;
+  top: 0;
   user-select: none;
   box-sizing: border-box;
   background-color: rgba(128, 128, 128, 0.5);
   touch-action: none;
+  transform-origin: top left;
 
   &:hover {
     border-color: blueviolet;

@@ -9,8 +9,8 @@ import { app, h, text } from "./packages/hyperapp/index.js";
  * @property {number} id
  * @property {number} width
  * @property {number} height
- * @property {number} left
- * @property {number} top
+ * @property {number} x
+ * @property {number} y
  */
 
 /**
@@ -40,15 +40,15 @@ import { app, h, text } from "./packages/hyperapp/index.js";
  * @property {boolean} isBlockDragging
  * @property {number|null} selectedId
  * @property {{id: number, handle: string}|null} resizing
- * @property {{id: number, startLeft: number, startTop: number}|null} dragStart
- * @property {{id: number, startWidth: number, startHeight: number, startLeft: number, startTop: number}|null} resizeStart
+ * @property {{id: number, startX: number, startY: number}|null} dragStart
+ * @property {{id: number, startWidth: number, startHeight: number, startX: number, startY: number}|null} resizeStart
  * @property {number} toolbarWidth
  * @property {CommandManager} commandManager
  * @property {boolean} isDarkMode
  */
 
 /**
- * @typedef {(block: Block, e: {percentX: number, percentY: number}) => {width: number, height: number, left: number, top: number}} ResizeHandler
+ * @typedef {(block: Block, e: {percentX: number, percentY: number}) => {width: number, height: number, x: number, y: number}} ResizeHandler
  */
 
 // -----------------------------
@@ -64,52 +64,52 @@ const STATE_SAVE_PATH = "user/state.json";
  */
 const RESIZE_HANDLERS = {
   nw: (block, e) => ({
-    width: block.left + block.width - e.percentX,
-    height: block.top + block.height - e.percentY,
-    left: Math.min(block.left + block.width - MIN_SIZE, e.percentX),
-    top: Math.min(block.top + block.height - MIN_SIZE, e.percentY),
+    width: block.x + block.width - e.percentX,
+    height: block.y + block.height - e.percentY,
+    x: Math.min(block.x + block.width - MIN_SIZE, e.percentX),
+    y: Math.min(block.y + block.height - MIN_SIZE, e.percentY),
   }),
   ne: (block, e) => ({
-    width: e.percentX - block.left,
-    height: block.top + block.height - e.percentY,
-    left: block.left,
-    top: Math.min(block.top + block.height - MIN_SIZE, e.percentY),
+    width: e.percentX - block.x,
+    height: block.y + block.height - e.percentY,
+    x: block.x,
+    y: Math.min(block.y + block.height - MIN_SIZE, e.percentY),
   }),
   sw: (block, e) => ({
-    width: block.left + block.width - e.percentX,
-    height: e.percentY - block.top,
-    left: Math.min(block.left + block.width - MIN_SIZE, e.percentX),
-    top: block.top,
+    width: block.x + block.width - e.percentX,
+    height: e.percentY - block.y,
+    x: Math.min(block.x + block.width - MIN_SIZE, e.percentX),
+    y: block.y,
   }),
   se: (block, e) => ({
-    width: e.percentX - block.left,
-    height: e.percentY - block.top,
-    left: block.left,
-    top: block.top,
+    width: e.percentX - block.x,
+    height: e.percentY - block.y,
+    x: block.x,
+    y: block.y,
   }),
   n: (block, e) => ({
     width: block.width,
-    height: block.top + block.height - e.percentY,
-    left: block.left,
-    top: Math.min(block.top + block.height - MIN_SIZE, e.percentY),
+    height: block.y + block.height - e.percentY,
+    x: block.x,
+    y: Math.min(block.y + block.height - MIN_SIZE, e.percentY),
   }),
   s: (block, e) => ({
     width: block.width,
-    height: e.percentY - block.top,
-    left: block.left,
-    top: block.top,
+    height: e.percentY - block.y,
+    x: block.x,
+    y: block.y,
   }),
   w: (block, e) => ({
-    width: block.left + block.width - e.percentX,
+    width: block.x + block.width - e.percentX,
     height: block.height,
-    left: Math.min(block.left + block.width - MIN_SIZE, e.percentX),
-    top: block.top,
+    x: Math.min(block.x + block.width - MIN_SIZE, e.percentX),
+    y: block.y,
   }),
   e: (block, e) => ({
-    width: e.percentX - block.left,
+    width: e.percentX - block.x,
     height: block.height,
-    left: block.left,
-    top: block.top,
+    x: block.x,
+    y: block.y,
   }),
 };
 
@@ -224,8 +224,8 @@ function createAddBlockCommand(currentState) {
     id: Math.max(...currentState.blocks.map((block) => block.id), 0) + 1,
     width: 200,
     height: 200,
-    left: 50,
-    top: 50,
+    x: 50,
+    y: 50,
   };
 
   return {
@@ -274,28 +274,28 @@ function createDeleteBlockCommand(currentState, blockId) {
  * Creates a command to move a block
  * @param {State} currentState
  * @param {number} blockId
- * @param {number} newLeft
- * @param {number} newTop
+ * @param {number} newX
+ * @param {number} newY
  * @returns {Command}
  */
-function createMoveBlockCommand(currentState, blockId, newLeft, newTop) {
+function createMoveBlockCommand(currentState, blockId, newX, newY) {
   const block = currentState.blocks.find((b) => b.id === blockId);
   if (!block) throw new Error(`Block ${blockId} not found`);
 
-  const oldLeft = block.left;
-  const oldTop = block.top;
+  const oldX = block.x;
+  const oldY = block.y;
 
   return {
     execute: () => ({
       ...currentState,
       blocks: currentState.blocks.map((b) =>
-        b.id === blockId ? { ...b, left: newLeft, top: newTop } : b,
+        b.id === blockId ? { ...b, x: newX, y: newY } : b,
       ),
     }),
     undo: () => ({
       ...currentState,
       blocks: currentState.blocks.map((b) =>
-        b.id === blockId ? { ...b, left: oldLeft, top: oldTop } : b,
+        b.id === blockId ? { ...b, x: oldX, y: oldY } : b,
       ),
     }),
     description: `Move block ${blockId}`,
@@ -308,8 +308,8 @@ function createMoveBlockCommand(currentState, blockId, newLeft, newTop) {
  * @param {number} blockId
  * @param {number} newWidth
  * @param {number} newHeight
- * @param {number} newLeft
- * @param {number} newTop
+ * @param {number} newX
+ * @param {number} newY
  * @returns {Command}
  */
 function createResizeBlockCommand(
@@ -317,16 +317,16 @@ function createResizeBlockCommand(
   blockId,
   newWidth,
   newHeight,
-  newLeft,
-  newTop,
+  newX,
+  newY,
 ) {
   const block = currentState.blocks.find((b) => b.id === blockId);
   if (!block) throw new Error(`Block ${blockId} not found`);
 
   const oldWidth = block.width;
   const oldHeight = block.height;
-  const oldLeft = block.left;
-  const oldTop = block.top;
+  const oldX = block.x;
+  const oldY = block.y;
 
   return {
     execute: () => ({
@@ -337,8 +337,8 @@ function createResizeBlockCommand(
               ...b,
               width: newWidth,
               height: newHeight,
-              left: newLeft,
-              top: newTop,
+              x: newX,
+              y: newY,
             }
           : b,
       ),
@@ -351,8 +351,8 @@ function createResizeBlockCommand(
               ...b,
               width: oldWidth,
               height: oldHeight,
-              left: oldLeft,
-              top: oldTop,
+              x: oldX,
+              y: oldY,
             }
           : b,
       ),
@@ -372,8 +372,8 @@ function createPasteBlockCommand(currentState, blockData) {
     id: Math.max(...currentState.blocks.map((block) => block.id), 0) + 1,
     width: blockData.width,
     height: blockData.height,
-    left: blockData.left + 20,
-    top: blockData.top + 20,
+    x: blockData.x + 20,
+    y: blockData.y + 20,
   };
 
   return {
@@ -444,8 +444,8 @@ function copySelectedBlock(state) {
     id: -1, // not a "real" block
     width: selectedBlock.width,
     height: selectedBlock.height,
-    left: selectedBlock.left,
-    top: selectedBlock.top,
+    x: selectedBlock.x,
+    y: selectedBlock.y,
   };
 
   navigator.clipboard.writeText(JSON.stringify(blockData, null, 2));
@@ -480,8 +480,8 @@ async function pasteBlock(state) {
       typeof blockData !== "object" ||
       typeof blockData.width !== "number" ||
       typeof blockData.height !== "number" ||
-      typeof blockData.left !== "number" ||
-      typeof blockData.top !== "number"
+      typeof blockData.x !== "number" ||
+      typeof blockData.y !== "number"
     ) {
       return state; // Invalid block data
     }
@@ -530,8 +530,8 @@ function ResizeHandle(handle) {
           id: blockId,
           startWidth: block.width,
           startHeight: block.height,
-          startLeft: block.left,
-          startTop: block.top,
+          startX: block.x,
+          startY: block.y,
         },
       };
     },
@@ -651,8 +651,8 @@ function viewport(state) {
               if (block.id === state.selectedId) {
                 return {
                   ...block,
-                  left: block.left + adjustedDx,
-                  top: block.top + adjustedDy,
+                  x: block.x + adjustedDx,
+                  y: block.y + adjustedDy,
                 };
               } else {
                 return block;
@@ -687,14 +687,14 @@ function viewport(state) {
           if (
             block &&
             state.dragStart &&
-            (block.left !== state.dragStart.startLeft ||
-              block.top !== state.dragStart.startTop)
+            (block.x !== state.dragStart.startX ||
+              block.y !== state.dragStart.startY)
           ) {
             const command = createMoveBlockCommand(
               { ...state, dragStart: null, resizeStart: null },
               state.dragStart.id,
-              block.left,
-              block.top,
+              block.x,
+              block.y,
             );
             // We need to manually update the command manager since we're creating the command after the fact
             const newCommandManager = {
@@ -707,7 +707,7 @@ function viewport(state) {
                     ...state,
                     blocks: state.blocks.map((b) =>
                       b.id === state.dragStart?.id
-                        ? { ...b, left: block.left, top: block.top }
+                        ? { ...b, x: block.x, y: block.y }
                         : b,
                     ),
                   }),
@@ -717,8 +717,8 @@ function viewport(state) {
                       b.id === state.dragStart?.id
                         ? {
                             ...b,
-                            left: state.dragStart?.startLeft || 0,
-                            top: state.dragStart?.startTop || 0,
+                            x: state.dragStart?.startX || 0,
+                            y: state.dragStart?.startY || 0,
                           }
                         : b,
                     ),
@@ -741,16 +741,16 @@ function viewport(state) {
             state.resizeStart &&
             (block.width !== state.resizeStart.startWidth ||
               block.height !== state.resizeStart.startHeight ||
-              block.left !== state.resizeStart.startLeft ||
-              block.top !== state.resizeStart.startTop)
+              block.x !== state.resizeStart.startX ||
+              block.y !== state.resizeStart.startY)
           ) {
             const command = createResizeBlockCommand(
               { ...state, dragStart: null, resizeStart: null },
               state.resizeStart.id,
               block.width,
               block.height,
-              block.left,
-              block.top,
+              block.x,
+              block.y,
             );
             // We need to manually update the command manager since we're creating the command after the fact
             const newCommandManager = {
@@ -767,8 +767,8 @@ function viewport(state) {
                             ...b,
                             width: block.width,
                             height: block.height,
-                            left: block.left,
-                            top: block.top,
+                            x: block.x,
+                            y: block.y,
                           }
                         : b,
                     ),
@@ -781,8 +781,8 @@ function viewport(state) {
                             ...b,
                             width: state.resizeStart?.startWidth || 0,
                             height: state.resizeStart?.startHeight || 0,
-                            left: state.resizeStart?.startLeft || 0,
-                            top: state.resizeStart?.startTop || 0,
+                            x: state.resizeStart?.startX || 0,
+                            y: state.resizeStart?.startY || 0,
                           }
                         : b,
                     ),
@@ -875,8 +875,7 @@ function block(state) {
         "data-id": block.id,
         style: {
           outline: isSelected ? "2px solid blue" : null,
-          left: `${block.left}px`,
-          top: `${block.top}px`,
+          transform: `translate(${block.x}px, ${block.y}px)`,
           width: `${block.width}px`,
           height: `${block.height}px`,
         },
@@ -897,8 +896,8 @@ function block(state) {
             isBlockDragging: true,
             dragStart: {
               id: id,
-              startLeft: block.left,
-              startTop: block.top,
+              startX: block.x,
+              startY: block.y,
             },
           };
         },
@@ -1117,8 +1116,8 @@ async function initialize() {
         id: 0,
         width: 200,
         height: 200,
-        left: 50,
-        top: 50,
+        x: 50,
+        y: 50,
       },
     ],
   };
