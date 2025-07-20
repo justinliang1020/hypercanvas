@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "allowJs": true,
+    "maxNodeModuleJsDepth": 3,
+    "noEmit": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "ESNext",
+    "strict": true,
+    "baseUrl": ".",
+    "typeRoots": ["./src/packages/types/"]
+  },
+  "include": ["./**/*.js", "./**/*.ts"],
+  "exclude": ["./src/packages", "node_modules"]
+}
