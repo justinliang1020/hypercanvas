@@ -928,6 +928,9 @@ function toolbar(state) {
     "div",
     {
       id: "toolbar",
+      style: {
+        pointerEvents: state.isBlockDragging ? "none" : "auto",
+      },
       onpointerdown: (state, event) => {
         event.stopPropagation();
         return state;
