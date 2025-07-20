@@ -1,4 +1,5 @@
 import { app, h, text } from "./packages/hyperapp/index.js";
+import { appWithVisualizer } from "../../hyperapp-visualizer/visualizer.js";
 
 // -----------------------------
 // ## Types
@@ -1139,7 +1140,8 @@ async function initialize() {
 
   let currentState = state;
 
-  app({
+  /** @type{import("hyperapp").App<State>} */
+  const appConfig = {
     init: state,
     view: (state) => main(state),
     // @ts-ignore
@@ -1162,7 +1164,14 @@ async function initialize() {
         document.body.classList.remove("dark-mode");
       }
     },
-  });
+  };
+
+  const isUsingAppWithVisualizer = true;
+  if (isUsingAppWithVisualizer) {
+    appWithVisualizer(appConfig);
+  } else {
+    app(appConfig);
+  }
 
   // Listen for quit signal from main process
   //@ts-ignore
