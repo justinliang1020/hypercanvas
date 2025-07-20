@@ -202,12 +202,13 @@ hr {
 
 #toolbar {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   position: fixed;
-  top: 0px;
-  right: 0px;
+  bottom: 50px;
   background: white;
-  height: 100%;
+  height: 30px;
+  left: 50%;
+  transform: translateX(-50%);
   border-left: 1px solid #ccc;
   z-index: 1000;
 }

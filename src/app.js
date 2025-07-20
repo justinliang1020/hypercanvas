@@ -43,8 +43,6 @@ import { app, h, text } from "./packages/hyperapp/index.js";
  * @property {{id: number, startLeft: number, startTop: number}|null} dragStart
  * @property {{id: number, startWidth: number, startHeight: number, startLeft: number, startTop: number}|null} resizeStart
  * @property {number} toolbarWidth
- * @property {boolean} isResizingToolbar
- * @property {boolean} isToolbarHidden
  * @property {CommandManager} commandManager
  * @property {boolean} isDarkMode
  */
@@ -58,8 +56,6 @@ import { app, h, text } from "./packages/hyperapp/index.js";
 // -----------------------------
 
 const MIN_SIZE = 20; // Minimum size in px
-const MIN_RIGHT_TOOLBAR_WIDTH = 200;
-const MAX_RIGHT_TOOLBAR_WIDTH = 1000;
 const INITIAL_RIGHT_TOOLBAR_WIDTH = 400;
 const STATE_SAVE_PATH = "user/state.json";
 
@@ -908,9 +904,10 @@ function block(state) {
         },
       },
       [
+        // TODO: contents of block
         h("div", {
           style: {
-            backgroundColor: "black",
+            backgroundColor: "purple",
             width: "100%",
             height: "100%",
           },
@@ -927,20 +924,10 @@ function block(state) {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 function toolbar(state) {
-  const blockTitle =
-    state.selectedId !== null
-      ? `block ${state.selectedId}`
-      : "no block selected";
-  const padding = 10;
   return h(
     "div",
     {
       id: "toolbar",
-      style: {
-        width: `${state.toolbarWidth - 2 * padding}px`,
-        padding: `${padding}px`,
-        visibility: state.isToolbarHidden ? "hidden" : "visible",
-      },
       onpointerdown: (state, event) => {
         event.stopPropagation();
         return state;
@@ -950,62 +937,26 @@ function toolbar(state) {
       h(
         "button",
         {
-          style: {
-            display: "block",
-            position: "relative",
-            left: "-60px",
-            width: "fit-content",
-            visibility: "visible",
-          },
-          onclick: (state) => {
-            return {
-              ...state,
-              isToolbarHidden: !state.isToolbarHidden,
-            };
-          },
+          onclick: undoCommand,
+          disabled: state.commandManager.undoStack.length === 0,
+          title:
+            state.commandManager.undoStack.length > 0
+              ? `Undo: ${state.commandManager.undoStack[state.commandManager.undoStack.length - 1].description}`
+              : "Nothing to undo",
         },
-        text("hide"),
+        text("↶ Undo"),
       ),
-      h("div", {
-        class: "toolbar-resize-handle",
-        onpointerdown: (state) => {
-          return {
-            ...state,
-            isResizingToolbar: true,
-          };
-        },
-      }),
-      h("h3", { style: { margin: "3px 0" } }, text(blockTitle)),
-      h("hr", {}),
       h(
-        "div",
-        { style: { display: "flex", gap: "5px", marginBottom: "10px" } },
-        [
-          h(
-            "button",
-            {
-              onclick: undoCommand,
-              disabled: state.commandManager.undoStack.length === 0,
-              title:
-                state.commandManager.undoStack.length > 0
-                  ? `Undo: ${state.commandManager.undoStack[state.commandManager.undoStack.length - 1].description}`
-                  : "Nothing to undo",
-            },
-            text("↶ Undo"),
-          ),
-          h(
-            "button",
-            {
-              onclick: redoCommand,
-              disabled: state.commandManager.redoStack.length === 0,
-              title:
-                state.commandManager.redoStack.length > 0
-                  ? `Redo: ${state.commandManager.redoStack[state.commandManager.redoStack.length - 1].description}`
-                  : "Nothing to redo",
-            },
-            text("↷ Redo"),
-          ),
-        ],
+        "button",
+        {
+          onclick: redoCommand,
+          disabled: state.commandManager.redoStack.length === 0,
+          title:
+            state.commandManager.redoStack.length > 0
+              ? `Redo: ${state.commandManager.redoStack[state.commandManager.redoStack.length - 1].description}`
+              : "Nothing to redo",
+        },
+        text("↷ Redo"),
       ),
       h("button", { onclick: addNewBlock }, text("add new block")),
       h(
@@ -1040,28 +991,6 @@ function main(state) {
     {
       style: {
         cursor: state.cursorStyle,
-      },
-      onpointerup: (state) => {
-        return {
-          ...state,
-          isResizingToolbar: false,
-        };
-      },
-      onpointermove: (state, event) => {
-        let newWidth = state.toolbarWidth;
-        if (state.isResizingToolbar) {
-          newWidth = clamp(
-            window.innerWidth - event.clientX,
-            MIN_RIGHT_TOOLBAR_WIDTH,
-            MAX_RIGHT_TOOLBAR_WIDTH,
-          );
-        }
-        return {
-          ...state,
-          toolbarWidth: newWidth,
-          lastX: event.clientX,
-          lastY: event.clientY,
-        };
       },
       onkeydown: (state, event) => {
         // Check if user is interacting with an input field or has text selected
@@ -1178,8 +1107,6 @@ async function initialize() {
     isViewportDragging: false,
     isBlockDragging: false,
     toolbarWidth: INITIAL_RIGHT_TOOLBAR_WIDTH,
-    isResizingToolbar: false,
-    isToolbarHidden: true,
     dragStart: null,
     resizeStart: null,
     commandManager: createCommandManager(),
