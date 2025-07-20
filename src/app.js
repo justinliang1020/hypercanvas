@@ -905,11 +905,12 @@ function block(state) {
       },
       [
         // TODO: contents of block
-        h("div", {
+        h("img", {
+          src: "./assets/sun-cat.jpg",
+          draggable: false,
           style: {
-            backgroundColor: "purple",
-            width: "100%",
             height: "100%",
+            width: "100%",
           },
         }),
         ...(isSelected ? Object.keys(RESIZE_HANDLERS).map(ResizeHandle) : []),
