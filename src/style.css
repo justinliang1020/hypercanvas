@@ -7,66 +7,6 @@ main {
   overscroll-behavior-x: none; /* disable swipe to go back a page */
 }
 
-/* Dark mode styles */
-body.dark-mode {
-  background-color: #1a1a1a;
-  color: #e0e0e0;
-
-  #viewport {
-    background-color: #2d2d2d;
-  }
-
-  #toolbar {
-    background: #333;
-    border-left-color: #555;
-    color: #e0e0e0;
-  }
-
-  .block {
-    background-color: rgba(80, 80, 80, 0.8);
-
-    &:hover {
-      border-color: #8a2be2;
-    }
-  }
-
-  .block-toolbar {
-    background: #444;
-    border-color: #666;
-    color: #e0e0e0;
-
-    button {
-      background: #555;
-      border-color: #777;
-      color: #e0e0e0;
-
-      &:hover {
-        background: #666;
-      }
-    }
-  }
-
-  button {
-    background: #555;
-    border-color: #777;
-    color: #e0e0e0;
-
-    &:hover {
-      background: #666;
-    }
-
-    &:disabled {
-      background: #333;
-      color: #666;
-      border-color: #444;
-    }
-  }
-
-  hr {
-    background-color: #555;
-  }
-}
-
 hr {
   border: none;
   height: 2px;
@@ -260,5 +200,65 @@ hr {
     img {
       width: 100%;
     }
+  }
+}
+
+/* Dark mode styles */
+body.dark-mode {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+
+  #viewport {
+    background-color: #2d2d2d;
+  }
+
+  #toolbar {
+    background: #333;
+    border-left-color: #555;
+    color: #e0e0e0;
+  }
+
+  .block {
+    background-color: rgba(80, 80, 80, 0.8);
+
+    &:hover {
+      border-color: #8a2be2;
+    }
+  }
+
+  .block-toolbar {
+    background: #444;
+    border-color: #666;
+    color: #e0e0e0;
+
+    button {
+      background: #555;
+      border-color: #777;
+      color: #e0e0e0;
+
+      &:hover {
+        background: #666;
+      }
+    }
+  }
+
+  button {
+    background: #555;
+    border-color: #777;
+    color: #e0e0e0;
+
+    &:hover {
+      background: #666;
+    }
+
+    &:disabled {
+      background: #333;
+      color: #666;
+      border-color: #444;
+    }
+  }
+
+  hr {
+    background-color: #555;
   }
 }
