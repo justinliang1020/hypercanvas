@@ -22,7 +22,6 @@ hr {
 
 /* Draggable element styles */
 .block {
-  cursor: move;
   position: absolute;
   left: 0;
   top: 0;
@@ -33,7 +32,7 @@ hr {
   transform-origin: top left;
 
   &:hover {
-    border-color: blueviolet;
+    outline: 3px solid blue;
   }
 
   /* Resize handle base styles */
