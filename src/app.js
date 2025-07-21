@@ -12,6 +12,12 @@ import { appWithVisualizer } from "../../hyperapp-visualizer/visualizer.js";
  * @property {number} height
  * @property {number} x
  * @property {number} y
+ * @property {Program} program
+ */
+
+/** @typedef {Object} Program
+ * @property {string} name
+ * @property {any} properties
  */
 
 /**
@@ -113,6 +119,55 @@ const RESIZE_HANDLERS = {
     y: block.y,
   }),
 };
+
+// -----------------------------
+// ## Block Program Implementation
+// -----------------------------
+
+class ProgramComponent extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+  }
+
+  // // FIX: this causes a "double render"
+  // static get observedAttributes() {
+  //   return ["properties"];
+  // }
+
+  connectedCallback() {
+    this.render();
+  }
+
+  /**
+   * @param {string} name
+   * @param {any} oldValue
+   * @param {any} newValue
+   */
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === "properties" && oldValue !== newValue) {
+      this.render();
+    }
+  }
+
+  render() {
+    const name = this.getAttribute("name");
+    if (!name) return;
+
+    if (!this.shadowRoot) return;
+    this.shadowRoot.innerHTML = "";
+    const el = document.createElement("div");
+    this.shadowRoot.appendChild(el);
+    import(`./programs/${name}.js`).then((program) => {
+      program.run(el);
+    });
+  }
+}
+
+customElements.define("program-component", ProgramComponent);
+
+/** @type{Program} */
+const helloProgram = { name: "hello-world", properties: {} };
 
 // -----------------------------
 // ## Command Pattern Implementation
@@ -227,6 +282,7 @@ function createAddBlockCommand(currentState) {
     height: 200,
     x: 50,
     y: 50,
+    program: helloProgram,
   };
 
   return {
@@ -370,9 +426,8 @@ function createResizeBlockCommand(
  */
 function createPasteBlockCommand(currentState, blockData) {
   const newBlock = {
+    ...blockData,
     id: Math.max(...currentState.blocks.map((block) => block.id), 0) + 1,
-    width: blockData.width,
-    height: blockData.height,
     x: blockData.x + 20,
     y: blockData.y + 20,
   };
@@ -431,11 +486,8 @@ function copySelectedBlock(state) {
   // Create a copy of the block data for clipboard
   /** @type {Block} */
   const blockData = {
+    ...selectedBlock,
     id: -1, // not a "real" block
-    width: selectedBlock.width,
-    height: selectedBlock.height,
-    x: selectedBlock.x,
-    y: selectedBlock.y,
   };
 
   navigator.clipboard.writeText(JSON.stringify(blockData, null, 2));
@@ -893,14 +945,9 @@ function block(state) {
         },
       },
       [
-        // TODO: contents of block
-        h("img", {
-          src: "./assets/sun-cat.jpg",
-          draggable: false,
-          style: {
-            height: "100%",
-            width: "100%",
-          },
+        h("program-component", {
+          name: block.program.name,
+          properties: block.program.properties,
         }),
         ...(isSelected ? Object.keys(RESIZE_HANDLERS).map(ResizeHandle) : []),
         isSelected && blockToolbar(),
@@ -951,6 +998,7 @@ function toolbar(state) {
         },
         text("↷ Redo"),
       ),
+      h("button", { onclick: addNewBlock }, text("add new block")),
       h("button", { onclick: addNewBlock }, text("add new block")),
       h(
         "button",
@@ -1111,6 +1159,7 @@ async function initialize() {
         height: 200,
         x: 50,
         y: 50,
+        program: helloProgram,
       },
     ],
   };
