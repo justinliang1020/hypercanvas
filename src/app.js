@@ -46,6 +46,7 @@ import { appWithVisualizer } from "../../hyperapp-visualizer/visualizer.js";
  * @property {boolean} isViewportDragging
  * @property {boolean} isBlockDragging
  * @property {number|null} selectedId
+ * @property {number|null} editingId
  * @property {{id: number, handle: string}|null} resizing
  * @property {{id: number, startX: number, startY: number}|null} dragStart
  * @property {{id: number, startWidth: number, startHeight: number, startX: number, startY: number}|null} resizeStart
@@ -424,6 +425,7 @@ function createResizeBlockCommand(
  * @returns {Command}
  */
 function createPasteBlockCommand(currentState, blockData) {
+  /** @type{Block} */
   const newBlock = {
     ...blockData,
     id: Math.max(...currentState.blocks.map((block) => block.id), 0) + 1,
@@ -633,10 +635,11 @@ function viewport(state) {
           };
         }
 
-        // Regular click - deselect blocks
+        // Regular click - deselect blocks and exit edit mode
         return {
           ...state,
           selectedId: null,
+          editingId: null,
         };
       },
       onpointermove: (state, event) => {
@@ -682,7 +685,8 @@ function viewport(state) {
             lastX: event.clientX,
             lastY: event.clientY,
           };
-        } else if (state.isBlockDragging) {
+        } else if (state.isBlockDragging && state.editingId === null) {
+          // Only allow dragging if no block is in edit mode
           // Adjust drag delta by zoom level - when zoomed in, smaller movements should result in smaller position changes
           const adjustedDx = dx / state.zoom;
           const adjustedDy = dy / state.zoom;
@@ -911,6 +915,7 @@ function viewport(state) {
 function block(state) {
   return (block) => {
     const isSelected = state.selectedId === block.id;
+    const isEditing = state.editingId === block.id;
     return h(
       "div",
       {
@@ -930,9 +935,20 @@ function block(state) {
           if (isNaN(id)) return state;
           const block = state.blocks.find((b) => b.id === id);
           if (!block) return state;
+
+          // If block is in edit mode, don't start dragging
+          if (state.editingId === id) {
+            return {
+              ...state,
+              selectedId: id,
+            };
+          }
+
+          // Normal selection and drag start
           return {
             ...state,
             selectedId: id,
+            editingId: null, // Exit edit mode when selecting any block (even the same one)
             lastX: event.clientX,
             lastY: event.clientY,
             isBlockDragging: true,
@@ -943,14 +959,35 @@ function block(state) {
             },
           };
         },
+        ondblclick: (state, event) => {
+          event.stopPropagation();
+          const id = parseInt(
+            /** @type {HTMLElement} */ (event.currentTarget).dataset.id || "",
+          );
+          if (isNaN(id)) return state;
+
+          // Double-click enters edit mode
+          return {
+            ...state,
+            selectedId: id,
+            editingId: id,
+            isBlockDragging: false, // Cancel any drag that might have started
+            dragStart: null,
+          };
+        },
       },
       [
         h("program-component", {
           name: block.program.name,
           properties: block.program.properties,
+          style: {
+            pointerEvents: isEditing ? null : "none",
+          },
         }),
-        ...(isSelected ? Object.keys(RESIZE_HANDLERS).map(ResizeHandle) : []),
-        isSelected && blockToolbar(),
+        ...(isSelected && !isEditing
+          ? Object.keys(RESIZE_HANDLERS).map(ResizeHandle)
+          : []),
+        isSelected && !isEditing && blockToolbar(),
       ],
     );
   };
@@ -1043,23 +1080,31 @@ function main(state) {
       },
       onkeydown: (state, event) => {
         // Check if user is interacting with an input field or has text selected
-        const isInputElement =
-          //@ts-ignore
-          event.target?.tagName === "INPUT" ||
-          //@ts-ignore
-          event.target?.tagName === "TEXTAREA" ||
-          //@ts-ignore
-          event.target?.isContentEditable;
-
         const hasTextSelection =
           (window.getSelection()?.toString() ?? "").length > 0;
 
         // Handle keyboard shortcuts
         switch (event.key) {
+          case "Escape":
+            // Exit edit mode
+            if (state.editingId !== null) {
+              event.preventDefault();
+              return {
+                ...state,
+                editingId: null,
+              };
+            } else if (state.selectedId !== null) {
+              event.preventDefault();
+              return {
+                ...state,
+                selectedId: null,
+              };
+            }
+            return state;
           case "Delete":
           case "Backspace":
-            // Only handle block deletion if not in input field and a block is selected
-            if (!isInputElement && state.selectedId !== null) {
+            // Only handle block deletion if not in input field, a block is selected, and not in edit mode
+            if (state.selectedId !== null && state.editingId === null) {
               event.preventDefault();
               const command = createDeleteBlockCommand(state, state.selectedId);
               return executeCommand(state, command);
@@ -1070,11 +1115,11 @@ function main(state) {
           case "c":
             // Handle copy shortcut (Ctrl+C or Cmd+C)
             if (event.ctrlKey || event.metaKey) {
-              // Only handle block copy if not in input field and no text is selected
+              // Only handle block copy if not in input field, no text is selected, and not in edit mode
               if (
-                !isInputElement &&
                 !hasTextSelection &&
-                state.selectedId !== null
+                state.selectedId !== null &&
+                state.editingId === null
               ) {
                 event.preventDefault();
                 return copySelectedBlock(state);
@@ -1086,8 +1131,8 @@ function main(state) {
           case "v":
             // Handle paste shortcut (Ctrl+V or Cmd+V)
             if (event.ctrlKey || event.metaKey) {
-              // Only handle block paste if not in input field
-              if (!isInputElement) {
+              // Only handle block paste if not in input field and not in edit mode
+              if (state.editingId === null) {
                 event.preventDefault();
                 return [
                   state,
@@ -1105,7 +1150,7 @@ function main(state) {
           case "Z":
             // Handle undo/redo shortcuts
             if (event.ctrlKey || event.metaKey) {
-              if (!isInputElement) {
+              if (state.editingId === null) {
                 event.preventDefault();
                 if (event.shiftKey) {
                   // Ctrl+Shift+Z or Cmd+Shift+Z = Redo
@@ -1121,7 +1166,7 @@ function main(state) {
           case "y":
             // Handle redo shortcut (Ctrl+Y or Cmd+Y)
             if (event.ctrlKey || event.metaKey) {
-              if (!isInputElement) {
+              if (state.editingId === null) {
                 event.preventDefault();
                 return redoCommand(state);
               }
@@ -1146,6 +1191,7 @@ async function initialize() {
   /** @type{State} */
   const initialState = {
     selectedId: null,
+    editingId: null,
     resizing: null,
     offsetX: 0,
     offsetY: 0,
