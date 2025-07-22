@@ -27,12 +27,12 @@ hr {
   top: 0;
   user-select: none;
   box-sizing: border-box;
-  background-color: rgba(128, 128, 128, 0.5);
   touch-action: none;
   transform-origin: top left;
+  outline: 1px solid black;
 
   &:hover {
-    outline: 3px solid blue;
+    outline: 1px solid blue;
   }
 
   /* Resize handle base styles */
@@ -219,10 +219,10 @@ body.dark-mode {
   }
 
   .block {
-    background-color: rgba(80, 80, 80, 0.8);
+    outline-color: grey;
 
     &:hover {
-      border-color: #8a2be2;
+      outline-color: blue;
     }
   }
 
