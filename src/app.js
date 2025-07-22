@@ -166,9 +166,6 @@ class ProgramComponent extends HTMLElement {
 
 customElements.define("program-component", ProgramComponent);
 
-/** @type{Program} */
-const helloProgram = { name: "hello-world", properties: {} };
-
 // -----------------------------
 // ## Command Pattern Implementation
 // -----------------------------
@@ -273,16 +270,18 @@ function redoCommand(state) {
 /**
  * Creates a command to add a new block
  * @param {State} currentState
+ * @param {string} programName
  * @returns {Command}
  */
-function createAddBlockCommand(currentState) {
+function createAddBlockCommand(currentState, programName) {
+  /** @type{Block} */
   const newBlock = {
     id: Math.max(...currentState.blocks.map((block) => block.id), 0) + 1,
     width: 200,
     height: 200,
     x: 50,
     y: 50,
-    program: helloProgram,
+    program: { name: programName, properties: {} },
   };
 
   return {
@@ -463,10 +462,11 @@ async function saveState(state) {
 
 /**
  * @param {State} state
+ * @param {string} programName
  * @returns {State}
  */
-function addNewBlock(state) {
-  const command = createAddBlockCommand(state);
+function addNewBlock(state, programName) {
+  const command = createAddBlockCommand(state, programName);
   return executeCommand(state, command);
 }
 
@@ -998,8 +998,16 @@ function toolbar(state) {
         },
         text("↷ Redo"),
       ),
-      h("button", { onclick: addNewBlock }, text("add new block")),
-      h("button", { onclick: addNewBlock }, text("add new block")),
+      h(
+        "button",
+        { onclick: (state) => addNewBlock(state, "hello-world") },
+        text("add new hello world block"),
+      ),
+      h(
+        "button",
+        { onclick: (state) => addNewBlock(state, "text") },
+        text("add new text block"),
+      ),
       h(
         "button",
         {
@@ -1159,7 +1167,7 @@ async function initialize() {
         height: 200,
         x: 50,
         y: 50,
-        program: helloProgram,
+        program: { name: "hello-world", properties: {} },
       },
     ],
   };
