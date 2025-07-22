@@ -58,19 +58,15 @@ hr {
     /* Individual edge positions */
     &.n {
       top: -5px;
-      cursor: n-resize;
     }
     &.s {
       bottom: -5px;
-      cursor: s-resize;
     }
     &.e {
       right: -5px;
-      cursor: e-resize;
     }
     &.w {
       left: -5px;
-      cursor: w-resize;
     }
 
     /* Corner handles */
@@ -84,22 +80,18 @@ hr {
 
     /* Corner positions */
     &.nw {
-      cursor: nw-resize;
       left: -5px;
       top: -5px;
     }
     &.ne {
-      cursor: ne-resize;
       right: -5px;
       top: -5px;
     }
     &.sw {
-      cursor: sw-resize;
       left: -5px;
       bottom: -5px;
     }
     &.se {
-      cursor: se-resize;
       right: -5px;
       bottom: -5px;
     }

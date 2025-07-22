@@ -69,6 +69,20 @@ const INITIAL_RIGHT_TOOLBAR_WIDTH = 400;
 const STATE_SAVE_PATH = "user/state.json";
 
 /**
+ * @type {Record<string, string>}
+ */
+const RESIZE_CURSORS = {
+  nw: "nw-resize",
+  ne: "ne-resize",
+  sw: "sw-resize",
+  se: "se-resize",
+  n: "n-resize",
+  s: "s-resize",
+  w: "w-resize",
+  e: "e-resize",
+};
+
+/**
  * @type {Record<string, ResizeHandler>}>}
  */
 const RESIZE_HANDLERS = {
@@ -552,6 +566,20 @@ function ResizeHandle(handle) {
   return h("div", {
     class: `resize-handle ${handle}`,
     "data-handle": handle,
+    onpointerenter: (state, event) => {
+      event.stopPropagation();
+      return {
+        ...state,
+        cursorStyle: RESIZE_CURSORS[handle] || "default",
+      };
+    },
+    onpointerleave: (state, event) => {
+      event.stopPropagation();
+      return {
+        ...state,
+        cursorStyle: "default",
+      };
+    },
     onpointerdown: (state, event) => {
       event.stopPropagation();
       const blockId = parseInt(
@@ -578,6 +606,7 @@ function ResizeHandle(handle) {
           startX: block.x,
           startY: block.y,
         },
+        cursorStyle: RESIZE_CURSORS[handle] || "default",
       };
     },
   });
@@ -685,6 +714,7 @@ function viewport(state) {
             ),
             lastX: event.clientX,
             lastY: event.clientY,
+            cursorStyle: RESIZE_CURSORS[state.resizing.handle] || "default",
           };
         } else if (state.isBlockDragging && state.editingId === null) {
           // Only allow dragging if no block is in edit mode
@@ -950,9 +980,19 @@ function block(state) {
           )
             return state;
 
+          // Don't change cursor if we're over a resize handle
+          const target = /** @type {HTMLElement} */ (event.target);
+          if (target.classList.contains('resize-handle')) {
+            return {
+              ...state,
+              hoveringId: block.id,
+            };
+          }
+
           return {
             ...state,
             hoveringId: block.id,
+            cursorStyle: state.editingId === block.id ? "default" : "move",
           };
         },
         onpointerleave: (state, event) => {
@@ -960,6 +1000,7 @@ function block(state) {
           return {
             ...state,
             hoveringId: null,
+            cursorStyle: "default",
           };
         },
         onpointerdown: (state, event) => {
