@@ -29,11 +29,6 @@ hr {
   box-sizing: border-box;
   touch-action: none;
   transform-origin: top left;
-  outline: 1px solid black;
-
-  &:hover {
-    outline: 1px solid blue;
-  }
 
   /* Resize handle base styles */
   .resize-handle {
@@ -216,14 +211,6 @@ body.dark-mode {
     background: #333;
     border-left-color: #555;
     color: #e0e0e0;
-  }
-
-  .block {
-    outline-color: grey;
-
-    &:hover {
-      outline-color: blue;
-    }
   }
 
   .block-toolbar {

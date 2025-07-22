@@ -47,6 +47,7 @@ import { appWithVisualizer } from "../../hyperapp-visualizer/visualizer.js";
  * @property {boolean} isBlockDragging
  * @property {number|null} selectedId
  * @property {number|null} editingId
+ * @property {number|null} hoveringId
  * @property {{id: number, handle: string}|null} resizing
  * @property {{id: number, startX: number, startY: number}|null} dragStart
  * @property {{id: number, startWidth: number, startHeight: number, startX: number, startY: number}|null} resizeStart
@@ -916,44 +917,72 @@ function block(state) {
   return (block) => {
     const isSelected = state.selectedId === block.id;
     const isEditing = state.editingId === block.id;
+    const isHovering = state.hoveringId === block.id;
+
+    // Having small borders, i.e. 1px, can cause rendering glitches to occur when CSS transform translations are applied such as zooming out
+    const outline = (() => {
+      if (isSelected) {
+        return "4px solid blue";
+      } else if (isHovering) {
+        return "2px solid blue";
+      } else {
+        return null;
+      }
+    })();
+
     return h(
       "div",
       {
         "data-id": block.id,
         style: {
-          outline: isSelected ? "2px solid blue" : null,
+          outline: outline,
           transform: `translate(${block.x}px, ${block.y}px)`,
           width: `${block.width}px`,
           height: `${block.height}px`,
         },
-        class: "block",
+        class: { block: true, hovered: isHovering },
+        onpointerover: (state, event) => {
+          event.stopPropagation();
+          if (
+            state.selectedId !== null &&
+            state.selectedId !== block.id &&
+            state.isBlockDragging
+          )
+            return state;
+
+          return {
+            ...state,
+            hoveringId: block.id,
+          };
+        },
+        onpointerleave: (state, event) => {
+          event.stopPropagation();
+          return {
+            ...state,
+            hoveringId: null,
+          };
+        },
         onpointerdown: (state, event) => {
           event.stopPropagation();
-          const id = parseInt(
-            /** @type {HTMLElement} */ (event.currentTarget).dataset.id || "",
-          );
-          if (isNaN(id)) return state;
-          const block = state.blocks.find((b) => b.id === id);
-          if (!block) return state;
 
           // If block is in edit mode, don't start dragging
-          if (state.editingId === id) {
+          if (state.editingId === block.id) {
             return {
               ...state,
-              selectedId: id,
+              selectedId: block.id,
             };
           }
 
           // Normal selection and drag start
           return {
             ...state,
-            selectedId: id,
+            selectedId: block.id,
             editingId: null, // Exit edit mode when selecting any block (even the same one)
             lastX: event.clientX,
             lastY: event.clientY,
             isBlockDragging: true,
             dragStart: {
-              id: id,
+              id: block.id,
               startX: block.x,
               startY: block.y,
             },
@@ -961,16 +990,12 @@ function block(state) {
         },
         ondblclick: (state, event) => {
           event.stopPropagation();
-          const id = parseInt(
-            /** @type {HTMLElement} */ (event.currentTarget).dataset.id || "",
-          );
-          if (isNaN(id)) return state;
 
           // Double-click enters edit mode
           return {
             ...state,
-            selectedId: id,
-            editingId: id,
+            selectedId: block.id,
+            editingId: block.id,
             isBlockDragging: false, // Cancel any drag that might have started
             dragStart: null,
           };
@@ -1192,6 +1217,7 @@ async function initialize() {
   const initialState = {
     selectedId: null,
     editingId: null,
+    hoveringId: null,
     resizing: null,
     offsetX: 0,
     offsetY: 0,
