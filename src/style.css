@@ -30,71 +30,8 @@ hr {
   touch-action: none;
   transform-origin: top left;
 
-  /* Resize handle base styles */
   .resize-handle {
     position: absolute;
-    width: 10px;
-    height: 10px;
-    background-color: transparent;
-    border: none;
-
-    /* Edge handles */
-    &.n,
-    &.s {
-      left: 10px;
-      right: 10px;
-      width: auto;
-      height: 10px;
-    }
-
-    &.e,
-    &.w {
-      top: 10px;
-      bottom: 10px;
-      width: 10px;
-      height: auto;
-    }
-
-    /* Individual edge positions */
-    &.n {
-      top: -5px;
-    }
-    &.s {
-      bottom: -5px;
-    }
-    &.e {
-      right: -5px;
-    }
-    &.w {
-      left: -5px;
-    }
-
-    /* Corner handles */
-    &.nw,
-    &.ne,
-    &.sw,
-    &.se {
-      background-color: white;
-      border: 1px solid blue;
-    }
-
-    /* Corner positions */
-    &.nw {
-      left: -5px;
-      top: -5px;
-    }
-    &.ne {
-      right: -5px;
-      top: -5px;
-    }
-    &.sw {
-      left: -5px;
-      bottom: -5px;
-    }
-    &.se {
-      right: -5px;
-      bottom: -5px;
-    }
   }
 
   /* Toolbar styles */

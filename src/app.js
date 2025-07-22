@@ -560,12 +560,48 @@ async function pasteBlock(state) {
 
 /**
  * @param {string} handle
+ * @param {number} zoom
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-function ResizeHandle(handle) {
+function ResizeHandle(handle, zoom) {
+  // Scale handle sizes inversely with zoom to maintain consistent visual appearance
+  const handleSize = 10 / zoom;
+  const handleOffset = 5 / zoom;
+  const borderWidth = 1 / zoom;
+
+  // Determine if this is a corner handle
+  const isCorner = ["nw", "ne", "sw", "se"].includes(handle);
+  const isEdge = ["n", "s", "e", "w"].includes(handle);
+
+  /** @type {import("hyperapp").StyleProp} */
+  const style = {
+    position: "absolute",
+    backgroundColor: isCorner ? "white" : "transparent",
+    border: isCorner ? `${borderWidth}px solid blue` : "none",
+    width: isEdge && ["n", "s"].includes(handle) ? "auto" : `${handleSize}px`,
+    height: isEdge && ["e", "w"].includes(handle) ? "auto" : `${handleSize}px`,
+  };
+
+  // Add positioning based on handle type
+  if (handle.includes("n")) style.top = `-${handleOffset}px`;
+  if (handle.includes("s")) style.bottom = `-${handleOffset}px`;
+  if (handle.includes("e")) style.right = `-${handleOffset}px`;
+  if (handle.includes("w")) style.left = `-${handleOffset}px`;
+
+  // Edge handle positioning
+  if (["n", "s"].includes(handle)) {
+    style.left = `${handleSize}px`;
+    style.right = `${handleSize}px`;
+  }
+  if (["e", "w"].includes(handle)) {
+    style.top = `${handleSize}px`;
+    style.bottom = `${handleSize}px`;
+  }
+
   return h("div", {
     class: `resize-handle ${handle}`,
     "data-handle": handle,
+    style: style,
     onpointerenter: (state, event) => {
       event.stopPropagation();
       return {
@@ -950,11 +986,12 @@ function block(state) {
     const isHovering = state.hoveringId === block.id;
 
     // Having small borders, i.e. 1px, can cause rendering glitches to occur when CSS transform translations are applied such as zooming out
+    // Scale outline thickness inversely with zoom to maintain consistent visual appearance
     const outline = (() => {
       if (isSelected) {
-        return "4px solid blue";
+        return `${4 / state.zoom}px solid blue`;
       } else if (isHovering) {
-        return "2px solid blue";
+        return `${2 / state.zoom}px solid blue`;
       } else {
         return null;
       }
@@ -982,7 +1019,7 @@ function block(state) {
 
           // Don't change cursor if we're over a resize handle
           const target = /** @type {HTMLElement} */ (event.target);
-          if (target.classList.contains('resize-handle')) {
+          if (target.classList.contains("resize-handle")) {
             return {
               ...state,
               hoveringId: block.id,
@@ -1051,7 +1088,9 @@ function block(state) {
           },
         }),
         ...(isSelected && !isEditing
-          ? Object.keys(RESIZE_HANDLERS).map(ResizeHandle)
+          ? Object.keys(RESIZE_HANDLERS).map((handle) =>
+              ResizeHandle(handle, state.zoom),
+            )
           : []),
         isSelected && !isEditing && blockToolbar(),
       ],
