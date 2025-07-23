@@ -25,7 +25,6 @@ import { appWithVisualizer } from "../../hyperapp-visualizer/visualizer.js";
  * @property {Block[]} blocks
  * @property {number|null} selectedId
  * @property {number|null} editingId
- * @property {string} description
  */
 
 /**
@@ -202,15 +201,13 @@ function createMementoManager() {
 /**
  * Creates a memento from the current state
  * @param {State} state
- * @param {string} description
  * @returns {Memento}
  */
-function createMemento(state, description) {
+function createMemento(state) {
   return {
     blocks: JSON.parse(JSON.stringify(state.blocks)),
     selectedId: state.selectedId,
     editingId: state.editingId,
-    description: description,
   };
 }
 
@@ -218,11 +215,10 @@ function createMemento(state, description) {
  * Saves prev state in memento history and returns the new state
  * @param {State} prevState
  * @param {State} newState
- * @param {string} description
  * @returns {State}
  */
-function saveStateHistoryAndReturn(prevState, newState, description) {
-  const memento = createMemento(prevState, description);
+function saveStateHistoryAndReturn(prevState, newState) {
+  const memento = createMemento(prevState);
 
   const newMementoManager = {
     ...prevState.mementoManager,
@@ -248,7 +244,7 @@ function undoState(state) {
 
   const memento =
     state.mementoManager.undoStack[state.mementoManager.undoStack.length - 1];
-  const currentMemento = createMemento(state, "Current state");
+  const currentMemento = createMemento(state);
 
   const newMementoManager = {
     ...state.mementoManager,
@@ -282,7 +278,7 @@ function redoState(state) {
 
   const memento =
     state.mementoManager.redoStack[state.mementoManager.redoStack.length - 1];
-  const currentMemento = createMemento(state, "Current state");
+  const currentMemento = createMemento(state);
 
   const newMementoManager = {
     ...state.mementoManager,
@@ -329,11 +325,7 @@ function addBlock(currentState, programName) {
     selectedId: newBlock.id,
   };
 
-  return saveStateHistoryAndReturn(
-    currentState,
-    newState,
-    `Add block ${newBlock.id}`,
-  );
+  return saveStateHistoryAndReturn(currentState, newState);
 }
 
 /**
@@ -354,11 +346,7 @@ function deleteBlock(currentState, blockId) {
     selectedId: null,
   };
 
-  return saveStateHistoryAndReturn(
-    currentState,
-    newState,
-    `Delete block ${blockId}`,
-  );
+  return saveStateHistoryAndReturn(currentState, newState);
 }
 
 /**
@@ -382,11 +370,7 @@ function pasteBlock(currentState, blockData) {
     selectedId: newBlock.id,
   };
 
-  return saveStateHistoryAndReturn(
-    currentState,
-    newState,
-    `Paste block ${newBlock.id}`,
-  );
+  return saveStateHistoryAndReturn(currentState, newState);
 }
 
 // -----------------------------
@@ -743,11 +727,7 @@ function viewport(state) {
                   : b,
               ),
             };
-            return saveStateHistoryAndReturn(
-              beforeDragState,
-              newState,
-              `Move block ${state.dragStart.id}`,
-            );
+            return saveStateHistoryAndReturn(beforeDragState, newState);
           }
         }
 
@@ -779,11 +759,7 @@ function viewport(state) {
                   : b,
               ),
             };
-            return saveStateHistoryAndReturn(
-              beforeResizeState,
-              newState,
-              `Resize Block ${resizedBlock.id}`,
-            );
+            return saveStateHistoryAndReturn(beforeResizeState, newState);
           }
         }
 
@@ -996,10 +972,6 @@ function toolbar(state) {
         {
           onclick: undoState,
           disabled: state.mementoManager.undoStack.length === 0,
-          title:
-            state.mementoManager.undoStack.length > 0
-              ? `Undo: ${state.mementoManager.undoStack[state.mementoManager.undoStack.length - 1].description}`
-              : "Nothing to undo",
         },
         text("↶ Undo"),
       ),
@@ -1008,10 +980,6 @@ function toolbar(state) {
         {
           onclick: redoState,
           disabled: state.mementoManager.redoStack.length === 0,
-          title:
-            state.mementoManager.redoStack.length > 0
-              ? `Redo: ${state.mementoManager.redoStack[state.mementoManager.redoStack.length - 1].description}`
-              : "Nothing to redo",
         },
         text("↷ Redo"),
       ),
