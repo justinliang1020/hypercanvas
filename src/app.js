@@ -21,16 +21,20 @@ import { appWithVisualizer } from "../../hyperapp-visualizer/visualizer.js";
  */
 
 /**
- * @typedef {Object} Command
- * @property {() => State} execute
- * @property {() => State} undo
+ * @typedef {Object} Memento
+ * @property {Block[]} blocks
+ * @property {number} offsetX
+ * @property {number} offsetY
+ * @property {number} zoom
+ * @property {number|null} selectedId
+ * @property {number|null} editingId
  * @property {string} description
  */
 
 /**
- * @typedef {Object} CommandManager
- * @property {Command[]} undoStack
- * @property {Command[]} redoStack
+ * @typedef {Object} MementoManager
+ * @property {Memento[]} undoStack
+ * @property {Memento[]} redoStack
  * @property {number} maxHistorySize
  */
 
@@ -52,7 +56,7 @@ import { appWithVisualizer } from "../../hyperapp-visualizer/visualizer.js";
  * @property {{id: number, startX: number, startY: number}|null} dragStart
  * @property {{id: number, startWidth: number, startHeight: number, startX: number, startY: number}|null} resizeStart
  * @property {number} toolbarWidth
- * @property {CommandManager} commandManager
+ * @property {MementoManager} mementoManager
  * @property {boolean} isDarkMode
  */
 
@@ -183,14 +187,14 @@ class ProgramComponent extends HTMLElement {
 customElements.define("program-component", ProgramComponent);
 
 // -----------------------------
-// ## Command Pattern Implementation
+// ## Memento Pattern Implementation
 // -----------------------------
 
 /**
- * Creates a new command manager
- * @returns {CommandManager}
+ * Creates a new memento manager
+ * @returns {MementoManager}
  */
-function createCommandManager() {
+function createMementoManager() {
   return {
     undoStack: [],
     redoStack: [],
@@ -199,49 +203,74 @@ function createCommandManager() {
 }
 
 /**
- * Executes a command and adds it to the undo stack
+ * Creates a memento from the current state
  * @param {State} state
- * @param {Command} command
+ * @param {string} description
+ * @returns {Memento}
+ */
+function createMemento(state, description) {
+  return {
+    blocks: JSON.parse(JSON.stringify(state.blocks)),
+    offsetX: state.offsetX,
+    offsetY: state.offsetY,
+    zoom: state.zoom,
+    selectedId: state.selectedId,
+    editingId: state.editingId,
+    description: description,
+  };
+}
+
+/**
+ * Saves current state and executes a state change
+ * @param {State} state
+ * @param {State} newState
+ * @param {string} description
  * @returns {State}
  */
-function executeCommand(state, command) {
-  const newState = command.execute();
+function saveStateAndExecute(state, newState, description) {
+  const memento = createMemento(state, description);
 
-  const newCommandManager = {
-    ...state.commandManager,
-    undoStack: [...state.commandManager.undoStack, command].slice(
-      -state.commandManager.maxHistorySize,
+  const newMementoManager = {
+    ...state.mementoManager,
+    undoStack: [...state.mementoManager.undoStack, memento].slice(
+      -state.mementoManager.maxHistorySize,
     ),
     redoStack: [],
   };
 
   return {
     ...newState,
-    commandManager: newCommandManager,
+    mementoManager: newMementoManager,
   };
 }
 
 /**
- * Undoes the last command
+ * Undoes the last state change
  * @param {State} state
  * @returns {State}
  */
-function undoCommand(state) {
-  if (state.commandManager.undoStack.length === 0) return state;
+function undoState(state) {
+  if (state.mementoManager.undoStack.length === 0) return state;
 
-  const command =
-    state.commandManager.undoStack[state.commandManager.undoStack.length - 1];
-  const newState = command.undo();
+  const memento =
+    state.mementoManager.undoStack[state.mementoManager.undoStack.length - 1];
+  const currentMemento = createMemento(state, "Current state");
 
-  const newCommandManager = {
-    ...state.commandManager,
-    undoStack: state.commandManager.undoStack.slice(0, -1),
-    redoStack: [...state.commandManager.redoStack, command],
+  const newMementoManager = {
+    ...state.mementoManager,
+    undoStack: state.mementoManager.undoStack.slice(0, -1),
+    redoStack: [...state.mementoManager.redoStack, currentMemento],
   };
 
   return {
-    ...newState,
-    commandManager: newCommandManager,
+    ...state,
+    blocks: memento.blocks,
+    offsetX: memento.offsetX,
+    offsetY: memento.offsetY,
+    zoom: memento.zoom,
+    selectedId: memento.selectedId,
+    editingId: memento.editingId,
+    mementoManager: newMementoManager,
     // Reset interaction states to prevent stuck drag/resize modes
     isBlockDragging: false,
     isViewportDragging: false,
@@ -253,26 +282,32 @@ function undoCommand(state) {
 }
 
 /**
- * Redoes the last undone command
+ * Redoes the last undone state change
  * @param {State} state
  * @returns {State}
  */
-function redoCommand(state) {
-  if (state.commandManager.redoStack.length === 0) return state;
+function redoState(state) {
+  if (state.mementoManager.redoStack.length === 0) return state;
 
-  const command =
-    state.commandManager.redoStack[state.commandManager.redoStack.length - 1];
-  const newState = command.execute();
+  const memento =
+    state.mementoManager.redoStack[state.mementoManager.redoStack.length - 1];
+  const currentMemento = createMemento(state, "Current state");
 
-  const newCommandManager = {
-    ...state.commandManager,
-    undoStack: [...state.commandManager.undoStack, command],
-    redoStack: state.commandManager.redoStack.slice(0, -1),
+  const newMementoManager = {
+    ...state.mementoManager,
+    undoStack: [...state.mementoManager.undoStack, currentMemento],
+    redoStack: state.mementoManager.redoStack.slice(0, -1),
   };
 
   return {
-    ...newState,
-    commandManager: newCommandManager,
+    ...state,
+    blocks: memento.blocks,
+    offsetX: memento.offsetX,
+    offsetY: memento.offsetY,
+    zoom: memento.zoom,
+    selectedId: memento.selectedId,
+    editingId: memento.editingId,
+    mementoManager: newMementoManager,
     // Reset interaction states to prevent stuck drag/resize modes
     isBlockDragging: false,
     isViewportDragging: false,
@@ -284,12 +319,12 @@ function redoCommand(state) {
 }
 
 /**
- * Creates a command to add a new block
+ * Adds a new block to the state
  * @param {State} currentState
  * @param {string} programName
- * @returns {Command}
+ * @returns {State}
  */
-function createAddBlockCommand(currentState, programName) {
+function addBlock(currentState, programName) {
   /** @type{Block} */
   const newBlock = {
     id: Math.max(...currentState.blocks.map((block) => block.id), 0) + 1,
@@ -300,146 +335,101 @@ function createAddBlockCommand(currentState, programName) {
     program: { name: programName, properties: {} },
   };
 
-  return {
-    execute: () => ({
-      ...currentState,
-      blocks: [...currentState.blocks, newBlock],
-      selectedId: newBlock.id,
-    }),
-    undo: () => ({
-      ...currentState,
-      blocks: currentState.blocks.filter((block) => block.id !== newBlock.id),
-      selectedId: null,
-    }),
-    description: `Add block ${newBlock.id}`,
+  const newState = {
+    ...currentState,
+    blocks: [...currentState.blocks, newBlock],
+    selectedId: newBlock.id,
   };
+
+  return saveStateAndExecute(
+    currentState,
+    newState,
+    `Add block ${newBlock.id}`,
+  );
 }
 
 /**
- * Creates a command to delete a block
+ * Deletes a block from the state
  * @param {State} currentState
  * @param {number} blockId
- * @returns {Command}
+ * @returns {State}
  */
-function createDeleteBlockCommand(currentState, blockId) {
+function deleteBlock(currentState, blockId) {
   const blockToDelete = currentState.blocks.find(
     (block) => block.id === blockId,
   );
   if (!blockToDelete) throw new Error(`Block ${blockId} not found`);
 
-  return {
-    execute: () => ({
-      ...currentState,
-      blocks: currentState.blocks.filter((block) => block.id !== blockId),
-      selectedId: null,
-    }),
-    undo: () => ({
-      ...currentState,
-      blocks: [...currentState.blocks, blockToDelete],
-      selectedId: blockId,
-    }),
-    description: `Delete block ${blockId}`,
+  const newState = {
+    ...currentState,
+    blocks: currentState.blocks.filter((block) => block.id !== blockId),
+    selectedId: null,
   };
+
+  return saveStateAndExecute(currentState, newState, `Delete block ${blockId}`);
 }
 
 /**
- * Creates a command to move a block
+ * Moves a block in the state
  * @param {State} currentState
  * @param {number} blockId
  * @param {number} newX
  * @param {number} newY
- * @returns {Command}
+ * @returns {State}
  */
-function createMoveBlockCommand(currentState, blockId, newX, newY) {
+function moveBlock(currentState, blockId, newX, newY) {
   const block = currentState.blocks.find((b) => b.id === blockId);
   if (!block) throw new Error(`Block ${blockId} not found`);
 
-  const oldX = block.x;
-  const oldY = block.y;
-
-  return {
-    execute: () => ({
-      ...currentState,
-      blocks: currentState.blocks.map((b) =>
-        b.id === blockId ? { ...b, x: newX, y: newY } : b,
-      ),
-    }),
-    undo: () => ({
-      ...currentState,
-      blocks: currentState.blocks.map((b) =>
-        b.id === blockId ? { ...b, x: oldX, y: oldY } : b,
-      ),
-    }),
-    description: `Move block ${blockId}`,
+  const newState = {
+    ...currentState,
+    blocks: currentState.blocks.map((b) =>
+      b.id === blockId ? { ...b, x: newX, y: newY } : b,
+    ),
   };
+
+  return saveStateAndExecute(currentState, newState, `Move block ${blockId}`);
 }
 
 /**
- * Creates a command to resize a block
+ * Resizes a block in the state
  * @param {State} currentState
  * @param {number} blockId
  * @param {number} newWidth
  * @param {number} newHeight
  * @param {number} newX
  * @param {number} newY
- * @returns {Command}
+ * @returns {State}
  */
-function createResizeBlockCommand(
-  currentState,
-  blockId,
-  newWidth,
-  newHeight,
-  newX,
-  newY,
-) {
+function resizeBlock(currentState, blockId, newWidth, newHeight, newX, newY) {
   const block = currentState.blocks.find((b) => b.id === blockId);
   if (!block) throw new Error(`Block ${blockId} not found`);
 
-  const oldWidth = block.width;
-  const oldHeight = block.height;
-  const oldX = block.x;
-  const oldY = block.y;
-
-  return {
-    execute: () => ({
-      ...currentState,
-      blocks: currentState.blocks.map((b) =>
-        b.id === blockId
-          ? {
-              ...b,
-              width: newWidth,
-              height: newHeight,
-              x: newX,
-              y: newY,
-            }
-          : b,
-      ),
-    }),
-    undo: () => ({
-      ...currentState,
-      blocks: currentState.blocks.map((b) =>
-        b.id === blockId
-          ? {
-              ...b,
-              width: oldWidth,
-              height: oldHeight,
-              x: oldX,
-              y: oldY,
-            }
-          : b,
-      ),
-    }),
-    description: `Resize block ${blockId}`,
+  const newState = {
+    ...currentState,
+    blocks: currentState.blocks.map((b) =>
+      b.id === blockId
+        ? {
+            ...b,
+            width: newWidth,
+            height: newHeight,
+            x: newX,
+            y: newY,
+          }
+        : b,
+    ),
   };
+
+  return saveStateAndExecute(currentState, newState, `Resize block ${blockId}`);
 }
 
 /**
- * Creates a command to paste a block
+ * Pastes a block into the state
  * @param {State} currentState
  * @param {Block} blockData
- * @returns {Command}
+ * @returns {State}
  */
-function createPasteBlockCommand(currentState, blockData) {
+function pasteBlock(currentState, blockData) {
   /** @type{Block} */
   const newBlock = {
     ...blockData,
@@ -448,19 +438,17 @@ function createPasteBlockCommand(currentState, blockData) {
     y: blockData.y + 20,
   };
 
-  return {
-    execute: () => ({
-      ...currentState,
-      blocks: [...currentState.blocks, newBlock],
-      selectedId: newBlock.id,
-    }),
-    undo: () => ({
-      ...currentState,
-      blocks: currentState.blocks.filter((block) => block.id !== newBlock.id),
-      selectedId: currentState.selectedId,
-    }),
-    description: `Paste block ${newBlock.id}`,
+  const newState = {
+    ...currentState,
+    blocks: [...currentState.blocks, newBlock],
+    selectedId: newBlock.id,
   };
+
+  return saveStateAndExecute(
+    currentState,
+    newState,
+    `Paste block ${newBlock.id}`,
+  );
 }
 
 // -----------------------------
@@ -471,8 +459,8 @@ function createPasteBlockCommand(currentState, blockData) {
  * @param {State} state
  */
 async function saveState(state) {
-  // Functions in the commandManager cannot be serialized. Anyways we don't want to save that as state.
-  const { commandManager, ...serializableSaveState } = state;
+  // Functions in the mementoManager cannot be serialized. Anyways we don't want to save that as state.
+  const { mementoManager, ...serializableSaveState } = state;
   // @ts-ignore
   await window.fileAPI.writeFile(STATE_SAVE_PATH, serializableSaveState);
 }
@@ -483,8 +471,7 @@ async function saveState(state) {
  * @returns {State}
  */
 function addNewBlock(state, programName) {
-  const command = createAddBlockCommand(state, programName);
-  return executeCommand(state, command);
+  return addBlock(state, programName);
 }
 
 /**
@@ -519,7 +506,7 @@ function copySelectedBlock(state) {
  * @param {State} state
  * @returns {Promise<State>}
  */
-async function pasteBlock(state) {
+async function pasteBlockFromClipboard(state) {
   try {
     // Read from clipboard
     const clipboardText = await navigator.clipboard.readText();
@@ -545,8 +532,7 @@ async function pasteBlock(state) {
       return state; // Invalid block data
     }
 
-    const command = createPasteBlockCommand(state, blockData);
-    return executeCommand(state, command);
+    return pasteBlock(state, blockData);
   } catch (error) {
     // If clipboard doesn't contain valid JSON or we can't read it, just return current state
     console.warn("Failed to paste block from clipboard:", error);
@@ -669,8 +655,7 @@ function blockToolbar() {
           onclick: (state, event) => {
             event.stopPropagation();
             if (state.selectedId === null) return state;
-            const command = createDeleteBlockCommand(state, state.selectedId);
-            return executeCommand(state, command);
+            return deleteBlock(state, state.selectedId);
           },
         },
         text("❌"),
@@ -794,7 +779,7 @@ function viewport(state) {
           cursorStyle: "default",
         };
 
-        // Create command for completed drag operation
+        // Save state for completed drag operation
         if (state.dragStart && state.isBlockDragging) {
           const block = state.blocks.find((b) => b.id === state.dragStart?.id);
           if (
@@ -803,48 +788,36 @@ function viewport(state) {
             (block.x !== state.dragStart.startX ||
               block.y !== state.dragStart.startY)
           ) {
-            const command = createMoveBlockCommand(
-              { ...state, dragStart: null, resizeStart: null },
-              state.dragStart.id,
-              block.x,
-              block.y,
+            // Create memento from the state before the drag started
+            const beforeDragState = {
+              ...state,
+              blocks: state.blocks.map((b) =>
+                b.id === state.dragStart?.id
+                  ? {
+                      ...b,
+                      x: state.dragStart?.startX || 0,
+                      y: state.dragStart?.startY || 0,
+                    }
+                  : b,
+              ),
+            };
+            const memento = createMemento(
+              beforeDragState,
+              `Move block ${state.dragStart.id}`,
             );
-            // We need to manually update the command manager since we're creating the command after the fact
-            const newCommandManager = {
-              ...state.commandManager,
-              undoStack: [
-                ...state.commandManager.undoStack,
-                {
-                  ...command,
-                  execute: () => ({
-                    ...state,
-                    blocks: state.blocks.map((b) =>
-                      b.id === state.dragStart?.id
-                        ? { ...b, x: block.x, y: block.y }
-                        : b,
-                    ),
-                  }),
-                  undo: () => ({
-                    ...state,
-                    blocks: state.blocks.map((b) =>
-                      b.id === state.dragStart?.id
-                        ? {
-                            ...b,
-                            x: state.dragStart?.startX || 0,
-                            y: state.dragStart?.startY || 0,
-                          }
-                        : b,
-                    ),
-                  }),
-                },
-              ].slice(-state.commandManager.maxHistorySize),
+
+            const newMementoManager = {
+              ...state.mementoManager,
+              undoStack: [...state.mementoManager.undoStack, memento].slice(
+                -state.mementoManager.maxHistorySize,
+              ),
               redoStack: [],
             };
-            newState = { ...newState, commandManager: newCommandManager };
+            newState = { ...newState, mementoManager: newMementoManager };
           }
         }
 
-        // Create command for completed resize operation
+        // Save state for completed resize operation
         if (state.resizeStart && state.resizing) {
           const block = state.blocks.find(
             (b) => b.id === state.resizeStart?.id,
@@ -857,54 +830,34 @@ function viewport(state) {
               block.x !== state.resizeStart.startX ||
               block.y !== state.resizeStart.startY)
           ) {
-            const command = createResizeBlockCommand(
-              { ...state, dragStart: null, resizeStart: null },
-              state.resizeStart.id,
-              block.width,
-              block.height,
-              block.x,
-              block.y,
+            // Create memento from the state before the resize started
+            const beforeResizeState = {
+              ...state,
+              blocks: state.blocks.map((b) =>
+                b.id === state.resizeStart?.id
+                  ? {
+                      ...b,
+                      width: state.resizeStart?.startWidth || 0,
+                      height: state.resizeStart?.startHeight || 0,
+                      x: state.resizeStart?.startX || 0,
+                      y: state.resizeStart?.startY || 0,
+                    }
+                  : b,
+              ),
+            };
+            const memento = createMemento(
+              beforeResizeState,
+              `Resize block ${state.resizeStart.id}`,
             );
-            // We need to manually update the command manager since we're creating the command after the fact
-            const newCommandManager = {
-              ...newState.commandManager,
-              undoStack: [
-                ...newState.commandManager.undoStack,
-                {
-                  ...command,
-                  execute: () => ({
-                    ...state,
-                    blocks: state.blocks.map((b) =>
-                      b.id === state.resizeStart?.id
-                        ? {
-                            ...b,
-                            width: block.width,
-                            height: block.height,
-                            x: block.x,
-                            y: block.y,
-                          }
-                        : b,
-                    ),
-                  }),
-                  undo: () => ({
-                    ...state,
-                    blocks: state.blocks.map((b) =>
-                      b.id === state.resizeStart?.id
-                        ? {
-                            ...b,
-                            width: state.resizeStart?.startWidth || 0,
-                            height: state.resizeStart?.startHeight || 0,
-                            x: state.resizeStart?.startX || 0,
-                            y: state.resizeStart?.startY || 0,
-                          }
-                        : b,
-                    ),
-                  }),
-                },
-              ].slice(-state.commandManager.maxHistorySize),
+
+            const newMementoManager = {
+              ...newState.mementoManager,
+              undoStack: [...newState.mementoManager.undoStack, memento].slice(
+                -state.mementoManager.maxHistorySize,
+              ),
               redoStack: [],
             };
-            newState = { ...newState, commandManager: newCommandManager };
+            newState = { ...newState, mementoManager: newMementoManager };
           }
         }
 
@@ -1119,11 +1072,11 @@ function toolbar(state) {
       h(
         "button",
         {
-          onclick: undoCommand,
-          disabled: state.commandManager.undoStack.length === 0,
+          onclick: undoState,
+          disabled: state.mementoManager.undoStack.length === 0,
           title:
-            state.commandManager.undoStack.length > 0
-              ? `Undo: ${state.commandManager.undoStack[state.commandManager.undoStack.length - 1].description}`
+            state.mementoManager.undoStack.length > 0
+              ? `Undo: ${state.mementoManager.undoStack[state.mementoManager.undoStack.length - 1].description}`
               : "Nothing to undo",
         },
         text("↶ Undo"),
@@ -1131,11 +1084,11 @@ function toolbar(state) {
       h(
         "button",
         {
-          onclick: redoCommand,
-          disabled: state.commandManager.redoStack.length === 0,
+          onclick: redoState,
+          disabled: state.mementoManager.redoStack.length === 0,
           title:
-            state.commandManager.redoStack.length > 0
-              ? `Redo: ${state.commandManager.redoStack[state.commandManager.redoStack.length - 1].description}`
+            state.mementoManager.redoStack.length > 0
+              ? `Redo: ${state.mementoManager.redoStack[state.mementoManager.redoStack.length - 1].description}`
               : "Nothing to redo",
         },
         text("↷ Redo"),
@@ -1211,8 +1164,7 @@ function main(state) {
             // Only handle block deletion if not in input field, a block is selected, and not in edit mode
             if (state.selectedId !== null && state.editingId === null) {
               event.preventDefault();
-              const command = createDeleteBlockCommand(state, state.selectedId);
-              return executeCommand(state, command);
+              return deleteBlock(state, state.selectedId);
             }
             // Let browser handle regular text deletion
             return state;
@@ -1242,7 +1194,7 @@ function main(state) {
                 return [
                   state,
                   async (dispatch) => {
-                    const newState = await pasteBlock(state);
+                    const newState = await pasteBlockFromClipboard(state);
                     dispatch(newState);
                   },
                 ];
@@ -1259,10 +1211,10 @@ function main(state) {
                 event.preventDefault();
                 if (event.shiftKey) {
                   // Ctrl+Shift+Z or Cmd+Shift+Z = Redo
-                  return redoCommand(state);
+                  return redoState(state);
                 } else {
                   // Ctrl+Z or Cmd+Z = Undo
-                  return undoCommand(state);
+                  return undoState(state);
                 }
               }
             }
@@ -1273,7 +1225,7 @@ function main(state) {
             if (event.ctrlKey || event.metaKey) {
               if (state.editingId === null) {
                 event.preventDefault();
-                return redoCommand(state);
+                return redoState(state);
               }
             }
             return state;
@@ -1310,7 +1262,7 @@ async function initialize() {
     toolbarWidth: INITIAL_RIGHT_TOOLBAR_WIDTH,
     dragStart: null,
     resizeStart: null,
-    commandManager: createCommandManager(),
+    mementoManager: createMementoManager(),
     isDarkMode: false,
     blocks: [
       {
@@ -1331,7 +1283,7 @@ async function initialize() {
     if (!state) {
       state = initialState;
     }
-    state.commandManager = createCommandManager();
+    state.mementoManager = createMementoManager();
   } catch {
     state = initialState;
   }
