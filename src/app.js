@@ -23,9 +23,6 @@ import { appWithVisualizer } from "../../hyperapp-visualizer/visualizer.js";
 /**
  * @typedef {Object} Memento
  * @property {Block[]} blocks
- * @property {number} offsetX
- * @property {number} offsetY
- * @property {number} zoom
  * @property {number|null} selectedId
  * @property {number|null} editingId
  * @property {string} description
@@ -211,9 +208,6 @@ function createMementoManager() {
 function createMemento(state, description) {
   return {
     blocks: JSON.parse(JSON.stringify(state.blocks)),
-    offsetX: state.offsetX,
-    offsetY: state.offsetY,
-    zoom: state.zoom,
     selectedId: state.selectedId,
     editingId: state.editingId,
     description: description,
@@ -221,19 +215,19 @@ function createMemento(state, description) {
 }
 
 /**
- * Saves current state and executes a state change
- * @param {State} state
+ * Saves prev state in memento history and returns the new state
+ * @param {State} prevState
  * @param {State} newState
  * @param {string} description
  * @returns {State}
  */
-function saveStateAndExecute(state, newState, description) {
-  const memento = createMemento(state, description);
+function saveStateHistoryAndReturn(prevState, newState, description) {
+  const memento = createMemento(prevState, description);
 
   const newMementoManager = {
-    ...state.mementoManager,
-    undoStack: [...state.mementoManager.undoStack, memento].slice(
-      -state.mementoManager.maxHistorySize,
+    ...prevState.mementoManager,
+    undoStack: [...prevState.mementoManager.undoStack, memento].slice(
+      -prevState.mementoManager.maxHistorySize,
     ),
     redoStack: [],
   };
@@ -265,9 +259,6 @@ function undoState(state) {
   return {
     ...state,
     blocks: memento.blocks,
-    offsetX: memento.offsetX,
-    offsetY: memento.offsetY,
-    zoom: memento.zoom,
     selectedId: memento.selectedId,
     editingId: memento.editingId,
     mementoManager: newMementoManager,
@@ -302,9 +293,6 @@ function redoState(state) {
   return {
     ...state,
     blocks: memento.blocks,
-    offsetX: memento.offsetX,
-    offsetY: memento.offsetY,
-    zoom: memento.zoom,
     selectedId: memento.selectedId,
     editingId: memento.editingId,
     mementoManager: newMementoManager,
@@ -341,7 +329,7 @@ function addBlock(currentState, programName) {
     selectedId: newBlock.id,
   };
 
-  return saveStateAndExecute(
+  return saveStateHistoryAndReturn(
     currentState,
     newState,
     `Add block ${newBlock.id}`,
@@ -366,61 +354,11 @@ function deleteBlock(currentState, blockId) {
     selectedId: null,
   };
 
-  return saveStateAndExecute(currentState, newState, `Delete block ${blockId}`);
-}
-
-/**
- * Moves a block in the state
- * @param {State} currentState
- * @param {number} blockId
- * @param {number} newX
- * @param {number} newY
- * @returns {State}
- */
-function moveBlock(currentState, blockId, newX, newY) {
-  const block = currentState.blocks.find((b) => b.id === blockId);
-  if (!block) throw new Error(`Block ${blockId} not found`);
-
-  const newState = {
-    ...currentState,
-    blocks: currentState.blocks.map((b) =>
-      b.id === blockId ? { ...b, x: newX, y: newY } : b,
-    ),
-  };
-
-  return saveStateAndExecute(currentState, newState, `Move block ${blockId}`);
-}
-
-/**
- * Resizes a block in the state
- * @param {State} currentState
- * @param {number} blockId
- * @param {number} newWidth
- * @param {number} newHeight
- * @param {number} newX
- * @param {number} newY
- * @returns {State}
- */
-function resizeBlock(currentState, blockId, newWidth, newHeight, newX, newY) {
-  const block = currentState.blocks.find((b) => b.id === blockId);
-  if (!block) throw new Error(`Block ${blockId} not found`);
-
-  const newState = {
-    ...currentState,
-    blocks: currentState.blocks.map((b) =>
-      b.id === blockId
-        ? {
-            ...b,
-            width: newWidth,
-            height: newHeight,
-            x: newX,
-            y: newY,
-          }
-        : b,
-    ),
-  };
-
-  return saveStateAndExecute(currentState, newState, `Resize block ${blockId}`);
+  return saveStateHistoryAndReturn(
+    currentState,
+    newState,
+    `Delete block ${blockId}`,
+  );
 }
 
 /**
@@ -444,7 +382,7 @@ function pasteBlock(currentState, blockData) {
     selectedId: newBlock.id,
   };
 
-  return saveStateAndExecute(
+  return saveStateHistoryAndReturn(
     currentState,
     newState,
     `Paste block ${newBlock.id}`,
@@ -458,8 +396,8 @@ function pasteBlock(currentState, blockData) {
 /**
  * @param {State} state
  */
-async function saveState(state) {
-  // Functions in the mementoManager cannot be serialized. Anyways we don't want to save that as state.
+async function saveApplication(state) {
+  // Don't need to save mementoManager since it just stores undo/redo session history
   const { mementoManager, ...serializableSaveState } = state;
   // @ts-ignore
   await window.fileAPI.writeFile(STATE_SAVE_PATH, serializableSaveState);
@@ -771,28 +709,32 @@ function viewport(state) {
         return state;
       },
       onpointerup: (state) => {
-        let newState = {
+        const newState = {
           ...state,
           isViewportDragging: false,
           isBlockDragging: false,
           resizing: null,
+          dragStart: null,
+          resizeStart: null,
           cursorStyle: "default",
         };
 
         // Save state for completed drag operation
         if (state.dragStart && state.isBlockDragging) {
-          const block = state.blocks.find((b) => b.id === state.dragStart?.id);
+          const draggedBlock = state.blocks.find(
+            (b) => b.id === state.dragStart?.id,
+          );
           if (
-            block &&
+            draggedBlock &&
             state.dragStart &&
-            (block.x !== state.dragStart.startX ||
-              block.y !== state.dragStart.startY)
+            (draggedBlock.x !== state.dragStart.startX ||
+              draggedBlock.y !== state.dragStart.startY)
           ) {
             // Create memento from the state before the drag started
             const beforeDragState = {
               ...state,
               blocks: state.blocks.map((b) =>
-                b.id === state.dragStart?.id
+                b.id === draggedBlock.id
                   ? {
                       ...b,
                       x: state.dragStart?.startX || 0,
@@ -801,40 +743,32 @@ function viewport(state) {
                   : b,
               ),
             };
-            const memento = createMemento(
+            return saveStateHistoryAndReturn(
               beforeDragState,
+              newState,
               `Move block ${state.dragStart.id}`,
             );
-
-            const newMementoManager = {
-              ...state.mementoManager,
-              undoStack: [...state.mementoManager.undoStack, memento].slice(
-                -state.mementoManager.maxHistorySize,
-              ),
-              redoStack: [],
-            };
-            newState = { ...newState, mementoManager: newMementoManager };
           }
         }
 
         // Save state for completed resize operation
         if (state.resizeStart && state.resizing) {
-          const block = state.blocks.find(
+          const resizedBlock = state.blocks.find(
             (b) => b.id === state.resizeStart?.id,
           );
           if (
-            block &&
+            resizedBlock &&
             state.resizeStart &&
-            (block.width !== state.resizeStart.startWidth ||
-              block.height !== state.resizeStart.startHeight ||
-              block.x !== state.resizeStart.startX ||
-              block.y !== state.resizeStart.startY)
+            (resizedBlock.width !== state.resizeStart.startWidth ||
+              resizedBlock.height !== state.resizeStart.startHeight ||
+              resizedBlock.x !== state.resizeStart.startX ||
+              resizedBlock.y !== state.resizeStart.startY)
           ) {
             // Create memento from the state before the resize started
             const beforeResizeState = {
               ...state,
               blocks: state.blocks.map((b) =>
-                b.id === state.resizeStart?.id
+                b.id === resizedBlock.id
                   ? {
                       ...b,
                       width: state.resizeStart?.startWidth || 0,
@@ -845,27 +779,15 @@ function viewport(state) {
                   : b,
               ),
             };
-            const memento = createMemento(
+            return saveStateHistoryAndReturn(
               beforeResizeState,
-              `Resize block ${state.resizeStart.id}`,
+              newState,
+              `Resize Block ${resizedBlock.id}`,
             );
-
-            const newMementoManager = {
-              ...newState.mementoManager,
-              undoStack: [...newState.mementoManager.undoStack, memento].slice(
-                -state.mementoManager.maxHistorySize,
-              ),
-              redoStack: [],
-            };
-            newState = { ...newState, mementoManager: newMementoManager };
           }
         }
 
-        return {
-          ...newState,
-          dragStart: null,
-          resizeStart: null,
-        };
+        return newState;
       },
       onwheel: (state, event) => {
         // Prevent default scrolling behavior
@@ -1117,7 +1039,7 @@ function toolbar(state) {
       h(
         "button", // TODO: remove after development. currently a temporary manual save button
         {
-          onclick: (state) => [state, () => saveState(state)],
+          onclick: (state) => [state, () => saveApplication(state)],
         },
         text("save"),
       ),
@@ -1328,7 +1250,7 @@ async function initialize() {
   window.electronAPI.onAppWillQuit(() => {
     // Save your state here
     // @ts-ignore
-    saveState(currentState);
+    saveApplication(currentState);
 
     // Tell main process we're done
     //@ts-ignore
