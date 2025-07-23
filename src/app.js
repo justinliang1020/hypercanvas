@@ -1190,13 +1190,6 @@ async function initialize() {
       // Store current state for save functionality
       currentState = state;
 
-      // Dispatch custom event with state data to notify inspector
-      window.dispatchEvent(
-        new CustomEvent("appStateUpdate", {
-          detail: { appState: state },
-        }),
-      );
-
       // Apply dark mode class to body
       if (state.isDarkMode) {
         document.body.classList.add("dark-mode");
