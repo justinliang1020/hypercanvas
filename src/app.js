@@ -1,5 +1,6 @@
 import { app, h, text } from "./packages/hyperapp/index.js";
 import { appWithVisualizer } from "../../hyperapp-visualizer/visualizer.js";
+import * as programs from "./programs/index.js";
 
 // -----------------------------
 // ## Types
@@ -174,9 +175,9 @@ class ProgramComponent extends HTMLElement {
     this.shadowRoot.innerHTML = "";
     const el = document.createElement("div");
     this.shadowRoot.appendChild(el);
-    import(`./programs/${name}.js`).then((program) => {
-      program.run(el);
-    });
+    const program = new programs.textProgram(el);
+    program.changeText("meoww");
+    console.log("current state", program.getCurrentState());
   }
 }
 
@@ -983,11 +984,11 @@ function toolbar(state) {
         },
         text("↷ Redo"),
       ),
-      h(
-        "button",
-        { onclick: (state) => addNewBlock(state, "hello-world") },
-        text("add new hello world block"),
-      ),
+      // h(
+      //   "button",
+      //   { onclick: (state) => addNewBlock(state, "hello-world") },
+      //   text("add new hello world block"),
+      // ),
       h(
         "button",
         { onclick: (state) => addNewBlock(state, "text") },
