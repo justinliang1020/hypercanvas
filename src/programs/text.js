@@ -1,10 +1,14 @@
 import { h, text, app } from "../packages/hyperapp/index.js";
 
 export class Program {
+  constructor() {
+    this.dispatch = null;
+  }
+
   /**
    * @param {HTMLElement} node
    */
-  constructor(node) {
+  run(node) {
     this.dispatch = app({
       init: {
         text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
@@ -39,7 +43,9 @@ export class Program {
    * @param {string} text
    */
   changeText(text) {
-    this.dispatch(() => ({ text: text }));
+    if (this.dispatch) {
+      this.dispatch(() => ({ text: text }));
+    }
   }
 
   /**
@@ -47,6 +53,7 @@ export class Program {
    * @returns {object}
    */
   getCurrentState() {
+    if (!this.dispatch) return {};
     let currentState;
     this.dispatch((state) => {
       currentState = state;

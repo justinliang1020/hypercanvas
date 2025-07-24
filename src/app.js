@@ -26,6 +26,7 @@ import * as programs from "./programs/index.js";
  * @property {Block[]} blocks
  * @property {number|null} selectedId
  * @property {number|null} editingId
+ * @property {Array<[number, string]>} programInstancesData
  */
 
 /**
@@ -38,6 +39,7 @@ import * as programs from "./programs/index.js";
 /**
  * @typedef {Object} State
  * @property {Block[]} blocks
+ * @property {Map<number, any>} programInstances
  * @property {number} offsetX
  * @property {number} offsetY
  * @property {number} lastX
@@ -68,6 +70,7 @@ import * as programs from "./programs/index.js";
 const MIN_SIZE = 20; // Minimum size in px
 const INITIAL_RIGHT_TOOLBAR_WIDTH = 400;
 const STATE_SAVE_PATH = "user/state.json";
+const HYPERAPP_PROGRAM_ROOT = "hyperappProgramRoot";
 
 /**
  * @type {Record<string, string>}
@@ -147,37 +150,12 @@ class ProgramComponent extends HTMLElement {
     this.attachShadow({ mode: "open" });
   }
 
-  // // FIX: this causes a "double render"
-  // static get observedAttributes() {
-  //   return ["properties"];
-  // }
-
   connectedCallback() {
-    this.render();
-  }
-
-  /**
-   * @param {string} name
-   * @param {any} oldValue
-   * @param {any} newValue
-   */
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (name === "properties" && oldValue !== newValue) {
-      this.render();
-    }
-  }
-
-  render() {
-    const name = this.getAttribute("name");
-    if (!name) return;
-
     if (!this.shadowRoot) return;
     this.shadowRoot.innerHTML = "";
     const el = document.createElement("div");
+    el.className = HYPERAPP_PROGRAM_ROOT;
     this.shadowRoot.appendChild(el);
-    const program = new programs.textProgram(el);
-    program.changeText("meoww");
-    console.log("current state", program.getCurrentState());
   }
 }
 
@@ -205,10 +183,18 @@ function createMementoManager() {
  * @returns {Memento}
  */
 function createMemento(state) {
+  // Store program instance data for restoration
+  const programInstancesData = Array.from(state.programInstances.entries()).map(
+    ([id, instance]) => {
+      return [id, instance.constructor.name];
+    },
+  );
+
   return {
     blocks: JSON.parse(JSON.stringify(state.blocks)),
     selectedId: state.selectedId,
     editingId: state.editingId,
+    programInstancesData: programInstancesData,
   };
 }
 
@@ -253,11 +239,20 @@ function undoState(state) {
     redoStack: [...state.mementoManager.redoStack, currentMemento],
   };
 
+  // Restore program instances
+  const newProgramInstances = new Map();
+  memento.programInstancesData.forEach(([id, className]) => {
+    if (className === "Program") {
+      newProgramInstances.set(id, new programs.textProgram());
+    }
+  });
+
   return {
     ...state,
     blocks: memento.blocks,
     selectedId: memento.selectedId,
     editingId: memento.editingId,
+    programInstances: newProgramInstances,
     mementoManager: newMementoManager,
     // Reset interaction states to prevent stuck drag/resize modes
     isBlockDragging: false,
@@ -287,11 +282,20 @@ function redoState(state) {
     redoStack: state.mementoManager.redoStack.slice(0, -1),
   };
 
+  // Restore program instances
+  const newProgramInstances = new Map();
+  memento.programInstancesData.forEach(([id, className]) => {
+    if (className === "Program") {
+      newProgramInstances.set(id, new programs.textProgram());
+    }
+  });
+
   return {
     ...state,
     blocks: memento.blocks,
     selectedId: memento.selectedId,
     editingId: memento.editingId,
+    programInstances: newProgramInstances,
     mementoManager: newMementoManager,
     // Reset interaction states to prevent stuck drag/resize modes
     isBlockDragging: false,
@@ -320,9 +324,21 @@ function addBlock(currentState, programName) {
     program: { name: programName, properties: {} },
   };
 
+  // Instantiate the program class
+  let programInstance = null;
+  if (programName === "text") {
+    programInstance = new programs.textProgram();
+  }
+
+  const newProgramInstances = new Map(currentState.programInstances);
+  if (programInstance) {
+    newProgramInstances.set(newBlock.id, programInstance);
+  }
+
   const newState = {
     ...currentState,
     blocks: [...currentState.blocks, newBlock],
+    programInstances: newProgramInstances,
     selectedId: newBlock.id,
   };
 
@@ -341,9 +357,13 @@ function deleteBlock(currentState, blockId) {
   );
   if (!blockToDelete) throw new Error(`Block ${blockId} not found`);
 
+  const newProgramInstances = new Map(currentState.programInstances);
+  newProgramInstances.delete(blockId);
+
   const newState = {
     ...currentState,
     blocks: currentState.blocks.filter((block) => block.id !== blockId),
+    programInstances: newProgramInstances,
     selectedId: null,
   };
 
@@ -365,9 +385,21 @@ function pasteBlock(currentState, blockData) {
     y: blockData.y + 20,
   };
 
+  // Instantiate the program class
+  let programInstance = null;
+  if (newBlock.program.name === "text") {
+    programInstance = new programs.textProgram();
+  }
+
+  const newProgramInstances = new Map(currentState.programInstances);
+  if (programInstance) {
+    newProgramInstances.set(newBlock.id, programInstance);
+  }
+
   const newState = {
     ...currentState,
     blocks: [...currentState.blocks, newBlock],
+    programInstances: newProgramInstances,
     selectedId: newBlock.id,
   };
 
@@ -933,6 +965,7 @@ function block(state) {
       },
       [
         h("program-component", {
+          "data-id": block.id,
           name: block.program.name,
           properties: block.program.properties,
           style: {
@@ -1155,6 +1188,7 @@ async function initialize() {
     resizeStart: null,
     mementoManager: createMementoManager(),
     isDarkMode: false,
+    programInstances: new Map(),
     blocks: [
       {
         id: 0,
@@ -1175,6 +1209,18 @@ async function initialize() {
       state = initialState;
     }
     state.mementoManager = createMementoManager();
+
+    // Initialize programInstances for loaded state
+    if (!state.programInstances) {
+      state.programInstances = new Map();
+    }
+
+    // Recreate program instances for existing blocks
+    state.blocks.forEach((block) => {
+      if (block.program.name === "text") {
+        state.programInstances.set(block.id, new programs.textProgram());
+      }
+    });
   } catch {
     state = initialState;
   }
@@ -1197,6 +1243,30 @@ async function initialize() {
       } else {
         document.body.classList.remove("dark-mode");
       }
+
+      // Run programs on their corresponding DOM elements after DOM updates
+      setTimeout(() => {
+        state.blocks.forEach((block) => {
+          const programComponent = document.querySelector(
+            `program-component[data-id="${block.id}"]`,
+          );
+          if (programComponent && programComponent.shadowRoot) {
+            const targetElement = programComponent.shadowRoot.firstElementChild;
+            if (
+              targetElement &&
+              targetElement.className === HYPERAPP_PROGRAM_ROOT
+            ) {
+              const programInstance = state.programInstances.get(block.id);
+              if (
+                programInstance &&
+                typeof programInstance.run === "function"
+              ) {
+                programInstance.run(targetElement);
+              }
+            }
+          }
+        });
+      }, 0);
     },
   };
 
