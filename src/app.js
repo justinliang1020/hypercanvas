@@ -1197,19 +1197,18 @@ async function initialize() {
           const programComponent = document.querySelector(
             `program-component[data-id="${block.id}"]`,
           );
-          if (programComponent && programComponent.shadowRoot) {
-            const targetElement = programComponent.shadowRoot.firstElementChild;
-            if (
-              targetElement &&
-              targetElement.className === HYPERAPP_PROGRAM_ROOT
-            ) {
-              const programInstance = block.program;
-              if (
-                programInstance &&
-                typeof programInstance.run === "function"
-              ) {
-                programInstance.run(targetElement);
-              }
+          if (
+            programComponent &&
+            programComponent.shadowRoot &&
+            programComponent.shadowRoot.firstElementChild &&
+            programComponent.shadowRoot.firstElementChild.className ===
+              HYPERAPP_PROGRAM_ROOT
+          ) {
+            const programInstance = block.program;
+            if (programInstance && typeof programInstance.run === "function") {
+              programInstance.run(
+                programComponent.shadowRoot.firstElementChild,
+              );
             }
           }
         });
