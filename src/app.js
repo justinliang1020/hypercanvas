@@ -57,6 +57,7 @@ import * as programs from "./programs/index.js";
  * @property {number} toolbarWidth
  * @property {MementoManager} mementoManager
  * @property {boolean} isDarkMode
+ * @property {Block|null} clipboard
  */
 
 /**
@@ -352,18 +353,24 @@ function deleteBlock(currentState, blockId) {
 
 /**
  * Pastes a block into the state
- * @param {State} currentState
- * @param {Block} blockData
+ * @param {State} state
  * @returns {State}
  */
-function pasteBlock(currentState, blockData) {
-  // Instantiate the program class
-  const programInstance = initializeProgram(blockData.program.name, null); //TODO: set initial state
+function pasteBlock(state) {
+  const blockData = state.clipboard;
+  if (blockData === null) {
+    return state;
+  }
+  // Instantiate the program class with the initial state from the copied block
+  const programInstance = initializeProgram(
+    blockData.program.name,
+    blockData.program.initialState,
+  );
 
   /** @type{Block} */
   const newBlock = {
     ...blockData,
-    id: Math.max(...currentState.blocks.map((block) => block.id), 0) + 1,
+    id: Math.max(...state.blocks.map((block) => block.id), 0) + 1,
     x: blockData.x + 20,
     y: blockData.y + 20,
     program: {
@@ -374,12 +381,12 @@ function pasteBlock(currentState, blockData) {
   };
 
   const newState = {
-    ...currentState,
-    blocks: [...currentState.blocks, newBlock],
+    ...state,
+    blocks: [...state.blocks, newBlock],
     selectedId: newBlock.id,
   };
 
-  return saveStateHistoryAndReturn(currentState, newState);
+  return saveStateHistoryAndReturn(state, newState);
 }
 
 // -----------------------------
@@ -402,7 +409,7 @@ async function saveApplication(state) {
 }
 
 /**
- * Copy the selected block to clipboard
+ * Copy the selected block to application clipboard
  * @param {State} state
  * @returns {State}
  */
@@ -414,57 +421,23 @@ function copySelectedBlock(state) {
   );
   if (!selectedBlock) return state;
 
-  // Create a copy of the block data for clipboard
+  // Create a copy of the block data for clipboard, capturing current state
   /** @type {Block} */
   const blockData = {
     ...selectedBlock,
     id: -1, // not a "real" block
+    program: {
+      ...selectedBlock.program,
+      initialState:
+        selectedBlock.program.instance?.getCurrentState() ||
+        selectedBlock.program.initialState,
+    },
   };
-
-  navigator.clipboard.writeText(JSON.stringify(blockData, null, 2));
 
   return {
     ...state,
+    clipboard: blockData,
   };
-}
-
-/**
- * Paste a block from clipboard
- * @param {State} state
- * @returns {Promise<State>}
- */
-async function pasteBlockFromClipboard(state) {
-  try {
-    // Read from clipboard
-    const clipboardText = await navigator.clipboard.readText();
-
-    // Try to parse as JSON - if it fails, it's probably regular text
-    let blockData;
-    try {
-      blockData = JSON.parse(clipboardText);
-    } catch {
-      // Not valid JSON, probably regular text - don't paste as block
-      return state;
-    }
-
-    // Validate that it's a block object
-    if (
-      !blockData ||
-      typeof blockData !== "object" ||
-      typeof blockData.width !== "number" ||
-      typeof blockData.height !== "number" ||
-      typeof blockData.x !== "number" ||
-      typeof blockData.y !== "number"
-    ) {
-      return state; // Invalid block data
-    }
-
-    return pasteBlock(state, blockData);
-  } catch (error) {
-    // If clipboard doesn't contain valid JSON or we can't read it, just return current state
-    console.warn("Failed to paste block from clipboard:", error);
-    return state;
-  }
 }
 
 // -----------------------------
@@ -1074,8 +1047,13 @@ function main(state) {
               ) {
                 event.preventDefault();
                 return copySelectedBlock(state);
+              } else {
+                // Let browser handle regular text copy
+                return {
+                  ...state,
+                  clipboard: null,
+                };
               }
-              // Let browser handle regular text copy
             }
             return state;
 
@@ -1085,13 +1063,7 @@ function main(state) {
               // Only handle block paste if not in input field and not in edit mode
               if (state.editingId === null) {
                 event.preventDefault();
-                return [
-                  state,
-                  async (dispatch) => {
-                    const newState = await pasteBlockFromClipboard(state);
-                    dispatch(newState);
-                  },
-                ];
+                return pasteBlock(state);
               }
               // Let browser handle regular text paste
             }
@@ -1159,6 +1131,7 @@ async function initialize() {
     mementoManager: createMementoManager(),
     isDarkMode: false,
     blocks: [],
+    clipboard: null,
   };
 
   /** @type{State} */
