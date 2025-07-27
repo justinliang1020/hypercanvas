@@ -13,7 +13,14 @@ import * as programs from "./programs/index.js";
  * @property {number} height
  * @property {number} x
  * @property {number} y
- * @property {any} program
+ * @property {Program} program
+ */
+
+/**
+ * @typedef {Object} Program
+ * @property {any | null} instance - class instance of the program. used to pass into other programs.
+ * @property {any | null} initialState - state used to initialize the program. if null, will initialize with default state
+ * @property {string} name - name of the program, used to load the program. must be unique
  */
 
 /**
@@ -286,6 +293,8 @@ function addBlock(currentState, programName) {
   // TODO: make more generic
   if (programName === "text") {
     programInstance = new programs.textProgram();
+  } else {
+    throw Error("invalid program name");
   }
 
   /** @type{Block} */
@@ -295,7 +304,11 @@ function addBlock(currentState, programName) {
     height: 200,
     x: 50,
     y: 50,
-    program: programInstance,
+    program: {
+      instance: programInstance,
+      name: programName,
+      initialState: null,
+    },
   };
 
   const newState = {
@@ -347,7 +360,11 @@ function pasteBlock(currentState, blockData) {
     id: Math.max(...currentState.blocks.map((block) => block.id), 0) + 1,
     x: blockData.x + 20,
     y: blockData.y + 20,
-    program: programInstance,
+    program: {
+      instance: programInstance,
+      name: blockData.program.name,
+      initialState: blockData.program.initialState,
+    },
   };
 
   const newState = {
@@ -369,6 +386,7 @@ function pasteBlock(currentState, blockData) {
 async function saveApplication(state) {
   // Don't need to save mementoManager since it just stores undo/redo session history
   const { mementoManager, ...serializableSaveState } = state;
+
   // @ts-ignore
   await window.fileAPI.writeFile(STATE_SAVE_PATH, serializableSaveState);
 }
@@ -919,8 +937,6 @@ function block(state) {
       [
         h("program-component", {
           "data-id": block.id,
-          name: block.program.name,
-          properties: block.program.properties,
           style: {
             pointerEvents: isEditing ? null : "none",
           },
@@ -1141,16 +1157,7 @@ async function initialize() {
     resizeStart: null,
     mementoManager: createMementoManager(),
     isDarkMode: false,
-    blocks: [
-      {
-        id: 0,
-        width: 200,
-        height: 200,
-        x: 50,
-        y: 50,
-        program: { name: "hello-world", properties: {} },
-      },
-    ],
+    blocks: [],
   };
 
   let state;
@@ -1204,7 +1211,7 @@ async function initialize() {
             programComponent.shadowRoot.firstElementChild.className ===
               HYPERAPP_PROGRAM_ROOT
           ) {
-            const programInstance = block.program;
+            const programInstance = block.program.instance;
             if (programInstance && typeof programInstance.run === "function") {
               programInstance.run(
                 programComponent.shadowRoot.firstElementChild,
