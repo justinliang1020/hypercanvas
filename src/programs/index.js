@@ -1,1 +1,1 @@
-export { Program as textProgram } from "./text.js";
+export { textProgram } from "./text.js";

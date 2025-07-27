@@ -1,19 +1,17 @@
-import { h, text, app } from "../packages/hyperapp/index.js";
+import { h, text } from "../packages/hyperapp/index.js";
+import { Program } from "./program.js";
 
-export class Program {
-  constructor() {
-    this.dispatch = null;
-  }
-
+export class textProgram extends Program {
   /**
    * @param {HTMLElement} node
-   */
-  run(node) {
-    this.dispatch = app({
+   * @returns {import("hyperapp").App<any>}
+   **/
+  appConfig(node) {
+    const appConfig = {
       init: {
         text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
       },
-      view: (state) =>
+      view: (/** @type {any} */ state) =>
         h(
           "textarea",
           {
@@ -35,9 +33,9 @@ export class Program {
           text(state.text),
         ),
       node: node,
-    });
+    };
+    return appConfig;
   }
-
   /**
    * changes the text of the program
    * @param {string} text
@@ -46,20 +44,5 @@ export class Program {
     if (this.dispatch) {
       this.dispatch(() => ({ text: text }));
     }
-  }
-
-  /**
-   * returns the current state
-   * @returns {object}
-   */
-  getCurrentState() {
-    if (!this.dispatch) return {};
-    let currentState;
-    this.dispatch((state) => {
-      currentState = state;
-      return state;
-    });
-    // @ts-ignore
-    return currentState;
   }
 }
