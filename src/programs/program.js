@@ -4,8 +4,12 @@ import { app } from "../packages/hyperapp/index.js";
  * @abstract
  */
 export class Program {
-  constructor() {
+  /**
+   * @param {object | undefined} initialState
+   */
+  constructor(initialState) {
     this.dispatch = null;
+    this.initialState = initialState;
   }
 
   /**

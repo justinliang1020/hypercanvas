@@ -18,7 +18,7 @@ import * as programs from "./programs/index.js";
 
 /**
  * @typedef {Object} Program
- * @property {any | null} instance - class instance of the program. used to pass into other programs.
+ * @property {import("./programs/program.js").Program | null} instance - class instance of the program. used to pass into other programs.
  * @property {any | null} initialState - state used to initialize the program. if null, will initialize with default state
  * @property {string} name - name of the program, used to load the program. must be unique
  */
@@ -289,7 +289,7 @@ function redoState(state) {
 function initializeProgram(name, initialState) {
   let programInstance = null;
   if (name === "text") {
-    programInstance = new programs.textProgram();
+    programInstance = new programs.textProgram(initialState);
   } else {
     throw Error("invalid program name");
   }
@@ -393,6 +393,7 @@ async function saveApplication(state) {
   // Don't need to save mementoManager since it just stores undo/redo session history
   const { mementoManager, ...serializableSaveState } = state;
   for (const block of serializableSaveState.blocks) {
+    block.program.initialState = block.program.instance?.getCurrentState();
     block.program.instance = null;
   }
 
@@ -1217,7 +1218,8 @@ async function initialize() {
             if (programInstance && typeof programInstance.run === "function") {
               //TODO: if initial state exits, use that to initialize
               programInstance.run(
-                programComponent.shadowRoot.firstElementChild,
+                /** @type{HTMLElement} */
+                (programComponent.shadowRoot.firstElementChild),
               );
             }
           }
@@ -1249,7 +1251,10 @@ async function initialize() {
         const programInstance = block.program.instance;
         if (programInstance && typeof programInstance.run === "function") {
           //TODO: if initial state exits, use that to initialize
-          programInstance.run(programComponent.shadowRoot.firstElementChild);
+          programInstance.run(
+            /** @type{HTMLElement} */
+            (programComponent.shadowRoot.firstElementChild),
+          );
         }
       }
     });
