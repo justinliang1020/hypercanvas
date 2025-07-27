@@ -535,6 +535,128 @@ function ResizeHandle(handle, zoom) {
 }
 
 /**
+ * @param {State} state
+ * @returns { (block:Block) => import("hyperapp").ElementVNode<State> }
+ */
+function block(state) {
+  return (block) => {
+    const isSelected = state.selectedId === block.id;
+    const isEditing = state.editingId === block.id;
+    const isHovering = state.hoveringId === block.id;
+
+    // Having small borders, i.e. 1px, can cause rendering glitches to occur when CSS transform translations are applied such as zooming out
+    // Scale outline thickness inversely with zoom to maintain consistent visual appearance
+    const outline = (() => {
+      if (isSelected) {
+        return `${4 / state.zoom}px solid blue`;
+      } else if (isHovering) {
+        return `${2 / state.zoom}px solid blue`;
+      } else {
+        return null;
+      }
+    })();
+
+    return h(
+      "div",
+      {
+        "data-id": block.id,
+        style: {
+          outline: outline,
+          transform: `translate(${block.x}px, ${block.y}px)`,
+          width: `${block.width}px`,
+          height: `${block.height}px`,
+        },
+        class: { block: true, hovered: isHovering },
+        onpointerover: (state, event) => {
+          event.stopPropagation();
+          if (
+            state.selectedId !== null &&
+            state.selectedId !== block.id &&
+            state.isBlockDragging
+          )
+            return state;
+
+          // Don't change cursor if we're over a resize handle
+          const target = /** @type {HTMLElement} */ (event.target);
+          if (target.classList.contains("resize-handle")) {
+            return {
+              ...state,
+              hoveringId: block.id,
+            };
+          }
+
+          return {
+            ...state,
+            hoveringId: block.id,
+            cursorStyle: state.editingId === block.id ? "default" : "move",
+          };
+        },
+        onpointerleave: (state, event) => {
+          event.stopPropagation();
+          return {
+            ...state,
+            hoveringId: null,
+            cursorStyle: "default",
+          };
+        },
+        onpointerdown: (state, event) => {
+          event.stopPropagation();
+
+          // If block is in edit mode, don't start dragging
+          if (state.editingId === block.id) {
+            return {
+              ...state,
+              selectedId: block.id,
+            };
+          }
+
+          // Normal selection and drag start
+          return {
+            ...state,
+            selectedId: block.id,
+            editingId: null, // Exit edit mode when selecting any block (even the same one)
+            lastX: event.clientX,
+            lastY: event.clientY,
+            isBlockDragging: true,
+            dragStart: {
+              id: block.id,
+              startX: block.x,
+              startY: block.y,
+            },
+          };
+        },
+        ondblclick: (state, event) => {
+          event.stopPropagation();
+
+          // Double-click enters edit mode
+          return {
+            ...state,
+            selectedId: block.id,
+            editingId: block.id,
+            isBlockDragging: false, // Cancel any drag that might have started
+            dragStart: null,
+          };
+        },
+      },
+      [
+        h("program-component", {
+          "data-id": block.id,
+          style: {
+            pointerEvents: isEditing ? null : "none",
+          },
+        }),
+        ...(isSelected && !isEditing
+          ? Object.keys(RESIZE_HANDLERS).map((handle) =>
+              ResizeHandle(handle, state.zoom),
+            )
+          : []),
+        isSelected && !isEditing && blockToolbar(),
+      ],
+    );
+  };
+}
+
+/**
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 function blockToolbar() {
@@ -802,128 +924,6 @@ function viewport(state) {
       ),
     ],
   );
-}
-
-/**
- * @param {State} state
- * @returns { (block:Block) => import("hyperapp").ElementVNode<State> }
- */
-function block(state) {
-  return (block) => {
-    const isSelected = state.selectedId === block.id;
-    const isEditing = state.editingId === block.id;
-    const isHovering = state.hoveringId === block.id;
-
-    // Having small borders, i.e. 1px, can cause rendering glitches to occur when CSS transform translations are applied such as zooming out
-    // Scale outline thickness inversely with zoom to maintain consistent visual appearance
-    const outline = (() => {
-      if (isSelected) {
-        return `${4 / state.zoom}px solid blue`;
-      } else if (isHovering) {
-        return `${2 / state.zoom}px solid blue`;
-      } else {
-        return null;
-      }
-    })();
-
-    return h(
-      "div",
-      {
-        "data-id": block.id,
-        style: {
-          outline: outline,
-          transform: `translate(${block.x}px, ${block.y}px)`,
-          width: `${block.width}px`,
-          height: `${block.height}px`,
-        },
-        class: { block: true, hovered: isHovering },
-        onpointerover: (state, event) => {
-          event.stopPropagation();
-          if (
-            state.selectedId !== null &&
-            state.selectedId !== block.id &&
-            state.isBlockDragging
-          )
-            return state;
-
-          // Don't change cursor if we're over a resize handle
-          const target = /** @type {HTMLElement} */ (event.target);
-          if (target.classList.contains("resize-handle")) {
-            return {
-              ...state,
-              hoveringId: block.id,
-            };
-          }
-
-          return {
-            ...state,
-            hoveringId: block.id,
-            cursorStyle: state.editingId === block.id ? "default" : "move",
-          };
-        },
-        onpointerleave: (state, event) => {
-          event.stopPropagation();
-          return {
-            ...state,
-            hoveringId: null,
-            cursorStyle: "default",
-          };
-        },
-        onpointerdown: (state, event) => {
-          event.stopPropagation();
-
-          // If block is in edit mode, don't start dragging
-          if (state.editingId === block.id) {
-            return {
-              ...state,
-              selectedId: block.id,
-            };
-          }
-
-          // Normal selection and drag start
-          return {
-            ...state,
-            selectedId: block.id,
-            editingId: null, // Exit edit mode when selecting any block (even the same one)
-            lastX: event.clientX,
-            lastY: event.clientY,
-            isBlockDragging: true,
-            dragStart: {
-              id: block.id,
-              startX: block.x,
-              startY: block.y,
-            },
-          };
-        },
-        ondblclick: (state, event) => {
-          event.stopPropagation();
-
-          // Double-click enters edit mode
-          return {
-            ...state,
-            selectedId: block.id,
-            editingId: block.id,
-            isBlockDragging: false, // Cancel any drag that might have started
-            dragStart: null,
-          };
-        },
-      },
-      [
-        h("program-component", {
-          "data-id": block.id,
-          style: {
-            pointerEvents: isEditing ? null : "none",
-          },
-        }),
-        ...(isSelected && !isEditing
-          ? Object.keys(RESIZE_HANDLERS).map((handle) =>
-              ResizeHandle(handle, state.zoom),
-            )
-          : []),
-        isSelected && !isEditing && blockToolbar(),
-      ],
-    );
-  };
 }
 
 /**
