@@ -13,6 +13,7 @@ import * as programs from "./programs/index.js";
  * @property {number} height
  * @property {number} x
  * @property {number} y
+ * @property {number} zIndex
  * @property {Program} program
  */
 
@@ -314,6 +315,8 @@ function addBlock(currentState, programName) {
     height: 200,
     x: 50,
     y: 50,
+    zIndex:
+      Math.max(...currentState.blocks.map((block) => block.zIndex), 0) + 1,
     program: {
       instance: programInstance,
       name: programName,
@@ -373,6 +376,7 @@ function pasteBlock(state) {
     id: Math.max(...state.blocks.map((block) => block.id), 0) + 1,
     x: blockData.x + 20,
     y: blockData.y + 20,
+    zIndex: Math.max(...state.blocks.map((block) => block.zIndex), 0) + 1,
     program: {
       instance: programInstance,
       name: blockData.program.name,
@@ -438,6 +442,52 @@ function copySelectedBlock(state) {
     ...state,
     clipboard: blockData,
   };
+}
+
+/**
+ * Sends a block to the front (highest z-index)
+ * @param {State} currentState
+ * @param {number} blockId
+ * @returns {State}
+ */
+function sendToFront(currentState, blockId) {
+  const block = currentState.blocks.find((b) => b.id === blockId);
+  if (!block) return currentState;
+
+  // Find the highest z-index among all blocks
+  const maxZIndex = Math.max(...currentState.blocks.map((b) => b.zIndex));
+
+  const newState = {
+    ...currentState,
+    blocks: currentState.blocks.map((b) =>
+      b.id === blockId ? { ...b, zIndex: maxZIndex + 1 } : b,
+    ),
+  };
+
+  return saveStateHistoryAndReturn(currentState, newState);
+}
+
+/**
+ * Sends a block to the back (lowest z-index)
+ * @param {State} currentState
+ * @param {number} blockId
+ * @returns {State}
+ */
+function sendToBack(currentState, blockId) {
+  const block = currentState.blocks.find((b) => b.id === blockId);
+  if (!block) return currentState;
+
+  // Find the lowest z-index among all blocks
+  const minZIndex = Math.min(...currentState.blocks.map((b) => b.zIndex));
+
+  const newState = {
+    ...currentState,
+    blocks: currentState.blocks.map((b) =>
+      b.id === blockId ? { ...b, zIndex: minZIndex - 1 } : b,
+    ),
+  };
+
+  return saveStateHistoryAndReturn(currentState, newState);
 }
 
 // -----------------------------
@@ -565,6 +615,7 @@ function block(state) {
           transform: `translate(${block.x}px, ${block.y}px)`,
           width: `${block.width}px`,
           height: `${block.height}px`,
+          zIndex: `${block.zIndex}`,
         },
         class: { block: true, hovered: isHovering },
         onpointerover: (state, event) => {
@@ -680,6 +731,28 @@ function blockToolbar() {
           },
         },
         text("❌"),
+      ),
+      h(
+        "button",
+        {
+          onclick: (state, event) => {
+            event.stopPropagation();
+            if (state.selectedId === null) return state;
+            return sendToBack(state, state.selectedId);
+          },
+        },
+        text("send to back"),
+      ),
+      h(
+        "button",
+        {
+          onclick: (state, event) => {
+            event.stopPropagation();
+            if (state.selectedId === null) return state;
+            return sendToFront(state, state.selectedId);
+          },
+        },
+        text("send to front"),
       ),
     ],
   );
@@ -1143,7 +1216,6 @@ async function initialize() {
     }
     state.mementoManager = createMementoManager();
 
-    // TODO: Recreate program instances for existing blocks
     for (const block of state.blocks) {
       block.program.instance = initializeProgram(
         block.program.name,
