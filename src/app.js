@@ -282,6 +282,21 @@ function redoState(state) {
 }
 
 /**
+ * @param {string} name
+ * @param {any} initialState
+ * @returns {any}
+ */
+function initializeProgram(name, initialState) {
+  let programInstance = null;
+  if (name === "text") {
+    programInstance = new programs.textProgram();
+  } else {
+    throw Error("invalid program name");
+  }
+  return programInstance;
+}
+
+/**
  * Adds a new block to the state
  * @param {State} currentState
  * @param {string} programName
@@ -289,13 +304,7 @@ function redoState(state) {
  */
 function addBlock(currentState, programName) {
   // Instantiate the program class
-  let programInstance = null;
-  // TODO: make more generic
-  if (programName === "text") {
-    programInstance = new programs.textProgram();
-  } else {
-    throw Error("invalid program name");
-  }
+  const programInstance = initializeProgram(programName, null); //TODO: set initial state
 
   /** @type{Block} */
   const newBlock = {
@@ -349,10 +358,7 @@ function deleteBlock(currentState, blockId) {
  */
 function pasteBlock(currentState, blockData) {
   // Instantiate the program class
-  let programInstance = null;
-  if (blockData.program.name === "text") {
-    programInstance = new programs.textProgram();
-  }
+  const programInstance = initializeProgram(blockData.program.name, null); //TODO: set initial state
 
   /** @type{Block} */
   const newBlock = {
@@ -386,18 +392,12 @@ function pasteBlock(currentState, blockData) {
 async function saveApplication(state) {
   // Don't need to save mementoManager since it just stores undo/redo session history
   const { mementoManager, ...serializableSaveState } = state;
+  for (const block of serializableSaveState.blocks) {
+    block.program.instance = null;
+  }
 
   // @ts-ignore
   await window.fileAPI.writeFile(STATE_SAVE_PATH, serializableSaveState);
-}
-
-/**
- * @param {State} state
- * @param {string} programName
- * @returns {State}
- */
-function addNewBlock(state, programName) {
-  return addBlock(state, programName);
 }
 
 /**
@@ -993,7 +993,7 @@ function toolbar(state) {
       // ),
       h(
         "button",
-        { onclick: (state) => addNewBlock(state, "text") },
+        { onclick: (state) => addBlock(state, "text") },
         text("add new text block"),
       ),
       h(
@@ -1160,6 +1160,7 @@ async function initialize() {
     blocks: [],
   };
 
+  /** @type{State} */
   let state;
   try {
     // @ts-ignore
@@ -1169,12 +1170,13 @@ async function initialize() {
     }
     state.mementoManager = createMementoManager();
 
-    // Initialize programInstances for loaded state
-    if (!state.programInstances) {
-      state.programInstances = new Map();
-    }
-
     // TODO: Recreate program instances for existing blocks
+    for (const block of state.blocks) {
+      block.program.instance = initializeProgram(
+        block.program.name,
+        block.program.initialState,
+      );
+    }
   } catch {
     state = initialState;
   }
@@ -1213,6 +1215,7 @@ async function initialize() {
           ) {
             const programInstance = block.program.instance;
             if (programInstance && typeof programInstance.run === "function") {
+              //TODO: if initial state exits, use that to initialize
               programInstance.run(
                 programComponent.shadowRoot.firstElementChild,
               );
@@ -1229,6 +1232,28 @@ async function initialize() {
   } else {
     app(appConfig);
   }
+
+  // HACK: run hyperapp programs after the dom renders
+  setTimeout(() => {
+    state.blocks.forEach((block) => {
+      const programComponent = document.querySelector(
+        `program-component[data-id="${block.id}"]`,
+      );
+      if (
+        programComponent &&
+        programComponent.shadowRoot &&
+        programComponent.shadowRoot.firstElementChild &&
+        programComponent.shadowRoot.firstElementChild.className ===
+          HYPERAPP_PROGRAM_ROOT
+      ) {
+        const programInstance = block.program.instance;
+        if (programInstance && typeof programInstance.run === "function") {
+          //TODO: if initial state exits, use that to initialize
+          programInstance.run(programComponent.shadowRoot.firstElementChild);
+        }
+      }
+    });
+  }, 20);
 
   // Listen for quit signal from main process
   //@ts-ignore
