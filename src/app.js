@@ -673,7 +673,6 @@ function blockToolbar() {
       h(
         "button",
         {
-          class: "block-toolbar-button",
           onclick: (state, event) => {
             event.stopPropagation();
             if (state.selectedId === null) return state;
