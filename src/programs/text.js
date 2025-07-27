@@ -9,9 +9,10 @@ export class TextProgram extends Program {
 
   /**
    * @param {HTMLElement} node
+   * @param {object | null} initialState
    * @returns {import("hyperapp").App<State>}
    **/
-  appConfig(node) {
+  appConfig(node, initialState) {
     /** @type{State} */
     const defaultState = {
       text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
@@ -19,9 +20,7 @@ export class TextProgram extends Program {
     };
 
     return {
-      init: this.initialState
-        ? /** @type{State} */ (this.initialState)
-        : defaultState,
+      init: initialState ? /** @type{State} */ (initialState) : defaultState,
       view: (state) =>
         h(
           "textarea",
@@ -49,11 +48,13 @@ export class TextProgram extends Program {
 
   /**
    * changes the text of the program
-   * @param {string} text
+   * @param {string} color
    */
-  changeText(text) {
-    if (this.dispatch) {
-      this.dispatch(() => ({ text: text }));
-    }
+  changeBackgroundColor(color) {
+    const currentState = this.getCurrentState();
+    this.modifyState({
+      ...currentState,
+      backgroundColor: color,
+    });
   }
 }
