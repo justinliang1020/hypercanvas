@@ -291,7 +291,7 @@ function redoState(state) {
 function initializeProgram(name, initialState) {
   let programInstance = null;
   if (name === "text") {
-    programInstance = new programs.textProgram(initialState);
+    programInstance = new programs.TextProgram(initialState);
   } else {
     throw Error("invalid program name");
   }

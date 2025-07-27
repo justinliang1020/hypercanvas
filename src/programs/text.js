@@ -1,7 +1,7 @@
 import { h, text } from "../packages/hyperapp/index.js";
 import { Program } from "./program.js";
 
-export class textProgram extends Program {
+export class TextProgram extends Program {
   /**
    * @param {HTMLElement} node
    * @returns {import("hyperapp").App<any>}
@@ -39,6 +39,7 @@ export class textProgram extends Program {
     };
     return appConfig;
   }
+
   /**
    * changes the text of the program
    * @param {string} text
