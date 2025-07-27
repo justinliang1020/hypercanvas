@@ -51,7 +51,7 @@ export class TextProgram extends Program {
    * @param {string} color
    */
   changeBackgroundColor(color) {
-    const currentState = this.getCurrentState();
+    const currentState = this.getState();
     this.modifyState({
       ...currentState,
       backgroundColor: color,

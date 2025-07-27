@@ -48,7 +48,7 @@ export class Program {
    * returns the current state
    * @returns {object}
    */
-  getCurrentState() {
+  getState() {
     if (!this.#dispatch) return {};
     let currentState;
     this.#dispatch((/** @type {any} */ state) => {

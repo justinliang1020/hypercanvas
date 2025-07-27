@@ -404,7 +404,7 @@ async function saveApplication(state) {
   // Don't need to save mementoManager since it just stores undo/redo session history
   const { mementoManager, ...serializableSaveState } = state;
   for (const block of serializableSaveState.blocks) {
-    block.program.initialState = block.program.instance?.getCurrentState();
+    block.program.initialState = block.program.instance?.getState();
     block.program.instance = null;
   }
 
@@ -433,7 +433,7 @@ function copySelectedBlock(state) {
     program: {
       ...selectedBlock.program,
       initialState:
-        selectedBlock.program.instance?.getCurrentState() ||
+        selectedBlock.program.instance?.getState() ||
         selectedBlock.program.initialState,
     },
   };
