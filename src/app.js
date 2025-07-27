@@ -1183,6 +1183,31 @@ function main(state) {
 // -----------------------------
 
 async function initialize() {
+  /** @param {State} state */
+  function renderPrograms(state) {
+    state.blocks.forEach((block) => {
+      const programComponent = document.querySelector(
+        `program-component[data-id="${block.id}"]`,
+      );
+      if (
+        programComponent &&
+        programComponent.shadowRoot &&
+        programComponent.shadowRoot.firstElementChild &&
+        programComponent.shadowRoot.firstElementChild.className ===
+          HYPERAPP_PROGRAM_ROOT
+      ) {
+        const programInstance = block.program.instance;
+        if (programInstance && typeof programInstance.run === "function") {
+          //TODO: if initial state exits, use that to initialize
+          programInstance.run(
+            /** @type{HTMLElement} */
+            (programComponent.shadowRoot.firstElementChild),
+          );
+        }
+      }
+    });
+  }
+
   /** @type{State} */
   const initialState = {
     selectedId: null,
@@ -1246,29 +1271,7 @@ async function initialize() {
       }
 
       // Run programs on their corresponding DOM elements after DOM updates
-      setTimeout(() => {
-        state.blocks.forEach((block) => {
-          const programComponent = document.querySelector(
-            `program-component[data-id="${block.id}"]`,
-          );
-          if (
-            programComponent &&
-            programComponent.shadowRoot &&
-            programComponent.shadowRoot.firstElementChild &&
-            programComponent.shadowRoot.firstElementChild.className ===
-              HYPERAPP_PROGRAM_ROOT
-          ) {
-            const programInstance = block.program.instance;
-            if (programInstance && typeof programInstance.run === "function") {
-              //TODO: if initial state exits, use that to initialize
-              programInstance.run(
-                /** @type{HTMLElement} */
-                (programComponent.shadowRoot.firstElementChild),
-              );
-            }
-          }
-        });
-      }, 0);
+      setTimeout(() => renderPrograms(state), 0);
     },
   };
 
@@ -1280,29 +1283,7 @@ async function initialize() {
   }
 
   // HACK: run hyperapp programs after the dom renders
-  setTimeout(() => {
-    state.blocks.forEach((block) => {
-      const programComponent = document.querySelector(
-        `program-component[data-id="${block.id}"]`,
-      );
-      if (
-        programComponent &&
-        programComponent.shadowRoot &&
-        programComponent.shadowRoot.firstElementChild &&
-        programComponent.shadowRoot.firstElementChild.className ===
-          HYPERAPP_PROGRAM_ROOT
-      ) {
-        const programInstance = block.program.instance;
-        if (programInstance && typeof programInstance.run === "function") {
-          //TODO: if initial state exits, use that to initialize
-          programInstance.run(
-            /** @type{HTMLElement} */
-            (programComponent.shadowRoot.firstElementChild),
-          );
-        }
-      }
-    });
-  }, 20);
+  setTimeout(() => renderPrograms(state), 20);
 
   // Listen for quit signal from main process
   //@ts-ignore
