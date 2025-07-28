@@ -22,6 +22,7 @@ import * as programs from "./programs/index.js";
  * @property {import("./programs/program.js").Program | null} instance - class instance of the program. used to pass into other programs.
  * @property {any | null} initialState - state used to initialize the program. if null, will initialize with default state
  * @property {string} name - name of the program, used to load the program. must be unique
+ * @property {boolean} isInitialized
  */
 
 /**
@@ -321,6 +322,8 @@ function initializeConnection(state, connection) {
   if (!targetBlock) return state;
   if (!targetBlock.program.instance) return state;
 
+  //BUG: fix allowedConnections code
+
   // if (!(connection.name in sourceBlock.program.instance.allowedConnections())) {
   //   console.error("connection not allowed");
   //   return state;
@@ -355,6 +358,7 @@ function addBlock(currentState, programName) {
       instance: programInstance,
       name: programName,
       initialState: null,
+      isInitialized: false,
     },
   };
 
@@ -415,6 +419,7 @@ function pasteBlock(state) {
       instance: programInstance,
       name: blockData.program.name,
       initialState: blockData.program.initialState,
+      isInitialized: false,
     },
   };
 
@@ -440,6 +445,7 @@ async function saveApplication(state) {
   for (const block of serializableSaveState.blocks) {
     block.program.initialState = block.program.instance?.getState();
     block.program.instance = null;
+    block.program.isInitialized = false;
   }
 
   // @ts-ignore
@@ -1263,12 +1269,19 @@ async function initialize() {
           HYPERAPP_PROGRAM_ROOT
       ) {
         const programInstance = block.program.instance;
-        if (programInstance && typeof programInstance.run === "function") {
+        if (
+          programInstance &&
+          typeof programInstance.run === "function" &&
+          !block.program.isInitialized
+          //TODO this is kinda weird and borked, if this is removed then there is weird glitch where each interaction in a program repeats a dozen times
+          //i need this bc the program-component element still exists always and this will always rerender otherwise
+        ) {
           //TODO: if initial state exits, use that to initialize
           programInstance.run(
             /** @type{HTMLElement} */
             (programComponent.shadowRoot.firstElementChild),
           );
+          block.program.isInitialized = true;
         }
       }
     });
