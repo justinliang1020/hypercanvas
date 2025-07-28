@@ -8,6 +8,8 @@ export class Program {
   #dispatch;
   /** @type{object | null} */
   #initialState;
+  /** @type{Object.<string, (Program | null)>} */
+  #connections;
 
   /**
    * @param {object | null} initialState
@@ -15,6 +17,7 @@ export class Program {
   constructor(initialState) {
     this.#dispatch = null;
     this.#initialState = initialState;
+    this.#connections = {};
   }
 
   /**
@@ -25,6 +28,19 @@ export class Program {
    **/
   appConfig(node, initialState) {
     throw new Error("app must be implemented");
+  }
+
+  /**
+   * @typedef {Object} AllowedConnection
+   * @property {String} name
+   * @property {typeof Program} program
+   */
+  /**
+   * @abstract
+   * @returns {AllowedConnection[]}
+   **/
+  allowedConnections() {
+    throw new Error("no allowed connections implemented");
   }
 
   /**
@@ -68,5 +84,31 @@ export class Program {
     } else {
       throw Error("No dispatch");
     }
+  }
+
+  /**
+   * @param {String} name
+   * @param {Program} program
+   */
+  setConnection(name, program) {
+    this.#connections[name] = program;
+  }
+
+  /**
+   * @param {String} name
+   */
+  getConnection(name) {
+    return this.#connections[name];
+  }
+
+  /**
+   * @param {String} name
+   */
+  removeConnection(name) {
+    this.#connections[name] = null;
+  }
+
+  getConnectionNames() {
+    return Object.keys(this.#connections);
   }
 }
