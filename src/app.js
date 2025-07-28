@@ -25,6 +25,13 @@ import * as programs from "./programs/index.js";
  */
 
 /**
+ * @typedef {Object} BlockConnection
+ * @property {String} name
+ * @property {number} sourceBlockId
+ * @property {number} targetBlockId
+ */
+
+/**
  * @typedef {Object} Memento
  * @property {Block[]} blocks
  * @property {number|null} selectedId
@@ -41,6 +48,7 @@ import * as programs from "./programs/index.js";
 /**
  * @typedef {Object} State
  * @property {Block[]} blocks
+ * @property {BlockConnection[]} connections
  * @property {number} offsetX
  * @property {number} offsetY
  * @property {number} lastX
@@ -296,6 +304,33 @@ function initializeProgram(name, initialState) {
     throw Error("invalid program name");
   }
   return programInstance;
+}
+
+/**
+ * @param {State} state
+ * @param {BlockConnection} connection
+ */
+function initializeConnection(state, connection) {
+  const sourceBlock = state.blocks.find(
+    (block) => block.id === connection.sourceBlockId,
+  );
+  if (!sourceBlock) return state;
+  if (!sourceBlock.program.instance) return state;
+  const targetBlock = state.blocks.find(
+    (block) => block.id === connection.targetBlockId,
+  );
+  if (!targetBlock) return state;
+  if (!targetBlock.program.instance) return state;
+
+  if (!(connection.name in sourceBlock.program.instance.allowedConnections())) {
+    console.error("connection not allowed");
+    return state;
+  }
+  sourceBlock.program.instance.setConnection(
+    connection.name,
+    targetBlock.program.instance,
+  );
+  return state;
 }
 
 /**
@@ -1228,6 +1263,7 @@ async function initialize() {
     mementoManager: createMementoManager(),
     isDarkMode: false,
     blocks: [],
+    connections: [],
     clipboard: null,
   };
 
