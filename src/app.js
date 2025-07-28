@@ -297,12 +297,11 @@ function redoState(state) {
  * @returns {any}
  */
 function initializeProgram(name, initialState) {
-  let programInstance = null;
-  if (name === "text") {
-    programInstance = new programs.TextProgram(initialState);
-  } else {
+  const program = programs.programRegistry[name];
+  if (!program) {
     throw Error("invalid program name");
   }
+  let programInstance = new program(initialState);
   return programInstance;
 }
 
