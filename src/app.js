@@ -81,7 +81,6 @@ import * as programs from "./programs/index.js";
 const MIN_SIZE = 20; // Minimum size in px
 const INITIAL_RIGHT_TOOLBAR_WIDTH = 400;
 const STATE_SAVE_PATH = "user/state.json";
-const HYPERAPP_PROGRAM_ROOT = "hyperappProgramRoot";
 
 /**
  * @type {Record<string, string>}
@@ -164,13 +163,19 @@ class ProgramComponent extends HTMLElement {
   connectedCallback() {
     if (!this.shadowRoot) return;
     this.shadowRoot.innerHTML = "";
-    const el = document.createElement("div");
-    el.className = HYPERAPP_PROGRAM_ROOT;
+    const el = document.createElement("program-component-child");
     this.shadowRoot.appendChild(el);
   }
 }
 
+class ProgramComponentChild extends HTMLElement {
+  constructor() {
+    super();
+  }
+}
+
 customElements.define("program-component", ProgramComponent);
+customElements.define("program-component-child", ProgramComponentChild);
 
 // -----------------------------
 // ## Memento Pattern Implementation
@@ -1265,10 +1270,11 @@ async function initialize() {
         programComponent &&
         programComponent.shadowRoot &&
         programComponent.shadowRoot.firstElementChild &&
-        programComponent.shadowRoot.firstElementChild.className ===
-          HYPERAPP_PROGRAM_ROOT
+        programComponent.shadowRoot.firstElementChild.localName ===
+          "program-component-child"
       ) {
         const programInstance = block.program.instance;
+        console.log("run");
         if (
           programInstance &&
           typeof programInstance.run === "function" &&
@@ -1276,7 +1282,7 @@ async function initialize() {
           //TODO this is kinda weird and borked, if this is removed then there is weird glitch where each interaction in a program repeats a dozen times
           //i need this bc the program-component element still exists always and this will always rerender otherwise
         ) {
-          //TODO: if initial state exits, use that to initialize
+          //TODO: refactor so that it it checks if this element is a special "unitizilaied hyperapp" div, and only run the program if that element is true
           programInstance.run(
             /** @type{HTMLElement} */
             (programComponent.shadowRoot.firstElementChild),
