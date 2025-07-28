@@ -31,7 +31,7 @@ export class TextProgram extends Program {
               height: "100%",
               padding: "10px",
               border: "0px",
-              backgroundColor: "transparent",
+              backgroundColor: state.backgroundColor,
               color: "inherit",
               resize: "none",
               overflow: "hidden",
@@ -44,17 +44,5 @@ export class TextProgram extends Program {
         ),
       node: node,
     };
-  }
-
-  /**
-   * changes the text of the program
-   * @param {string} color
-   */
-  changeBackgroundColor(color) {
-    const currentState = this.getState();
-    this.modifyState({
-      ...currentState,
-      backgroundColor: color,
-    });
   }
 }

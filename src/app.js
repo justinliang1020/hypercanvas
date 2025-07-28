@@ -321,10 +321,10 @@ function initializeConnection(state, connection) {
   if (!targetBlock) return state;
   if (!targetBlock.program.instance) return state;
 
-  if (!(connection.name in sourceBlock.program.instance.allowedConnections())) {
-    console.error("connection not allowed");
-    return state;
-  }
+  // if (!(connection.name in sourceBlock.program.instance.allowedConnections())) {
+  //   console.error("connection not allowed");
+  //   return state;
+  // }
   sourceBlock.program.instance.setConnection(
     connection.name,
     targetBlock.program.instance,
@@ -1075,6 +1075,38 @@ function toolbar(state) {
         "button",
         { onclick: (state) => addBlock(state, "text") },
         text("add new text block"),
+      ),
+      h(
+        "button",
+        {
+          /** @returns {State} */
+          onclick: (state) => {
+            state.blocks[0].program.instance?.modifyState({
+              text: "test",
+              backgroundColor: "red",
+            });
+            return { ...state };
+          },
+        },
+        text("manually change state"),
+      ),
+      h(
+        "button",
+        {
+          /** @returns {State} */
+          onclick: (state) => {
+            /** @type{BlockConnection} */
+            const connection = {
+              name: "editor",
+              sourceBlockId: 2,
+              targetBlockId: 1,
+            };
+            initializeConnection(state, connection);
+
+            return { ...state, connections: [connection] };
+          },
+        },
+        text("add connection between 1 and 2"),
       ),
       h(
         "button",

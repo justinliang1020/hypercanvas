@@ -22,7 +22,7 @@ export class TextStyleProgram extends Program {
      * @param {State} state
      */
     const changeBackground = (state) => {
-      const textProgramInstance = this.getConnection("text");
+      const textProgramInstance = this.getConnection("editor");
       if (!textProgramInstance) return state;
       const textProgramState = textProgramInstance.getState();
       textProgramInstance.modifyState({
@@ -38,12 +38,14 @@ export class TextStyleProgram extends Program {
         h("div", {}, [
           h("input", {
             type: "text",
-            oninput: (state, event) => ({
-              ...state,
-              value: /** @type{HTMLInputElement}*/ (event.target).value,
-            }),
+            oninput: (state, event) => {
+              return {
+                ...state,
+                value: /** @type{HTMLInputElement}*/ (event.target).value,
+              };
+            },
           }),
-          h("button", { onsubmit: changeBackground }, text("submit")),
+          h("button", { onclick: changeBackground }, text("submit")),
         ]),
       node: node,
     };
