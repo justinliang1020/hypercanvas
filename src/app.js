@@ -1066,11 +1066,11 @@ function toolbar(state) {
         },
         text("↷ Redo"),
       ),
-      // h(
-      //   "button",
-      //   { onclick: (state) => addNewBlock(state, "hello-world") },
-      //   text("add new hello world block"),
-      // ),
+      h(
+        "button",
+        { onclick: (state) => addBlock(state, "textStyleEditor") },
+        text("add new text style editor block"),
+      ),
       h(
         "button",
         { onclick: (state) => addBlock(state, "text") },

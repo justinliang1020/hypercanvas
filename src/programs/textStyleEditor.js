@@ -35,7 +35,7 @@ export class TextStyleProgram extends Program {
     return {
       init: initialState ? /** @type{State} */ (initialState) : defaultState,
       view: (state) =>
-        h("form", {}, [
+        h("div", {}, [
           h("input", {
             type: "text",
             oninput: (state, event) => ({
