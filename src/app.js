@@ -22,7 +22,6 @@ import * as programs from "./programs/index.js";
  * @property {import("./programs/program.js").Program | null} instance - class instance of the program. used to pass into other programs.
  * @property {any | null} initialState - state used to initialize the program. if null, will initialize with default state
  * @property {string} name - name of the program, used to load the program. must be unique
- * @property {boolean} isInitialized
  */
 
 /**
@@ -363,7 +362,6 @@ function addBlock(currentState, programName) {
       instance: programInstance,
       name: programName,
       initialState: null,
-      isInitialized: false,
     },
   };
 
@@ -424,7 +422,6 @@ function pasteBlock(state) {
       instance: programInstance,
       name: blockData.program.name,
       initialState: blockData.program.initialState,
-      isInitialized: false,
     },
   };
 
@@ -450,7 +447,6 @@ async function saveApplication(state) {
   for (const block of serializableSaveState.blocks) {
     block.program.initialState = block.program.instance?.getState();
     block.program.instance = null;
-    block.program.isInitialized = false;
   }
 
   // @ts-ignore
@@ -1275,19 +1271,11 @@ async function initialize() {
       ) {
         const programInstance = block.program.instance;
         console.log("run");
-        if (
-          programInstance &&
-          typeof programInstance.run === "function" &&
-          !block.program.isInitialized
-          //TODO this is kinda weird and borked, if this is removed then there is weird glitch where each interaction in a program repeats a dozen times
-          //i need this bc the program-component element still exists always and this will always rerender otherwise
-        ) {
-          //TODO: refactor so that it it checks if this element is a special "unitizilaied hyperapp" div, and only run the program if that element is true
+        if (programInstance && typeof programInstance.run === "function") {
           programInstance.run(
             /** @type{HTMLElement} */
             (programComponent.shadowRoot.firstElementChild),
           );
-          block.program.isInitialized = true;
         }
       }
     });
