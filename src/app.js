@@ -1127,7 +1127,7 @@ function toolbar(state) {
         text(state.isDarkMode ? "☀️ Light" : "🌙 Dark"),
       ),
       h(
-        "button", // TODO: remove after development. currently a temporary manual save button
+        "button",
         {
           onclick: (state) => [state, () => saveApplication(state)],
         },
@@ -1270,7 +1270,6 @@ async function initialize() {
           "program-component-child"
       ) {
         const programInstance = block.program.instance;
-        console.log("run");
         if (programInstance && typeof programInstance.run === "function") {
           programInstance.run(
             /** @type{HTMLElement} */
