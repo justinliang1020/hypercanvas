@@ -1318,19 +1318,22 @@ async function initialize() {
       const programComponent = document.querySelector(
         `program-component[data-id="${block.id}"]`,
       );
+      const targetElement = /** @type{HTMLElement} */ (
+        programComponent?.shadowRoot?.firstElementChild
+      );
+      const programInstance = block.program.instance;
+
       if (
-        programComponent &&
-        programComponent.shadowRoot &&
-        programComponent.shadowRoot.firstElementChild &&
-        programComponent.shadowRoot.firstElementChild.localName ===
-          "program-component-child"
+        targetElement &&
+        targetElement.localName === "program-component-child" &&
+        programInstance?.run &&
+        !targetElement.dataset.programInitialized
       ) {
-        const programInstance = block.program.instance;
-        if (programInstance && typeof programInstance.run === "function") {
-          programInstance.run(
-            /** @type{HTMLElement} */
-            (programComponent.shadowRoot.firstElementChild),
-          );
+        try {
+          programInstance.run(targetElement);
+          targetElement.dataset.programInitialized = "true";
+        } catch (error) {
+          console.warn(`Failed to run program for block ${block.id}:`, error);
         }
       }
     });
@@ -1400,7 +1403,8 @@ async function initialize() {
       }
 
       // Run programs on their corresponding DOM elements after DOM updates
-      setTimeout(() => renderPrograms(state), 0);
+      // Use requestAnimationFrame to ensure DOM is fully updated before running programs
+      requestAnimationFrame(() => renderPrograms(state));
     },
   };
 
@@ -1411,8 +1415,8 @@ async function initialize() {
     app(appConfig);
   }
 
-  // HACK: run hyperapp programs after the dom renders
-  setTimeout(() => renderPrograms(state), 20);
+  // render programs prior to subscription handling program rendering
+  requestAnimationFrame(() => renderPrograms(state));
 
   // Listen for quit signal from main process
   //@ts-ignore
