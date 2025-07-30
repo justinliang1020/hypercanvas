@@ -742,6 +742,9 @@ function block(state) {
     return h(
       "div",
       {
+        // Key ensures Hyperapp's virtual DOM can properly track each block element during list updates,
+        // preventing DOM node reuse bugs when blocks are deleted (fixes positioning issues)
+        key: `block-${block.id}`,
         "data-id": block.id,
         style: {
           outline: outline,
