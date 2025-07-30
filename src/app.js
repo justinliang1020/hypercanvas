@@ -8,65 +8,87 @@ import * as programs from "./programs/index.js";
 
 /**
  * @typedef {Object} Block
- * @property {number} id
- * @property {number} width
- * @property {number} height
- * @property {number} x
- * @property {number} y
- * @property {number} zIndex
- * @property {Program} program
+ * @property {number} id - Unique block identifier
+ * @property {number} width - Block width in pixels
+ * @property {number} height - Block height in pixels
+ * @property {number} x - X position on canvas
+ * @property {number} y - Y position on canvas
+ * @property {number} zIndex - Stacking order (higher = front)
+ * @property {Program} program - Associated program instance
  */
 
 /**
  * @typedef {Object} Program
- * @property {import("./programs/program.js").Program | null} instance - class instance of the program. used to pass into other programs.
- * @property {any | null} initialState - state used to initialize the program. if null, will initialize with default state
- * @property {string} name - name of the program, used to load the program. must be unique
+ * @property {import("./programs/program.js").Program|null} instance - Program class instance
+ * @property {any|null} initialState - Initial state for program initialization
+ * @property {string} name - Unique program name for loading
  */
 
 /**
  * @typedef {Object} BlockConnection
- * @property {String} name
- * @property {number} sourceBlockId
- * @property {number} targetBlockId
+ * @property {string} name - Connection name/type
+ * @property {number} sourceBlockId - ID of source block
+ * @property {number} targetBlockId - ID of target block
  */
 
 /**
  * @typedef {Object} Memento
- * @property {Block[]} blocks
- * @property {number|null} selectedId
- * @property {number|null} editingId
+ * @property {Block[]} blocks - Snapshot of blocks state
+ * @property {number|null} selectedId - Selected block ID at time of snapshot
+ * @property {number|null} editingId - Editing block ID at time of snapshot
  */
 
 /**
  * @typedef {Object} MementoManager
- * @property {Memento[]} undoStack
- * @property {Memento[]} redoStack
- * @property {number} maxHistorySize
+ * @property {Memento[]} undoStack - Stack of previous states for undo
+ * @property {Memento[]} redoStack - Stack of undone states for redo
+ * @property {number} maxHistorySize - Maximum number of states to keep
+ */
+
+/**
+ * @typedef {Object} ResizeState
+ * @property {number} id - Block ID being resized
+ * @property {string} handle - Resize handle (nw, ne, sw, se, n, s, e, w)
+ */
+
+/**
+ * @typedef {Object} DragState
+ * @property {number} id - Block ID being dragged
+ * @property {number} startX - Initial X position
+ * @property {number} startY - Initial Y position
+ */
+
+/**
+ * @typedef {Object} ResizeStartState
+ * @property {number} id - Block ID
+ * @property {number} startWidth - Initial width
+ * @property {number} startHeight - Initial height
+ * @property {number} startX - Initial X position
+ * @property {number} startY - Initial Y position
  */
 
 /**
  * @typedef {Object} State
- * @property {Block[]} blocks
- * @property {BlockConnection[]} connections
- * @property {number} offsetX
- * @property {number} offsetY
- * @property {number} lastX
- * @property {number} lastY
- * @property {number} zoom
- * @property {string} cursorStyle
- * @property {boolean} isViewportDragging
- * @property {boolean} isBlockDragging
- * @property {number|null} selectedId
- * @property {number|null} editingId
- * @property {number|null} hoveringId
- * @property {{id: number, handle: string}|null} resizing
- * @property {{id: number, startX: number, startY: number}|null} dragStart
- * @property {{id: number, startWidth: number, startHeight: number, startX: number, startY: number}|null} resizeStart
- * @property {number} toolbarWidth
- * @property {MementoManager} mementoManager
- * @property {boolean} isDarkMode
- * @property {Block|null} clipboard
+ * @property {Block[]} blocks - All blocks on the canvas
+ * @property {BlockConnection[]} connections - Connections between blocks
+ * @property {number} offsetX - Canvas X offset for panning
+ * @property {number} offsetY - Canvas Y offset for panning
+ * @property {number} lastX - Last mouse X position
+ * @property {number} lastY - Last mouse Y position
+ * @property {number} zoom - Current zoom level
+ * @property {string} cursorStyle - Current cursor style
+ * @property {boolean} isViewportDragging - Whether viewport is being dragged
+ * @property {boolean} isBlockDragging - Whether a block is being dragged
+ * @property {number|null} selectedId - ID of selected block
+ * @property {number|null} editingId - ID of block in edit mode
+ * @property {number|null} hoveringId - ID of hovered block
+ * @property {ResizeState|null} resizing - Current resize operation
+ * @property {DragState|null} dragStart - Drag operation start state
+ * @property {ResizeStartState|null} resizeStart - Resize operation start state
+ * @property {number} toolbarWidth - Width of the toolbar
+ * @property {MementoManager} mementoManager - Undo/redo manager
+ * @property {boolean} isDarkMode - Dark mode toggle
+ * @property {Block|null} clipboard - Copied block data
  */
 
 /**
@@ -98,7 +120,7 @@ const RESIZE_CURSORS = {
 };
 
 /**
- * @type {Record<string, ResizeHandler>}>}
+ * @type {Record<string, ResizeHandler>}
  */
 const RESIZE_HANDLERS = {
   nw: (block, e) => ({
@@ -155,6 +177,9 @@ const RESIZE_HANDLERS = {
 // ## Block Program Implementation
 // -----------------------------
 
+/**
+ * Custom element that wraps program instances with shadow DOM
+ */
 class ProgramComponent extends HTMLElement {
   constructor() {
     super();
@@ -169,6 +194,9 @@ class ProgramComponent extends HTMLElement {
   }
 }
 
+/**
+ * Child element that serves as the target for program rendering
+ */
 class ProgramComponentChild extends HTMLElement {
   constructor() {
     super();
@@ -195,9 +223,9 @@ function createMementoManager() {
 }
 
 /**
- * Creates a memento from the current state
- * @param {State} state
- * @returns {Memento}
+ * Creates a memento from the current state for undo/redo
+ * @param {State} state - Current application state
+ * @returns {Memento} Snapshot of state for history
  */
 function createMemento(state) {
   return {
@@ -208,10 +236,10 @@ function createMemento(state) {
 }
 
 /**
- * Saves prev state in memento history and returns the new state
- * @param {State} prevState
- * @param {State} newState
- * @returns {State}
+ * Saves previous state in memento history and returns the new state
+ * @param {State} prevState - Previous state to save in history
+ * @param {State} newState - New state to return with updated history
+ * @returns {State} New state with updated memento manager
  */
 function saveStateHistoryAndReturn(prevState, newState) {
   const memento = createMemento(prevState);
@@ -232,8 +260,8 @@ function saveStateHistoryAndReturn(prevState, newState) {
 
 /**
  * Undoes the last state change
- * @param {State} state
- * @returns {import("hyperapp").Dispatchable<State>}
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").Dispatchable<State>} Previous state from undo stack
  */
 function undoState(state) {
   if (state.mementoManager.undoStack.length === 0) return state;
@@ -266,8 +294,8 @@ function undoState(state) {
 
 /**
  * Redoes the last undone state change
- * @param {State} state
- * @returns {import("hyperapp").Dispatchable<State>}
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").Dispatchable<State>} Next state from redo stack
  */
 function redoState(state) {
   if (state.mementoManager.redoStack.length === 0) return state;
@@ -299,9 +327,10 @@ function redoState(state) {
 }
 
 /**
- * @param {string} name
- * @param {any} initialState
- * @returns {any}
+ * Creates and initializes a program instance
+ * @param {string} name - Program name from registry
+ * @param {any} initialState - Initial state for the program
+ * @returns {any} Program instance
  */
 function initializeProgram(name, initialState) {
   const program = programs.programRegistry[name];
@@ -313,8 +342,10 @@ function initializeProgram(name, initialState) {
 }
 
 /**
- * @param {State} state
- * @param {BlockConnection} connection
+ * Establishes a connection between two blocks
+ * @param {State} state - Current application state
+ * @param {BlockConnection} connection - Connection to establish
+ * @returns {State} Updated state
  */
 function initializeConnection(state, connection) {
   const sourceBlock = state.blocks.find(
@@ -342,16 +373,15 @@ function initializeConnection(state, connection) {
 }
 
 /**
- * Adds a new block to the state
- * Also renders programs
- * @param {State} state
- * @param {string} programName
- * @param {Object | null} programState
- * @param {number} x
- * @param {number} y
- * @param {number} width
- * @param {number} height
- * @returns {import("hyperapp").Dispatchable<State>}
+ * Adds a new block to the state and renders its program
+ * @param {State} state - Current application state
+ * @param {string} programName - Name of program to instantiate
+ * @param {Object|null} programState - Initial state for the program
+ * @param {number} x - X position on canvas
+ * @param {number} y - Y position on canvas
+ * @param {number} width - Block width in pixels
+ * @param {number} height - Block height in pixels
+ * @returns {import("hyperapp").Dispatchable<State>} Updated state with new block
  */
 function addBlock(
   state,
@@ -365,7 +395,7 @@ function addBlock(
   // Instantiate the program class
   const programInstance = initializeProgram(programName, programState);
 
-  /** @type{Block} */
+  /** @type {Block} */
   const newBlock = {
     id: Math.max(...state.blocks.map((block) => block.id), 0) + 1,
     width: width,
@@ -406,9 +436,9 @@ const renderProgramEffect = async (dispatch, block) => {
 
 /**
  * Deletes a block from the state
- * @param {State} currentState
- * @param {number} blockId
- * @returns {import("hyperapp").Dispatchable<State>}
+ * @param {State} currentState - Current application state
+ * @param {number} blockId - ID of block to delete
+ * @returns {import("hyperapp").Dispatchable<State>} Updated state without the block
  */
 function deleteBlock(currentState, blockId) {
   const blockToDelete = currentState.blocks.find(
@@ -426,9 +456,9 @@ function deleteBlock(currentState, blockId) {
 }
 
 /**
- * Pastes a block into the state
- * @param {State} state
- * @returns {import("hyperapp").Dispatchable<State>}
+ * Pastes a block from clipboard into the state
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").Dispatchable<State>} Updated state with pasted block
  */
 function pasteBlock(state) {
   const blockData = state.clipboard;
@@ -451,14 +481,16 @@ function pasteBlock(state) {
 // ## Utility
 // -----------------------------
 
-/** @param {Block} block
+/**
+ * Renders a program instance into its DOM element
+ * @param {Block} block - Block containing the program to render
  * @returns {void}
- * */
+ */
 function renderProgram(block) {
   const programComponent = document.querySelector(
     `program-component[data-id="${block.id}"]`,
   );
-  const targetElement = /** @type{HTMLElement} */ (
+  const targetElement = /** @type {HTMLElement} */ (
     programComponent?.shadowRoot?.firstElementChild
   );
   const programInstance = block.program.instance;
@@ -479,7 +511,9 @@ function renderProgram(block) {
 }
 
 /**
- * @param {State} state
+ * Saves the application state to disk
+ * @param {State} state - Current application state to save
+ * @returns {Promise<void>}
  */
 async function saveApplication(state) {
   // Don't need to save mementoManager since it just stores undo/redo session history
@@ -494,9 +528,9 @@ async function saveApplication(state) {
 }
 
 /**
- * Copy the selected block to application clipboard
- * @param {State} state
- * @returns {import("hyperapp").Dispatchable<State>}
+ * Copies the selected block to application clipboard
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").Dispatchable<State>} Updated state with clipboard data
  */
 function copySelectedBlock(state) {
   if (state.selectedId === null) return state;
@@ -531,9 +565,9 @@ function copySelectedBlock(state) {
 
 /**
  * Sends a block to the front (highest z-index)
- * @param {State} currentState
- * @param {number} blockId
- * @returns {import("hyperapp").Dispatchable<State>}
+ * @param {State} currentState - Current application state
+ * @param {number} blockId - ID of block to bring to front
+ * @returns {import("hyperapp").Dispatchable<State>} Updated state
  */
 function sendToFront(currentState, blockId) {
   const block = currentState.blocks.find((b) => b.id === blockId);
@@ -554,9 +588,9 @@ function sendToFront(currentState, blockId) {
 
 /**
  * Sends a block to the back (lowest z-index)
- * @param {State} currentState
- * @param {number} blockId
- * @returns {import("hyperapp").Dispatchable<State>}
+ * @param {State} currentState - Current application state
+ * @param {number} blockId - ID of block to send to back
+ * @returns {import("hyperapp").Dispatchable<State>} Updated state
  */
 function sendToBack(currentState, blockId) {
   const block = currentState.blocks.find((b) => b.id === blockId);
@@ -592,9 +626,10 @@ const clearUserClipboardEffect = async () => {
 // -----------------------------
 
 /**
- * @param {string} handle
- * @param {number} zoom
- * @returns {import("hyperapp").ElementVNode<State>}
+ * Creates a resize handle component for block resizing
+ * @param {string} handle - Handle position (nw, ne, sw, se, n, s, e, w)
+ * @param {number} zoom - Current zoom level for scaling
+ * @returns {import("hyperapp").ElementVNode<State>} Resize handle element
  */
 function ResizeHandle(handle, zoom) {
   // Scale handle sizes inversely with zoom to maintain consistent visual appearance
@@ -682,8 +717,9 @@ function ResizeHandle(handle, zoom) {
 }
 
 /**
- * @param {State} state
- * @returns { (block:Block) => import("hyperapp").ElementVNode<State> }
+ * Creates a block component renderer
+ * @param {State} state - Current application state
+ * @returns {(block: Block) => import("hyperapp").ElementVNode<State>} Block renderer function
  */
 function block(state) {
   return (block) => {
@@ -805,7 +841,8 @@ function block(state) {
 }
 
 /**
- * @returns {import("hyperapp").ElementVNode<State>}
+ * Creates a toolbar for selected blocks with action buttons
+ * @returns {import("hyperapp").ElementVNode<State>} Block toolbar element
  */
 function blockToolbar() {
   return h(
@@ -856,8 +893,9 @@ function blockToolbar() {
 }
 
 /**
- * @param {State} state
- * @returns {import("hyperapp").ElementVNode<State>}
+ * Creates the main viewport component for the canvas
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>} Viewport element
  */
 function viewport(state) {
   return h(
@@ -1096,8 +1134,9 @@ function viewport(state) {
 }
 
 /**
- * @param {State} state
- * @returns {import("hyperapp").ElementVNode<State>}
+ * Creates the main application toolbar with action buttons
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>} Toolbar element
  */
 function toolbar(state) {
   return h(
@@ -1162,7 +1201,7 @@ function toolbar(state) {
         {
           /** @returns {import("hyperapp").Dispatchable<State>} */
           onclick: (state) => {
-            /** @type{BlockConnection} */
+            /** @type {BlockConnection} */
             const connection = {
               name: "editor",
               sourceBlockId: 2,
@@ -1198,8 +1237,9 @@ function toolbar(state) {
 }
 
 /**
- * @param {State} state
- * @returns {import("hyperapp").ElementVNode<State>}
+ * Creates the main application component with keyboard handling
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>} Main application element
  */
 function main(state) {
   /**
@@ -1230,7 +1270,7 @@ function main(state) {
         dispatch(pasteBlock(state));
         return;
       } else {
-        /** @type{import("./programs/text.js").State} */
+        /** @type {import("./programs/text.js").State} */
         const textProgramState = {
           text: text,
           backgroundColor: "transparent",
@@ -1354,8 +1394,12 @@ function main(state) {
 // ## Initialization
 // -----------------------------
 
+/**
+ * Initializes the application with saved state and starts the Hyperapp
+ * @returns {Promise<void>}
+ */
 async function initialize() {
-  /** @type{State} */
+  /** @type {State} */
   const initialState = {
     selectedId: null,
     editingId: null,
@@ -1379,7 +1423,7 @@ async function initialize() {
     clipboard: null,
   };
 
-  /** @type{State} */
+  /** @type {State} */
   let state;
   try {
     // @ts-ignore
@@ -1401,7 +1445,7 @@ async function initialize() {
 
   let currentState = state;
 
-  /** @type{import("hyperapp").App<State>} */
+  /** @type {import("hyperapp").App<State>} */
   const appConfig = {
     init: state,
     view: (state) => main(state),
