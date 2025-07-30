@@ -233,7 +233,7 @@ function saveStateHistoryAndReturn(prevState, newState) {
 /**
  * Undoes the last state change
  * @param {State} state
- * @returns {State}
+ * @returns {import("hyperapp").Dispatchable<State>}
  */
 function undoState(state) {
   if (state.mementoManager.undoStack.length === 0) return state;
@@ -267,7 +267,7 @@ function undoState(state) {
 /**
  * Redoes the last undone state change
  * @param {State} state
- * @returns {State}
+ * @returns {import("hyperapp").Dispatchable<State>}
  */
 function redoState(state) {
   if (state.mementoManager.redoStack.length === 0) return state;
@@ -351,7 +351,7 @@ function initializeConnection(state, connection) {
  * @param {number} y
  * @param {number} width
  * @param {number} height
- * @returns {State | [State, import("hyperapp").Effect<State>]}
+ * @returns {import("hyperapp").Dispatchable<State>}
  */
 function addBlock(
   state,
@@ -393,8 +393,8 @@ function addBlock(
 }
 
 /**
- * Clear clipboard effect that clears the system clipboard
- * @type {import("hyperapp").Effect<State>}
+ * Effect that renders a program block
+ * @type {import("hyperapp").Effecter<State, Block>}
  * @param {import("hyperapp").Dispatch<State>} dispatch
  * @param {Block} block
  */
@@ -408,7 +408,7 @@ const renderProgramEffect = async (dispatch, block) => {
  * Deletes a block from the state
  * @param {State} currentState
  * @param {number} blockId
- * @returns {State}
+ * @returns {import("hyperapp").Dispatchable<State>}
  */
 function deleteBlock(currentState, blockId) {
   const blockToDelete = currentState.blocks.find(
@@ -428,7 +428,7 @@ function deleteBlock(currentState, blockId) {
 /**
  * Pastes a block into the state
  * @param {State} state
- * @returns {State}
+ * @returns {import("hyperapp").Dispatchable<State>}
  */
 function pasteBlock(state) {
   const blockData = state.clipboard;
@@ -496,7 +496,7 @@ async function saveApplication(state) {
 /**
  * Copy the selected block to application clipboard
  * @param {State} state
- * @returns {State | [State, import("hyperapp").Effect<State>]}
+ * @returns {import("hyperapp").Dispatchable<State>}
  */
 function copySelectedBlock(state) {
   if (state.selectedId === null) return state;
@@ -533,7 +533,7 @@ function copySelectedBlock(state) {
  * Sends a block to the front (highest z-index)
  * @param {State} currentState
  * @param {number} blockId
- * @returns {State}
+ * @returns {import("hyperapp").Dispatchable<State>}
  */
 function sendToFront(currentState, blockId) {
   const block = currentState.blocks.find((b) => b.id === blockId);
@@ -556,7 +556,7 @@ function sendToFront(currentState, blockId) {
  * Sends a block to the back (lowest z-index)
  * @param {State} currentState
  * @param {number} blockId
- * @returns {State}
+ * @returns {import("hyperapp").Dispatchable<State>}
  */
 function sendToBack(currentState, blockId) {
   const block = currentState.blocks.find((b) => b.id === blockId);
@@ -1147,13 +1147,12 @@ function toolbar(state) {
       h(
         "button",
         {
-          /** @returns {State} */
           onclick: (state) => {
             state.blocks[0].program.instance?.modifyState({
               text: "test",
               backgroundColor: "red",
             });
-            return { ...state };
+            return state;
           },
         },
         text("manually change state"),
@@ -1161,7 +1160,7 @@ function toolbar(state) {
       h(
         "button",
         {
-          /** @returns {State} */
+          /** @returns {import("hyperapp").Dispatchable<State>} */
           onclick: (state) => {
             /** @type{BlockConnection} */
             const connection = {
