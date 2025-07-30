@@ -1163,6 +1163,43 @@ function toolbar(state) {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 function main(state) {
+  /**
+   * Clear clipboard effect that clears the system clipboard
+   * @type {import("hyperapp").Effect<State>}
+   * @param {import("hyperapp").Dispatch<State>} dispatch
+   */
+  const pasteEffect = async (dispatch) => {
+    try {
+      const clipboardItems = await navigator.clipboard.read();
+
+      if (clipboardItems.length === 0) {
+        dispatch((state) => state);
+        return;
+      }
+
+      const item = clipboardItems[0];
+
+      const imageTypes = item.types.filter((type) => type.startsWith("image/"));
+      if (imageTypes.length > 0) {
+        //TODO: add new image block with image path initial state
+        dispatch((state) => state);
+        return;
+      }
+
+      const text = await navigator.clipboard.readText();
+      if (text.trim() === "") {
+        dispatch(pasteBlock(state));
+        return;
+      } else {
+        //TODO: add new text block with text initial state
+        dispatch((state) => state);
+        return;
+      }
+    } catch (error) {
+      console.error("Failed to read clipboard:", error);
+      dispatch((state) => state);
+    }
+  };
   return h(
     "main",
     {
@@ -1226,12 +1263,10 @@ function main(state) {
           case "v":
             // Handle paste shortcut (Ctrl+V or Cmd+V)
             if (event.ctrlKey || event.metaKey) {
-              // Only handle block paste if not in input field and not in edit mode
               if (state.editingId === null) {
                 event.preventDefault();
-                return pasteBlock(state);
+                return [state, pasteEffect];
               }
-              // Let browser handle regular text paste
             }
             return state;
 
