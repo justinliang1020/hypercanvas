@@ -1,3 +1,4 @@
+import { ImageProgram } from "./image.js";
 import { TextProgram } from "./text.js";
 import { TextStyleProgram } from "./textStyleEditor.js";
 
@@ -5,4 +6,5 @@ import { TextStyleProgram } from "./textStyleEditor.js";
 export const programRegistry = {
   text: TextProgram,
   textStyleEditor: TextStyleProgram,
+  image: ImageProgram,
 };

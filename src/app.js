@@ -1085,6 +1085,11 @@ function toolbar(state) {
       ),
       h(
         "button",
+        { onclick: (state) => addBlock(state, "image") },
+        text("add new image"),
+      ),
+      h(
+        "button",
         {
           /** @returns {State} */
           onclick: (state) => {
