@@ -87,14 +87,14 @@ const PASTE_OFFSET_Y = 20;
  * @type {Record<string, string>}
  */
 const RESIZE_CURSORS = {
-  nw: "nw-resize",
-  ne: "ne-resize",
-  sw: "sw-resize",
-  se: "se-resize",
-  n: "n-resize",
-  s: "s-resize",
-  w: "w-resize",
-  e: "e-resize",
+  nw: "nwse-resize",
+  ne: "nesw-resize",
+  sw: "nesw-resize",
+  se: "nwse-resize",
+  n: "ns-resize",
+  s: "ns-resize",
+  w: "ew-resize",
+  e: "ew-resize",
 };
 
 /**
