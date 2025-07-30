@@ -343,11 +343,12 @@ function initializeConnection(state, connection) {
  * Adds a new block to the state
  * @param {State} currentState
  * @param {string} programName
+ * @param {Object | null} programState
  * @returns {State}
  */
-function addBlock(currentState, programName) {
+function addBlock(currentState, programName, programState = null) {
   // Instantiate the program class
-  const programInstance = initializeProgram(programName, null); //TODO: set initial state
+  const programInstance = initializeProgram(programName, programState); //TODO: set initial state
 
   /** @type{Block} */
   const newBlock = {
@@ -1191,8 +1192,12 @@ function main(state) {
         dispatch(pasteBlock(state));
         return;
       } else {
-        //TODO: add new text block with text initial state
-        dispatch((state) => state);
+        /** @type{import("./programs/text.js").State} */
+        const textProgramState = {
+          text: text,
+          backgroundColor: "transparent",
+        };
+        dispatch(addBlock(state, "text", textProgramState));
         return;
       }
     } catch (error) {

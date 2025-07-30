@@ -1,12 +1,11 @@
 import { h, text } from "../packages/hyperapp/index.js";
 import { Program } from "./program.js";
 
+/** @typedef State
+ * @property {string} text
+ * @property {string} backgroundColor
+ */
 export class TextProgram extends Program {
-  /** @typedef State
-   * @property {string} text
-   * @property {string} backgroundColor
-   */
-
   /**
    * @param {HTMLElement} node
    * @param {object | null} initialState
