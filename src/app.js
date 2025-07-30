@@ -343,6 +343,7 @@ function initializeConnection(state, connection) {
 
 /**
  * Adds a new block to the state
+ * Also renders programs
  * @param {State} state
  * @param {string} programName
  * @param {Object | null} programState
@@ -350,7 +351,7 @@ function initializeConnection(state, connection) {
  * @param {number} y
  * @param {number} width
  * @param {number} height
- * @returns {State}
+ * @returns {State | [State, import("hyperapp").Effect<State>]}
  */
 function addBlock(
   state,
@@ -362,7 +363,7 @@ function addBlock(
   height = 200,
 ) {
   // Instantiate the program class
-  const programInstance = initializeProgram(programName, programState); //TODO: set initial state
+  const programInstance = initializeProgram(programName, programState);
 
   /** @type{Block} */
   const newBlock = {
@@ -385,8 +386,23 @@ function addBlock(
     selectedId: newBlock.id,
   };
 
-  return saveStateHistoryAndReturn(state, newState);
+  return [
+    saveStateHistoryAndReturn(state, newState),
+    [renderProgramEffect, newBlock],
+  ];
 }
+
+/**
+ * Clear clipboard effect that clears the system clipboard
+ * @type {import("hyperapp").Effect<State>}
+ * @param {import("hyperapp").Dispatch<State>} dispatch
+ * @param {Block} block
+ */
+const renderProgramEffect = async (dispatch, block) => {
+  requestAnimationFrame(() => {
+    renderProgram(block);
+  });
+};
 
 /**
  * Deletes a block from the state
@@ -434,6 +450,33 @@ function pasteBlock(state) {
 // -----------------------------
 // ## Utility
 // -----------------------------
+
+/** @param {Block} block
+ * @returns {void}
+ * */
+function renderProgram(block) {
+  const programComponent = document.querySelector(
+    `program-component[data-id="${block.id}"]`,
+  );
+  const targetElement = /** @type{HTMLElement} */ (
+    programComponent?.shadowRoot?.firstElementChild
+  );
+  const programInstance = block.program.instance;
+
+  if (
+    targetElement &&
+    targetElement.localName === "program-component-child" &&
+    programInstance?.run &&
+    !targetElement.dataset.programInitialized
+  ) {
+    try {
+      programInstance.run(targetElement);
+      targetElement.dataset.programInitialized = "true";
+    } catch (error) {
+      console.warn(`Failed to run program for block ${block.id}:`, error);
+    }
+  }
+}
 
 /**
  * @param {State} state
@@ -1313,33 +1356,6 @@ function main(state) {
 // -----------------------------
 
 async function initialize() {
-  /** @param {State} state */
-  function renderPrograms(state) {
-    state.blocks.forEach((block) => {
-      const programComponent = document.querySelector(
-        `program-component[data-id="${block.id}"]`,
-      );
-      const targetElement = /** @type{HTMLElement} */ (
-        programComponent?.shadowRoot?.firstElementChild
-      );
-      const programInstance = block.program.instance;
-
-      if (
-        targetElement &&
-        targetElement.localName === "program-component-child" &&
-        programInstance?.run &&
-        !targetElement.dataset.programInitialized
-      ) {
-        try {
-          programInstance.run(targetElement);
-          targetElement.dataset.programInitialized = "true";
-        } catch (error) {
-          console.warn(`Failed to run program for block ${block.id}:`, error);
-        }
-      }
-    });
-  }
-
   /** @type{State} */
   const initialState = {
     selectedId: null,
@@ -1402,10 +1418,6 @@ async function initialize() {
       } else {
         document.body.classList.remove("dark-mode");
       }
-
-      // Run programs on their corresponding DOM elements after DOM updates
-      // Use requestAnimationFrame to ensure DOM is fully updated before running programs
-      requestAnimationFrame(() => renderPrograms(state));
     },
   };
 
@@ -1416,8 +1428,12 @@ async function initialize() {
     app(appConfig);
   }
 
-  // render programs prior to subscription handling program rendering
-  requestAnimationFrame(() => renderPrograms(state));
+  // render programs on initial startup
+  requestAnimationFrame(() =>
+    state.blocks.forEach((block) => {
+      renderProgram(block);
+    }),
+  );
 
   // Listen for quit signal from main process
   //@ts-ignore
