@@ -80,6 +80,8 @@ import * as programs from "./programs/index.js";
 const MIN_SIZE = 20; // Minimum size in px
 const INITIAL_RIGHT_TOOLBAR_WIDTH = 400;
 const STATE_SAVE_PATH = "user/state.json";
+const PASTE_OFFSET_X = 20;
+const PASTE_OFFSET_Y = 20;
 
 /**
  * @type {Record<string, string>}
@@ -341,24 +343,35 @@ function initializeConnection(state, connection) {
 
 /**
  * Adds a new block to the state
- * @param {State} currentState
+ * @param {State} state
  * @param {string} programName
  * @param {Object | null} programState
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
  * @returns {State}
  */
-function addBlock(currentState, programName, programState = null) {
+function addBlock(
+  state,
+  programName,
+  programState = null,
+  x = 50,
+  y = 50,
+  width = 200,
+  height = 200,
+) {
   // Instantiate the program class
   const programInstance = initializeProgram(programName, programState); //TODO: set initial state
 
   /** @type{Block} */
   const newBlock = {
-    id: Math.max(...currentState.blocks.map((block) => block.id), 0) + 1,
-    width: 200,
-    height: 200,
-    x: 50,
-    y: 50,
-    zIndex:
-      Math.max(...currentState.blocks.map((block) => block.zIndex), 0) + 1,
+    id: Math.max(...state.blocks.map((block) => block.id), 0) + 1,
+    width: width,
+    height: height,
+    x: x,
+    y: y,
+    zIndex: Math.max(...state.blocks.map((block) => block.zIndex), 0) + 1,
     program: {
       instance: programInstance,
       name: programName,
@@ -367,12 +380,12 @@ function addBlock(currentState, programName, programState = null) {
   };
 
   const newState = {
-    ...currentState,
-    blocks: [...currentState.blocks, newBlock],
+    ...state,
+    blocks: [...state.blocks, newBlock],
     selectedId: newBlock.id,
   };
 
-  return saveStateHistoryAndReturn(currentState, newState);
+  return saveStateHistoryAndReturn(state, newState);
 }
 
 /**
@@ -406,33 +419,16 @@ function pasteBlock(state) {
   if (blockData === null) {
     return state;
   }
-  // Instantiate the program class with the initial state from the copied block
-  const programInstance = initializeProgram(
+
+  return addBlock(
+    state,
     blockData.program.name,
     blockData.program.initialState,
+    blockData.x + PASTE_OFFSET_X,
+    blockData.y + PASTE_OFFSET_Y,
+    blockData.width,
+    blockData.height,
   );
-
-  /** @type{Block} */
-  const newBlock = {
-    ...blockData,
-    id: Math.max(...state.blocks.map((block) => block.id), 0) + 1,
-    x: blockData.x + 20,
-    y: blockData.y + 20,
-    zIndex: Math.max(...state.blocks.map((block) => block.zIndex), 0) + 1,
-    program: {
-      instance: programInstance,
-      name: blockData.program.name,
-      initialState: blockData.program.initialState,
-    },
-  };
-
-  const newState = {
-    ...state,
-    blocks: [...state.blocks, newBlock],
-    selectedId: newBlock.id,
-  };
-
-  return saveStateHistoryAndReturn(state, newState);
 }
 
 // -----------------------------
