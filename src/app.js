@@ -473,6 +473,7 @@ function copySelectedBlock(state) {
     id: -1, // not a "real" block
     program: {
       ...selectedBlock.program,
+      instance: null,
       initialState:
         selectedBlock.program.instance?.getState() ||
         selectedBlock.program.initialState,
