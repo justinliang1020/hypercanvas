@@ -456,7 +456,7 @@ async function saveApplication(state) {
 /**
  * Copy the selected block to application clipboard
  * @param {State} state
- * @returns {State}
+ * @returns {State | [State, import("hyperapp").Effect<State>]}
  */
 function copySelectedBlock(state) {
   if (state.selectedId === null) return state;
@@ -480,10 +480,13 @@ function copySelectedBlock(state) {
     },
   };
 
-  return {
-    ...state,
-    clipboard: blockData,
-  };
+  return [
+    {
+      ...state,
+      clipboard: blockData,
+    },
+    clearUserClipboardEffect,
+  ];
 }
 
 /**
@@ -531,6 +534,18 @@ function sendToBack(currentState, blockId) {
 
   return saveStateHistoryAndReturn(currentState, newState);
 }
+
+/**
+ * Clear clipboard effect that clears the system clipboard
+ * @type {import("hyperapp").Effect<State>}
+ */
+const clearUserClipboardEffect = async () => {
+  try {
+    await navigator.clipboard.writeText("");
+  } catch (error) {
+    console.error("Failed to clear clipboard:", error);
+  }
+};
 
 // -----------------------------
 // ## Components
