@@ -455,8 +455,10 @@ function pasteBlock(state) {
  * @returns {Promise<void>}
  */
 async function saveApplication(state) {
-  // Don't need to save mementoManager since it just stores undo/redo session history
+  // Don't need to save mementoManager which is session undo/redo history
   const { mementoManager, ...serializableSaveState } = state;
+  // Don't need to save session clipboard
+  serializableSaveState.clipboard = null;
 
   // @ts-ignore
   await window.fileAPI.writeFile(STATE_SAVE_PATH, serializableSaveState);
