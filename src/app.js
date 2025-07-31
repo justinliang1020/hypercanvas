@@ -1431,32 +1431,46 @@ async function initialize() {
 
   let currentState = state;
 
+  /**
+   * Subscription that runs after DOM repaint to render programs and handle dark mode
+   * @param {import("hyperapp").Dispatch<State>} dispatch - Function to dispatch actions
+   * @param {State} state
+   * @returns {(() => void) | void} Cleanup function or void
+   */
+  function subscription(dispatch, state) {
+    // Apply dark mode class to body
+    if (state.isDarkMode) {
+      document.body.classList.add("dark-mode");
+    } else {
+      document.body.classList.remove("dark-mode");
+    }
+
+    // Schedule callback for after the current hyperapp paint cycle
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        state.blocks.forEach((block) => {
+          renderProgram(block);
+        });
+
+        // Now you can dispatch state changes here if needed
+        // dispatch(actions.afterRender, { timestamp: Date.now() });
+      });
+    });
+
+    // Store current state for save functionality
+    currentState = state;
+
+    // Return cleanup function (required for subscriptions)
+    return () => {};
+  }
+
   /** @type {import("hyperapp").App<State>} */
   const appConfig = {
     init: state,
     view: (state) => main(state),
     // @ts-ignore
     node: document.getElementById("app"),
-    subscriptions: (state) => {
-      // Store current state for save functionality
-      currentState = state;
-
-      // Schedule callback for after the current hyperapp paint cycle
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() =>
-          state.blocks.forEach((block) => {
-            renderProgram(block);
-          }),
-        );
-      });
-
-      // Apply dark mode class to body
-      if (state.isDarkMode) {
-        document.body.classList.add("dark-mode");
-      } else {
-        document.body.classList.remove("dark-mode");
-      }
-    },
+    subscriptions: (state) => [[subscription, state]],
   };
 
   const isUsingAppWithVisualizer = true;
