@@ -19,7 +19,7 @@ export class TextProgram extends Program {
     };
 
     return {
-      init: initialState ? /** @type{State} */ (initialState) : defaultState,
+      init: initialState,
       view: (state) =>
         h(
           "textarea",

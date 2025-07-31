@@ -6,17 +6,11 @@ import { app } from "../packages/hyperapp/index.js";
 export class Program {
   /** @type{import("hyperapp").Dispatch<any> | null}*/
   #dispatch;
-  /** @type{object | null} */
-  #initialState;
   /** @type{Object.<string, (Program | null)>} */
   #connections;
 
-  /**
-   * @param {object | null} initialState
-   */
-  constructor(initialState) {
+  constructor() {
     this.#dispatch = null;
-    this.#initialState = initialState;
     this.#connections = {};
   }
 
@@ -45,9 +39,10 @@ export class Program {
 
   /**
    * @param {HTMLElement} node
+   * @param {Object | null} state
    */
-  run(node) {
-    this.#dispatch = app(this.appConfig(node, this.#initialState));
+  run(node, state) {
+    this.#dispatch = app(this.appConfig(node, state));
   }
 
   /**
@@ -65,7 +60,10 @@ export class Program {
    * @returns {object}
    */
   getState() {
-    if (!this.#dispatch) return {};
+    if (!this.#dispatch) {
+      console.error("no dispatch function");
+      return {};
+    }
     let currentState;
     this.#dispatch((/** @type {any} */ state) => {
       currentState = state;

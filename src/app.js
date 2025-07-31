@@ -19,7 +19,7 @@ import * as programs from "./programs/index.js";
 
 /**
  * @typedef {Object} Program
- * @property {Object | null} initialState - Initial state for program initialization
+ * @property {Object | null} state - State of program instance. If 'null', the program will be initialized with its default state and sync with this value.
  * @property {string} name - Unique program name for loading
  */
 
@@ -326,21 +326,6 @@ function redoState(state) {
 }
 
 /**
- * Creates and initializes a program instance
- * @param {string} name - Program name from registry
- * @param {any} initialState - Initial state for the program
- * @returns {any} Program instance
- */
-function initializeProgram(name, initialState) {
-  const program = programs.programRegistry[name];
-  if (!program) {
-    throw Error("invalid program name");
-  }
-  let programInstance = new program(initialState);
-  return programInstance;
-}
-
-/**
  * Establishes a connection between two blocks
  * @param {State} state - Current application state
  * @param {BlockConnection} connection - Connection to establish
@@ -402,7 +387,7 @@ function addBlock(
     zIndex: Math.max(...state.blocks.map((block) => block.zIndex), 0) + 1,
     program: {
       name: programName,
-      initialState: null,
+      state: programState,
     },
   };
 
@@ -450,7 +435,7 @@ function pasteBlock(state) {
   return addBlock(
     state,
     blockData.program.name,
-    blockData.program.initialState,
+    blockData.program.state,
     blockData.x + PASTE_OFFSET_X,
     blockData.y + PASTE_OFFSET_Y,
     blockData.width,
@@ -493,10 +478,6 @@ function copySelectedBlock(state) {
   const blockData = {
     ...selectedBlock,
     id: -1, // not a "real" block
-    program: {
-      ...selectedBlock.program,
-      initialState: selectedBlock.program.initialState,
-    },
   };
 
   return [
@@ -1118,12 +1099,20 @@ function toolbar(state) {
       ),
       h(
         "button",
-        { onclick: (state) => addBlock(state, "textStyleEditor") },
+        {
+          onclick: (state) => addBlock(state, "textStyleEditor"),
+        },
         text("add new text style editor block"),
       ),
       h(
         "button",
-        { onclick: (state) => addBlock(state, "text") },
+        {
+          onclick: (state) =>
+            addBlock(state, "text", {
+              text: "hello",
+              backgroundColor: "red",
+            }),
+        },
         text("add new text block"),
       ),
       h(
@@ -1345,11 +1334,7 @@ class ProgramManager {
     // TODO: Create new programs for new IDs. how to check if a program is initialized?
     for (const block of state.blocks) {
       if (!this.#programs.get(block.id)) {
-        this.#addProgram(
-          block.id,
-          block.program.name,
-          block.program.initialState,
-        );
+        this.#initializeProgram(block.id, block.program.name);
       }
     }
 
@@ -1367,6 +1352,15 @@ class ProgramManager {
       }
     }
     // TODO: Sync state of programs to main app state for all programs
+
+    // for (let i = 0; i < state.blocks.length; i++) {
+    //   //@ts-ignore
+    //   state.blocks[i].program.state = this.#programs
+    //     .get(state.blocks[i].id)
+    //     .getState();
+    // }
+
+    // dispatch(() => state);
   }
 
   /**
@@ -1380,14 +1374,14 @@ class ProgramManager {
   /**
    * @param {Number} id
    * @param {String} name
-   * @param {Object | null} state
    */
-  #addProgram(id, name, state) {
+  #initializeProgram(id, name) {
+    console.log("initialized", id);
     const Program = programs.programRegistry[name];
     if (!Program) {
       throw Error("invalid program name");
     }
-    const programInstance = new Program(state);
+    const programInstance = new Program();
     this.#programs.set(id, programInstance);
   }
 }
@@ -1446,7 +1440,7 @@ async function initialize() {
       programInstance
     ) {
       try {
-        programInstance.run(targetElement);
+        programInstance.run(targetElement, block.program.state);
       } catch (error) {
         console.warn(`Failed to run program for block ${block.id}:`, error);
       }
@@ -1490,9 +1484,6 @@ async function initialize() {
         state.blocks.forEach((block) => {
           renderProgram(block);
         });
-
-        // Now you can dispatch state changes here if needed
-        // dispatch(actions.afterRender, { timestamp: Date.now() });
       });
     });
 
