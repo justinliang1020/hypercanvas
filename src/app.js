@@ -19,8 +19,7 @@ import * as programs from "./programs/index.js";
 
 /**
  * @typedef {Object} Program
- * @property {import("./programs/program.js").Program|null} instance - Program class instance
- * @property {any|null} initialState - Initial state for program initialization
+ * @property {Object | null} initialState - Initial state for program initialization
  * @property {string} name - Unique program name for loading
  */
 
@@ -352,12 +351,17 @@ function initializeConnection(state, connection) {
     (block) => block.id === connection.sourceBlockId,
   );
   if (!sourceBlock) return state;
-  if (!sourceBlock.program.instance) return state;
   const targetBlock = state.blocks.find(
     (block) => block.id === connection.targetBlockId,
   );
   if (!targetBlock) return state;
-  if (!targetBlock.program.instance) return state;
+  const sourceProgramInstance = programManager.get(sourceBlock.id);
+  const targetProgramInstance = programManager.get(targetBlock.id);
+
+  if (sourceProgramInstance && targetProgramInstance) {
+    sourceProgramInstance.setConnection(connection.name, targetProgramInstance);
+  }
+  //TODO: think about how connections should be cleaned up
 
   //BUG: fix allowedConnections code
 
@@ -365,10 +369,6 @@ function initializeConnection(state, connection) {
   //   console.error("connection not allowed");
   //   return state;
   // }
-  sourceBlock.program.instance.setConnection(
-    connection.name,
-    targetBlock.program.instance,
-  );
   return state;
 }
 
@@ -392,9 +392,6 @@ function addBlock(
   width = 200,
   height = 200,
 ) {
-  // Instantiate the program class
-  const programInstance = initializeProgram(programName, programState);
-
   /** @type {Block} */
   const newBlock = {
     id: Math.max(...state.blocks.map((block) => block.id), 0) + 1,
@@ -404,7 +401,6 @@ function addBlock(
     y: y,
     zIndex: Math.max(...state.blocks.map((block) => block.zIndex), 0) + 1,
     program: {
-      instance: programInstance,
       name: programName,
       initialState: null,
     },
@@ -474,10 +470,6 @@ function pasteBlock(state) {
 async function saveApplication(state) {
   // Don't need to save mementoManager since it just stores undo/redo session history
   const { mementoManager, ...serializableSaveState } = state;
-  for (const block of serializableSaveState.blocks) {
-    block.program.initialState = block.program.instance?.getState();
-    block.program.instance = null;
-  }
 
   // @ts-ignore
   await window.fileAPI.writeFile(STATE_SAVE_PATH, serializableSaveState);
@@ -503,10 +495,7 @@ function copySelectedBlock(state) {
     id: -1, // not a "real" block
     program: {
       ...selectedBlock.program,
-      instance: null,
-      initialState:
-        selectedBlock.program.instance?.getState() ||
-        selectedBlock.program.initialState,
+      initialState: selectedBlock.program.initialState,
     },
   };
 
@@ -1145,19 +1134,6 @@ function toolbar(state) {
       h(
         "button",
         {
-          onclick: (state) => {
-            state.blocks[0].program.instance?.modifyState({
-              text: "test",
-              backgroundColor: "red",
-            });
-            return state;
-          },
-        },
-        text("manually change state"),
-      ),
-      h(
-        "button",
-        {
           /** @returns {import("hyperapp").Dispatchable<State>} */
           onclick: (state) => {
             /** @type {BlockConnection} */
@@ -1350,9 +1326,77 @@ function main(state) {
 }
 
 // -----------------------------
+// ## Program Manager
+// -----------------------------
+
+class ProgramManager {
+  /** @type{Map<number,import("./programs/program.js").Program>}*/
+  #programs;
+
+  constructor() {
+    this.#programs = new Map();
+  }
+
+  /**
+   * @param {import("hyperapp").Dispatch<State>} dispatch
+   * @param {State} state
+   */
+  syncPrograms(dispatch, state) {
+    // TODO: Create new programs for new IDs. how to check if a program is initialized?
+    for (const block of state.blocks) {
+      if (!this.#programs.get(block.id)) {
+        this.#addProgram(
+          block.id,
+          block.program.name,
+          block.program.initialState,
+        );
+      }
+    }
+
+    // TODO: Delete unused programs for unused IDs
+    for (const id of this.#programs.keys()) {
+      let programExists = false;
+      for (const block of state.blocks) {
+        if (block.id === id) {
+          programExists = true;
+        }
+      }
+
+      if (!programExists) {
+        this.#programs.delete(id);
+      }
+    }
+    // TODO: Sync state of programs to main app state for all programs
+  }
+
+  /**
+   * @param {Number} id
+   * @returns {import("./programs/program.js").Program | undefined}
+   */
+  get(id) {
+    return this.#programs.get(id);
+  }
+
+  /**
+   * @param {Number} id
+   * @param {String} name
+   * @param {Object | null} state
+   */
+  #addProgram(id, name, state) {
+    const Program = programs.programRegistry[name];
+    if (!Program) {
+      throw Error("invalid program name");
+    }
+    const programInstance = new Program(state);
+    this.#programs.set(id, programInstance);
+  }
+}
+
+// -----------------------------
 // ## Initialization
 // -----------------------------
 
+const programManager = new ProgramManager();
 /**
  * Initializes the application with saved state and starts the Hyperapp
  * @returns {Promise<void>}
@@ -1394,12 +1438,12 @@ async function initialize() {
     const targetElement = /** @type {HTMLElement} */ (
       programComponent?.shadowRoot?.firstElementChild
     );
-    const programInstance = block.program.instance;
+    const programInstance = programManager.get(block.id);
 
     if (
       targetElement &&
       targetElement.localName === "program-component-child" &&
-      programInstance?.run
+      programInstance
     ) {
       try {
         programInstance.run(targetElement);
@@ -1418,13 +1462,6 @@ async function initialize() {
       state = initialState;
     }
     state.mementoManager = createMementoManager();
-
-    for (const block of state.blocks) {
-      block.program.instance = initializeProgram(
-        block.program.name,
-        block.program.initialState,
-      );
-    }
   } catch {
     state = initialState;
   }
@@ -1444,6 +1481,8 @@ async function initialize() {
     } else {
       document.body.classList.remove("dark-mode");
     }
+
+    programManager.syncPrograms(dispatch, state);
 
     // Schedule callback for after the current hyperapp paint cycle
     requestAnimationFrame(() => {
