@@ -18,9 +18,9 @@ import * as programs from "./programs/index.js";
  */
 
 /**
- * @typedef {Object} Program
- * @property {Object | null} state - State of program instance. If 'null', the program will be initialized with its default state and sync with this value.
- * @property {string} name - Unique program name for loading
+ * @typedef {Object} Program - Data for Hyperapp Program
+ * @property {Object | null} state - State of hyperapp program instance, constantly synced. If 'null', the program will be mounted with its default state.
+ * @property {string} name - Unique program name for mounting hyperapp program
  */
 
 /**
@@ -340,8 +340,8 @@ function initializeConnection(state, connection) {
     (block) => block.id === connection.targetBlockId,
   );
   if (!targetBlock) return state;
-  const sourceProgramInstance = programManager.get(sourceBlock.id);
-  const targetProgramInstance = programManager.get(targetBlock.id);
+  const sourceProgramInstance = programInstanceManager.get(sourceBlock.id);
+  const targetProgramInstance = programInstanceManager.get(targetBlock.id);
 
   if (sourceProgramInstance && targetProgramInstance) {
     sourceProgramInstance.setConnection(connection.name, targetProgramInstance);
@@ -1311,10 +1311,10 @@ function main(state) {
 }
 
 // -----------------------------
-// ## Program Manager
+// ## Program Instance Manager
 // -----------------------------
 
-class ProgramManager {
+class ProgramInstanceManager {
   /** @type{Map<number,import("./programs/program.js").Program>}*/
   #programs;
 
@@ -1322,46 +1322,26 @@ class ProgramManager {
     this.#programs = new Map();
   }
 
-  /**
-   * @param {import("hyperapp").Dispatch<State>} dispatch
-   * @param {State} state
-   */
-  syncPrograms(dispatch, state) {
-    for (const block of state.blocks) {
-      if (!this.#programs.get(block.id)) {
-        this.#initializeProgram(block.id, block.program.name);
-      }
-    }
-
-    for (const id of this.#programs.keys()) {
-      let programExists = false;
-      for (const block of state.blocks) {
-        if (block.id === id) {
-          programExists = true;
-        }
-      }
-
-      if (!programExists) {
-        this.#programs.delete(id);
-      }
-    }
-
-    for (let i = 0; i < state.blocks.length; i++) {
-      const program = this.#programs.get(state.blocks[i].id);
-      if (!program) continue;
-      if (program.isMounted()) {
-        // TODO: should i modify directly or use a dispatch function?
-        state.blocks[i].program.state = program.getState();
-      }
-    }
-  }
-
-  /**
+  /** Get an instance of a program based on an ID
    * @param {Number} id
    * @returns {import("./programs/program.js").Program | undefined}
    */
   get(id) {
     return this.#programs.get(id);
+  }
+
+  /**
+   * Synchronizes program instances with current block state
+   * - Initializes programs for new blocks
+   * - Cleans up programs for deleted blocks
+   * - Updates block state from mounted programs
+   * @param {import("hyperapp").Dispatch<State>} dispatch
+   * @param {State} state
+   */
+  syncPrograms(dispatch, state) {
+    this.#initializePrograms(state.blocks);
+    this.#cleanupDeletedPrograms(state.blocks);
+    this.#syncProgramStates(state.blocks);
   }
 
   /**
@@ -1376,13 +1356,53 @@ class ProgramManager {
     const programInstance = new Program();
     this.#programs.set(id, programInstance);
   }
+
+  /**
+   * Removes program instances for blocks that no longer exist
+   * @param {Block[]} blocks - Current blocks array
+   */
+  #initializePrograms(blocks) {
+    for (const block of blocks) {
+      if (!this.#programs.has(block.id)) {
+        this.#initializeProgram(block.id, block.program.name);
+      }
+    }
+  }
+
+  /**
+   * Removes program instances for blocks that no longer exist
+   * @param {Block[]} blocks - Current blocks array
+   */
+  #cleanupDeletedPrograms(blocks) {
+    const activeBlockIds = new Set(blocks.map((block) => block.id));
+
+    for (const programId of this.#programs.keys()) {
+      if (!activeBlockIds.has(programId)) {
+        this.#programs.delete(programId);
+      }
+    }
+  }
+
+  /**
+   * Updates block program state from mounted program instances
+   * Writes directly to the new state of the block
+   * @param {Block[]} blocks - Current blocks array
+   */
+  #syncProgramStates(blocks) {
+    for (const block of blocks) {
+      const program = this.#programs.get(block.id);
+      if (program?.isMounted()) {
+        block.program.state = program.getState();
+      }
+    }
+  }
 }
 
 // -----------------------------
 // ## Initialization
 // -----------------------------
 
-const programManager = new ProgramManager();
+const programInstanceManager = new ProgramInstanceManager();
 /**
  * Initializes the application with saved state and starts the Hyperapp
  * @returns {Promise<void>}
@@ -1424,7 +1444,7 @@ async function initialize() {
     const targetElement = /** @type {HTMLElement} */ (
       programComponent?.shadowRoot?.firstElementChild
     );
-    const programInstance = programManager.get(block.id);
+    const programInstance = programInstanceManager.get(block.id);
 
     if (
       targetElement &&
@@ -1468,7 +1488,7 @@ async function initialize() {
       document.body.classList.remove("dark-mode");
     }
 
-    programManager.syncPrograms(dispatch, state);
+    programInstanceManager.syncPrograms(dispatch, state);
 
     // Schedule callback for after the current hyperapp paint cycle
     requestAnimationFrame(() => {
