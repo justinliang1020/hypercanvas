@@ -416,23 +416,8 @@ function addBlock(
     selectedId: newBlock.id,
   };
 
-  return [
-    saveStateHistoryAndReturn(state, newState),
-    [renderProgramEffect, newBlock],
-  ];
+  return saveStateHistoryAndReturn(state, newState);
 }
-
-/**
- * Effect that renders a program block
- * @type {import("hyperapp").Effecter<State, Block>}
- * @param {import("hyperapp").Dispatch<State>} dispatch
- * @param {Block} block
- */
-const renderProgramEffect = async (dispatch, block) => {
-  requestAnimationFrame(() => {
-    renderProgram(block);
-  });
-};
 
 /**
  * Deletes a block from the state
@@ -480,35 +465,6 @@ function pasteBlock(state) {
 // -----------------------------
 // ## Utility
 // -----------------------------
-
-/**
- * Renders a program instance into its DOM element
- * @param {Block} block - Block containing the program to render
- * @returns {void}
- */
-function renderProgram(block) {
-  const programComponent = document.querySelector(
-    `program-component[data-id="${block.id}"]`,
-  );
-  const targetElement = /** @type {HTMLElement} */ (
-    programComponent?.shadowRoot?.firstElementChild
-  );
-  const programInstance = block.program.instance;
-
-  if (
-    targetElement &&
-    targetElement.localName === "program-component-child" &&
-    programInstance?.run &&
-    !targetElement.dataset.programInitialized
-  ) {
-    try {
-      programInstance.run(targetElement);
-      targetElement.dataset.programInitialized = "true";
-    } catch (error) {
-      console.warn(`Failed to run program for block ${block.id}:`, error);
-    }
-  }
-}
 
 /**
  * Saves the application state to disk
@@ -1426,6 +1382,33 @@ async function initialize() {
     clipboard: null,
   };
 
+  /**
+   * Renders a program instance into its DOM element
+   * @param {Block} block - Block containing the program to render
+   * @returns {void}
+   */
+  function renderProgram(block) {
+    const programComponent = document.querySelector(
+      `program-component[data-id="${block.id}"]`,
+    );
+    const targetElement = /** @type {HTMLElement} */ (
+      programComponent?.shadowRoot?.firstElementChild
+    );
+    const programInstance = block.program.instance;
+
+    if (
+      targetElement &&
+      targetElement.localName === "program-component-child" &&
+      programInstance?.run
+    ) {
+      try {
+        programInstance.run(targetElement);
+      } catch (error) {
+        console.warn(`Failed to run program for block ${block.id}:`, error);
+      }
+    }
+  }
+
   /** @type {State} */
   let state;
   try {
@@ -1458,6 +1441,15 @@ async function initialize() {
       // Store current state for save functionality
       currentState = state;
 
+      // Schedule callback for after the current hyperapp paint cycle
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() =>
+          state.blocks.forEach((block) => {
+            renderProgram(block);
+          }),
+        );
+      });
+
       // Apply dark mode class to body
       if (state.isDarkMode) {
         document.body.classList.add("dark-mode");
@@ -1473,13 +1465,6 @@ async function initialize() {
   } else {
     app(appConfig);
   }
-
-  // render programs on initial startup
-  requestAnimationFrame(() =>
-    state.blocks.forEach((block) => {
-      renderProgram(block);
-    }),
-  );
 
   // Listen for quit signal from main process
   //@ts-ignore
