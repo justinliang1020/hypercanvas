@@ -8,10 +8,21 @@ export class Program {
   #dispatch;
   /** @type{Object.<string, (Program | null)>} */
   #connections;
+  /** @type {any} */
+  #defaultState;
 
   constructor() {
     this.#dispatch = null;
     this.#connections = {};
+    this.#defaultState = this.setDefaultState();
+  }
+
+  /**
+   * @abstract
+   * @returns {any}
+   */
+  setDefaultState() {
+    throw new Error("default state must be implemented");
   }
 
   /**
@@ -37,22 +48,20 @@ export class Program {
     throw new Error("no allowed connections implemented");
   }
 
-  /**
+  /** Runs a hyperapp program on a node. If no state is passed in, it uses the default state of the program.
    * @param {HTMLElement} node
    * @param {Object | null} state
    */
-  run(node, state) {
-    this.#dispatch = app(this.appConfig(node, state));
+  mount(node, state) {
+    if (state === null) {
+      this.#dispatch = app(this.appConfig(node, this.#defaultState));
+    } else {
+      this.#dispatch = app(this.appConfig(node, state));
+    }
   }
 
-  /**
-   * changes the text of the program
-   * @param {string} text
-   */
-  changeText(text) {
-    if (this.#dispatch) {
-      this.#dispatch(() => ({ text: text }));
-    }
+  isMounted() {
+    return Boolean(this.#dispatch);
   }
 
   /**

@@ -1107,11 +1107,7 @@ function toolbar(state) {
       h(
         "button",
         {
-          onclick: (state) =>
-            addBlock(state, "text", {
-              text: "hello",
-              backgroundColor: "red",
-            }),
+          onclick: (state) => addBlock(state, "text"),
         },
         text("add new text block"),
       ),
@@ -1331,14 +1327,12 @@ class ProgramManager {
    * @param {State} state
    */
   syncPrograms(dispatch, state) {
-    // TODO: Create new programs for new IDs. how to check if a program is initialized?
     for (const block of state.blocks) {
       if (!this.#programs.get(block.id)) {
         this.#initializeProgram(block.id, block.program.name);
       }
     }
 
-    // TODO: Delete unused programs for unused IDs
     for (const id of this.#programs.keys()) {
       let programExists = false;
       for (const block of state.blocks) {
@@ -1351,16 +1345,15 @@ class ProgramManager {
         this.#programs.delete(id);
       }
     }
-    // TODO: Sync state of programs to main app state for all programs
 
-    // for (let i = 0; i < state.blocks.length; i++) {
-    //   //@ts-ignore
-    //   state.blocks[i].program.state = this.#programs
-    //     .get(state.blocks[i].id)
-    //     .getState();
-    // }
-
-    // dispatch(() => state);
+    for (let i = 0; i < state.blocks.length; i++) {
+      const program = this.#programs.get(state.blocks[i].id);
+      if (!program) continue;
+      if (program.isMounted()) {
+        // TODO: should i modify directly or use a dispatch function?
+        state.blocks[i].program.state = program.getState();
+      }
+    }
   }
 
   /**
@@ -1376,7 +1369,6 @@ class ProgramManager {
    * @param {String} name
    */
   #initializeProgram(id, name) {
-    console.log("initialized", id);
     const Program = programs.programRegistry[name];
     if (!Program) {
       throw Error("invalid program name");
@@ -1425,7 +1417,7 @@ async function initialize() {
    * @param {Block} block - Block containing the program to render
    * @returns {void}
    */
-  function renderProgram(block) {
+  function mountProgram(block) {
     const programComponent = document.querySelector(
       `program-component[data-id="${block.id}"]`,
     );
@@ -1440,7 +1432,7 @@ async function initialize() {
       programInstance
     ) {
       try {
-        programInstance.run(targetElement, block.program.state);
+        programInstance.mount(targetElement, block.program.state);
       } catch (error) {
         console.warn(`Failed to run program for block ${block.id}:`, error);
       }
@@ -1482,7 +1474,7 @@ async function initialize() {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         state.blocks.forEach((block) => {
-          renderProgram(block);
+          mountProgram(block);
         });
       });
     });
