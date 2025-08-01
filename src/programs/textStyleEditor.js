@@ -2,22 +2,33 @@ import { Program } from "./program.js";
 import { TextProgram } from "./text.js";
 import { h, text } from "../packages/hyperapp/index.js";
 
+/**
+ * @typedef State
+ * @property {string} value
+ */
+
 export class TextStyleProgram extends Program {
-  /** @typedef State
-   * @property {string} value
-   */
+  constructor() {
+    super();
+    /** @type {State} */
+    this.defaultState = {
+      value: "transparent",
+    };
+    /** @type {import("./program.js").AllowedConnection[]} */
+    this.allowedConnections = [
+      {
+        name: "editor",
+        program: TextProgram,
+      },
+    ];
+  }
 
   /**
    * @param {HTMLElement} node
-   * @param {object | null} initialState
+   * @param {State} initialState
    * @returns {import("hyperapp").App<State>}
    **/
   hyperapp(node, initialState) {
-    /** @type{State} */
-    const defaultState = {
-      value: "transparent",
-    };
-
     /**
      * @param {State} state
      */
@@ -33,7 +44,7 @@ export class TextStyleProgram extends Program {
     };
 
     return {
-      init: initialState ? /** @type{State} */ (initialState) : defaultState,
+      init: initialState,
       view: (state) =>
         h("section", {}, [
           h("input", {
@@ -49,14 +60,5 @@ export class TextStyleProgram extends Program {
         ]),
       node: node,
     };
-  }
-
-  allowedConnections() {
-    return [
-      {
-        name: "editor",
-        program: TextProgram,
-      },
-    ];
   }
 }
