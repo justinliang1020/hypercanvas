@@ -43,8 +43,10 @@ export class TextProgram extends Program {
               overflow: "hidden",
               outline: "none",
             },
-            //@ts-ignore
-            oninput: (state, event) => ({ ...state, text: event.target.value }),
+            oninput: (state, event) => ({
+              ...state,
+              text: /** @type {HTMLInputElement}*/ (event.target).value,
+            }),
           },
           text(state.text),
         ),
