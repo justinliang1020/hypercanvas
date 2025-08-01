@@ -83,6 +83,7 @@ import * as programs from "./programs/index.js";
  * @property {number|null} selectedId - ID of selected block
  * @property {number|null} editingId - ID of block in edit mode
  * @property {number|null} hoveringId - ID of hovered block
+ * @property {number|null} connectingId - ID of block in connect mode (pending connection)
  * @property {ResizeState|null} resizing - Current resize operation
  * @property {DragState|null} dragStart - Drag operation start state
  * @property {ResizeStartState|null} resizeStart - Resize operation start state
@@ -287,6 +288,7 @@ function undoState(state) {
     resizing: null,
     dragStart: null,
     resizeStart: null,
+    connectingId: null,
     cursorStyle: "default",
   };
 }
@@ -321,8 +323,48 @@ function redoState(state) {
     resizing: null,
     dragStart: null,
     resizeStart: null,
+    connectingId: null,
     cursorStyle: "default",
   };
+}
+
+/**
+ * Checks if a block has any connections (as source or target)
+ * @param {State} state - Current application state
+ * @param {number} blockId - ID of block to check
+ * @returns {boolean} True if block has connections
+ */
+function blockHasConnections(state, blockId) {
+  return state.connections.some(
+    (conn) => conn.sourceBlockId === blockId || conn.targetBlockId === blockId,
+  );
+}
+
+/**
+ * Checks if a block can be connected to from the connecting block
+ * @param {State} state - Current application state
+ * @param {number} targetBlockId - ID of potential target block
+ * @returns {boolean} True if block can be connected to
+ */
+function isBlockConnectable(state, targetBlockId) {
+  if (state.connectingId === null) return false;
+  if (state.connectingId === targetBlockId) return false; // Can't connect to self
+
+  // For now, allow connection to any other block (simple 1-connection rule)
+  // In the future, this could check program compatibility, existing connections, etc.
+  return true;
+}
+
+/**
+ * Gets connected block IDs for a given source block
+ * @param {State} state - Current application state
+ * @param {number} sourceBlockId - ID of source block
+ * @returns {number[]} Array of connected block IDs
+ */
+function getConnectedBlockIds(state, sourceBlockId) {
+  return state.connections
+    .filter((conn) => conn.sourceBlockId === sourceBlockId)
+    .map((conn) => conn.targetBlockId);
 }
 
 /**
@@ -642,11 +684,22 @@ function block(state) {
     const isSelected = state.selectedId === block.id;
     const isEditing = state.editingId === block.id;
     const isHovering = state.hoveringId === block.id;
+    const isConnecting = state.connectingId === block.id;
+    const isConnectable = isBlockConnectable(state, block.id);
+    const isConnectedToHovered =
+      state.hoveringId !== null &&
+      getConnectedBlockIds(state, state.hoveringId).includes(block.id);
 
     // Having small borders, i.e. 1px, can cause rendering glitches to occur when CSS transform translations are applied such as zooming out
     // Scale outline thickness inversely with zoom to maintain consistent visual appearance
     const outline = (() => {
-      if (isSelected) {
+      if (isConnecting) {
+        return `${4 / state.zoom}px solid orange`; // Orange for pending connection
+      } else if (isConnectable) {
+        return `${3 / state.zoom}px solid green`; // Green for connectable blocks
+      } else if (isConnectedToHovered) {
+        return `${3 / state.zoom}px solid purple`; // Purple for connected blocks when hovering source
+      } else if (isSelected) {
         return `${4 / state.zoom}px solid blue`;
       } else if (isHovering) {
         return `${2 / state.zoom}px solid blue`;
@@ -705,6 +758,25 @@ function block(state) {
         onpointerdown: (state, event) => {
           event.stopPropagation();
 
+          // Handle connection mode
+          if (
+            state.connectingId !== null &&
+            isBlockConnectable(state, block.id)
+          ) {
+            // Create connection and exit connect mode
+            const newState = addConnection(
+              state,
+              "editor",
+              state.connectingId,
+              block.id,
+            );
+            return {
+              ...newState,
+              connectingId: null,
+              selectedId: block.id,
+            };
+          }
+
           // If block is in edit mode, don't start dragging
           if (state.editingId === block.id) {
             return {
@@ -718,6 +790,7 @@ function block(state) {
             ...state,
             selectedId: block.id,
             editingId: null, // Exit edit mode when selecting any block (even the same one)
+            connectingId: null, // Exit connect mode when selecting any block
             lastX: event.clientX,
             lastY: event.clientY,
             isBlockDragging: true,
@@ -748,7 +821,7 @@ function block(state) {
             pointerEvents: isEditing ? null : "none",
           },
         }),
-        ...(isSelected && !isEditing
+        ...(isSelected && !isEditing && !isConnecting
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>
               ResizeHandle(handle, state.zoom),
             )
@@ -807,6 +880,31 @@ function blockToolbar() {
         },
         text("send to front"),
       ),
+      h(
+        "button",
+        {
+          onclick: (state, event) => {
+            event.stopPropagation();
+            if (state.selectedId === null) return state;
+
+            // Toggle connect mode
+            if (state.connectingId === state.selectedId) {
+              // Exit connect mode
+              return {
+                ...state,
+                connectingId: null,
+              };
+            } else {
+              // Enter connect mode
+              return {
+                ...state,
+                connectingId: state.selectedId,
+              };
+            }
+          },
+        },
+        text("connect"),
+      ),
     ],
   );
 }
@@ -834,11 +932,12 @@ function viewport(state) {
           };
         }
 
-        // Regular click - deselect blocks and exit edit mode
+        // Regular click - deselect blocks, exit edit mode, and exit connect mode
         return {
           ...state,
           selectedId: null,
           editingId: null,
+          connectingId: null,
         };
       },
       onpointermove: (state, event) => {
@@ -1199,8 +1298,14 @@ function main(state) {
         // Handle keyboard shortcuts
         switch (event.key) {
           case "Escape":
-            // Exit edit mode
-            if (state.editingId !== null) {
+            // Exit connect mode, edit mode, or deselect
+            if (state.connectingId !== null) {
+              event.preventDefault();
+              return {
+                ...state,
+                connectingId: null,
+              };
+            } else if (state.editingId !== null) {
               event.preventDefault();
               return {
                 ...state,
@@ -1415,6 +1520,7 @@ async function initialize() {
     selectedId: null,
     editingId: null,
     hoveringId: null,
+    connectingId: null,
     resizing: null,
     offsetX: 0,
     offsetY: 0,
