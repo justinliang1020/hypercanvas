@@ -1323,11 +1323,8 @@ class ProgramInstanceManager {
   syncPrograms(dispatch, state) {
     this.#initializePrograms(state.blocks);
     this.#cleanupDeletedPrograms(state.blocks);
-
     this.#syncProgramStates(state.blocks);
-
     this.#initializeConnections(state.connections);
-    this.#cleanupDeletedConnections(state.connections);
   }
 
   /**
@@ -1400,14 +1397,6 @@ class ProgramInstanceManager {
         sourceProgram.setConnection(connection.name, targetProgram);
       }
     }
-  }
-
-  /**
-   * Iterate through all programs instances' connections and remove those that don't exist anymore
-   * @param {BlockConnection[]} connections - Current blocks array
-   */
-  #cleanupDeletedConnections(connections) {
-    //TODO: implement
   }
 }
 
@@ -1487,6 +1476,20 @@ async function initialize() {
   let currentState = state;
 
   /**
+   * Mutates state to remove inactive connections
+   * @param {State} state
+   */
+  function deleteInactiveConnections(state) {
+    const activeBlockIds = new Set(state.blocks.map((block) => block.id));
+    const validConnections = state.connections.filter(
+      (connection) =>
+        activeBlockIds.has(connection.sourceBlockId) &&
+        activeBlockIds.has(connection.targetBlockId),
+    );
+    state.connections = validConnections;
+  }
+
+  /**
    * Subscription that runs after DOM repaint to render programs and handle dark mode
    * @param {import("hyperapp").Dispatch<State>} dispatch - Function to dispatch actions
    * @param {State} state
@@ -1499,6 +1502,8 @@ async function initialize() {
     } else {
       document.body.classList.remove("dark-mode");
     }
+
+    deleteInactiveConnections(state);
 
     programInstanceManager.syncPrograms(dispatch, state);
 
