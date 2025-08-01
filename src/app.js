@@ -14,11 +14,11 @@ import * as programs from "./programs/index.js";
  * @property {number} x - X position on canvas
  * @property {number} y - Y position on canvas
  * @property {number} zIndex - Stacking order (higher = front)
- * @property {Program} program - Associated program instance
+ * @property {ProgramData} programData - Associated program data
  */
 
 /**
- * @typedef {Object} Program - Data for Hyperapp Program
+ * @typedef {Object} ProgramData - Data for Hyperapp Program
  * @property {string} name - Unique program name for mounting hyperapp program
  * @property {Object | null} state - State of hyperapp program instance, constantly synced.
  * If 'null', the program will be mounted with its default state.
@@ -385,7 +385,7 @@ function addBlock(
     x: x,
     y: y,
     zIndex: Math.max(...state.blocks.map((block) => block.zIndex), 0) + 1,
-    program: {
+    programData: {
       name: programName,
       state: programState,
     },
@@ -434,8 +434,8 @@ function pasteBlock(state) {
 
   return addBlock(
     state,
-    blockData.program.name,
-    blockData.program.state,
+    blockData.programData.name,
+    blockData.programData.state,
     blockData.x + PASTE_OFFSET_X,
     blockData.y + PASTE_OFFSET_Y,
     blockData.width,
@@ -1366,7 +1366,7 @@ class ProgramInstanceManager {
   #initializePrograms(blocks) {
     for (const block of blocks) {
       if (!this.#programs.has(block.id)) {
-        this.#initializeProgram(block.id, block.program.name);
+        this.#initializeProgram(block.id, block.programData.name);
       }
     }
   }
@@ -1394,7 +1394,7 @@ class ProgramInstanceManager {
     for (const block of blocks) {
       const program = this.#programs.get(block.id);
       if (program?.isMounted()) {
-        block.program.state = program.getState();
+        block.programData.state = program.getState();
       }
     }
   }
@@ -1453,7 +1453,7 @@ async function initialize() {
       programInstance
     ) {
       try {
-        programInstance.mount(targetElement, block.program.state);
+        programInstance.mount(targetElement, block.programData.state);
       } catch (error) {
         console.warn(`Failed to run program for block ${block.id}:`, error);
       }
