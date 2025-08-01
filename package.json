@@ -1,6 +1,6 @@
 {
-  "name": "computer-land",
-  "productName": "computer-land",
+  "name": "hypercanvas",
+  "productName": "hypercanvas",
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": "src/index.js",
