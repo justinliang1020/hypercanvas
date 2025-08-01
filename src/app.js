@@ -86,7 +86,6 @@ import * as programs from "./programs/index.js";
  * @property {ResizeState|null} resizing - Current resize operation
  * @property {DragState|null} dragStart - Drag operation start state
  * @property {ResizeStartState|null} resizeStart - Resize operation start state
- * @property {number} toolbarWidth - Width of the toolbar
  * @property {MementoManager} mementoManager - Undo/redo manager
  * @property {boolean} isDarkMode - Dark mode toggle
  * @property {Block|null} clipboard - Copied block data
@@ -101,7 +100,6 @@ import * as programs from "./programs/index.js";
 // -----------------------------
 
 const MIN_SIZE = 20; // Minimum size in px
-const INITIAL_RIGHT_TOOLBAR_WIDTH = 400;
 const STATE_SAVE_PATH = "user/state.json";
 const PASTE_OFFSET_X = 20;
 const PASTE_OFFSET_Y = 20;
@@ -1426,7 +1424,6 @@ async function initialize() {
     cursorStyle: "pointer",
     isViewportDragging: false,
     isBlockDragging: false,
-    toolbarWidth: INITIAL_RIGHT_TOOLBAR_WIDTH,
     dragStart: null,
     resizeStart: null,
     mementoManager: createMementoManager(),
