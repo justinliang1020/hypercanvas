@@ -12,7 +12,7 @@ export class TextStyleProgram extends Program {
    * @param {object | null} initialState
    * @returns {import("hyperapp").App<State>}
    **/
-  appConfig(node, initialState) {
+  hyperapp(node, initialState) {
     /** @type{State} */
     const defaultState = {
       value: "transparent",

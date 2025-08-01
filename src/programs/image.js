@@ -11,7 +11,7 @@ export class ImageProgram extends Program {
    * @param {object | null} initialState
    * @returns {import("hyperapp").App<State>}
    **/
-  appConfig(node, initialState) {
+  hyperapp(node, initialState) {
     /** @type{State} */
     const defaultState = {
       path: "assets/sun-cat.jpg",
