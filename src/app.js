@@ -1203,11 +1203,6 @@ function toolbar(state) {
       ),
       h(
         "button",
-        { onclick: (state) => addBlock(state, "image") },
-        text("add new image"),
-      ),
-      h(
-        "button",
         {
           onclick: (state) => [
             state,
@@ -1217,12 +1212,18 @@ function toolbar(state) {
                 const result = await window.fileAPI.selectImageFromDialog();
                 if (!result.canceled && result.success) {
                   console.log(`Image uploaded: ${result.filename}`);
-                  // For now, just log the upload. Later this could create a new image block
-                  // with the uploaded image path as initial state
+                  dispatch((state) =>
+                    addBlock(
+                      state,
+                      "image",
+                      { path: result.path },
+                      50, // x
+                      50, // y
+                      result.width,
+                      result.height,
+                    ),
+                  );
                 }
-                dispatch((state) =>
-                  addBlock(state, "image", { path: result.path }),
-                );
               } catch (error) {
                 console.error("Failed to upload image:", error);
                 dispatch((state) => state);
@@ -1301,7 +1302,15 @@ function main(state) {
           );
           if (result.success) {
             dispatch((state) =>
-              addBlock(state, "image", { path: result.path }),
+              addBlock(
+                state,
+                "image",
+                { path: result.path },
+                50, // x
+                50, // y
+                result.width,
+                result.height,
+              ),
             );
             return;
           }

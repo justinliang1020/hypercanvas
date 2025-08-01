@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld("fileAPI", {
   selectImageFromDialog: () => ipcRenderer.invoke("image:selectFromDialog"),
   saveImageFromBuffer: (imageBuffer, mimeType) =>
     ipcRenderer.invoke("image:saveFromBuffer", imageBuffer, mimeType),
+  getImageDimensions: (imagePath) => ipcRenderer.invoke("image:getDimensions", imagePath),
 });
 
 contextBridge.exposeInMainWorld("electronAPI", {

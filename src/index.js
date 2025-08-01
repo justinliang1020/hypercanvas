@@ -114,6 +114,70 @@ async function getUniqueFilename(basePath, filename) {
   return finalFilename;
 }
 
+// Helper function to get image dimensions from buffer
+async function getImageDimensions(buffer) {
+  // Simple image dimension detection for common formats
+  // This is a basic implementation - for production, consider using a library like 'image-size'
+  
+  if (buffer.length < 24) {
+    return { width: 200, height: 200 }; // fallback
+  }
+
+  // PNG detection
+  if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) {
+    const width = buffer.readUInt32BE(16);
+    const height = buffer.readUInt32BE(20);
+    return { width, height };
+  }
+
+  // JPEG detection
+  if (buffer[0] === 0xFF && buffer[1] === 0xD8) {
+    let offset = 2;
+    while (offset < buffer.length - 8) {
+      if (buffer[offset] === 0xFF) {
+        const marker = buffer[offset + 1];
+        if (marker >= 0xC0 && marker <= 0xC3) {
+          const height = buffer.readUInt16BE(offset + 5);
+          const width = buffer.readUInt16BE(offset + 7);
+          return { width, height };
+        }
+        const segmentLength = buffer.readUInt16BE(offset + 2);
+        offset += 2 + segmentLength;
+      } else {
+        offset++;
+      }
+    }
+  }
+
+  // GIF detection
+  if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46) {
+    const width = buffer.readUInt16LE(6);
+    const height = buffer.readUInt16LE(8);
+    return { width, height };
+  }
+
+  // BMP detection
+  if (buffer[0] === 0x42 && buffer[1] === 0x4D) {
+    const width = buffer.readUInt32LE(18);
+    const height = buffer.readUInt32LE(22);
+    return { width, height };
+  }
+
+  // WebP detection
+  if (buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 &&
+      buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50) {
+    // Simple WebP VP8 format
+    if (buffer[12] === 0x56 && buffer[13] === 0x50 && buffer[14] === 0x38) {
+      const width = ((buffer[26] | (buffer[27] << 8) | (buffer[28] << 16)) & 0x3FFF) + 1;
+      const height = ((buffer[28] >> 2 | (buffer[29] << 6) | (buffer[30] << 14)) & 0x3FFF) + 1;
+      return { width, height };
+    }
+  }
+
+  // Fallback dimensions
+  return { width: 200, height: 200 };
+}
+
 // Write file function
 async function writeFile(filename, data) {
   try {
@@ -225,6 +289,9 @@ ipcMain.handle("image:selectFromDialog", async (event) => {
     // Read source file
     const imageData = await fs.readFile(sourcePath);
 
+    // Get image dimensions
+    const dimensions = await getImageDimensions(imageData);
+
     // Write to media directory
     await writeFile(targetPath, imageData);
 
@@ -232,6 +299,8 @@ ipcMain.handle("image:selectFromDialog", async (event) => {
       success: true,
       filename: uniqueFilename,
       path: getFilePath(targetPath),
+      width: dimensions.width,
+      height: dimensions.height,
     };
   } catch (error) {
     console.error("Error selecting image from dialog:", error);
@@ -263,17 +332,53 @@ ipcMain.handle("image:saveFromBuffer", async (event, imageBuffer, mimeType) => {
     );
     const targetPath = path.join("user/media", uniqueFilename);
 
+    // Convert ArrayBuffer to Buffer and get dimensions
+    const buffer = Buffer.from(imageBuffer);
+    const dimensions = await getImageDimensions(buffer);
+
     // Write image buffer to media directory
-    await writeFile(targetPath, Buffer.from(imageBuffer));
+    await writeFile(targetPath, buffer);
 
     return {
       success: true,
       filename: uniqueFilename,
       path: getFilePath(targetPath),
+      width: dimensions.width,
+      height: dimensions.height,
     };
   } catch (error) {
     console.error("Error saving image from buffer:", error);
     throw error;
+  }
+});
+
+// Get image dimensions handler
+ipcMain.handle("image:getDimensions", async (event, imagePath) => {
+  try {
+    // Handle both absolute paths and relative paths from assets
+    let fullPath;
+    if (path.isAbsolute(imagePath)) {
+      fullPath = imagePath;
+    } else {
+      // For relative paths like "assets/sun-cat.jpg", resolve from app directory
+      fullPath = path.join(__dirname, imagePath);
+    }
+    
+    const imageData = await fs.readFile(fullPath);
+    const dimensions = await getImageDimensions(imageData);
+    
+    return {
+      success: true,
+      width: dimensions.width,
+      height: dimensions.height,
+    };
+  } catch (error) {
+    console.error("Error getting image dimensions:", error);
+    return {
+      success: false,
+      width: 200,
+      height: 200,
+    };
   }
 });
 
