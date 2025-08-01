@@ -1,31 +1,32 @@
 import { h, text } from "../packages/hyperapp/index.js";
 import { Program } from "./program.js";
 
-/** @typedef State
+/**
+ * @typedef State
  * @property {string} text
  * @property {string} backgroundColor
  */
+
 export class TextProgram extends Program {
   constructor() {
     super();
-  }
-
-  /** @returns {State} */
-  setDefaultState() {
-    return {
+    /** @type {State} */
+    this.defaultState = {
       text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
       backgroundColor: "transparent",
     };
+    /** @type {import("./program.js").AllowedConnection[]} */
+    this.allowedConnections = [];
   }
 
   /**
    * @param {HTMLElement} node
-   * @param {State} state
+   * @param {State} initialState
    * @returns {import("hyperapp").App<State>}
    **/
-  appConfig(node, state) {
+  appConfig(node, initialState) {
     return {
-      init: state,
+      init: initialState,
       view: (state) =>
         h(
           "textarea",

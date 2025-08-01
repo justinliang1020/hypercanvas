@@ -1,29 +1,22 @@
 import { app } from "../packages/hyperapp/index.js";
 
 /**
+ * @typedef {Object} AllowedConnection
+ * @property {String} name
+ * @property {typeof Program} program
+ */
+
+/**
  * @abstract
  */
 export class Program {
   /** @type{import("hyperapp").Dispatch<any> | null}*/
-  #dispatch;
+  #dispatch = null;
   /** @type{Object.<string, (Program | null)>} */
-  #connections;
-  /** @type {any} */
-  #defaultState;
-
-  constructor() {
-    this.#dispatch = null;
-    this.#connections = {};
-    this.#defaultState = this.setDefaultState();
-  }
-
-  /**
-   * @abstract
-   * @returns {any}
-   */
-  setDefaultState() {
-    throw new Error("default state must be implemented");
-  }
+  #connections = {};
+  /** @type {AllowedConnection[]} */
+  allowedConnections = [];
+  defaultState = {};
 
   /**
    * @abstract
@@ -35,26 +28,13 @@ export class Program {
     throw new Error("app must be implemented");
   }
 
-  /**
-   * @typedef {Object} AllowedConnection
-   * @property {String} name
-   * @property {typeof Program} program
-   */
-  /**
-   * @abstract
-   * @returns {AllowedConnection[]}
-   **/
-  allowedConnections() {
-    throw new Error("no allowed connections implemented");
-  }
-
   /** Runs a hyperapp program on a node. If no state is passed in, it uses the default state of the program.
    * @param {HTMLElement} node
    * @param {Object | null} state
    */
   mount(node, state) {
     if (state === null) {
-      this.#dispatch = app(this.appConfig(node, this.#defaultState));
+      this.#dispatch = app(this.appConfig(node, this.defaultState));
     } else {
       this.#dispatch = app(this.appConfig(node, state));
     }
