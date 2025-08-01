@@ -93,11 +93,11 @@ async function ensureDirectory(filePath) {
 async function getUniqueFilename(basePath, filename) {
   const ext = path.extname(filename);
   const nameWithoutExt = path.basename(filename, ext);
-  
+
   let counter = 0;
   let finalFilename = filename;
   let finalPath = path.join(basePath, finalFilename);
-  
+
   // Check if file exists and increment counter until we find a unique name
   while (true) {
     try {
@@ -110,7 +110,7 @@ async function getUniqueFilename(basePath, filename) {
       break;
     }
   }
-  
+
   return finalFilename;
 }
 
@@ -121,7 +121,7 @@ async function writeFile(filename, data) {
     await ensureDirectory(filePath);
 
     let content, encoding;
-    
+
     if (Buffer.isBuffer(data)) {
       // Binary data (images, etc.)
       content = data;
@@ -194,15 +194,18 @@ ipcMain.handle("dialog:showOpenDialog", async (event, options) => {
   }
 });
 
-// Upload image handler
-ipcMain.handle("image:upload", async (event) => {
+// Select image from dialog handler
+ipcMain.handle("image:selectFromDialog", async (event) => {
   try {
     // Show file dialog for image selection
     const result = await dialog.showOpenDialog({
-      properties: ['openFile'],
+      properties: ["openFile"],
       filters: [
-        { name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'] }
-      ]
+        {
+          name: "Images",
+          extensions: ["jpg", "jpeg", "png", "gif", "bmp", "webp"],
+        },
+      ],
     });
 
     if (result.canceled || result.filePaths.length === 0) {
@@ -211,24 +214,65 @@ ipcMain.handle("image:upload", async (event) => {
 
     const sourcePath = result.filePaths[0];
     const originalFilename = path.basename(sourcePath);
-    
+
     // Generate unique filename in media directory
-    const uniqueFilename = await getUniqueFilename("user/media", originalFilename);
+    const uniqueFilename = await getUniqueFilename(
+      "user/media",
+      originalFilename,
+    );
     const targetPath = path.join("user/media", uniqueFilename);
-    
+
     // Read source file
     const imageData = await fs.readFile(sourcePath);
-    
+
     // Write to media directory
     await writeFile(targetPath, imageData);
-    
-    return { 
-      success: true, 
+
+    return {
+      success: true,
       filename: uniqueFilename,
-      path: getFilePath(targetPath)
+      path: getFilePath(targetPath),
     };
   } catch (error) {
-    console.error("Error uploading image:", error);
+    console.error("Error selecting image from dialog:", error);
+    throw error;
+  }
+});
+
+// Save image from buffer handler
+ipcMain.handle("image:saveFromBuffer", async (event, imageBuffer, mimeType) => {
+  try {
+    // Determine file extension from MIME type
+    const extensionMap = {
+      "image/png": "png",
+      "image/jpeg": "jpg",
+      "image/jpg": "jpg",
+      "image/gif": "gif",
+      "image/bmp": "bmp",
+      "image/webp": "webp",
+    };
+
+    const extension = extensionMap[mimeType] || "png";
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const originalFilename = `pasted-image-${timestamp}.${extension}`;
+
+    // Generate unique filename in media directory
+    const uniqueFilename = await getUniqueFilename(
+      "user/media",
+      originalFilename,
+    );
+    const targetPath = path.join("user/media", uniqueFilename);
+
+    // Write image buffer to media directory
+    await writeFile(targetPath, Buffer.from(imageBuffer));
+
+    return {
+      success: true,
+      filename: uniqueFilename,
+      path: getFilePath(targetPath),
+    };
+  } catch (error) {
+    console.error("Error saving image from buffer:", error);
     throw error;
   }
 });

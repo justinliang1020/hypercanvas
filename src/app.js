@@ -1214,7 +1214,7 @@ function toolbar(state) {
             async (dispatch) => {
               try {
                 // @ts-ignore
-                const result = await window.fileAPI.uploadImage();
+                const result = await window.fileAPI.selectImageFromDialog();
                 if (!result.canceled && result.success) {
                   console.log(`Image uploaded: ${result.filename}`);
                   // For now, just log the upload. Later this could create a new image block
@@ -1288,7 +1288,27 @@ function main(state) {
 
       const imageTypes = item.types.filter((type) => type.startsWith("image/"));
       if (imageTypes.length > 0) {
-        //TODO: add new image block with image path initial state
+        // Handle image paste
+        const imageType = imageTypes[0];
+        const blob = await item.getType(imageType);
+        const arrayBuffer = await blob.arrayBuffer();
+
+        try {
+          // @ts-ignore
+          const result = await window.fileAPI.saveImageFromBuffer(
+            arrayBuffer,
+            imageType,
+          );
+          if (result.success) {
+            dispatch((state) =>
+              addBlock(state, "image", { path: result.path }),
+            );
+            return;
+          }
+        } catch (error) {
+          console.error("Failed to paste image:", error);
+        }
+
         dispatch((state) => state);
         return;
       }
