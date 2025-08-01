@@ -326,35 +326,23 @@ function redoState(state) {
 }
 
 /**
- * Establishes a connection between two blocks
+ * Adds a connection between two blocks
  * @param {State} state - Current application state
- * @param {BlockConnection} connection - Connection to establish
- * @returns {State} Updated state
+ * @param {string} name - Connection name/type
+ * @param {number} sourceBlockId - ID of source block
+ * @param {number} targetBlockId - ID of target block
+ * @returns {State} Updated state with new connection
  */
-function initializeConnection(state, connection) {
-  const sourceBlock = state.blocks.find(
-    (block) => block.id === connection.sourceBlockId,
-  );
-  if (!sourceBlock) return state;
-  const targetBlock = state.blocks.find(
-    (block) => block.id === connection.targetBlockId,
-  );
-  if (!targetBlock) return state;
-  const sourceProgramInstance = programInstanceManager.get(sourceBlock.id);
-  const targetProgramInstance = programInstanceManager.get(targetBlock.id);
+function addConnection(state, name, sourceBlockId, targetBlockId) {
+  const connection = {
+    name,
+    sourceBlockId,
+    targetBlockId,
+  };
+  // TODO: allowed connection logic
+  // TODO: multiple connections per program
 
-  if (sourceProgramInstance && targetProgramInstance) {
-    sourceProgramInstance.setConnection(connection.name, targetProgramInstance);
-  }
-  //TODO: think about how connections should be cleaned up
-
-  //BUG: fix allowedConnections code
-
-  // if (!(connection.name in sourceBlock.program.instance.allowedConnections())) {
-  //   console.error("connection not allowed");
-  //   return state;
-  // }
-  return state;
+  return { ...state, connections: [connection] };
 }
 
 /**
@@ -1123,15 +1111,7 @@ function toolbar(state) {
         {
           /** @returns {import("hyperapp").Dispatchable<State>} */
           onclick: (state) => {
-            /** @type {BlockConnection} */
-            const connection = {
-              name: "editor",
-              sourceBlockId: 2,
-              targetBlockId: 1,
-            };
-            initializeConnection(state, connection);
-
-            return { ...state, connections: [connection] };
+            return addConnection(state, "editor", 2, 1);
           },
         },
         text("add connection between 1 and 2"),
@@ -1343,7 +1323,11 @@ class ProgramInstanceManager {
   syncPrograms(dispatch, state) {
     this.#initializePrograms(state.blocks);
     this.#cleanupDeletedPrograms(state.blocks);
+
     this.#syncProgramStates(state.blocks);
+
+    this.#initializeConnections(state.connections);
+    this.#cleanupDeletedConnections(state.connections);
   }
 
   /**
@@ -1397,6 +1381,33 @@ class ProgramInstanceManager {
         block.programData.state = program.getState();
       }
     }
+  }
+
+  /**
+   * Initialzie connections for programs
+   * @param {BlockConnection[]} connections - Current blocks array
+   */
+  #initializeConnections(connections) {
+    for (const connection of connections) {
+      const sourceProgram = programInstanceManager.get(
+        connection.sourceBlockId,
+      );
+      const targetProgram = programInstanceManager.get(
+        connection.targetBlockId,
+      );
+
+      if (sourceProgram && targetProgram) {
+        sourceProgram.setConnection(connection.name, targetProgram);
+      }
+    }
+  }
+
+  /**
+   * Iterate through all programs instances' connections and remove those that don't exist anymore
+   * @param {BlockConnection[]} connections - Current blocks array
+   */
+  #cleanupDeletedConnections(connections) {
+    //TODO: implement
   }
 }
 
