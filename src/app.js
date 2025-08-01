@@ -102,6 +102,7 @@ import * as programs from "./programs/index.js";
 
 const MIN_SIZE = 20; // Minimum size in px
 const STATE_SAVE_PATH = "user/state.json";
+const MEDIA_SAVE_PATH = "user/media/";
 const PASTE_OFFSET_X = 20;
 const PASTE_OFFSET_Y = 20;
 
@@ -1204,6 +1205,32 @@ function toolbar(state) {
         "button",
         { onclick: (state) => addBlock(state, "image") },
         text("add new image"),
+      ),
+      h(
+        "button",
+        {
+          onclick: (state) => [
+            state,
+            async (dispatch) => {
+              try {
+                // @ts-ignore
+                const result = await window.fileAPI.uploadImage();
+                if (!result.canceled && result.success) {
+                  console.log(`Image uploaded: ${result.filename}`);
+                  // For now, just log the upload. Later this could create a new image block
+                  // with the uploaded image path as initial state
+                }
+                dispatch((state) =>
+                  addBlock(state, "image", { path: result.path }),
+                );
+              } catch (error) {
+                console.error("Failed to upload image:", error);
+                dispatch((state) => state);
+              }
+            },
+          ],
+        },
+        text("upload image"),
       ),
       h(
         "button",

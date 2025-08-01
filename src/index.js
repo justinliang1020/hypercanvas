@@ -1,5 +1,5 @@
 //@ts-nocheck
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("node:path");
 const fs = require("fs").promises;
 
@@ -89,17 +89,54 @@ async function ensureDirectory(filePath) {
   }
 }
 
+// Helper function to generate unique filename with auto-incrementing suffix
+async function getUniqueFilename(basePath, filename) {
+  const ext = path.extname(filename);
+  const nameWithoutExt = path.basename(filename, ext);
+  
+  let counter = 0;
+  let finalFilename = filename;
+  let finalPath = path.join(basePath, finalFilename);
+  
+  // Check if file exists and increment counter until we find a unique name
+  while (true) {
+    try {
+      await fs.access(getFilePath(path.join(basePath, finalFilename)));
+      // File exists, increment counter
+      counter++;
+      finalFilename = `${nameWithoutExt}(${counter})${ext}`;
+    } catch (error) {
+      // File doesn't exist, we can use this name
+      break;
+    }
+  }
+  
+  return finalFilename;
+}
+
 // Write file function
 async function writeFile(filename, data) {
   try {
     const filePath = getFilePath(filename);
     await ensureDirectory(filePath);
 
-    // Convert data to string if it's an object
-    const content =
-      typeof data === "object" ? JSON.stringify(data, null, 2) : data;
+    let content, encoding;
+    
+    if (Buffer.isBuffer(data)) {
+      // Binary data (images, etc.)
+      content = data;
+      encoding = null;
+    } else if (typeof data === "object") {
+      // JSON objects
+      content = JSON.stringify(data, null, 2);
+      encoding = "utf8";
+    } else {
+      // Text data
+      content = data;
+      encoding = "utf8";
+    }
 
-    await fs.writeFile(filePath, content, "utf8");
+    await fs.writeFile(filePath, content, encoding);
     console.log(`File written successfully: ${filePath}`);
     return { success: true, path: filePath };
   } catch (error) {
@@ -143,6 +180,55 @@ ipcMain.handle("file:read", async (event, filename) => {
   try {
     return await readFile(filename);
   } catch (error) {
+    throw error;
+  }
+});
+
+// Dialog handler for file selection
+ipcMain.handle("dialog:showOpenDialog", async (event, options) => {
+  try {
+    const result = await dialog.showOpenDialog(options);
+    return result;
+  } catch (error) {
+    throw error;
+  }
+});
+
+// Upload image handler
+ipcMain.handle("image:upload", async (event) => {
+  try {
+    // Show file dialog for image selection
+    const result = await dialog.showOpenDialog({
+      properties: ['openFile'],
+      filters: [
+        { name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'] }
+      ]
+    });
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return { canceled: true };
+    }
+
+    const sourcePath = result.filePaths[0];
+    const originalFilename = path.basename(sourcePath);
+    
+    // Generate unique filename in media directory
+    const uniqueFilename = await getUniqueFilename("user/media", originalFilename);
+    const targetPath = path.join("user/media", uniqueFilename);
+    
+    // Read source file
+    const imageData = await fs.readFile(sourcePath);
+    
+    // Write to media directory
+    await writeFile(targetPath, imageData);
+    
+    return { 
+      success: true, 
+      filename: uniqueFilename,
+      path: getFilePath(targetPath)
+    };
+  } catch (error) {
+    console.error("Error uploading image:", error);
     throw error;
   }
 });

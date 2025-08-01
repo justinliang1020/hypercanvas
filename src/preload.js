@@ -9,6 +9,8 @@ contextBridge.exposeInMainWorld("fileAPI", {
   writeFile: (filename, data) =>
     ipcRenderer.invoke("file:write", filename, data),
   readFile: (filename) => ipcRenderer.invoke("file:read", filename),
+  showOpenDialog: (options) => ipcRenderer.invoke("dialog:showOpenDialog", options),
+  uploadImage: () => ipcRenderer.invoke("image:upload"),
 });
 
 contextBridge.exposeInMainWorld("electronAPI", {
