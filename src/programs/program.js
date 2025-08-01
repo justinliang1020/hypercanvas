@@ -78,7 +78,11 @@ export class Program {
    * @param {Program} program
    */
   setConnection(name, program) {
-    this.#connections[name] = program;
+    for (const allowedConnection of this.allowedConnections) {
+      if (program instanceof allowedConnection.program) {
+        this.#connections[name] = program;
+      }
+    }
   }
 
   /**
