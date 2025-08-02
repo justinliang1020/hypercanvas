@@ -118,25 +118,30 @@ async function getUniqueFilename(basePath, filename) {
 async function getImageDimensions(buffer) {
   // Simple image dimension detection for common formats
   // This is a basic implementation - for production, consider using a library like 'image-size'
-  
+
   if (buffer.length < 24) {
     return { width: 200, height: 200 }; // fallback
   }
 
   // PNG detection
-  if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) {
+  if (
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47
+  ) {
     const width = buffer.readUInt32BE(16);
     const height = buffer.readUInt32BE(20);
     return { width, height };
   }
 
   // JPEG detection
-  if (buffer[0] === 0xFF && buffer[1] === 0xD8) {
+  if (buffer[0] === 0xff && buffer[1] === 0xd8) {
     let offset = 2;
     while (offset < buffer.length - 8) {
-      if (buffer[offset] === 0xFF) {
+      if (buffer[offset] === 0xff) {
         const marker = buffer[offset + 1];
-        if (marker >= 0xC0 && marker <= 0xC3) {
+        if (marker >= 0xc0 && marker <= 0xc3) {
           const height = buffer.readUInt16BE(offset + 5);
           const width = buffer.readUInt16BE(offset + 7);
           return { width, height };
@@ -157,19 +162,31 @@ async function getImageDimensions(buffer) {
   }
 
   // BMP detection
-  if (buffer[0] === 0x42 && buffer[1] === 0x4D) {
+  if (buffer[0] === 0x42 && buffer[1] === 0x4d) {
     const width = buffer.readUInt32LE(18);
     const height = buffer.readUInt32LE(22);
     return { width, height };
   }
 
   // WebP detection
-  if (buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 &&
-      buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50) {
+  if (
+    buffer[0] === 0x52 &&
+    buffer[1] === 0x49 &&
+    buffer[2] === 0x46 &&
+    buffer[3] === 0x46 &&
+    buffer[8] === 0x57 &&
+    buffer[9] === 0x45 &&
+    buffer[10] === 0x42 &&
+    buffer[11] === 0x50
+  ) {
     // Simple WebP VP8 format
     if (buffer[12] === 0x56 && buffer[13] === 0x50 && buffer[14] === 0x38) {
-      const width = ((buffer[26] | (buffer[27] << 8) | (buffer[28] << 16)) & 0x3FFF) + 1;
-      const height = ((buffer[28] >> 2 | (buffer[29] << 6) | (buffer[30] << 14)) & 0x3FFF) + 1;
+      const width =
+        ((buffer[26] | (buffer[27] << 8) | (buffer[28] << 16)) & 0x3fff) + 1;
+      const height =
+        (((buffer[28] >> 2) | (buffer[29] << 6) | (buffer[30] << 14)) &
+          0x3fff) +
+        1;
       return { width, height };
     }
   }
@@ -363,10 +380,10 @@ ipcMain.handle("image:getDimensions", async (event, imagePath) => {
       // For relative paths like "assets/sun-cat.jpg", resolve from app directory
       fullPath = path.join(__dirname, imagePath);
     }
-    
+
     const imageData = await fs.readFile(fullPath);
     const dimensions = await getImageDimensions(imageData);
-    
+
     return {
       success: true,
       width: dimensions.width,
@@ -381,9 +398,3 @@ ipcMain.handle("image:getDimensions", async (event, imagePath) => {
     };
   }
 });
-
-// Export functions for use in other parts of main process
-module.exports = {
-  writeFile,
-  readFile,
-};
