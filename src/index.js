@@ -71,6 +71,10 @@ app.on("window-all-closed", () => {
   // }
 });
 
+// -----------------------------
+// ## File Processing
+// -----------------------------
+
 // Get the user data directory (AppData on Windows, equivalent on other platforms)
 const userDataPath = app.getPath("userData");
 

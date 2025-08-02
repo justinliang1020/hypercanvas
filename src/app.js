@@ -1655,7 +1655,7 @@ async function initialize() {
    * Subscription that runs after DOM repaint to render programs and handle dark mode
    * @param {import("hyperapp").Dispatch<State>} dispatch - Function to dispatch actions
    * @param {State} state
-   * @returns {(() => void) | void} Cleanup function or void
+   * @returns {() => void} Cleanup function
    */
   function subscription(dispatch, state) {
     // Apply dark mode class to body
@@ -1689,8 +1689,7 @@ async function initialize() {
   const appConfig = {
     init: state,
     view: (state) => main(state),
-    // @ts-ignore
-    node: document.getElementById("app"),
+    node: /** @type {Node} */ (document.getElementById("app")),
     subscriptions: (state) => [[subscription, state]],
   };
 
