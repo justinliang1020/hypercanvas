@@ -17,7 +17,7 @@ export class TextStyleProgram extends Program {
     /** @type {import("./program.js").AllowedConnection[]} */
     this.allowedConnections = [
       {
-        name: "editor",
+        name: "default",
         program: TextProgram,
       },
     ];
@@ -33,7 +33,7 @@ export class TextStyleProgram extends Program {
      * @param {State} state
      */
     const changeBackground = (state) => {
-      const textProgramInstance = this.getConnection("editor");
+      const textProgramInstance = this.getConnection("default");
       if (!textProgramInstance) return state;
       const textProgramState = textProgramInstance.getState();
       textProgramInstance.modifyState({

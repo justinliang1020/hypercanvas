@@ -767,7 +767,7 @@ function block(state) {
             // Create connection and exit connect mode
             const newState = addConnection(
               state,
-              "editor",
+              "default",
               state.connectingId,
               block.id,
             );
@@ -1232,16 +1232,6 @@ function toolbar(state) {
           ],
         },
         text("upload image"),
-      ),
-      h(
-        "button",
-        {
-          /** @returns {import("hyperapp").Dispatchable<State>} */
-          onclick: (state) => {
-            return addConnection(state, "editor", 2, 1);
-          },
-        },
-        text("add connection between 1 and 2"),
       ),
       h(
         "button",
