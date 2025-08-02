@@ -696,8 +696,10 @@ function block(state) {
     const outline = (() => {
       if (isConnecting) {
         return `${4 / state.zoom}px solid orange`; // Orange for pending connection
+      } else if (isConnectable && isHovering) {
+        return `${4 / state.zoom}px solid #00ff00`; // Bright green for hovered connectable blocks
       } else if (isConnectable) {
-        return `${3 / state.zoom}px solid green`; // Green for connectable blocks
+        return `${3 / state.zoom}px solid #90ee90`; // Light green for connectable blocks
       } else if (isConnectedToHovered) {
         return `${3 / state.zoom}px solid purple`; // Purple for connected blocks when hovering source
       } else if (isSelected) {
@@ -742,10 +744,23 @@ function block(state) {
             };
           }
 
+          // Set cursor based on current mode
+          let cursorStyle = "default";
+          if (state.connectingId !== null) {
+            // In connection mode, use default pointer cursor
+            cursorStyle = "pointer";
+          } else if (state.editingId === block.id) {
+            // In edit mode, use default cursor
+            cursorStyle = "default";
+          } else {
+            // Normal mode, use move cursor
+            cursorStyle = "move";
+          }
+
           return {
             ...state,
             hoveringId: block.id,
-            cursorStyle: state.editingId === block.id ? "default" : "move",
+            cursorStyle: cursorStyle,
           };
         },
         onpointerleave: (state, event) => {
