@@ -36,6 +36,8 @@ export class Program {
   defaultState = {};
   /** @type {Number} */
   id = -1;
+  /** @type {any} */
+  #currentState = null;
 
   /**
    * Required to set when initializing a program
@@ -86,14 +88,7 @@ export class Program {
       console.error("no dispatch function");
       return {};
     }
-    //TODO: this is triggering a dispatch every time this is called (could trigger unintended no-op events). use event here?
-    let currentState;
-    this.#dispatch((/** @type {any} */ state) => {
-      currentState = state;
-      return state;
-    });
-    // @ts-ignore
-    return currentState;
+    return this.#currentState || {};
   }
 
   /**
@@ -141,8 +136,20 @@ export class Program {
    * @type {(dispatch: import("hyperapp").Dispatch<any>) => import("hyperapp").Dispatch<any>}
    */
   #logStateMiddleware = stateMiddleware((state) => {
+    this.#currentState = state;
     console.log(`${this.id} STATE:`, state);
-    //TODO: make this emit an event, and figure out how to test that
+    this.#emitStateChange(state);
     return state;
   });
+
+  /**
+   * Emits a state change event
+   * @param {any} state
+   */
+  #emitStateChange(state) {
+    const event = new CustomEvent("programStateChange", {
+      detail: { programId: this.id, state },
+    });
+    document.dispatchEvent(event);
+  }
 }
