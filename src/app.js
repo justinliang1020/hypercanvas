@@ -385,7 +385,7 @@ function addConnection(state, name, sourceBlockId, targetBlockId) {
   // TODO: allowed connection logic
   // TODO: multiple connections per program
 
-  return { ...state, connections: [connection] };
+  return { ...state, connections: [...state.connections, connection] };
 }
 
 /**
