@@ -28,7 +28,7 @@ export class TextStyleProgram extends Program {
    * @param {State} initialState
    * @returns {import("hyperapp").App<State>}
    **/
-  hyperapp(node, initialState) {
+  appConfig(node, initialState) {
     /**
      * @param {State} state
      */

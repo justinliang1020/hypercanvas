@@ -24,7 +24,7 @@ export class Program {
    * @param {object | null} initialState
    * @returns {import("hyperapp").App<any>}
    **/
-  hyperapp(node, initialState) {
+  appConfig(node, initialState) {
     throw new Error("app must be implemented");
   }
 
@@ -34,9 +34,9 @@ export class Program {
    */
   mount(node, state) {
     if (state === null) {
-      this.#dispatch = app(this.hyperapp(node, this.defaultState));
+      this.#dispatch = app(this.appConfig(node, this.defaultState));
     } else {
-      this.#dispatch = app(this.hyperapp(node, state));
+      this.#dispatch = app(this.appConfig(node, state));
     }
   }
 

@@ -24,7 +24,7 @@ export class TextProgram extends Program {
    * @param {State} initialState
    * @returns {import("hyperapp").App<State>}
    **/
-  hyperapp(node, initialState) {
+  appConfig(node, initialState) {
     return {
       init: initialState,
       view: (state) =>
