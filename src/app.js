@@ -1503,6 +1503,7 @@ class ProgramInstanceManager {
       throw Error("invalid program name");
     }
     const programInstance = new Program();
+    programInstance.setId(id);
     this.#programs.set(id, programInstance);
   }
 

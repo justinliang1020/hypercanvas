@@ -17,6 +17,17 @@ export class Program {
   /** @type {AllowedConnection[]} */
   allowedConnections = [];
   defaultState = {};
+  /** @type {Number} */
+  id = -1;
+
+  /**
+   * Required to set when initializing a program
+   * This isn't in the constructor to reduce boilerplate of classes implementing this class
+   * @param {Number} id
+   */
+  setId(id) {
+    this.id = id;
+  }
 
   /**
    * @abstract
@@ -33,6 +44,9 @@ export class Program {
    * @param {Object | null} state
    */
   mount(node, state) {
+    if (this.id === -1) {
+      throw Error("No ID set on Program Instance");
+    }
     if (state === null) {
       this.#dispatch = app(this.appConfig(node, this.defaultState));
     } else {
