@@ -17,40 +17,28 @@ export class TextProgram extends Program {
     };
     /** @type {import("./program.js").AllowedConnection[]} */
     this.allowedConnections = [];
-  }
-
-  /**
-   * @param {HTMLElement} node
-   * @param {State} initialState
-   * @returns {import("hyperapp").App<State>}
-   **/
-  appConfig(node, initialState) {
-    return {
-      init: initialState,
-      view: (state) =>
-        h(
-          "textarea",
-          {
-            style: {
-              boxSizing: "border-box",
-              width: "100%",
-              height: "100%",
-              padding: "10px",
-              border: "0px",
-              backgroundColor: state.backgroundColor,
-              color: "inherit",
-              resize: "none",
-              overflow: "hidden",
-              outline: "none",
-            },
-            oninput: (state, event) => ({
-              ...state,
-              text: /** @type {HTMLInputElement}*/ (event.target).value,
-            }),
+    this.view = (/** @type {State} */ state) =>
+      h(
+        "textarea",
+        {
+          style: {
+            boxSizing: "border-box",
+            width: "100%",
+            height: "100%",
+            padding: "10px",
+            border: "0px",
+            backgroundColor: state.backgroundColor,
+            color: "inherit",
+            resize: "none",
+            overflow: "hidden",
+            outline: "none",
           },
-          text(state.text),
-        ),
-      node: node,
-    };
+          oninput: (state, event) => ({
+            ...state,
+            text: /** @type {HTMLInputElement}*/ (event.target).value,
+          }),
+        },
+        text(state.text),
+      );
   }
 }

@@ -15,26 +15,14 @@ export class ImageProgram extends Program {
     };
     /** @type {import("./program.js").AllowedConnection[]} */
     this.allowedConnections = [];
-  }
-
-  /**
-   * @param {HTMLElement} node
-   * @param {State} initialState
-   * @returns {import("hyperapp").App<State>}
-   **/
-  appConfig(node, initialState) {
-    return {
-      init: initialState,
-      view: (state) =>
-        h("img", {
-          src: state.path,
-          style: {
-            boxSizing: "border-box",
-            width: "100%",
-            height: "100%",
-          },
-        }),
-      node: node,
-    };
+    this.view = (/** @type {State} */ state) =>
+      h("img", {
+        src: state.path,
+        style: {
+          boxSizing: "border-box",
+          width: "100%",
+          height: "100%",
+        },
+      });
   }
 }

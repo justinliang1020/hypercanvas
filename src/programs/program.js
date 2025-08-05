@@ -31,13 +31,17 @@ export class Program {
   #dispatch = null;
   /** @type{Object.<string, (Program | null)>} */
   #connections = {};
+  /** @type {any} */
+  #currentState = null;
   /** @type {AllowedConnection[]} */
   allowedConnections = [];
   defaultState = {};
   /** @type {Number} */
   id = -1;
-  /** @type {any} */
-  #currentState = null;
+  /** @type {((state: any) => import("hyperapp").VNode<any>) | undefined} - imported from import("hyperapp").App<any> */
+  view = undefined;
+  /** @type {((state: any) => readonly (boolean | undefined | import("hyperapp").Subscription<any>)[]) | undefined}  - imported from import("hyperapp").App<any> */
+  subscriptions = undefined;
 
   /**
    * Required to set when initializing a program
@@ -48,16 +52,6 @@ export class Program {
     this.id = id;
   }
 
-  /**
-   * @abstract
-   * @param {HTMLElement} node
-   * @param {object | null} initialState
-   * @returns {import("hyperapp").App<any>}
-   **/
-  appConfig(node, initialState) {
-    throw new Error("app must be implemented");
-  }
-
   /** Runs a hyperapp program on a node. If no state is passed in, it uses the default state of the program.
    * @param {HTMLElement} node
    * @param {Object | null} state
@@ -66,12 +60,19 @@ export class Program {
     if (this.id === -1) {
       throw Error("No ID set on Program Instance");
     }
+    if (!this.view) {
+      throw Error("App config is undefined");
+    }
     if (state === null) {
       state = this.defaultState;
     }
+    //@ts-ignore
     this.#dispatch = app({
       dispatch: this.#logStateMiddleware,
-      ...this.appConfig(node, state),
+      init: state,
+      node: node,
+      view: this.view,
+      subscriptions: this.subscriptions,
     });
   }
 

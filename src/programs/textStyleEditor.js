@@ -21,44 +21,32 @@ export class TextStyleProgram extends Program {
         program: TextProgram,
       },
     ];
+    this.view = (/** @type {State} */ state) =>
+      h("section", {}, [
+        h("input", {
+          type: "text",
+          oninput: (state, event) => {
+            return {
+              ...state,
+              value: /** @type{HTMLInputElement}*/ (event.target).value,
+            };
+          },
+        }),
+        h("button", { onclick: this.changeBackground }, text("submit")),
+      ]);
   }
 
   /**
-   * @param {HTMLElement} node
-   * @param {State} initialState
-   * @returns {import("hyperapp").App<State>}
-   **/
-  appConfig(node, initialState) {
-    /**
-     * @param {State} state
-     */
-    const changeBackground = (state) => {
-      const textProgramInstance = this.getConnection("default");
-      if (!textProgramInstance) return state;
-      const textProgramState = textProgramInstance.getState();
-      textProgramInstance.modifyState({
-        ...textProgramState,
-        backgroundColor: state.value,
-      });
-      return state;
-    };
-
-    return {
-      init: initialState,
-      view: (state) =>
-        h("section", {}, [
-          h("input", {
-            type: "text",
-            oninput: (state, event) => {
-              return {
-                ...state,
-                value: /** @type{HTMLInputElement}*/ (event.target).value,
-              };
-            },
-          }),
-          h("button", { onclick: changeBackground }, text("submit")),
-        ]),
-      node: node,
-    };
-  }
+   * @param {State} state
+   */
+  changeBackground = (state) => {
+    const textProgramInstance = this.getConnection("default");
+    if (!textProgramInstance) return state;
+    const textProgramState = textProgramInstance.getState();
+    textProgramInstance.modifyState({
+      ...textProgramState,
+      backgroundColor: state.value,
+    });
+    return state;
+  };
 }
