@@ -1219,6 +1219,13 @@ function toolbar(state) {
       h(
         "button",
         {
+          onclick: (state) => addBlock(state, "stateVisualizer"),
+        },
+        text("add new state visualizer"),
+      ),
+      h(
+        "button",
+        {
           onclick: (state) => [
             state,
             async (dispatch) => {

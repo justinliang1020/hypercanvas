@@ -116,6 +116,7 @@ export class Program {
 
   /**
    * @param {String} name
+   * @returns {Program | null}
    */
   getConnection(name) {
     return this.#connections[name];
@@ -138,24 +139,34 @@ export class Program {
    * @returns {import("hyperapp").Subscription<any>}
    */
   onConnectionStateChange(name, action) {
-    //TODO: proper typing
-    //
+    /**
+     * @typedef {Object} ProgramStateSubscriberOptions
+     * @property {String} name - The connection name
+     * @property {import("hyperapp").Action<any>} action - The action to dispatch
+     * @property {Program} program - The program instance
+     */
+
     /**
      * @param {import("hyperapp").Dispatch<any>} dispatch
-     * @param {any} options
+     * @param {ProgramStateSubscriberOptions} options
+     * @returns {() => void}
      */
     function programStateSubscriber(dispatch, options) {
       /**
-       * @param {any} ev
+       * @param {Event} ev
        */
       function handler(ev) {
-        if (ev.id !== options.name) return;
-        dispatch(options.action);
+        const customEvent =
+          /** @type {CustomEvent<{id: Number, state: any}>} */ (ev);
+        const connectedProgram = options.program.getConnection(options.name);
+        if (!connectedProgram || customEvent.detail.id !== connectedProgram.id)
+          return;
+        dispatch(options.action, customEvent.detail.state);
       }
       addEventListener("programStateChange", handler);
       return () => removeEventListener("programStateChange", handler);
     }
-    return [programStateSubscriber, { name, action }];
+    return [programStateSubscriber, { name, action, program: this }];
   }
 
   /**
@@ -163,7 +174,6 @@ export class Program {
    */
   #logStateMiddleware = stateMiddleware((state) => {
     this.#currentState = state;
-    console.log(`${this.id} STATE:`, state);
     this.#emitStateChange(state);
     return state;
   });
@@ -176,6 +186,6 @@ export class Program {
     const event = new CustomEvent("programStateChange", {
       detail: { id: this.id, state },
     });
-    document.dispatchEvent(event);
+    dispatchEvent(event);
   }
 }
