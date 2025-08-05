@@ -7,6 +7,23 @@ import { app } from "../packages/hyperapp/index.js";
  */
 
 /**
+ * @template S
+ * @param {(state: S) => S} fn
+ * @returns {(dispatch: import("hyperapp").Dispatch<S>) => import("hyperapp").Dispatch<S>}
+ */
+const stateMiddleware = (fn) => (dispatch) => (action, payload) => {
+  if (Array.isArray(action) && typeof action[0] !== "function") {
+    action = /** @type {import("hyperapp").Dispatchable<S>} */ ([
+      fn(/** @type {S} */ (action[0])),
+      ...action.slice(1),
+    ]);
+  } else if (!Array.isArray(action) && typeof action !== "function") {
+    action = fn(/** @type {S} */ (action));
+  }
+  dispatch(action, payload);
+};
+
+/**
  * @abstract
  */
 export class Program {
@@ -48,10 +65,12 @@ export class Program {
       throw Error("No ID set on Program Instance");
     }
     if (state === null) {
-      this.#dispatch = app(this.appConfig(node, this.defaultState));
-    } else {
-      this.#dispatch = app(this.appConfig(node, state));
+      state = this.defaultState;
     }
+    this.#dispatch = app({
+      dispatch: this.#logStateMiddleware,
+      ...this.appConfig(node, state),
+    });
   }
 
   isMounted() {
@@ -67,6 +86,7 @@ export class Program {
       console.error("no dispatch function");
       return {};
     }
+    //TODO: this is triggering a dispatch every time this is called (could trigger unintended no-op events). use event here?
     let currentState;
     this.#dispatch((/** @type {any} */ state) => {
       currentState = state;
@@ -116,4 +136,13 @@ export class Program {
   getConnectionNames() {
     return Object.keys(this.#connections);
   }
+
+  /**
+   * @type {(dispatch: import("hyperapp").Dispatch<any>) => import("hyperapp").Dispatch<any>}
+   */
+  #logStateMiddleware = stateMiddleware((state) => {
+    console.log(`${this.id} STATE:`, state);
+    //TODO: make this emit an event, and figure out how to test that
+    return state;
+  });
 }
