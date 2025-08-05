@@ -133,6 +133,32 @@ export class Program {
   }
 
   /**
+   * @param {String} name
+   * @param {import("hyperapp").Action<any>} action
+   * @returns {import("hyperapp").Subscription<any>}
+   */
+  onConnectionStateChange(name, action) {
+    //TODO: proper typing
+    //
+    /**
+     * @param {import("hyperapp").Dispatch<any>} dispatch
+     * @param {any} options
+     */
+    function programStateSubscriber(dispatch, options) {
+      /**
+       * @param {any} ev
+       */
+      function handler(ev) {
+        if (ev.id !== options.name) return;
+        dispatch(options.action);
+      }
+      addEventListener("programStateChange", handler);
+      return () => removeEventListener("programStateChange", handler);
+    }
+    return [programStateSubscriber, { name, action }];
+  }
+
+  /**
    * @type {(dispatch: import("hyperapp").Dispatch<any>) => import("hyperapp").Dispatch<any>}
    */
   #logStateMiddleware = stateMiddleware((state) => {
@@ -148,7 +174,7 @@ export class Program {
    */
   #emitStateChange(state) {
     const event = new CustomEvent("programStateChange", {
-      detail: { programId: this.id, state },
+      detail: { id: this.id, state },
     });
     document.dispatchEvent(event);
   }
