@@ -111,6 +111,13 @@ export class Program {
     for (const allowedConnection of this.allowedConnections) {
       if (program instanceof allowedConnection.program) {
         this.#connections[name] = program;
+        // Emit initial state change event for newly connected program
+        if (program.isMounted()) {
+          const event = new CustomEvent("programStateChange", {
+            detail: { id: program.id, state: program.getState() },
+          });
+          dispatchEvent(event);
+        }
       }
     }
   }
