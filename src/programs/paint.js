@@ -37,13 +37,70 @@ export class PaintProgram extends Program {
  * @property {number} gridHeight - Number of cells vertically
  * @property {number} cellSize - Size of each cell in pixels
  * @property {boolean} isDragging - Whether the user is currently dragging
- * @property {'paint'|'erase'} tool - Current selected tool
+ * @property {'paint'|'erase'|'fill'} tool - Current selected tool
  * @property {string} selectedColor - Currently selected color
  * @property {string[]} colorPalette - Available colors
  */
 
 /**
- * Applies the current tool (paint or erase) to a cell at the given coordinates
+ * Flood fill algorithm to fill connected cells of the same color
+ * @param {Object<string, string>} paintedCells - Current painted cells
+ * @param {number} startX - Starting x coordinate
+ * @param {number} startY - Starting y coordinate
+ * @param {string} targetColor - Color to replace
+ * @param {string} fillColor - Color to fill with
+ * @param {number} gridWidth - Grid width boundary
+ * @param {number} gridHeight - Grid height boundary
+ * @returns {Object<string, string>} Updated painted cells
+ */
+const floodFill = (
+  paintedCells,
+  startX,
+  startY,
+  targetColor,
+  fillColor,
+  gridWidth,
+  gridHeight,
+) => {
+  if (targetColor === fillColor) return paintedCells;
+
+  const newPaintedCells = { ...paintedCells };
+  const stack = [[startX, startY]];
+  const visited = new Set();
+
+  while (stack.length > 0) {
+    const coords = stack.pop();
+    if (!coords) continue;
+    const [x, y] = coords;
+    const key = `${x},${y}`;
+
+    if (
+      x < 0 ||
+      x >= gridWidth ||
+      y < 0 ||
+      y >= gridHeight ||
+      visited.has(key)
+    ) {
+      continue;
+    }
+
+    const currentColor = paintedCells[key] || "#ffffff";
+    if (currentColor !== targetColor) {
+      continue;
+    }
+
+    visited.add(key);
+    newPaintedCells[key] = fillColor;
+
+    // Add adjacent cells to stack
+    stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+  }
+
+  return newPaintedCells;
+};
+
+/**
+ * Applies the current tool (paint, erase, or fill) to a cell at the given coordinates
  * @param {State} currentState - The current application state
  * @param {number} x - The x coordinate of the cell
  * @param {number} y - The y coordinate of the cell
@@ -51,12 +108,23 @@ export class PaintProgram extends Program {
  */
 const applyTool = (currentState, x, y) => {
   const key = `${x},${y}`;
-  const newPaintedCells = { ...currentState.paintedCells };
+  let newPaintedCells = { ...currentState.paintedCells };
 
   if (currentState.tool === "paint") {
     newPaintedCells[key] = currentState.selectedColor;
   } else if (currentState.tool === "erase") {
     delete newPaintedCells[key];
+  } else if (currentState.tool === "fill") {
+    const targetColor = currentState.paintedCells[key] || "#ffffff";
+    newPaintedCells = floodFill(
+      currentState.paintedCells,
+      x,
+      y,
+      targetColor,
+      currentState.selectedColor,
+      currentState.gridWidth,
+      currentState.gridHeight,
+    );
   }
 
   return {
@@ -115,6 +183,17 @@ const buttons = (state) =>
       h(
         "button",
         {
+          style: getButtonStyle(state.tool === "fill"),
+          onclick: (currentState) => ({
+            ...currentState,
+            tool: "fill",
+          }),
+        },
+        text("Fill"),
+      ),
+      h(
+        "button",
+        {
           style: getButtonStyle(false),
           onclick: (currentState) => ({
             ...currentState,
@@ -159,7 +238,6 @@ const colorPalette = (state) =>
             return {
               ...currentState,
               selectedColor: color,
-              tool: "paint",
             };
           },
         },
