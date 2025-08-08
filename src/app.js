@@ -1202,26 +1202,14 @@ function toolbar(state) {
         },
         text("↷ Redo"),
       ),
-      h(
-        "button",
-        {
-          onclick: (state) => addBlock(state, "textStyleEditor"),
-        },
-        text("add new text style editor block"),
-      ),
-      h(
-        "button",
-        {
-          onclick: (state) => addBlock(state, "text"),
-        },
-        text("add new text block"),
-      ),
-      h(
-        "button",
-        {
-          onclick: (state) => addBlock(state, "stateVisualizer"),
-        },
-        text("add new state visualizer"),
+      ...Object.keys(programs.programRegistry).map((programName) =>
+        h(
+          "button",
+          {
+            onclick: (state) => addBlock(state, programName),
+          },
+          text(`create ${programName}`),
+        ),
       ),
       h(
         "button",
