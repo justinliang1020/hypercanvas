@@ -1443,6 +1443,14 @@ function main(state) {
             }
             return state;
 
+          case "s":
+            // Handle save shortcut (Ctrl+S or Cmd+S)
+            if (event.ctrlKey || event.metaKey) {
+              event.preventDefault();
+              return [state, () => saveApplication(state)];
+            }
+            return state;
+
           default:
             return state;
         }
