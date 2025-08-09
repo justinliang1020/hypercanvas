@@ -12,7 +12,7 @@ export class TextStyleProgram extends Program {
     super();
     /** @type {State} */
     this.defaultState = {
-      value: "transparent",
+      value: "#000000",
     };
     /** @type {import("./program.js").AllowedConnection[]} */
     this.allowedConnections = [
@@ -23,23 +23,27 @@ export class TextStyleProgram extends Program {
     ];
     this.view = (/** @type {State} */ state) =>
       h("section", {}, [
+        h("h3", {}, text("Text Style Editor")),
         h("input", {
-          type: "text",
+          type: "color",
+          value: state.value,
           oninput: (state, event) => {
-            return {
+            const newValue = /** @type{HTMLInputElement}*/ (event.target).value;
+            const newState = {
               ...state,
-              value: /** @type{HTMLInputElement}*/ (event.target).value,
+              value: newValue,
             };
+            this.#changeBackground(newState);
+            return newState;
           },
         }),
-        h("button", { onclick: this.changeBackground }, text("submit")),
       ]);
   }
 
   /**
    * @param {State} state
    */
-  changeBackground = (state) => {
+  #changeBackground = (state) => {
     const textProgramInstance = this.getConnection("default");
     if (!textProgramInstance) return state;
     const textProgramState = textProgramInstance.getState();
