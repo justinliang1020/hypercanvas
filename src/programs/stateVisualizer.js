@@ -28,7 +28,7 @@ export class StateVisualizerProgram extends Program {
           {
             style: {
               padding: "10px",
-              border: "1px solid #ccc",
+              border: "3px solid #ccc", // border size needs to be 3px or greater to avoid visual artifact glitch when zooming out
               borderRadius: "4px",
               overflow: "auto",
               maxHeight: "400px",

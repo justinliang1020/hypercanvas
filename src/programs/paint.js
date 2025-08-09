@@ -328,7 +328,7 @@ const canvasContainer = (state) =>
         width: `${state.gridWidth * state.cellSize}px`,
         height: `${state.gridHeight * state.cellSize}px`,
         margin: "80px 20px 20px 20px",
-        border: "2px solid #333",
+        border: "3px solid #333", // border size needs to be 3px or greater to avoid visual artifact glitch when zooming out
         backgroundColor: "#ffffff",
       },
       onmouseup: (currentState) => ({
