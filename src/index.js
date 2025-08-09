@@ -280,98 +280,104 @@ ipcMain.handle("dialog:showOpenDialog", async (event, options) => {
 });
 
 // Select image from dialog handler
-ipcMain.handle("image:selectFromDialog", async (event) => {
-  try {
-    // Show file dialog for image selection
-    const result = await dialog.showOpenDialog({
-      properties: ["openFile"],
-      filters: [
-        {
-          name: "Images",
-          extensions: ["jpg", "jpeg", "png", "gif", "bmp", "webp"],
-        },
-      ],
-    });
+ipcMain.handle(
+  "image:selectFromDialog",
+  async (event, mediaSavePath = "user/media") => {
+    try {
+      // Show file dialog for image selection
+      const result = await dialog.showOpenDialog({
+        properties: ["openFile"],
+        filters: [
+          {
+            name: "Images",
+            extensions: ["jpg", "jpeg", "png", "gif", "bmp", "webp"],
+          },
+        ],
+      });
 
-    if (result.canceled || result.filePaths.length === 0) {
-      return { canceled: true };
+      if (result.canceled || result.filePaths.length === 0) {
+        return { canceled: true };
+      }
+
+      const sourcePath = result.filePaths[0];
+      const originalFilename = path.basename(sourcePath);
+
+      // Generate unique filename in media directory
+      const uniqueFilename = await getUniqueFilename(
+        mediaSavePath,
+        originalFilename,
+      );
+      const targetPath = path.join(mediaSavePath, uniqueFilename);
+
+      // Read source file
+      const imageData = await fs.readFile(sourcePath);
+
+      // Get image dimensions
+      const dimensions = await getImageDimensions(imageData);
+
+      // Write to media directory
+      await writeFile(targetPath, imageData);
+
+      return {
+        success: true,
+        filename: uniqueFilename,
+        path: getFilePath(targetPath),
+        width: dimensions.width,
+        height: dimensions.height,
+      };
+    } catch (error) {
+      console.error("Error selecting image from dialog:", error);
+      throw error;
     }
-
-    const sourcePath = result.filePaths[0];
-    const originalFilename = path.basename(sourcePath);
-
-    // Generate unique filename in media directory
-    const uniqueFilename = await getUniqueFilename(
-      "user/media",
-      originalFilename,
-    );
-    const targetPath = path.join("user/media", uniqueFilename);
-
-    // Read source file
-    const imageData = await fs.readFile(sourcePath);
-
-    // Get image dimensions
-    const dimensions = await getImageDimensions(imageData);
-
-    // Write to media directory
-    await writeFile(targetPath, imageData);
-
-    return {
-      success: true,
-      filename: uniqueFilename,
-      path: getFilePath(targetPath),
-      width: dimensions.width,
-      height: dimensions.height,
-    };
-  } catch (error) {
-    console.error("Error selecting image from dialog:", error);
-    throw error;
-  }
-});
+  },
+);
 
 // Save image from buffer handler
-ipcMain.handle("image:saveFromBuffer", async (event, imageBuffer, mimeType) => {
-  try {
-    // Determine file extension from MIME type
-    const extensionMap = {
-      "image/png": "png",
-      "image/jpeg": "jpg",
-      "image/jpg": "jpg",
-      "image/gif": "gif",
-      "image/bmp": "bmp",
-      "image/webp": "webp",
-    };
+ipcMain.handle(
+  "image:saveFromBuffer",
+  async (event, imageBuffer, mimeType, mediaSavePath = "user/media") => {
+    try {
+      // Determine file extension from MIME type
+      const extensionMap = {
+        "image/png": "png",
+        "image/jpeg": "jpg",
+        "image/jpg": "jpg",
+        "image/gif": "gif",
+        "image/bmp": "bmp",
+        "image/webp": "webp",
+      };
 
-    const extension = extensionMap[mimeType] || "png";
-    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const originalFilename = `pasted-image-${timestamp}.${extension}`;
+      const extension = extensionMap[mimeType] || "png";
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      const originalFilename = `pasted-image-${timestamp}.${extension}`;
 
-    // Generate unique filename in media directory
-    const uniqueFilename = await getUniqueFilename(
-      "user/media",
-      originalFilename,
-    );
-    const targetPath = path.join("user/media", uniqueFilename);
+      // Generate unique filename in media directory
+      const uniqueFilename = await getUniqueFilename(
+        mediaSavePath,
+        originalFilename,
+      );
+      const targetPath = path.join(mediaSavePath, uniqueFilename);
 
-    // Convert ArrayBuffer to Buffer and get dimensions
-    const buffer = Buffer.from(imageBuffer);
-    const dimensions = await getImageDimensions(buffer);
+      // Convert ArrayBuffer to Buffer and get dimensions
+      const buffer = Buffer.from(imageBuffer);
+      const dimensions = await getImageDimensions(buffer);
 
-    // Write image buffer to media directory
-    await writeFile(targetPath, buffer);
+      // Write image buffer to media directory
+      await writeFile(targetPath, buffer);
 
-    return {
-      success: true,
-      filename: uniqueFilename,
-      path: getFilePath(targetPath),
-      width: dimensions.width,
-      height: dimensions.height,
-    };
-  } catch (error) {
-    console.error("Error saving image from buffer:", error);
-    throw error;
-  }
-});
+      return {
+        success: true,
+        filename: uniqueFilename,
+        path: getFilePath(targetPath),
+        width: dimensions.width,
+        height: dimensions.height,
+      };
+    } catch (error) {
+      console.error("Error saving image from buffer:", error);
+      throw error;
+    }
+  },
+);
 
 // Get image dimensions handler
 ipcMain.handle("image:getDimensions", async (event, imagePath) => {

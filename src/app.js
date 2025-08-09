@@ -1264,7 +1264,8 @@ function toolbar(state) {
             async (dispatch) => {
               try {
                 // @ts-ignore
-                const result = await window.fileAPI.selectImageFromDialog();
+                const result =
+                  await window.fileAPI.selectImageFromDialog(MEDIA_SAVE_PATH);
                 if (!result.canceled && result.success) {
                   console.log(`Image uploaded: ${result.filename}`);
                   dispatch((state) =>
@@ -1344,6 +1345,7 @@ function main(state) {
           const result = await window.fileAPI.saveImageFromBuffer(
             arrayBuffer,
             imageType,
+            MEDIA_SAVE_PATH,
           );
           if (result.success) {
             dispatch((state) =>
