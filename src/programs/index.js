@@ -4,6 +4,7 @@ import { TextStyleProgram } from "./textStyleEditor.js";
 import { StateVisualizerProgram } from "./stateVisualizer.js";
 import { StateEditorProgram } from "./stateEditor.js";
 import { PaintProgram } from "./paint.js";
+import { HistoryProgram } from "./history.js";
 
 /** @type{Object.<string, (typeof import("./program.js").Program | null)>} */
 export const programRegistry = {
@@ -13,4 +14,5 @@ export const programRegistry = {
   stateVisualizer: StateVisualizerProgram,
   stateEditor: StateEditorProgram,
   paint: PaintProgram,
+  history: HistoryProgram,
 };
