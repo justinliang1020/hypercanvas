@@ -1620,7 +1620,11 @@ class ProgramInstanceManager {
         connection.targetBlockId,
       );
 
-      if (sourceProgram && targetProgram) {
+      if (
+        sourceProgram &&
+        targetProgram &&
+        !sourceProgram.getConnection(connection.name)
+      ) {
         sourceProgram.setConnection(connection.name, targetProgram);
       }
     }
