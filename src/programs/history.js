@@ -24,16 +24,17 @@ export class HistoryProgram extends Program {
         program: Program,
       },
     ];
-    this.view = this.main;
+    this.view = this.#main;
     this.subscriptions = () => {
-      return [this.onConnectionStateChange("default", this.recordStateChange)];
+      return [this.onConnectionStateChange("default", this.#recordStateChange)];
     };
   }
 
   /**
    * @param {State} state
+   * @return {import("hyperapp").ElementVNode<State>}
    */
-  main = (state) =>
+  #main = (state) =>
     h(
       "section",
       {
@@ -54,15 +55,18 @@ export class HistoryProgram extends Program {
       ],
     );
 
-  #renderHeader() {
-    return h("h3", { style: { margin: "0 0 20px 0" } }, text("History"));
-  }
+  /**
+   * @return {import("hyperapp").ElementVNode<State>}
+   */
+  #renderHeader = () =>
+    h("h3", { style: { margin: "0 0 20px 0" } }, text("History"));
 
   /**
    * @param {State} state
+   * @return {import("hyperapp").ElementVNode<State>}
    */
-  #renderSliderContainer(state) {
-    return h(
+  #renderSliderContainer = (state) =>
+    h(
       "div",
       {
         style: {
@@ -71,13 +75,13 @@ export class HistoryProgram extends Program {
       },
       [this.#renderSliderLabel(state), this.#renderSlider(state)],
     );
-  }
 
   /**
    * @param {State} state
+   * @return {import("hyperapp").ElementVNode<State>}
    */
-  #renderSliderLabel(state) {
-    return h(
+  #renderSliderLabel = (state) =>
+    h(
       "label",
       {
         style: {
@@ -90,13 +94,13 @@ export class HistoryProgram extends Program {
         `Current position: ${state.currentIndex + 1}/${state.history.length}`,
       ),
     );
-  }
 
   /**
    * @param {State} state
+   * @return {import("hyperapp").ElementVNode<State>}
    */
-  #renderSlider(state) {
-    return h("input", {
+  #renderSlider = (state) =>
+    h("input", {
       type: "range",
       min: "0",
       max: String(state.history.length - 1),
@@ -107,15 +111,17 @@ export class HistoryProgram extends Program {
         marginBottom: "10px",
       },
       oninput: (/** @type {State} */ state, /** @type {Event} */ event) =>
-        this.navigateToHistoryIndex(
+        this.#navigateToHistoryIndex(
           state,
           parseInt(/** @type {HTMLInputElement} */ (event.target).value),
         ),
     });
-  }
 
-  #renderEmptyState() {
-    return h(
+  /**
+   * @return {import("hyperapp").ElementVNode<State>}
+   */
+  #renderEmptyState = () =>
+    h(
       "div",
       {
         style: {
@@ -126,13 +132,13 @@ export class HistoryProgram extends Program {
       },
       text("No history recorded yet. Connect to a program to start recording."),
     );
-  }
 
   /**
    * @param {State} state
    * @param {any} connectedState
+   * @returns {State}
    */
-  recordStateChange = (state, connectedState) => {
+  #recordStateChange = (state, connectedState) => {
     // Create a deep copy of the connected state
     const stateCopy = JSON.parse(JSON.stringify(connectedState));
 
@@ -161,8 +167,9 @@ export class HistoryProgram extends Program {
   /**
    * @param {State} state
    * @param {number} index
+   * @returns {State}
    */
-  navigateToHistoryIndex = (state, index) => {
+  #navigateToHistoryIndex = (state, index) => {
     if (index < 0 || index >= state.history.length) {
       return state;
     }

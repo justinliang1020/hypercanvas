@@ -24,18 +24,19 @@ export class StateEditorProgram extends Program {
         program: Program,
       },
     ];
-    this.view = this.main;
+    this.view = this.#main;
     this.subscriptions = () => {
       return [
-        this.onConnectionStateChange("default", this.updateConnectedState),
+        this.onConnectionStateChange("default", this.#updateConnectedState),
       ];
     };
   }
 
   /**
    * @param {State} state
+   * @returns {import("hyperapp").ElementVNode<State>}
    */
-  main = (state) =>
+  #main = (state) =>
     h(
       "section",
       {
@@ -65,7 +66,7 @@ export class StateEditorProgram extends Program {
             },
             disabled: !!state.error,
             onclick: (/** @type {State} */ state) =>
-              this.applyStateChanges(state),
+              this.#applyStateChanges(state),
           },
           text("Apply Changes"),
         ),
@@ -83,7 +84,7 @@ export class StateEditorProgram extends Program {
           },
           value: state.editableState,
           oninput: (/** @type {State} */ state, /** @type {Event} */ event) =>
-            this.updateEditableState(
+            this.#updateEditableState(
               state,
               /** @type {HTMLTextAreaElement} */ (event.target).value,
             ),
@@ -107,8 +108,9 @@ export class StateEditorProgram extends Program {
   /**
    * @param {State} state
    * @param {any} connectedState
+   * @return {State}
    */
-  updateConnectedState = (state, connectedState) => {
+  #updateConnectedState = (state, connectedState) => {
     const jsonString = JSON.stringify(connectedState, null, 2);
     return {
       ...state,
@@ -123,8 +125,9 @@ export class StateEditorProgram extends Program {
   /**
    * @param {State} state
    * @param {string} newValue
+   * @return {State}
    */
-  updateEditableState = (state, newValue) => {
+  #updateEditableState = (state, newValue) => {
     let error = null;
     try {
       JSON.parse(newValue);
@@ -140,8 +143,9 @@ export class StateEditorProgram extends Program {
 
   /**
    * @param {State} state
+   * @return {State}
    */
-  applyStateChanges = (state) => {
+  #applyStateChanges = (state) => {
     const connectedProgramInstance = this.getConnection("default");
     if (!connectedProgramInstance) return state;
     const parsedState = JSON.parse(state.editableState);

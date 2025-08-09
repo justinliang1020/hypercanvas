@@ -21,27 +21,34 @@ export class TextStyleProgram extends Program {
         program: TextProgram,
       },
     ];
-    this.view = (/** @type {State} */ state) =>
-      h("section", {}, [
-        h("h3", {}, text("Text Style Editor")),
-        h("input", {
-          type: "color",
-          value: state.value,
-          oninput: (state, event) => {
-            const newValue = /** @type{HTMLInputElement}*/ (event.target).value;
-            const newState = {
-              ...state,
-              value: newValue,
-            };
-            this.#changeBackground(newState);
-            return newState;
-          },
-        }),
-      ]);
+    this.view = this.#main;
   }
 
   /**
    * @param {State} state
+   * @returns {import("hyperapp").ElementVNode<State>}
+   */
+  #main = (state) =>
+    h("section", {}, [
+      h("h3", {}, text("Text Style Editor")),
+      h("input", {
+        type: "color",
+        value: state.value,
+        oninput: (state, event) => {
+          const newValue = /** @type{HTMLInputElement}*/ (event.target).value;
+          const newState = {
+            ...state,
+            value: newValue,
+          };
+          this.#changeBackground(newState);
+          return newState;
+        },
+      }),
+    ]);
+
+  /**
+   * @param {State} state
+   * @returns {State}
    */
   #changeBackground = (state) => {
     const textProgramInstance = this.getConnection("default");

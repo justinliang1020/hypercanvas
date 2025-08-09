@@ -17,28 +17,34 @@ export class TextProgram extends Program {
     };
     /** @type {import("./program.js").AllowedConnection[]} */
     this.allowedConnections = [];
-    this.view = (/** @type {State} */ state) =>
-      h(
-        "textarea",
-        {
-          style: {
-            boxSizing: "border-box",
-            width: "100%",
-            height: "100%",
-            padding: "10px",
-            border: "0px",
-            backgroundColor: state.backgroundColor,
-            color: "inherit",
-            resize: "none",
-            overflow: "hidden",
-            outline: "none",
-          },
-          oninput: (/** @type {State} */ state, event) => ({
-            ...state,
-            text: /** @type {HTMLInputElement}*/ (event.target).value,
-          }),
-        },
-        text(state.text),
-      );
+    this.view = this.#main;
   }
+
+  /**
+   * @param {State} state
+   * @returns {import("hyperapp").ElementVNode<State>}
+   * */
+  #main = (state) =>
+    h(
+      "textarea",
+      {
+        style: {
+          boxSizing: "border-box",
+          width: "100%",
+          height: "100%",
+          padding: "10px",
+          border: "0px",
+          backgroundColor: state.backgroundColor,
+          color: "inherit",
+          resize: "none",
+          overflow: "hidden",
+          outline: "none",
+        },
+        oninput: (state, event) => ({
+          ...state,
+          text: /** @type {HTMLInputElement}*/ (event.target).value,
+        }),
+      },
+      text(state.text),
+    );
 }
