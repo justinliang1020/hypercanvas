@@ -11,9 +11,15 @@ contextBridge.exposeInMainWorld("fileAPI", {
   readFile: (filename) => ipcRenderer.invoke("file:read", filename),
   showOpenDialog: (options) =>
     ipcRenderer.invoke("dialog:showOpenDialog", options),
-  selectImageFromDialog: (mediaSavePath) => ipcRenderer.invoke("image:selectFromDialog", mediaSavePath),
+  uploadImageFromDialog: (mediaSavePath) =>
+    ipcRenderer.invoke("image:selectFromDialog", mediaSavePath),
   saveImageFromBuffer: (imageBuffer, mimeType, mediaSavePath) =>
-    ipcRenderer.invoke("image:saveFromBuffer", imageBuffer, mimeType, mediaSavePath),
+    ipcRenderer.invoke(
+      "image:saveFromBuffer",
+      imageBuffer,
+      mimeType,
+      mediaSavePath,
+    ),
   getImageDimensions: (imagePath) =>
     ipcRenderer.invoke("image:getDimensions", imagePath),
 });

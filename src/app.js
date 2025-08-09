@@ -1265,7 +1265,7 @@ function toolbar(state) {
               try {
                 // @ts-ignore
                 const result =
-                  await window.fileAPI.selectImageFromDialog(MEDIA_SAVE_PATH);
+                  await window.fileAPI.uploadImageFromDialog(MEDIA_SAVE_PATH);
                 if (!result.canceled && result.success) {
                   console.log(`Image uploaded: ${result.filename}`);
                   dispatch((state) =>
