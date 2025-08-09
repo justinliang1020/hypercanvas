@@ -1,4 +1,5 @@
 import { h, text } from "../packages/hyperapp/index.js";
+
 import { Program } from "./program.js";
 
 export class PaintProgram extends Program {
@@ -6,7 +7,6 @@ export class PaintProgram extends Program {
     super();
     /** @type {State} */
     this.defaultState = {
-      paintedCells: {},
       gridWidth: 40,
       gridHeight: 30,
       cellSize: 16,
@@ -23,6 +23,7 @@ export class PaintProgram extends Program {
         "#FF00FF", // Magenta
         "#00FFFF", // Cyan
       ],
+      paintedCells: {},
     };
     /** @type {import("./program.js").AllowedConnection[]} */
     this.allowedConnections = [];
