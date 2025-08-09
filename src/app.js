@@ -80,6 +80,7 @@ import * as programs from "./programs/index.js";
  * @property {string} cursorStyle - Current cursor style
  * @property {boolean} isViewportDragging - Whether viewport is being dragged
  * @property {boolean} isBlockDragging - Whether a block is being dragged
+ * @property {boolean} isShiftPressed - Whether shift key is currently pressed
  * @property {number|null} selectedId - ID of selected block
  * @property {number|null} editingId - ID of block in edit mode
  * @property {number|null} hoveringId - ID of hovered block
@@ -119,6 +120,89 @@ const RESIZE_CURSORS = {
   w: "ew-resize",
   e: "ew-resize",
 };
+
+/**
+ * Applies aspect ratio constraint to resize dimensions
+ * @param {{width: number, height: number, x: number, y: number}} dimensions - Original dimensions from resize handler
+ * @param {Block} originalBlock - Original block before resize
+ * @param {string} handle - Resize handle being used
+ * @returns {{width: number, height: number, x: number, y: number}} Constrained dimensions maintaining aspect ratio
+ */
+function applyAspectRatioConstraint(dimensions, originalBlock, handle) {
+  const originalAspectRatio = originalBlock.width / originalBlock.height;
+
+  // For corner handles, maintain aspect ratio
+  if (["nw", "ne", "sw", "se"].includes(handle)) {
+    // Calculate both possible constrained dimensions
+    const constrainedByWidth = {
+      width: dimensions.width,
+      height: dimensions.width / originalAspectRatio,
+      x: dimensions.x,
+      y: dimensions.y,
+    };
+
+    const constrainedByHeight = {
+      width: dimensions.height * originalAspectRatio,
+      height: dimensions.height,
+      x: dimensions.x,
+      y: dimensions.y,
+    };
+
+    // Choose the constraint that results in the smaller overall size change
+    // This prevents the block from growing too aggressively
+    const widthArea = constrainedByWidth.width * constrainedByWidth.height;
+    const heightArea = constrainedByHeight.width * constrainedByHeight.height;
+
+    const useWidthConstraint = widthArea <= heightArea;
+    let result = useWidthConstraint ? constrainedByWidth : constrainedByHeight;
+
+    // Apply minimum size constraints
+    result.width = Math.max(MIN_SIZE, result.width);
+    result.height = Math.max(MIN_SIZE, result.height);
+
+    // Adjust positions based on handle type and which constraint we're using
+    if (useWidthConstraint) {
+      // When constraining by width, adjust Y for north handles
+      if (handle.includes("n")) {
+        const heightDiff = result.height - dimensions.height;
+        result.y = dimensions.y - heightDiff;
+      }
+    } else {
+      // When constraining by height, adjust X for west handles
+      if (handle.includes("w")) {
+        const widthDiff = result.width - dimensions.width;
+        result.x = dimensions.x - widthDiff;
+      }
+    }
+
+    return result;
+  }
+
+  // For edge handles, maintain aspect ratio by adjusting the other dimension
+  if (["n", "s"].includes(handle)) {
+    // Height is changing, adjust width
+    const newWidth = dimensions.height * originalAspectRatio;
+    const widthDiff = newWidth - originalBlock.width;
+    return {
+      ...dimensions,
+      width: Math.max(MIN_SIZE, newWidth),
+      x: originalBlock.x - widthDiff / 2, // Center the width change
+    };
+  }
+
+  if (["e", "w"].includes(handle)) {
+    // Width is changing, adjust height
+    const newHeight = dimensions.width / originalAspectRatio;
+    const heightDiff = newHeight - originalBlock.height;
+    return {
+      ...dimensions,
+      height: Math.max(MIN_SIZE, newHeight),
+      y: originalBlock.y - heightDiff / 2, // Center the height change
+    };
+  }
+
+  return dimensions;
+}
 
 /**
  * @type {Record<string, ResizeHandler>}
@@ -1013,10 +1097,26 @@ function viewport(state) {
           const handler = RESIZE_HANDLERS[state.resizing.handle];
           if (!handler) return state;
 
-          const newDimensions = handler(block, {
+          let newDimensions = handler(block, {
             percentX: canvasX,
             percentY: canvasY,
           });
+
+          // Apply aspect ratio constraint if shift is pressed
+          if (state.isShiftPressed && state.resizeStart) {
+            const originalBlock = {
+              ...block,
+              width: state.resizeStart.startWidth,
+              height: state.resizeStart.startHeight,
+              x: state.resizeStart.startX,
+              y: state.resizeStart.startY,
+            };
+            newDimensions = applyAspectRatioConstraint(
+              newDimensions,
+              originalBlock,
+              state.resizing.handle,
+            );
+          }
 
           // Ensure minimum size
           const finalWidth = Math.max(MIN_SIZE, newDimensions.width);
@@ -1263,8 +1363,8 @@ function toolbar(state) {
             state,
             async (dispatch) => {
               try {
-                // @ts-ignore
                 const result =
+                  // @ts-ignore
                   await window.fileAPI.uploadImageFromDialog(MEDIA_SAVE_PATH);
                 if (!result.canceled && result.success) {
                   console.log(`Image uploaded: ${result.filename}`);
@@ -1394,6 +1494,14 @@ function main(state) {
         cursor: state.cursorStyle,
       },
       onkeydown: (state, event) => {
+        // Track shift key state
+        if (event.key === "Shift") {
+          return {
+            ...state,
+            isShiftPressed: true,
+          };
+        }
+
         // Check if user is interacting with an input field or has text selected
         const hasTextSelection =
           (window.getSelection()?.toString() ?? "").length > 0;
@@ -1501,6 +1609,16 @@ function main(state) {
           default:
             return state;
         }
+      },
+      onkeyup: (state, event) => {
+        // Track shift key release
+        if (event.key === "Shift") {
+          return {
+            ...state,
+            isShiftPressed: false,
+          };
+        }
+        return state;
       },
       tabindex: 0, // Make the main element focusable for keyboard events
     },
@@ -1646,6 +1764,7 @@ async function initialize() {
     cursorStyle: "pointer",
     isViewportDragging: false,
     isBlockDragging: false,
+    isShiftPressed: false,
     dragStart: null,
     resizeStart: null,
     mementoManager: createMementoManager(),
