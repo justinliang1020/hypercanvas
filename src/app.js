@@ -330,18 +330,6 @@ function redoState(state) {
 }
 
 /**
- * Checks if a block has any connections (as source or target)
- * @param {State} state - Current application state
- * @param {number} blockId - ID of block to check
- * @returns {boolean} True if block has connections
- */
-function blockHasConnections(state, blockId) {
-  return state.connections.some(
-    (conn) => conn.sourceBlockId === blockId || conn.targetBlockId === blockId,
-  );
-}
-
-/**
  * Checks if a block can be connected to from the connecting block
  * @param {State} state - Current application state
  * @param {number} targetBlockId - ID of potential target block
