@@ -1759,7 +1759,8 @@ async function initialize() {
     subscriptions: (state) => [[subscription, state]],
   };
 
-  const isUsingAppWithVisualizer = true;
+  // seems to be glitchy when having a lot of history
+  const isUsingAppWithVisualizer = false;
   if (isUsingAppWithVisualizer) {
     appWithVisualizer(appConfig);
   } else {
