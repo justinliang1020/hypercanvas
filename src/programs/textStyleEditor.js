@@ -48,16 +48,15 @@ export class TextStyleProgram extends Program {
 
   /**
    * @param {State} state
-   * @returns {State}
+   * @returns {void}
    */
   #changeBackground = (state) => {
     const textProgramInstance = this.getConnection("default");
-    if (!textProgramInstance) return state;
+    if (!textProgramInstance) return;
     const textProgramState = textProgramInstance.getState();
     textProgramInstance.modifyState({
       ...textProgramState,
       backgroundColor: state.value,
     });
-    return state;
   };
 }

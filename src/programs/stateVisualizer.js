@@ -20,35 +20,42 @@ export class StateVisualizerProgram extends Program {
         program: Program,
       },
     ];
-    this.view = (/** @type {State} */ state) =>
-      h("section", { style: { padding: "10px", fontFamily: "monospace" } }, [
-        h("h3", {}, text("Connected Program State")),
-        h(
-          "pre",
-          {
-            style: {
-              padding: "10px",
-              border: "3px solid #ccc", // border size needs to be 3px or greater to avoid visual artifact glitch when zooming out
-              borderRadius: "4px",
-              overflow: "auto",
-              maxHeight: "400px",
-            },
-          },
-          text(state.connectedState),
-        ),
-      ]);
+    this.view = this.#main;
     this.subscriptions = () => {
       return [
-        this.onConnectionStateChange("default", this.updateConnectedState),
+        this.onConnectionStateChange("default", this.#updateConnectedState),
       ];
     };
   }
 
   /**
    * @param {State} state
-   * @param {any} connectedState
+   * @returns {import("hyperapp").ElementVNode<State>}
    */
-  updateConnectedState = (state, connectedState) => {
+  #main = (state) =>
+    h("section", { style: { padding: "10px", fontFamily: "monospace" } }, [
+      h("h3", {}, text("Connected Program State")),
+      h(
+        "pre",
+        {
+          style: {
+            padding: "10px",
+            border: "3px solid #ccc", // border size needs to be 3px or greater to avoid visual artifact glitch when zooming out
+            borderRadius: "4px",
+            overflow: "auto",
+            maxHeight: "400px",
+          },
+        },
+        text(state.connectedState),
+      ),
+    ]);
+
+  /**
+   * @param {State} state
+   * @param {any} connectedState
+   * @returns {State}
+   */
+  #updateConnectedState = (state, connectedState) => {
     return {
       ...state,
       connectedState: JSON.stringify(connectedState, null, 2),
