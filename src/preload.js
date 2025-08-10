@@ -23,6 +23,7 @@ contextBridge.exposeInMainWorld("fileAPI", {
   getImageDimensions: (imagePath) =>
     ipcRenderer.invoke("image:getDimensions", imagePath),
   getSystemTheme: () => ipcRenderer.invoke("theme:getSystemTheme"),
+  listDirectory: (dirPath) => ipcRenderer.invoke("file:listDirectory", dirPath),
 });
 
 contextBridge.exposeInMainWorld("electronAPI", {

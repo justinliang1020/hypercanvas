@@ -423,3 +423,16 @@ ipcMain.handle("image:getDimensions", async (event, imagePath) => {
 ipcMain.handle("theme:getSystemTheme", () => {
   return nativeTheme.shouldUseDarkColors;
 });
+
+// List directory contents handler
+ipcMain.handle("file:listDirectory", async (event, dirPath) => {
+  try {
+    // Resolve relative paths from the app directory
+    const fullPath = path.isAbsolute(dirPath) ? dirPath : path.join(__dirname, dirPath);
+    const files = await fs.readdir(fullPath);
+    return files.filter(file => file.endsWith('.js'));
+  } catch (error) {
+    console.error("Error listing directory:", error);
+    return [];
+  }
+});

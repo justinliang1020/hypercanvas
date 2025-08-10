@@ -1,6 +1,6 @@
 import { app, h, text } from "./packages/hyperapp/index.js";
 import { appWithVisualizer } from "../../hyperapp-visualizer/visualizer.js";
-import * as programs from "./programRegistry.js";
+import { programRegistry } from "./programRegistry.js";
 
 // -----------------------------
 // ## Types
@@ -1418,7 +1418,7 @@ function toolbar(state) {
         },
         text("↷ Redo"),
       ),
-      ...Object.keys(programs.programRegistry).map((programName) =>
+      ...Object.keys(programRegistry).map((programName) =>
         h(
           "button",
           {
@@ -1670,7 +1670,7 @@ class ProgramInstanceManager {
    * @param {String} name
    */
   #initializeProgram(id, name) {
-    const Program = programs.programRegistry[name];
+    const Program = programRegistry[name];
     if (!Program) {
       throw Error("invalid program name");
     }
