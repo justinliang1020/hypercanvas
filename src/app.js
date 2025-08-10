@@ -90,6 +90,7 @@ import { programRegistry } from "./programRegistry.js";
  * @property {ResizeStartState|null} resizeStart - Resize operation start state
  * @property {MementoManager} mementoManager - Undo/redo manager
  * @property {boolean} isDarkMode - Dark mode toggle
+ * @property {boolean} sidebarVisible - Whether sidebar is visible
  * @property {Block|null} clipboard - Copied block data
  */
 
@@ -1128,6 +1129,9 @@ function viewport(state) {
     "div",
     {
       id: "viewport",
+      class: {
+        "sidebar-hidden": !state.sidebarVisible,
+      },
       onpointerdown: (state, event) => {
         // Only start dragging on middle mouse button or space+click
         if (event.button === 1 || (event.button === 0 && event.shiftKey)) {
@@ -1393,6 +1397,9 @@ function sidebar(state) {
     "div",
     {
       id: "sidebar",
+      class: {
+        hidden: !state.sidebarVisible,
+      },
       style: {
         pointerEvents: state.isBlockDragging ? "none" : "auto",
       },
@@ -1402,6 +1409,17 @@ function sidebar(state) {
       },
     },
     [
+      h(
+        "button",
+        {
+          onclick: (state) => ({
+            ...state,
+            sidebarVisible: !state.sidebarVisible,
+          }),
+          title: "Toggle sidebar visibility",
+        },
+        text("◀"),
+      ),
       h(
         "button",
         {
@@ -1626,7 +1644,27 @@ function main(state) {
       },
       tabindex: 0, // Make the main element focusable for keyboard events
     },
-    [viewport(state), sidebar(state)],
+    [
+      viewport(state),
+      sidebar(state),
+      // Only show floating toggle button when sidebar is hidden
+      ...(state.sidebarVisible
+        ? []
+        : [
+            h(
+              "button",
+              {
+                id: "sidebar-toggle",
+                onclick: (state) => ({
+                  ...state,
+                  sidebarVisible: !state.sidebarVisible,
+                }),
+                title: "Show sidebar",
+              },
+              text("▶"),
+            ),
+          ]),
+    ],
   );
 }
 
@@ -1773,6 +1811,7 @@ async function initialize() {
     resizeStart: null,
     mementoManager: createMementoManager(),
     isDarkMode: false,
+    sidebarVisible: true,
     blocks: [],
     connections: [],
     clipboard: null,

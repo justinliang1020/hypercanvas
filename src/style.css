@@ -84,6 +84,24 @@ hr {
   box-sizing: border-box;
 }
 
+#sidebar.hidden {
+  transform: translateX(100%);
+}
+
+#sidebar-toggle {
+  position: fixed;
+  right: 10px;
+  top: 10px;
+  z-index: 1001;
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 #sidebar button {
   width: 100%;
   padding: 8px 12px;
@@ -132,6 +150,10 @@ hr {
   box-sizing: border-box;
 }
 
+#viewport.sidebar-hidden {
+  padding-right: 0;
+}
+
 #gallery {
   display: flex;
   align-items: flex-start;
@@ -169,6 +191,17 @@ main.dark-mode {
     border-left-color: #555;
     color: #e0e0e0;
     box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
+  }
+
+  #sidebar-toggle {
+    background: #555;
+    border-color: #777;
+    color: #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  #sidebar-toggle:hover {
+    background: #666;
   }
 
   #sidebar button {
