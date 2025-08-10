@@ -1493,6 +1493,9 @@ function main(state) {
       style: {
         cursor: state.cursorStyle,
       },
+      class: {
+        "dark-mode": state.isDarkMode,
+      },
       onkeydown: (state, event) => {
         // Track shift key state
         if (event.key === "Shift") {
@@ -1846,15 +1849,7 @@ async function initialize() {
    * @returns {() => void} Cleanup function
    */
   function subscription(dispatch, state) {
-    // Apply dark mode class to body
-    if (state.isDarkMode) {
-      document.body.classList.add("dark-mode");
-    } else {
-      document.body.classList.remove("dark-mode");
-    }
-
     deleteInactiveConnections(state);
-
     programInstanceManager.syncPrograms(dispatch, state);
 
     // Schedule callback for after the current hyperapp paint cycle
@@ -1902,7 +1897,10 @@ async function initialize() {
     init: state,
     view: (state) => main(state),
     node: /** @type {Node} */ (document.getElementById("app")),
-    subscriptions: (state) => [[subscription, state], [themeSubscription, state]],
+    subscriptions: (state) => [
+      [subscription, state],
+      [themeSubscription, state],
+    ],
   };
 
   // seems to be glitchy when having a lot of history

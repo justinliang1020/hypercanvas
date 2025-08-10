@@ -128,7 +128,7 @@ hr {
 }
 
 /* Dark mode styles */
-body.dark-mode {
+main.dark-mode {
   background-color: #1a1a1a;
   color: #e0e0e0;
 
