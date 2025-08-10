@@ -19,7 +19,7 @@ async function loadPrograms() {
           /** @param {any} export_ */
           (export_) =>
             export_?.prototype &&
-            export_.prototype.constructor.name.endsWith("Program"),
+            export_.prototype.constructor.name === "Program",
         );
         if (ProgramClass) {
           registry[programName] =

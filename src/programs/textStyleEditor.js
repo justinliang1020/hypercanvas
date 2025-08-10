@@ -1,5 +1,5 @@
 import { AbstractProgram } from "../abstractProgram.js";
-import { TextProgram } from "./text.js";
+import { Program as TextProgram } from "./text.js";
 import { h, text } from "../packages/hyperapp/index.js";
 
 /**
@@ -7,7 +7,7 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @property {string} value
  */
 
-export class TextStyleProgram extends AbstractProgram {
+export class Program extends AbstractProgram {
   constructor() {
     super();
     /** @type {State} */

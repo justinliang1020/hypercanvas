@@ -6,7 +6,7 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @property {string} connectedState - JSON string representation of connected program state
  */
 
-export class StateVisualizerProgram extends AbstractProgram {
+export class Program extends AbstractProgram {
   constructor() {
     super();
     /** @type {State} */

@@ -14,7 +14,7 @@ import { AbstractProgram } from "../abstractProgram.js";
  * @property {string[]} colorPalette - Available colors
  */
 
-export class PaintProgram extends AbstractProgram {
+export class Program extends AbstractProgram {
   constructor() {
     super();
     /** @type {State} */

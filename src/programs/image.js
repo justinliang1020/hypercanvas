@@ -6,7 +6,7 @@ import { AbstractProgram } from "../abstractProgram.js";
  * @property {string} path
  */
 
-export class ImageProgram extends AbstractProgram {
+export class Program extends AbstractProgram {
   constructor() {
     super();
     /** @type {State} */

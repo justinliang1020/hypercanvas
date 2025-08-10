@@ -7,7 +7,7 @@ import { AbstractProgram } from "../abstractProgram.js";
  * @property {string} backgroundColor
  */
 
-export class TextProgram extends AbstractProgram {
+export class Program extends AbstractProgram {
   constructor() {
     super();
     /** @type {State} */

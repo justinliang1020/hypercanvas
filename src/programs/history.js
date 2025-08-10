@@ -8,7 +8,7 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @property {number} maxHistorySize - Maximum number of states to keep in history
  */
 
-export class HistoryProgram extends AbstractProgram {
+export class Program extends AbstractProgram {
   constructor() {
     super();
     /** @type {State} */

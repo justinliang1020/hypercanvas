@@ -8,7 +8,7 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @property {string|null} error - Error message for invalid JSON
  */
 
-export class StateEditorProgram extends AbstractProgram {
+export class Program extends AbstractProgram {
   constructor() {
     super();
     /** @type {State} */
