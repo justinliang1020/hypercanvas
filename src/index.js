@@ -429,8 +429,17 @@ ipcMain.handle("file:listDirectory", async (event, dirPath) => {
   try {
     // Resolve relative paths from the app directory
     const fullPath = path.isAbsolute(dirPath) ? dirPath : path.join(__dirname, dirPath);
-    const files = await fs.readdir(fullPath);
-    return files.filter(file => file.endsWith('.js'));
+    const items = await fs.readdir(fullPath, { withFileTypes: true });
+    
+    // Return both files and directories
+    return items.map(item => {
+      if (item.isDirectory()) {
+        return item.name; // Return directory name
+      } else if (item.isFile() && item.name.endsWith('.js')) {
+        return item.name; // Return JS file name
+      }
+      return null;
+    }).filter(Boolean); // Remove null entries
   } catch (error) {
     console.error("Error listing directory:", error);
     return [];

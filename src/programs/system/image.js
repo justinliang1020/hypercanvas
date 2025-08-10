@@ -1,5 +1,5 @@
-import { h } from "../packages/hyperapp/index.js";
-import { AbstractProgram } from "../abstractProgram.js";
+import { h } from "../../packages/hyperapp/index.js";
+import { AbstractProgram } from "../../abstractProgram.js";
 
 /**
  * @typedef State
@@ -13,7 +13,7 @@ export class Program extends AbstractProgram {
     this.defaultState = {
       path: "assets/sun-cat.jpg",
     };
-    /** @type {import("../abstractProgram.js").AllowedConnection[]} */
+    /** @type {import("../../abstractProgram.js").AllowedConnection[]} */
     this.allowedConnections = [];
     this.view = this.#main;
   }

@@ -1,5 +1,5 @@
 import { AbstractProgram } from "../abstractProgram.js";
-import { Program as TextProgram } from "./text.js";
+import { Program as TextProgram } from "./system/text.js";
 import { h, text } from "../packages/hyperapp/index.js";
 
 /**

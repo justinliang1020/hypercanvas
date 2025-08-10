@@ -1,41 +1,58 @@
 /**
- * Dynamically loads all program files from src/programs/
+ * Recursively loads programs from a directory
+ * @param {Object.<string, any>} registry - Registry to populate
+ * @param {string} dirPath - Directory path relative to programs/
+ * @param {string} namespace - Namespace prefix for program names
+ */
+async function loadFromDirectory(registry, dirPath = "", namespace = "") {
+  try {
+    // @ts-ignore - Use Electron's file API to list directory contents
+    const items = await window.fileAPI.listDirectory(
+      `programs${dirPath ? "/" + dirPath : ""}`,
+    );
+
+    for (const item of items) {
+      if (item.endsWith(".js")) {
+        // Load JavaScript file
+        const programName = item.replace(".js", "");
+        const fullProgramName = namespace
+          ? `${namespace}/${programName}`
+          : programName;
+        const importPath = `./programs${dirPath ? "/" + dirPath : ""}/${item}`;
+
+        try {
+          const module = await import(importPath);
+          const ProgramClass = Object.values(module).find(
+            /** @param {any} export_ */
+            (export_) =>
+              export_?.prototype &&
+              export_.prototype.constructor.name === "Program",
+          );
+          registry[fullProgramName] = ProgramClass || null;
+        } catch (error) {
+          console.error(`Failed to load program ${importPath}:`, error);
+          registry[fullProgramName] = null;
+        }
+      } else {
+        // Recurse into subdirectory
+        const subDirPath = dirPath ? `${dirPath}/${item}` : item;
+        const subNamespace = namespace ? `${namespace}/${item}` : item;
+        await loadFromDirectory(registry, subDirPath, subNamespace);
+      }
+    }
+  } catch (error) {
+    console.error(`Failed to load programs from directory ${dirPath}:`, error);
+  }
+}
+
+/**
+ * Dynamically loads all program files from src/programs/ including subdirectories
  * @returns {Promise<Object.<string, (typeof import("./abstractProgram.js").AbstractProgram | null)>>}
  */
 async function loadPrograms() {
   /** @type {Object.<string, (typeof import("./abstractProgram.js").AbstractProgram | null)>} */
   const registry = {};
-
-  try {
-    // @ts-ignore - Use Electron's file API to list directory contents
-    const files = await window.fileAPI.listDirectory("programs");
-
-    for (const file of files) {
-      const programName = file.replace(".js", "");
-      try {
-        const module = await import(`./programs/${file}`);
-        // Find the exported Program class (assumes one Program class per file)
-        const ProgramClass = Object.values(module).find(
-          /** @param {any} export_ */
-          (export_) =>
-            export_?.prototype &&
-            export_.prototype.constructor.name === "Program",
-        );
-        if (ProgramClass) {
-          registry[programName] =
-            /** @type {typeof import("./abstractProgram.js").AbstractProgram} */ (
-              ProgramClass
-            );
-        }
-      } catch (error) {
-        console.error(`Failed to load program ${file}:`, error);
-        registry[programName] = null;
-      }
-    }
-  } catch (error) {
-    console.error("Failed to load programs directory:", error);
-  }
-
+  await loadFromDirectory(registry);
   return registry;
 }
 
@@ -45,11 +62,11 @@ export const programRegistry = await loadPrograms();
  * Example of what programRegistry looks like:
  * {
  *   "history": HistoryProgram,
- *   "image": ImageProgram,
  *   "paint": PaintProgram,
  *   "stateEditor": StateEditorProgram,
  *   "stateVisualizer": StateVisualizerProgram,
- *   "text": TextProgram,
- *   "textStyleEditor": TextStyleEditorProgram
+ *   "textStyleEditor": TextStyleEditorProgram,
+ *   "system/image": ImageProgram,
+ *   "system/text": TextProgram
  * }
  */

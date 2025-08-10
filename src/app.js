@@ -686,7 +686,7 @@ const pasteEffect = async (dispatch, state) => {
           dispatch((state) =>
             addBlock(
               state,
-              "image",
+              "system/image",
               { path: result.path },
               50, // x
               50, // y
@@ -709,12 +709,12 @@ const pasteEffect = async (dispatch, state) => {
       dispatch(pasteBlock(state));
       return;
     } else {
-      /** @type {import("./programs/text.js").State} */
+      /** @type {import("./programs/system/text.js").State} */
       const textProgramState = {
         text: text,
         backgroundColor: "transparent",
       };
-      dispatch(addBlock(state, "text", textProgramState));
+      dispatch(addBlock(state, "system/text", textProgramState));
       return;
     }
   } catch (error) {
@@ -1418,16 +1418,15 @@ function toolbar(state) {
         },
         text("↷ Redo"),
       ),
-      ...Object.keys(programRegistry).map((programName) =>
+       ...Object.keys(programRegistry).map((programName) =>
         h(
           "button",
           {
             onclick: (state) => addBlock(state, programName),
           },
-          text(`create ${programName}`),
+          text(`create ${programName.replace('/', ' ')}`),
         ),
-      ),
-      h(
+      ),      h(
         "button",
         {
           onclick: (state) => [
@@ -1442,7 +1441,7 @@ function toolbar(state) {
                   dispatch((state) =>
                     addBlock(
                       state,
-                      "image",
+                      "system/image",
                       { path: result.path },
                       50, // x
                       50, // y
