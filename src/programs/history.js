@@ -1,4 +1,4 @@
-import { Program } from "./program.js";
+import { Program } from "../program.js";
 import { h, text } from "../packages/hyperapp/index.js";
 
 /**
@@ -17,7 +17,7 @@ export class HistoryProgram extends Program {
       currentIndex: -1,
       maxHistorySize: 100,
     };
-    /** @type {import("./program.js").AllowedConnection[]} */
+    /** @type {import("../program.js").AllowedConnection[]} */
     this.allowedConnections = [
       {
         name: "default",

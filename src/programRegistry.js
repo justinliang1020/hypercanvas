@@ -6,7 +6,7 @@ import { StateEditorProgram } from "./programs/stateEditor.js";
 import { PaintProgram } from "./programs/paint.js";
 import { HistoryProgram } from "./programs/history.js";
 
-/** @type{Object.<string, (typeof import("./programs/program.js").Program | null)>} */
+/** @type{Object.<string, (typeof import("./program.js").Program | null)>} */
 export const programRegistry = {
   text: TextProgram,
   textStyleEditor: TextStyleProgram,

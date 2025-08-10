@@ -1,4 +1,4 @@
-import { Program } from "./program.js";
+import { Program } from "../program.js";
 import { h, text } from "../packages/hyperapp/index.js";
 
 /**
@@ -13,7 +13,7 @@ export class StateVisualizerProgram extends Program {
     this.defaultState = {
       connectedState: "{}",
     };
-    /** @type {import("./program.js").AllowedConnection[]} */
+    /** @type {import("../program.js").AllowedConnection[]} */
     this.allowedConnections = [
       {
         name: "default",

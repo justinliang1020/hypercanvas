@@ -1,6 +1,6 @@
 import { h, text } from "../packages/hyperapp/index.js";
 
-import { Program } from "./program.js";
+import { Program } from "../program.js";
 
 /**
  * @typedef State
@@ -37,7 +37,7 @@ export class PaintProgram extends Program {
       ],
       paintedCells: {},
     };
-    /** @type {import("./program.js").AllowedConnection[]} */
+    /** @type {import("../program.js").AllowedConnection[]} */
     this.allowedConnections = [];
     this.view = this.#main;
   }
@@ -364,5 +364,3 @@ export class PaintProgram extends Program {
       this.#cells(state),
     );
 }
-
-

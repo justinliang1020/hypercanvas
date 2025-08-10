@@ -1,5 +1,5 @@
 import { h } from "../packages/hyperapp/index.js";
-import { Program } from "./program.js";
+import { Program } from "../program.js";
 
 /**
  * @typedef State
@@ -13,7 +13,7 @@ export class ImageProgram extends Program {
     this.defaultState = {
       path: "assets/sun-cat.jpg",
     };
-    /** @type {import("./program.js").AllowedConnection[]} */
+    /** @type {import("../program.js").AllowedConnection[]} */
     this.allowedConnections = [];
     this.view = this.#main;
   }

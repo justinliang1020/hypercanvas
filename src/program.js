@@ -1,4 +1,4 @@
-import { app } from "../packages/hyperapp/index.js";
+import { app } from "./packages/hyperapp/index.js";
 
 /**
  * @typedef {Object} AllowedConnection
