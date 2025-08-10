@@ -7,23 +7,6 @@ import { app } from "./packages/hyperapp/index.js";
  */
 
 /**
- * @template S
- * @param {(state: S) => S} fn
- * @returns {(dispatch: import("hyperapp").Dispatch<S>) => import("hyperapp").Dispatch<S>}
- */
-const stateMiddleware = (fn) => (dispatch) => (action, payload) => {
-  if (Array.isArray(action) && typeof action[0] !== "function") {
-    action = /** @type {import("hyperapp").Dispatchable<S>} */ ([
-      fn(/** @type {S} */ (action[0])),
-      ...action.slice(1),
-    ]);
-  } else if (!Array.isArray(action) && typeof action !== "function") {
-    action = fn(/** @type {S} */ (action));
-  }
-  dispatch(action, payload);
-};
-
-/**
  * @abstract
  */
 export class Program {
@@ -178,15 +161,6 @@ export class Program {
   }
 
   /**
-   * @type {(dispatch: import("hyperapp").Dispatch<any>) => import("hyperapp").Dispatch<any>}
-   */
-  #logStateMiddleware = stateMiddleware((state) => {
-    this.#currentState = state;
-    this.#emitStateChange(state);
-    return state;
-  });
-
-  /**
    * Emits a state change event
    * @param {any} state
    */
@@ -196,4 +170,30 @@ export class Program {
     });
     dispatchEvent(event);
   }
+
+  /**
+   * @template S
+   * @param {(state: S) => S} fn
+   * @returns {(dispatch: import("hyperapp").Dispatch<S>) => import("hyperapp").Dispatch<S>}
+   */
+  #stateMiddleware = (fn) => (dispatch) => (action, payload) => {
+    if (Array.isArray(action) && typeof action[0] !== "function") {
+      action = /** @type {import("hyperapp").Dispatchable<S>} */ ([
+        fn(/** @type {S} */ (action[0])),
+        ...action.slice(1),
+      ]);
+    } else if (!Array.isArray(action) && typeof action !== "function") {
+      action = fn(/** @type {S} */ (action));
+    }
+    dispatch(action, payload);
+  };
+
+  /**
+   * @type {(dispatch: import("hyperapp").Dispatch<any>) => import("hyperapp").Dispatch<any>}
+   */
+  #logStateMiddleware = this.#stateMiddleware((state) => {
+    this.#currentState = state;
+    this.#emitStateChange(state);
+    return state;
+  });
 }
