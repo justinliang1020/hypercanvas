@@ -1384,15 +1384,15 @@ function viewport(state) {
 }
 
 /**
- * Creates the main application toolbar with action buttons
+ * Creates the main application sidebar with action buttons
  * @param {State} state - Current application state
- * @returns {import("hyperapp").ElementVNode<State>} Toolbar element
+ * @returns {import("hyperapp").ElementVNode<State>} Sidebar element
  */
-function toolbar(state) {
+function sidebar(state) {
   return h(
     "div",
     {
-      id: "toolbar",
+      id: "sidebar",
       style: {
         pointerEvents: state.isBlockDragging ? "none" : "auto",
       },
@@ -1626,7 +1626,7 @@ function main(state) {
       },
       tabindex: 0, // Make the main element focusable for keyboard events
     },
-    [viewport(state), toolbar(state)],
+    [viewport(state), sidebar(state)],
   );
 }
 

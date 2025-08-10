@@ -67,17 +67,43 @@ hr {
   }
 }
 
-#toolbar {
+#sidebar {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   position: fixed;
-  bottom: 50px;
+  right: 0;
+  top: 0;
+  bottom: 0;
   background: white;
-  height: 30px;
-  left: 50%;
-  transform: translateX(-50%);
+  width: 180px;
+  padding: 20px;
   border-left: 1px solid #ccc;
   z-index: 1000;
+  gap: 8px;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
+#sidebar button {
+  width: 100%;
+  padding: 8px 12px;
+  text-align: left;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+#sidebar button:hover {
+  background: #f5f5f5;
+}
+
+#sidebar button:disabled {
+  background: #f8f8f8;
+  color: #999;
+  cursor: not-allowed;
 }
 
 .toolbar-resize-handle {
@@ -102,6 +128,8 @@ hr {
   position: relative;
   background-color: #f8f9fa;
   overflow: hidden;
+  padding-right: 180px;
+  box-sizing: border-box;
 }
 
 #gallery {
@@ -136,10 +164,27 @@ main.dark-mode {
     background-color: #2d2d2d;
   }
 
-  #toolbar {
+  #sidebar {
     background: #333;
     border-left-color: #555;
     color: #e0e0e0;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
+  }
+
+  #sidebar button {
+    background: #555;
+    border-color: #777;
+    color: #e0e0e0;
+  }
+
+  #sidebar button:hover {
+    background: #666;
+  }
+
+  #sidebar button:disabled {
+    background: #333;
+    color: #666;
+    border-color: #444;
   }
 
   .block-toolbar {
