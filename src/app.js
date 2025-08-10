@@ -1418,15 +1418,16 @@ function toolbar(state) {
         },
         text("↷ Redo"),
       ),
-       ...Object.keys(programRegistry).map((programName) =>
+      ...Object.keys(programRegistry).map((programName) =>
         h(
           "button",
           {
             onclick: (state) => addBlock(state, programName),
           },
-          text(`create ${programName.replace('/', ' ')}`),
+          text(`create ${programName.replace("/", " ")}`),
         ),
-      ),      h(
+      ),
+      h(
         "button",
         {
           onclick: (state) => [
@@ -1886,10 +1887,13 @@ async function initialize() {
     };
 
     // @ts-ignore
-    window.electronAPI.onThemeChanged(handleThemeChange);
+    const listener = window.electronAPI.onThemeChanged(handleThemeChange);
 
-    // Return cleanup function (required for subscriptions)
-    return () => {};
+    // Return cleanup function that removes the listener
+    return () => {
+      // @ts-ignore
+      window.electronAPI.removeThemeListener(listener);
+    };
   }
 
   /** @type {import("hyperapp").App<State>} */

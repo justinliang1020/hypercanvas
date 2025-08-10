@@ -34,6 +34,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.send("state-saved");
   },
   onThemeChanged: (callback) => {
-    ipcRenderer.on("theme-changed", (event, isDark) => callback(isDark));
+    const listener = (event, isDark) => callback(isDark);
+    ipcRenderer.on("theme-changed", listener);
+    return listener; // Return the listener so it can be removed later
+  },
+  removeThemeListener: (listener) => {
+    ipcRenderer.removeListener("theme-changed", listener);
   },
 });
