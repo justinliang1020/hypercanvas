@@ -22,6 +22,7 @@ contextBridge.exposeInMainWorld("fileAPI", {
     ),
   getImageDimensions: (imagePath) =>
     ipcRenderer.invoke("image:getDimensions", imagePath),
+  getSystemTheme: () => ipcRenderer.invoke("theme:getSystemTheme"),
 });
 
 contextBridge.exposeInMainWorld("electronAPI", {
@@ -30,5 +31,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
   stateSaved: () => {
     ipcRenderer.send("state-saved");
+  },
+  onThemeChanged: (callback) => {
+    ipcRenderer.on("theme-changed", (event, isDark) => callback(isDark));
   },
 });

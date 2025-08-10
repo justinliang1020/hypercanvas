@@ -1814,6 +1814,15 @@ async function initialize() {
     state = initialState;
   }
 
+  // Initialize dark mode based on system theme
+  try {
+    // @ts-ignore
+    const systemIsDark = await window.fileAPI.getSystemTheme();
+    state.isDarkMode = systemIsDark;
+  } catch (error) {
+    console.warn("Failed to get system theme, using default:", error);
+  }
+
   let currentState = state;
 
   /**
@@ -1864,12 +1873,36 @@ async function initialize() {
     return () => {};
   }
 
+  /**
+   * Subscription that listens for system theme changes
+   * @param {import("hyperapp").Dispatch<State>} dispatch - Function to dispatch actions
+   * @param {State} state
+   * @returns {() => void} Cleanup function
+   */
+  function themeSubscription(dispatch, state) {
+    /**
+     * @param {boolean} isDark - Whether the system theme is dark
+     */
+    const handleThemeChange = (isDark) => {
+      dispatch((state) => ({
+        ...state,
+        isDarkMode: isDark,
+      }));
+    };
+
+    // @ts-ignore
+    window.electronAPI.onThemeChanged(handleThemeChange);
+
+    // Return cleanup function (required for subscriptions)
+    return () => {};
+  }
+
   /** @type {import("hyperapp").App<State>} */
   const appConfig = {
     init: state,
     view: (state) => main(state),
     node: /** @type {Node} */ (document.getElementById("app")),
-    subscriptions: (state) => [[subscription, state]],
+    subscriptions: (state) => [[subscription, state], [themeSubscription, state]],
   };
 
   // seems to be glitchy when having a lot of history

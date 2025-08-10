@@ -1,5 +1,5 @@
 //@ts-nocheck
-const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, nativeTheme } = require("electron");
 const path = require("node:path");
 const fs = require("fs").promises;
 
@@ -58,6 +58,16 @@ app.whenReady().then(() => {
   // Listen for renderer confirmation that state is saved
   ipcMain.on("state-saved", () => {
     app.exit(); // Force quit after state is saved
+  });
+
+  // Send initial theme state to renderer
+  mainWindow.webContents.once("did-finish-load", () => {
+    mainWindow.webContents.send("theme-changed", nativeTheme.shouldUseDarkColors);
+  });
+
+  // Listen for system theme changes
+  nativeTheme.on("updated", () => {
+    mainWindow.webContents.send("theme-changed", nativeTheme.shouldUseDarkColors);
   });
 });
 
@@ -407,4 +417,9 @@ ipcMain.handle("image:getDimensions", async (event, imagePath) => {
       height: 200,
     };
   }
+});
+
+// Get system theme handler
+ipcMain.handle("theme:getSystemTheme", () => {
+  return nativeTheme.shouldUseDarkColors;
 });
