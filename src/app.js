@@ -91,6 +91,7 @@ import { programRegistry } from "./programRegistry.js";
  * @property {MementoManager} mementoManager - Undo/redo manager
  * @property {boolean} isDarkMode - Dark mode toggle
  * @property {boolean} sidebarVisible - Whether sidebar is visible
+ * @property {number} sidebarWidth - Width of sidebar in pixels
  * @property {Block|null} clipboard - Copied block data
  */
 
@@ -1132,6 +1133,10 @@ function viewport(state) {
       class: {
         "sidebar-hidden": !state.sidebarVisible,
       },
+      style: {
+        paddingRight: state.sidebarVisible ? `${state.sidebarWidth}px` : "0",
+        touchAction: "none", // Prevent default touch behaviors
+      },
       onpointerdown: (state, event) => {
         // Only start dragging on middle mouse button or space+click
         if (event.button === 1 || (event.button === 0 && event.shiftKey)) {
@@ -1361,9 +1366,6 @@ function viewport(state) {
 
         return state;
       },
-      style: {
-        touchAction: "none", // Prevent default touch behaviors
-      },
     },
     [
       h(
@@ -1402,6 +1404,7 @@ function sidebar(state) {
       },
       style: {
         pointerEvents: state.isBlockDragging ? "none" : "auto",
+        width: `${state.sidebarWidth}px`,
       },
       onpointerdown: (state, event) => {
         event.stopPropagation();
@@ -1812,6 +1815,7 @@ async function initialize() {
     mementoManager: createMementoManager(),
     isDarkMode: false,
     sidebarVisible: true,
+    sidebarWidth: 400,
     blocks: [],
     connections: [],
     clipboard: null,

@@ -75,7 +75,6 @@ hr {
   top: 0;
   bottom: 0;
   background: white;
-  width: 180px;
   padding: 20px;
   border-left: 1px solid #ccc;
   z-index: 1000;
@@ -146,7 +145,6 @@ hr {
   position: relative;
   background-color: #f8f9fa;
   overflow: hidden;
-  padding-right: 180px;
   box-sizing: border-box;
 }
 
