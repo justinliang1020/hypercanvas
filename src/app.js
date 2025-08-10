@@ -1439,15 +1439,6 @@ function sidebar(state) {
         },
         text("↷ Redo"),
       ),
-      ...Object.keys(programRegistry).map((programName) =>
-        h(
-          "button",
-          {
-            onclick: (state) => addBlock(state, programName),
-          },
-          text(`create ${programName.replace("/", " ")}`),
-        ),
-      ),
       h(
         "button",
         {
@@ -1498,6 +1489,16 @@ function sidebar(state) {
           onclick: (state) => [state, () => saveApplication(state)],
         },
         text("save"),
+      ),
+      h("hr", {}),
+      ...Object.keys(programRegistry).map((programName) =>
+        h(
+          "button",
+          {
+            onclick: (state) => addBlock(state, programName),
+          },
+          text(`create ${programName.replace("/", " ")}`),
+        ),
       ),
     ],
   );
