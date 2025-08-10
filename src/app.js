@@ -652,6 +652,77 @@ const clearUserClipboardEffect = async () => {
   }
 };
 
+/**
+ * Effect that handles pasting content from clipboard (images or text)
+ * @param {import("hyperapp").Dispatch<State>} dispatch
+ * @param {State} state
+ */
+const pasteEffect = async (dispatch, state) => {
+  try {
+    const clipboardItems = await navigator.clipboard.read();
+
+    if (clipboardItems.length === 0) {
+      dispatch((state) => state);
+      return;
+    }
+
+    const item = clipboardItems[0];
+
+    const imageTypes = item.types.filter((type) => type.startsWith("image/"));
+    if (imageTypes.length > 0) {
+      // Handle image paste
+      const imageType = imageTypes[0];
+      const blob = await item.getType(imageType);
+      const arrayBuffer = await blob.arrayBuffer();
+
+      try {
+        // @ts-ignore
+        const result = await window.fileAPI.saveImageFromBuffer(
+          arrayBuffer,
+          imageType,
+          MEDIA_SAVE_PATH,
+        );
+        if (result.success) {
+          dispatch((state) =>
+            addBlock(
+              state,
+              "image",
+              { path: result.path },
+              50, // x
+              50, // y
+              result.width,
+              result.height,
+            ),
+          );
+          return;
+        }
+      } catch (error) {
+        console.error("Failed to paste image:", error);
+      }
+
+      dispatch((state) => state);
+      return;
+    }
+
+    const text = await navigator.clipboard.readText();
+    if (text.trim() === "") {
+      dispatch(pasteBlock(state));
+      return;
+    } else {
+      /** @type {import("./programs/text.js").State} */
+      const textProgramState = {
+        text: text,
+        backgroundColor: "transparent",
+      };
+      dispatch(addBlock(state, "text", textProgramState));
+      return;
+    }
+  } catch (error) {
+    console.error("Failed to read clipboard:", error);
+    dispatch((state) => state);
+  }
+};
+
 // -----------------------------
 // ## Components
 // -----------------------------
@@ -1417,76 +1488,6 @@ function toolbar(state) {
  * @returns {import("hyperapp").ElementVNode<State>} Main application element
  */
 function main(state) {
-  /**
-   * Clear clipboard effect that clears the system clipboard
-   * @type {import("hyperapp").Effect<State>}
-   * @param {import("hyperapp").Dispatch<State>} dispatch
-   */
-  const pasteEffect = async (dispatch) => {
-    try {
-      const clipboardItems = await navigator.clipboard.read();
-
-      if (clipboardItems.length === 0) {
-        dispatch((state) => state);
-        return;
-      }
-
-      const item = clipboardItems[0];
-
-      const imageTypes = item.types.filter((type) => type.startsWith("image/"));
-      if (imageTypes.length > 0) {
-        // Handle image paste
-        const imageType = imageTypes[0];
-        const blob = await item.getType(imageType);
-        const arrayBuffer = await blob.arrayBuffer();
-
-        try {
-          // @ts-ignore
-          const result = await window.fileAPI.saveImageFromBuffer(
-            arrayBuffer,
-            imageType,
-            MEDIA_SAVE_PATH,
-          );
-          if (result.success) {
-            dispatch((state) =>
-              addBlock(
-                state,
-                "image",
-                { path: result.path },
-                50, // x
-                50, // y
-                result.width,
-                result.height,
-              ),
-            );
-            return;
-          }
-        } catch (error) {
-          console.error("Failed to paste image:", error);
-        }
-
-        dispatch((state) => state);
-        return;
-      }
-
-      const text = await navigator.clipboard.readText();
-      if (text.trim() === "") {
-        dispatch(pasteBlock(state));
-        return;
-      } else {
-        /** @type {import("./programs/text.js").State} */
-        const textProgramState = {
-          text: text,
-          backgroundColor: "transparent",
-        };
-        dispatch(addBlock(state, "text", textProgramState));
-        return;
-      }
-    } catch (error) {
-      console.error("Failed to read clipboard:", error);
-      dispatch((state) => state);
-    }
-  };
   return h(
     "main",
     {
@@ -1569,7 +1570,7 @@ function main(state) {
             if (event.ctrlKey || event.metaKey) {
               if (state.editingId === null) {
                 event.preventDefault();
-                return [state, pasteEffect];
+                return [state, [pasteEffect, state]];
               }
             }
             return state;
