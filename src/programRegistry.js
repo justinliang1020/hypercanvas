@@ -1,9 +1,9 @@
 /**
  * Dynamically loads all program files from src/programs/
- * @returns {Promise<Object.<string, (typeof import("./program.js").Program | null)>>}
+ * @returns {Promise<Object.<string, (typeof import("./abstractProgram.js").AbstractProgram | null)>>}
  */
 async function loadPrograms() {
-  /** @type {Object.<string, (typeof import("./program.js").Program | null)>} */
+  /** @type {Object.<string, (typeof import("./abstractProgram.js").AbstractProgram | null)>} */
   const registry = {};
 
   try {
@@ -23,7 +23,9 @@ async function loadPrograms() {
         );
         if (ProgramClass) {
           registry[programName] =
-            /** @type {typeof import("./program.js").Program} */ (ProgramClass);
+            /** @type {typeof import("./abstractProgram.js").AbstractProgram} */ (
+              ProgramClass
+            );
         }
       } catch (error) {
         console.error(`Failed to load program ${file}:`, error);
@@ -37,5 +39,5 @@ async function loadPrograms() {
   return registry;
 }
 
-/** @type{Object.<string, (typeof import("./program.js").Program | null)>} */
+/** @type{Object.<string, (typeof import("./abstractProgram.js").AbstractProgram | null)>} */
 export const programRegistry = await loadPrograms();

@@ -3,16 +3,16 @@ import { app } from "./packages/hyperapp/index.js";
 /**
  * @typedef {Object} AllowedConnection
  * @property {String} name
- * @property {typeof Program} program
+ * @property {typeof AbstractProgram} program
  */
 
 /**
  * @abstract
  */
-export class Program {
+export class AbstractProgram {
   /** @type{import("hyperapp").Dispatch<any> | null}*/
   #dispatch = null;
-  /** @type{Object.<string, (Program | null)>} */
+  /** @type{Object.<string, (AbstractProgram | null)>} */
   #connections = {};
   /** @type {any} */
   #currentState = null;
@@ -88,7 +88,7 @@ export class Program {
 
   /**
    * @param {String} name
-   * @param {Program} program
+   * @param {AbstractProgram} program
    */
   setConnection(name, program) {
     for (const allowedConnection of this.allowedConnections) {
@@ -107,7 +107,7 @@ export class Program {
 
   /**
    * @param {String} name
-   * @returns {Program | null}
+   * @returns {AbstractProgram | null}
    */
   getConnection(name) {
     return this.#connections[name];
@@ -134,7 +134,7 @@ export class Program {
      * @typedef {Object} ProgramStateSubscriberOptions
      * @property {String} name - The connection name
      * @property {import("hyperapp").Action<any>} action - The action to dispatch
-     * @property {Program} program - The program instance
+     * @property {AbstractProgram} program - The program instance
      */
 
     /**

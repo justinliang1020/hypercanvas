@@ -1,4 +1,4 @@
-import { Program } from "../program.js";
+import { AbstractProgram } from "../abstractProgram.js";
 import { h, text } from "../packages/hyperapp/index.js";
 
 /**
@@ -8,7 +8,7 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @property {string|null} error - Error message for invalid JSON
  */
 
-export class StateEditorProgram extends Program {
+export class StateEditorProgram extends AbstractProgram {
   constructor() {
     super();
     /** @type {State} */
@@ -17,11 +17,11 @@ export class StateEditorProgram extends Program {
       editableState: "{}",
       error: null,
     };
-    /** @type {import("../program.js").AllowedConnection[]} */
+    /** @type {import("../abstractProgram.js").AllowedConnection[]} */
     this.allowedConnections = [
       {
         name: "default",
-        program: Program,
+        program: AbstractProgram,
       },
     ];
     this.view = this.#main;

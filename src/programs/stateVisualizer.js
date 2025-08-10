@@ -1,4 +1,4 @@
-import { Program } from "../program.js";
+import { AbstractProgram } from "../abstractProgram.js";
 import { h, text } from "../packages/hyperapp/index.js";
 
 /**
@@ -6,18 +6,18 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @property {string} connectedState - JSON string representation of connected program state
  */
 
-export class StateVisualizerProgram extends Program {
+export class StateVisualizerProgram extends AbstractProgram {
   constructor() {
     super();
     /** @type {State} */
     this.defaultState = {
       connectedState: "{}",
     };
-    /** @type {import("../program.js").AllowedConnection[]} */
+    /** @type {import("../abstractProgram.js").AllowedConnection[]} */
     this.allowedConnections = [
       {
         name: "default",
-        program: Program,
+        program: AbstractProgram,
       },
     ];
     this.view = this.#main;

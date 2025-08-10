@@ -1,19 +1,19 @@
 import { h } from "../packages/hyperapp/index.js";
-import { Program } from "../program.js";
+import { AbstractProgram } from "../abstractProgram.js";
 
 /**
  * @typedef State
  * @property {string} path
  */
 
-export class ImageProgram extends Program {
+export class ImageProgram extends AbstractProgram {
   constructor() {
     super();
     /** @type {State} */
     this.defaultState = {
       path: "assets/sun-cat.jpg",
     };
-    /** @type {import("../program.js").AllowedConnection[]} */
+    /** @type {import("../abstractProgram.js").AllowedConnection[]} */
     this.allowedConnections = [];
     this.view = this.#main;
   }

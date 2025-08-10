@@ -1,6 +1,6 @@
 import { h, text } from "../packages/hyperapp/index.js";
 
-import { Program } from "../program.js";
+import { AbstractProgram } from "../abstractProgram.js";
 
 /**
  * @typedef State
@@ -14,7 +14,7 @@ import { Program } from "../program.js";
  * @property {string[]} colorPalette - Available colors
  */
 
-export class PaintProgram extends Program {
+export class PaintProgram extends AbstractProgram {
   constructor() {
     super();
     /** @type {State} */
@@ -37,7 +37,7 @@ export class PaintProgram extends Program {
       ],
       paintedCells: {},
     };
-    /** @type {import("../program.js").AllowedConnection[]} */
+    /** @type {import("../abstractProgram.js").AllowedConnection[]} */
     this.allowedConnections = [];
     this.view = this.#main;
   }

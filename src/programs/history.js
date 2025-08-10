@@ -1,4 +1,4 @@
-import { Program } from "../program.js";
+import { AbstractProgram } from "../abstractProgram.js";
 import { h, text } from "../packages/hyperapp/index.js";
 
 /**
@@ -8,7 +8,7 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @property {number} maxHistorySize - Maximum number of states to keep in history
  */
 
-export class HistoryProgram extends Program {
+export class HistoryProgram extends AbstractProgram {
   constructor() {
     super();
     /** @type {State} */
@@ -17,11 +17,11 @@ export class HistoryProgram extends Program {
       currentIndex: -1,
       maxHistorySize: 100,
     };
-    /** @type {import("../program.js").AllowedConnection[]} */
+    /** @type {import("../abstractProgram.js").AllowedConnection[]} */
     this.allowedConnections = [
       {
         name: "default",
-        program: Program,
+        program: AbstractProgram,
       },
     ];
     this.view = this.#main;

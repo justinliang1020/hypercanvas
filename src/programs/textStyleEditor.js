@@ -1,4 +1,4 @@
-import { Program } from "../program.js";
+import { AbstractProgram } from "../abstractProgram.js";
 import { TextProgram } from "./text.js";
 import { h, text } from "../packages/hyperapp/index.js";
 
@@ -7,14 +7,14 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @property {string} value
  */
 
-export class TextStyleProgram extends Program {
+export class TextStyleProgram extends AbstractProgram {
   constructor() {
     super();
     /** @type {State} */
     this.defaultState = {
       value: "#000000",
     };
-    /** @type {import("../program.js").AllowedConnection[]} */
+    /** @type {import("../abstractProgram.js").AllowedConnection[]} */
     this.allowedConnections = [
       {
         name: "default",
