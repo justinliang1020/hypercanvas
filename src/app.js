@@ -464,12 +464,34 @@ function addConnection(state, name, sourceBlockId, targetBlockId) {
 }
 
 /**
+ * Calculates viewport-relative coordinates for placing new blocks
+ * @param {State} state - Current application state
+ * @returns {{x: number, y: number}} Coordinates in the center of the current viewport
+ */
+function getViewportCenterCoordinates(state) {
+  // Get viewport dimensions (assuming standard viewport, could be made more dynamic)
+  const viewportWidth =
+    window.innerWidth - (state.sidebarVisible ? state.sidebarWidth : 0);
+  const viewportHeight = window.innerHeight;
+
+  // Calculate center of viewport in screen coordinates
+  const viewportCenterX = viewportWidth / 2;
+  const viewportCenterY = viewportHeight / 2;
+
+  // Convert to canvas coordinates by accounting for zoom and offset
+  const canvasX = (viewportCenterX - state.offsetX) / state.zoom;
+  const canvasY = (viewportCenterY - state.offsetY) / state.zoom;
+
+  return { x: canvasX, y: canvasY };
+}
+
+/**
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
  * @param {string} programName - Name of program to instantiate
  * @param {Object|null} programState - Initial state for the program
- * @param {number} x - X position on canvas
- * @param {number} y - Y position on canvas
+ * @param {number | null} x - X position on canvas. If null, uses viewport's center X coordinate
+ * @param {number | null} y - Y position on canvas. If null, uses viewport's center X coordinate
  * @param {number} width - Block width in pixels
  * @param {number} height - Block height in pixels
  * @returns {import("hyperapp").Dispatchable<State>} Updated state with new block
@@ -478,11 +500,17 @@ function addBlock(
   state,
   programName,
   programState = null,
-  x = 50,
-  y = 50,
+  x = null,
+  y = null,
   width = 200,
   height = 200,
 ) {
+  // If no coordinates provided, use viewport center
+  if (x === null || y === null) {
+    const viewportCenter = getViewportCenterCoordinates(state);
+    x = x ?? viewportCenter.x - width / 2; // Center the block
+    y = y ?? viewportCenter.y - height / 2; // Center the block
+  }
   /** @type {Block} */
   const newBlock = {
     id: Math.max(...state.blocks.map((block) => block.id), 0) + 1,
@@ -691,8 +719,8 @@ const pasteEffect = async (dispatch, state) => {
               state,
               "system/image",
               { path: result.path },
-              50, // x
-              50, // y
+              null, // x - use viewport center
+              null, // y - use viewport center
               result.width,
               result.height,
             ),
@@ -1502,8 +1530,8 @@ function sidebar(state) {
                       state,
                       "system/image",
                       { path: result.path },
-                      50, // x
-                      50, // y
+                      null, // x - use viewport center
+                      null, // y - use viewport center
                       result.width,
                       result.height,
                     ),
