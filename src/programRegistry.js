@@ -41,3 +41,15 @@ async function loadPrograms() {
 
 /** @type{Object.<string, (typeof import("./abstractProgram.js").AbstractProgram | null)>} */
 export const programRegistry = await loadPrograms();
+/**
+ * Example of what programRegistry looks like:
+ * {
+ *   "history": HistoryProgram,
+ *   "image": ImageProgram,
+ *   "paint": PaintProgram,
+ *   "stateEditor": StateEditorProgram,
+ *   "stateVisualizer": StateVisualizerProgram,
+ *   "text": TextProgram,
+ *   "textStyleEditor": TextStyleEditorProgram
+ * }
+ */
