@@ -1,6 +1,6 @@
-import { h, text } from "../packages/hyperapp/index.js";
+import { h, text } from "../../packages/hyperapp/index.js";
 
-import { AbstractProgram } from "../abstractProgram.js";
+import { AbstractProgram } from "../../abstractProgram.js";
 
 /**
  * @typedef State
@@ -37,7 +37,7 @@ export class Program extends AbstractProgram {
       ],
       paintedCells: {},
     };
-    /** @type {import("../abstractProgram.js").AllowedConnection[]} */
+    /** @type {import("../../abstractProgram.js").AllowedConnection[]} */
     this.allowedConnections = [];
     this.view = this.#main;
   }
