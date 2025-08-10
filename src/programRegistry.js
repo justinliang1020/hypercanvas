@@ -14,10 +14,7 @@ async function loadFromDirectory(registry, dirPath = "", namespace = "") {
     for (const item of items) {
       if (item.endsWith(".js")) {
         // Load JavaScript file
-        const programName = item.replace(".js", "");
-        const fullProgramName = namespace
-          ? `${namespace}/${programName}`
-          : programName;
+        const fullProgramName = namespace ? `${namespace}/${item}` : item;
         const importPath = `./programs${dirPath ? "/" + dirPath : ""}/${item}`;
 
         try {

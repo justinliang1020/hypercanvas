@@ -1056,7 +1056,7 @@ function block(state) {
       },
       [
         h("program-component", {
-          "data-id": block.id,
+          "data-id": block.id, // used for mounting program
           style: {
             pointerEvents: isEditing ? null : "none",
           },
@@ -1457,7 +1457,7 @@ function programButtons(state) {
         {
           onclick: (state) => addBlock(state, programName),
         },
-        text(`${programName.replace("/", " / ")}`),
+        text(`${programName.replaceAll("/", " / ")}`),
       ),
     ),
   ]);
@@ -1779,12 +1779,11 @@ class ProgramInstanceManager {
    */
   #initializeProgram(id, name) {
     const Program = programRegistry[name];
-    if (!Program) {
-      throw Error("invalid program name");
+    if (Program) {
+      const programInstance = new Program();
+      programInstance.setId(id);
+      this.#programs.set(id, programInstance);
     }
-    const programInstance = new Program();
-    programInstance.setId(id);
-    this.#programs.set(id, programInstance);
   }
 
   /**
@@ -1905,13 +1904,18 @@ async function initialize() {
 
     if (
       targetElement &&
-      targetElement.localName === "program-component-child" &&
-      programInstance
+      targetElement.localName === "program-component-child"
     ) {
-      try {
-        programInstance.mount(targetElement, block.programData.state);
-      } catch (error) {
-        console.warn(`Failed to run program for block ${block.id}:`, error);
+      if (programInstance) {
+        try {
+          programInstance.mount(targetElement, block.programData.state);
+        } catch (error) {
+          console.warn(`Failed to run program for block ${block.id}:`, error);
+        }
+      } else {
+        targetElement.style.color = "red";
+        targetElement.style.fontWeight = "bold";
+        targetElement.innerText = `ERROR: program '${block.programData.name}' not initialized.`;
       }
     }
   }
