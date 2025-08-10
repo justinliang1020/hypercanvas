@@ -1,6 +1,6 @@
 import { app, h, text } from "./packages/hyperapp/index.js";
 import { appWithVisualizer } from "../../hyperapp-visualizer/visualizer.js";
-import * as programs from "./programs/index.js";
+import * as programs from "./programRegistry.js";
 
 // -----------------------------
 // ## Types
