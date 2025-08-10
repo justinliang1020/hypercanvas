@@ -93,6 +93,7 @@ import { programRegistry } from "./programRegistry.js";
  * @property {boolean} sidebarVisible - Whether sidebar is visible
  * @property {number} sidebarWidth - Width of sidebar in pixels
  * @property {Block|null} clipboard - Copied block data
+ * @property {string} programFilter - Filter text for program buttons
  */
 
 /**
@@ -1390,6 +1391,51 @@ function viewport(state) {
 }
 
 /**
+ * Creates a program buttons component with filter functionality
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
+ */
+function programButtons(state) {
+  const filterText = state.programFilter || "";
+  const filteredPrograms = Object.keys(programRegistry).filter((programName) =>
+    programName.toLowerCase().includes(filterText.toLowerCase()),
+  );
+
+  return h("div", {}, [
+    h("h2", {}, text("add program")),
+    h("input", {
+      type: "text",
+      placeholder: "Filter programs...",
+      value: filterText,
+      style: {
+        width: "100%",
+        marginBottom: "10px",
+        padding: "8px",
+        border: "1px solid #ccc",
+        borderRadius: "4px",
+      },
+      oninput: (state, event) => ({
+        ...state,
+        programFilter: /** @type {HTMLInputElement} */ (event.target).value,
+      }),
+      onpointerdown: (state, event) => {
+        event.stopPropagation();
+        return state;
+      },
+    }),
+    ...filteredPrograms.map((programName) =>
+      h(
+        "button",
+        {
+          onclick: (state) => addBlock(state, programName),
+        },
+        text(`${programName.replace("/", " / ")}`),
+      ),
+    ),
+  ]);
+}
+
+/**
  * Creates the main application sidebar with action buttons
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State>} Sidebar element
@@ -1491,15 +1537,7 @@ function sidebar(state) {
         text("save"),
       ),
       h("hr", {}),
-      ...Object.keys(programRegistry).map((programName) =>
-        h(
-          "button",
-          {
-            onclick: (state) => addBlock(state, programName),
-          },
-          text(`create ${programName.replace("/", " ")}`),
-        ),
-      ),
+      programButtons(state),
     ],
   );
 }
@@ -1820,6 +1858,7 @@ async function initialize() {
     blocks: [],
     connections: [],
     clipboard: null,
+    programFilter: "",
   };
 
   /**
