@@ -1165,7 +1165,9 @@ function viewport(state) {
       style: {
         paddingRight: state.sidebarVisible ? `${state.sidebarWidth}px` : "0",
         touchAction: "none", // Prevent default touch behaviors
+        outline: "none", // Remove focus oultine
       },
+      tabindex: -1, // Make the main element focusable for keyboard events
       onpointerdown: (state, event) => {
         // Only start dragging on middle mouse button or space+click
         if (event.button === 1 || (event.button === 0 && event.shiftKey)) {
@@ -1395,6 +1397,133 @@ function viewport(state) {
 
         return state;
       },
+      onkeydown: (state, event) => {
+        // Track shift key state
+        if (event.key === "Shift") {
+          return {
+            ...state,
+            isShiftPressed: true,
+          };
+        }
+
+        // Check if user is interacting with an input field or has text selected
+        const hasTextSelection =
+          (window.getSelection()?.toString() ?? "").length > 0;
+
+        // Handle keyboard shortcuts
+        switch (event.key) {
+          case "Escape":
+            // Exit connect mode, edit mode, or deselect
+            if (state.connectingId !== null) {
+              event.preventDefault();
+              return {
+                ...state,
+                connectingId: null,
+              };
+            } else if (state.editingId !== null) {
+              event.preventDefault();
+              return {
+                ...state,
+                editingId: null,
+              };
+            } else if (state.selectedId !== null) {
+              event.preventDefault();
+              return {
+                ...state,
+                selectedId: null,
+              };
+            }
+            return state;
+          case "Delete":
+          case "Backspace":
+            // Only handle block deletion if not in input field, a block is selected, and not in edit mode
+            if (state.selectedId !== null && state.editingId === null) {
+              event.preventDefault();
+              return deleteBlock(state, state.selectedId);
+            }
+            // Let browser handle regular text deletion
+            return state;
+
+          case "c":
+            // Handle copy shortcut (Ctrl+C or Cmd+C)
+            if (event.ctrlKey || event.metaKey) {
+              // Only handle block copy if not in input field, no text is selected, and not in edit mode
+              if (
+                !hasTextSelection &&
+                state.selectedId !== null &&
+                state.editingId === null
+              ) {
+                event.preventDefault();
+                return copySelectedBlock(state);
+              } else {
+                // Let browser handle regular text copy
+                return {
+                  ...state,
+                  clipboard: null,
+                };
+              }
+            }
+            return state;
+
+          case "v":
+            // Handle paste shortcut (Ctrl+V or Cmd+V)
+            if (event.ctrlKey || event.metaKey) {
+              if (state.editingId === null) {
+                event.preventDefault();
+                return [state, [pasteEffect, state]];
+              }
+            }
+            return state;
+
+          case "z":
+          case "Z":
+            // Handle undo/redo shortcuts
+            if (event.ctrlKey || event.metaKey) {
+              if (state.editingId === null) {
+                event.preventDefault();
+                if (event.shiftKey) {
+                  // Ctrl+Shift+Z or Cmd+Shift+Z = Redo
+                  return redoState(state);
+                } else {
+                  // Ctrl+Z or Cmd+Z = Undo
+                  return undoState(state);
+                }
+              }
+            }
+            return state;
+
+          case "y":
+            // Handle redo shortcut (Ctrl+Y or Cmd+Y)
+            if (event.ctrlKey || event.metaKey) {
+              if (state.editingId === null) {
+                event.preventDefault();
+                return redoState(state);
+              }
+            }
+            return state;
+
+          case "s":
+            // Handle save shortcut (Ctrl+S or Cmd+S)
+            if (event.ctrlKey || event.metaKey) {
+              event.preventDefault();
+              return [state, () => saveApplication(state)];
+            }
+            return state;
+
+          default:
+            return state;
+        }
+      },
+      onkeyup: (state, event) => {
+        // Track shift key release
+        if (event.key === "Shift") {
+          return {
+            ...state,
+            isShiftPressed: false,
+          };
+        }
+        return state;
+      },
     },
     [
       h(
@@ -1585,134 +1714,6 @@ function main(state) {
       class: {
         "dark-mode": state.isDarkMode,
       },
-      onkeydown: (state, event) => {
-        // Track shift key state
-        if (event.key === "Shift") {
-          return {
-            ...state,
-            isShiftPressed: true,
-          };
-        }
-
-        // Check if user is interacting with an input field or has text selected
-        const hasTextSelection =
-          (window.getSelection()?.toString() ?? "").length > 0;
-
-        // Handle keyboard shortcuts
-        switch (event.key) {
-          case "Escape":
-            // Exit connect mode, edit mode, or deselect
-            if (state.connectingId !== null) {
-              event.preventDefault();
-              return {
-                ...state,
-                connectingId: null,
-              };
-            } else if (state.editingId !== null) {
-              event.preventDefault();
-              return {
-                ...state,
-                editingId: null,
-              };
-            } else if (state.selectedId !== null) {
-              event.preventDefault();
-              return {
-                ...state,
-                selectedId: null,
-              };
-            }
-            return state;
-          case "Delete":
-          case "Backspace":
-            // Only handle block deletion if not in input field, a block is selected, and not in edit mode
-            if (state.selectedId !== null && state.editingId === null) {
-              event.preventDefault();
-              return deleteBlock(state, state.selectedId);
-            }
-            // Let browser handle regular text deletion
-            return state;
-
-          case "c":
-            // Handle copy shortcut (Ctrl+C or Cmd+C)
-            if (event.ctrlKey || event.metaKey) {
-              // Only handle block copy if not in input field, no text is selected, and not in edit mode
-              if (
-                !hasTextSelection &&
-                state.selectedId !== null &&
-                state.editingId === null
-              ) {
-                event.preventDefault();
-                return copySelectedBlock(state);
-              } else {
-                // Let browser handle regular text copy
-                return {
-                  ...state,
-                  clipboard: null,
-                };
-              }
-            }
-            return state;
-
-          case "v":
-            // Handle paste shortcut (Ctrl+V or Cmd+V)
-            if (event.ctrlKey || event.metaKey) {
-              if (state.editingId === null) {
-                event.preventDefault();
-                return [state, [pasteEffect, state]];
-              }
-            }
-            return state;
-
-          case "z":
-          case "Z":
-            // Handle undo/redo shortcuts
-            if (event.ctrlKey || event.metaKey) {
-              if (state.editingId === null) {
-                event.preventDefault();
-                if (event.shiftKey) {
-                  // Ctrl+Shift+Z or Cmd+Shift+Z = Redo
-                  return redoState(state);
-                } else {
-                  // Ctrl+Z or Cmd+Z = Undo
-                  return undoState(state);
-                }
-              }
-            }
-            return state;
-
-          case "y":
-            // Handle redo shortcut (Ctrl+Y or Cmd+Y)
-            if (event.ctrlKey || event.metaKey) {
-              if (state.editingId === null) {
-                event.preventDefault();
-                return redoState(state);
-              }
-            }
-            return state;
-
-          case "s":
-            // Handle save shortcut (Ctrl+S or Cmd+S)
-            if (event.ctrlKey || event.metaKey) {
-              event.preventDefault();
-              return [state, () => saveApplication(state)];
-            }
-            return state;
-
-          default:
-            return state;
-        }
-      },
-      onkeyup: (state, event) => {
-        // Track shift key release
-        if (event.key === "Shift") {
-          return {
-            ...state,
-            isShiftPressed: false,
-          };
-        }
-        return state;
-      },
-      tabindex: 0, // Make the main element focusable for keyboard events
     },
     [
       viewport(state),
