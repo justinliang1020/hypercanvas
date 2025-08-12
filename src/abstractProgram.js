@@ -125,15 +125,8 @@ export class AbstractProgram {
    */
   onConnectionStateChange(name, action) {
     /**
-     * @typedef {Object} ProgramStateSubscriberOptions
-     * @property {String} name - The connection name
-     * @property {import("hyperapp").Action<any>} action - The action to dispatch
-     * @property {AbstractProgram} program - The program instance
-     */
-
-    /**
      * @param {import("hyperapp").Dispatch<any>} dispatch
-     * @param {ProgramStateSubscriberOptions} options
+     * @param {{name: String, action: import("hyperapp").Action<any>, program: AbstractProgram}} options
      * @returns {() => void}
      */
     function programStateSubscriber(dispatch, options) {
