@@ -1,30 +1,14 @@
 import { app, h, text } from "./packages/hyperapp/index.js";
 import { appWithVisualizer } from "../../hyperapp-visualizer/visualizer.js";
 import { programRegistry } from "./programRegistry.js";
-
-// -----------------------------
-// ## Constants
-// -----------------------------
-
-const MIN_SIZE = 20; // Minimum size in px
-const STATE_SAVE_PATH = "user/state.json";
-const MEDIA_SAVE_PATH = "user/media/";
-const PASTE_OFFSET_X = 20;
-const PASTE_OFFSET_Y = 20;
-
-/**
- * @type {Record<string, string>}
- */
-const RESIZE_CURSORS = {
-  nw: "nwse-resize",
-  ne: "nesw-resize",
-  sw: "nesw-resize",
-  se: "nwse-resize",
-  n: "ns-resize",
-  s: "ns-resize",
-  w: "ew-resize",
-  e: "ew-resize",
-};
+import {
+  MIN_SIZE,
+  STATE_SAVE_PATH,
+  MEDIA_SAVE_PATH,
+  PASTE_OFFSET_X,
+  PASTE_OFFSET_Y,
+  RESIZE_CURSORS,
+} from "./constants.js";
 
 /**
  * Applies aspect ratio constraint to resize dimensions
