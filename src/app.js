@@ -94,6 +94,8 @@ import { programRegistry } from "./programRegistry.js";
  * @property {number} sidebarWidth - Width of sidebar in pixels
  * @property {Block|null} clipboard - Copied block data
  * @property {string} programFilter - Filter text for program buttons
+ * @property {string|null} notification - Current notification message
+ * @property {boolean} notificationVisible - Whether notification is visible
  */
 
 /**
@@ -582,18 +584,53 @@ function pasteBlock(state) {
 // -----------------------------
 
 /**
- * Saves the application state to disk
+ * Shows a notification message
+ * @param {import("hyperapp").Dispatch<State>} dispatch - Function to dispatch actions
+ * @param {string} message - Notification message to display
+ */
+function showNotification(dispatch, message) {
+  dispatch((state) => ({
+    ...state,
+    notification: message,
+    notificationVisible: true,
+  }));
+
+  // Auto-dismiss after 3 seconds
+  setTimeout(() => {
+    dispatch((state) => ({
+      ...state,
+      notificationVisible: false,
+    }));
+  }, 1500);
+}
+
+/**
+ * Saves the application state to disk and shows success notification
+ * @param {import("hyperapp").Dispatch<State>} dispatch - Function to dispatch actions
  * @param {State} state - Current application state to save
  * @returns {Promise<void>}
  */
-async function saveApplication(state) {
-  // Don't need to save mementoManager which is session undo/redo history
-  const { mementoManager, ...serializableSaveState } = state;
-  // Don't need to save session clipboard
-  serializableSaveState.clipboard = null;
+async function saveApplication(dispatch, state) {
+  try {
+    // Don't need to save mementoManager which is session undo/redo history
+    const {
+      mementoManager,
+      notification,
+      notificationVisible,
+      ...serializableSaveState
+    } = state;
+    // Don't need to save session clipboard and notification state
+    serializableSaveState.clipboard = null;
 
-  // @ts-ignore
-  await window.fileAPI.writeFile(STATE_SAVE_PATH, serializableSaveState);
+    // @ts-ignore
+    await window.fileAPI.writeFile(STATE_SAVE_PATH, serializableSaveState);
+
+    // Show success notification
+    showNotification(dispatch, "State saved successfully!");
+  } catch (error) {
+    console.error("Failed to save application state:", error);
+    showNotification(dispatch, "Failed to save state");
+  }
 }
 
 /**
@@ -1506,10 +1543,9 @@ function viewport(state) {
             // Handle save shortcut (Ctrl+S or Cmd+S)
             if (event.ctrlKey || event.metaKey) {
               event.preventDefault();
-              return [state, () => saveApplication(state)];
+              return [state, (dispatch) => saveApplication(dispatch, state)];
             }
             return state;
-
           default:
             return state;
         }
@@ -1590,6 +1626,25 @@ function programButtons(state) {
       ),
     ),
   ]);
+}
+
+/**
+ * Creates a notification component that displays in the top middle
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>|null} Notification element or null if not visible
+ */
+function notification(state) {
+  if (!state.notificationVisible || !state.notification) {
+    return null;
+  }
+
+  return h(
+    "div",
+    {
+      id: "notification",
+    },
+    [h("span", {}, text(state.notification))],
+  );
 }
 
 /**
@@ -1689,7 +1744,10 @@ function sidebar(state) {
       h(
         "button",
         {
-          onclick: (state) => [state, () => saveApplication(state)],
+          onclick: (state) => [
+            state,
+            (dispatch) => saveApplication(dispatch, state),
+          ],
         },
         text("save"),
       ),
@@ -1718,6 +1776,7 @@ function main(state) {
     [
       viewport(state),
       sidebar(state),
+      notification(state),
       // Only show floating toggle button when sidebar is hidden
       ...(state.sidebarVisible
         ? []
@@ -1887,6 +1946,8 @@ async function initialize() {
     connections: [],
     clipboard: null,
     programFilter: "",
+    notification: null,
+    notificationVisible: false,
   };
 
   /**
