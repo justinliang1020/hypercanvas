@@ -14,7 +14,7 @@ export class Program extends AbstractProgram {
     this.defaultState = {
       value: "#000000",
     };
-    /** @type {import("../abstractProgram.js").AllowedConnection[]} */
+    /** @type {AllowedConnection[]} */
     this.allowedConnections = [
       {
         name: "default",

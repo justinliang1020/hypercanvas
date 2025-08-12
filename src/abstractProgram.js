@@ -1,12 +1,6 @@
 import { app } from "./packages/hyperapp/index.js";
 
 /**
- * @typedef {Object} AllowedConnection
- * @property {String} name
- * @property {typeof AbstractProgram} program
- */
-
-/**
  * @abstract
  */
 export class AbstractProgram {

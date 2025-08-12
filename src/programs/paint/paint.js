@@ -37,7 +37,7 @@ export class Program extends AbstractProgram {
       ],
       paintedCells: {},
     };
-    /** @type {import("../../abstractProgram.js").AllowedConnection[]} */
+    /** @type {AllowedConnection[]} */
     this.allowedConnections = [];
     this.view = this.#main;
   }

@@ -13,7 +13,7 @@ export class Program extends AbstractProgram {
     this.defaultState = {
       path: "assets/sun-cat.jpg",
     };
-    /** @type {import("../../abstractProgram.js").AllowedConnection[]} */
+    /** @type {AllowedConnection[]} */
     this.allowedConnections = [];
     this.view = this.#main;
   }

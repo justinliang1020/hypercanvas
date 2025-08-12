@@ -17,7 +17,7 @@ export class Program extends AbstractProgram {
       editableState: "{}",
       error: null,
     };
-    /** @type {import("../abstractProgram.js").AllowedConnection[]} */
+    /** @type {AllowedConnection[]} */
     this.allowedConnections = [
       {
         name: "default",

@@ -18,7 +18,7 @@ export class Program extends AbstractProgram {
       height: 30,
       cellSize: 16,
     };
-    /** @type {import("../../abstractProgram.js").AllowedConnection[]} */
+    /** @type {AllowedConnection[]} */
     this.allowedConnections = [
       {
         name: "default",
@@ -181,4 +181,3 @@ export class Program extends AbstractProgram {
     return state;
   };
 }
-

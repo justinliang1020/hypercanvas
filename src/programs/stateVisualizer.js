@@ -13,7 +13,7 @@ export class Program extends AbstractProgram {
     this.defaultState = {
       connectedState: "{}",
     };
-    /** @type {import("../abstractProgram.js").AllowedConnection[]} */
+    /** @type {AllowedConnection[]} */
     this.allowedConnections = [
       {
         name: "default",

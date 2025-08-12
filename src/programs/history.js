@@ -17,7 +17,7 @@ export class Program extends AbstractProgram {
       currentIndex: -1,
       maxHistorySize: 100,
     };
-    /** @type {import("../abstractProgram.js").AllowedConnection[]} */
+    /** @type {AllowedConnection[]} */
     this.allowedConnections = [
       {
         name: "default",
