@@ -1,10 +1,6 @@
 import { h } from "./packages/hyperapp/index.js";
-import {
-  copySelectedBlock,
-  pasteEffect,
-  saveApplication,
-  connectionLine,
-} from "./app.js";
+import { copySelectedBlock, pasteEffect, saveApplication } from "./app.js";
+import { connectionLine } from "./connection.js";
 import { deleteBlock } from "./block.js";
 import { RESIZE_HANDLERS, block } from "./block.js";
 import { MIN_SIZE, RESIZE_CURSORS } from "./constants.js";

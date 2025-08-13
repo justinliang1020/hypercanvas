@@ -1,6 +1,11 @@
 import { h, text } from "./packages/hyperapp/index.js";
 import { MIN_SIZE, RESIZE_CURSORS } from "./constants.js";
 import { saveMementoAndReturn } from "./memento.js";
+import {
+  addConnection,
+  getConnectedBlockIds,
+  isBlockConnectable,
+} from "./connection.js";
 
 /**
  * Creates a block component renderer
@@ -398,52 +403,6 @@ function blockToolbar() {
       ),
     ],
   );
-}
-
-/**
- * Checks if a block can be connected to from the connecting block
- * @param {State} state - Current application state
- * @param {number} targetBlockId - ID of potential target block
- * @returns {boolean} True if block can be connected to
- */
-function isBlockConnectable(state, targetBlockId) {
-  if (state.connectingId === null) return false;
-  if (state.connectingId === targetBlockId) return false; // Can't connect to self
-
-  // For now, allow connection to any other block (simple 1-connection rule)
-  // In the future, this could check program compatibility, existing connections, etc.
-  return true;
-}
-
-/**
- * Gets connected block IDs for a given source block
- * @param {State} state - Current application state
- * @param {number} sourceBlockId - ID of source block
- * @returns {number[]} Array of connected block IDs
- */
-function getConnectedBlockIds(state, sourceBlockId) {
-  return state.connections
-    .filter((conn) => conn.sourceBlockId === sourceBlockId)
-    .map((conn) => conn.targetBlockId);
-}
-
-/**
- * Adds a connection between two blocks
- * @param {State} state - Current application state
- * @param {string} name - Connection name/type
- * @param {number} sourceBlockId - ID of source block
- * @param {number} targetBlockId - ID of target block
- * @returns {State} Updated state with new connection
- */
-export function addConnection(state, name, sourceBlockId, targetBlockId) {
-  const connection = {
-    name,
-    sourceBlockId,
-    targetBlockId,
-  };
-  // TODO: allowed connection logic
-  // TODO: multiple connections per program
-  return { ...state, connections: [...state.connections, connection] };
 }
 
 /**
