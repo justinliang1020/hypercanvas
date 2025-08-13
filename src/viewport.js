@@ -1,13 +1,12 @@
 import { h } from "./packages/hyperapp/index.js";
 import {
-  RESIZE_HANDLERS,
-  deleteBlock,
   copySelectedBlock,
   pasteEffect,
   saveApplication,
   connectionLine,
-  block,
 } from "./app.js";
+import { deleteBlock } from "./block.js";
+import { RESIZE_HANDLERS, block } from "./block.js";
 import { MIN_SIZE, RESIZE_CURSORS } from "./constants.js";
 import { saveMementoAndReturn, redoState, undoState } from "./memento.js";
 
