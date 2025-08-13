@@ -215,7 +215,7 @@ function createMemento(state) {
  * @param {State} newState - New state to return with updated history
  * @returns {State} New state with updated memento manager
  */
-function saveStateHistoryAndReturn(prevState, newState) {
+function saveMementoAndReturn(prevState, newState) {
   const memento = createMemento(prevState);
 
   const newMementoManager = {
@@ -417,7 +417,7 @@ function addBlock(
     selectedId: newBlock.id,
   };
 
-  return saveStateHistoryAndReturn(state, newState);
+  return saveMementoAndReturn(state, newState);
 }
 
 /**
@@ -438,7 +438,7 @@ function deleteBlock(currentState, blockId) {
     selectedId: null,
   };
 
-  return saveStateHistoryAndReturn(currentState, newState);
+  return saveMementoAndReturn(currentState, newState);
 }
 
 /**
@@ -566,7 +566,7 @@ function sendToFront(currentState, blockId) {
     ),
   };
 
-  return saveStateHistoryAndReturn(currentState, newState);
+  return saveMementoAndReturn(currentState, newState);
 }
 
 /**
@@ -589,7 +589,7 @@ function sendToBack(currentState, blockId) {
     ),
   };
 
-  return saveStateHistoryAndReturn(currentState, newState);
+  return saveMementoAndReturn(currentState, newState);
 }
 
 /**
@@ -1238,7 +1238,7 @@ function viewport(state) {
                   : b,
               ),
             };
-            return saveStateHistoryAndReturn(beforeDragState, newState);
+            return saveMementoAndReturn(beforeDragState, newState);
           }
         }
 
@@ -1270,7 +1270,7 @@ function viewport(state) {
                   : b,
               ),
             };
-            return saveStateHistoryAndReturn(beforeResizeState, newState);
+            return saveMementoAndReturn(beforeResizeState, newState);
           }
         }
 
