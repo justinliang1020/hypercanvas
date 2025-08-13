@@ -1,11 +1,18 @@
 import { h, text } from "./packages/hyperapp/index.js";
-import { MIN_SIZE, RESIZE_CURSORS } from "./constants.js";
+import {
+  MIN_SIZE,
+  PASTE_OFFSET_X,
+  PASTE_OFFSET_Y,
+  RESIZE_CURSORS,
+} from "./constants.js";
 import { saveMementoAndReturn } from "./memento.js";
 import {
   addConnection,
   getConnectedBlockIds,
   isBlockConnectable,
 } from "./connection.js";
+import { getViewportCenterCoordinates } from "./viewport.js";
+import { clearUserClipboardEffect } from "./app.js";
 
 /**
  * Creates a block component renderer
@@ -470,4 +477,104 @@ export function deleteBlock(currentState, blockId) {
   };
 
   return saveMementoAndReturn(currentState, newState);
+}
+
+/**
+ * Adds a new block to the state and renders its program
+ * @param {State} state - Current application state
+ * @param {string} programName - Name of program to instantiate
+ * @param {Object|null} programState - Initial state for the program
+ * @param {number | null} x - X position on canvas. If null, uses viewport's center X coordinate
+ * @param {number | null} y - Y position on canvas. If null, uses viewport's center X coordinate
+ * @param {number} width - Block width in pixels
+ * @param {number} height - Block height in pixels
+ * @returns {import("hyperapp").Dispatchable<State>} Updated state with new block
+ */
+export function addBlock(
+  state,
+  programName,
+  programState = null,
+  x = null,
+  y = null,
+  width = 200,
+  height = 200,
+) {
+  // If no coordinates provided, use viewport center
+  if (x === null || y === null) {
+    const viewportCenter = getViewportCenterCoordinates(state);
+    x = x ?? viewportCenter.x - width / 2; // Center the block
+    y = y ?? viewportCenter.y - height / 2; // Center the block
+  }
+  /** @type {Block} */
+  const newBlock = {
+    id: Math.max(...state.blocks.map((block) => block.id), 0) + 1,
+    width: width,
+    height: height,
+    x: x,
+    y: y,
+    zIndex: Math.max(...state.blocks.map((block) => block.zIndex), 0) + 1,
+    programData: {
+      name: programName,
+      state: programState,
+    },
+  };
+
+  const newState = {
+    ...state,
+    blocks: [...state.blocks, newBlock],
+    selectedId: newBlock.id,
+  };
+
+  return saveMementoAndReturn(state, newState);
+}
+
+/**
+ * Pastes a block from clipboard into the state
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").Dispatchable<State>} Updated state with pasted block
+ */
+export function pasteBlock(state) {
+  const blockData = state.clipboard;
+  if (blockData === null) {
+    return state;
+  }
+
+  return addBlock(
+    state,
+    blockData.programData.name,
+    blockData.programData.state,
+    blockData.x + PASTE_OFFSET_X,
+    blockData.y + PASTE_OFFSET_Y,
+    blockData.width,
+    blockData.height,
+  );
+}
+
+/**
+ * Copies the selected block to application clipboard
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").Dispatchable<State>} Updated state with clipboard data
+ */
+export function copySelectedBlock(state) {
+  if (state.selectedId === null) return state;
+
+  const selectedBlock = state.blocks.find(
+    (block) => block.id === state.selectedId,
+  );
+  if (!selectedBlock) return state;
+
+  // Create a copy of the block data for clipboard, capturing current state
+  /** @type {Block} */
+  const blockData = {
+    ...selectedBlock,
+    id: -1, // not a "real" block
+  };
+
+  return [
+    {
+      ...state,
+      clipboard: blockData,
+    },
+    clearUserClipboardEffect,
+  ];
 }

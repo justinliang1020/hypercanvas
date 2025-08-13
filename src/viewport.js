@@ -1,5 +1,6 @@
 import { h } from "./packages/hyperapp/index.js";
-import { copySelectedBlock, pasteEffect, saveApplication } from "./app.js";
+import { pasteEffect, saveApplication } from "./app.js";
+import { copySelectedBlock } from "./block.js";
 import { connectionLine } from "./connection.js";
 import { deleteBlock } from "./block.js";
 import { RESIZE_HANDLERS, block } from "./block.js";
@@ -484,4 +485,26 @@ function applyAspectRatioConstraint(dimensions, originalBlock, handle) {
   }
 
   return dimensions;
+}
+
+/**
+ * Calculates viewport-relative coordinates for placing new blocks
+ * @param {State} state - Current application state
+ * @returns {{x: number, y: number}} Coordinates in the center of the current viewport
+ */
+export function getViewportCenterCoordinates(state) {
+  // Get viewport dimensions (assuming standard viewport, could be made more dynamic)
+  const viewportWidth =
+    window.innerWidth - (state.sidebarVisible ? state.sidebarWidth : 0);
+  const viewportHeight = window.innerHeight;
+
+  // Calculate center of viewport in screen coordinates
+  const viewportCenterX = viewportWidth / 2;
+  const viewportCenterY = viewportHeight / 2;
+
+  // Convert to canvas coordinates by accounting for zoom and offset
+  const canvasX = (viewportCenterX - state.offsetX) / state.zoom;
+  const canvasY = (viewportCenterY - state.offsetY) / state.zoom;
+
+  return { x: canvasX, y: canvasY };
 }
