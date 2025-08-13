@@ -97,5 +97,5 @@
 /**
  * @typedef {Object} AllowedConnection
  * @property {String} name
- * @property {typeof import('./abstractProgram.js').AbstractProgram} program
+ * @property {typeof import('./program.js').AbstractProgram} program
  */

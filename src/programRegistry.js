@@ -44,16 +44,16 @@ async function loadFromDirectory(registry, dirPath = "", namespace = "") {
 
 /**
  * Dynamically loads all program files from src/programs/ including subdirectories
- * @returns {Promise<Object.<string, (typeof import("./abstractProgram.js").AbstractProgram | null)>>}
+ * @returns {Promise<Object.<string, (typeof import("./program.js").AbstractProgram | null)>>}
  */
 async function loadPrograms() {
-  /** @type {Object.<string, (typeof import("./abstractProgram.js").AbstractProgram | null)>} */
+  /** @type {Object.<string, (typeof import("./program.js").AbstractProgram | null)>} */
   const registry = {};
   await loadFromDirectory(registry);
   return registry;
 }
 
-/** @type{Object.<string, (typeof import("./abstractProgram.js").AbstractProgram | null)>} */
+/** @type{Object.<string, (typeof import("./program.js").AbstractProgram | null)>} */
 export const programRegistry = await loadPrograms();
 /**
  * Example of what programRegistry looks like:

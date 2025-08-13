@@ -1687,7 +1687,7 @@ function main(state) {
 // -----------------------------
 
 class ProgramInstanceManager {
-  /** @type{Map<number,import("./abstractProgram.js").AbstractProgram>}*/
+  /** @type{Map<number,import("./program.js").AbstractProgram>}*/
   #programs;
 
   constructor() {
@@ -1696,7 +1696,7 @@ class ProgramInstanceManager {
 
   /** Get an instance of a program based on an ID
    * @param {Number} id
-   * @returns {import("./abstractProgram.js").AbstractProgram | undefined}
+   * @returns {import("./program.js").AbstractProgram | undefined}
    */
   get(id) {
     return this.#programs.get(id);

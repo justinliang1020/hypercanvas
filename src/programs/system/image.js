@@ -1,5 +1,5 @@
 import { h } from "../../packages/hyperapp/index.js";
-import { AbstractProgram } from "../../abstractProgram.js";
+import { AbstractProgram } from "../../program.js";
 
 /**
  * @typedef State
