@@ -131,17 +131,6 @@ async function initialize() {
     // Store current state for save functionality
     currentState = state;
 
-    // Return cleanup function (required for subscriptions)
-    return () => {};
-  }
-
-  /**
-   * Subscription that listens for system theme changes
-   * @param {import("hyperapp").Dispatch<State>} dispatch - Function to dispatch actions
-   * @param {State} state
-   * @returns {() => void} Cleanup function
-   */
-  function themeSubscription(dispatch, state) {
     /**
      * @param {boolean} isDark - Whether the system theme is dark
      */
@@ -151,11 +140,10 @@ async function initialize() {
         isDarkMode: isDark,
       }));
     };
-
     // @ts-ignore
     const listener = window.electronAPI.onThemeChanged(handleThemeChange);
 
-    // Return cleanup function that removes the listener
+    // Return cleanup function (required for subscriptions)
     return () => {
       // @ts-ignore
       window.electronAPI.removeThemeListener(listener);
@@ -167,10 +155,7 @@ async function initialize() {
     init: state,
     view: (state) => main(state),
     node: /** @type {Node} */ (document.getElementById("app")),
-    subscriptions: (state) => [
-      [subscription, state],
-      [themeSubscription, state],
-    ],
+    subscriptions: (state) => [[subscription, state]],
   };
 
   // seems to be glitchy when having a lot of history
