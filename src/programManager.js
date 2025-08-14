@@ -105,6 +105,36 @@ export class ProgramManager {
 }
 
 /**
+ * Renders a program instance into its DOM element
+ * @param {Block} block - Block containing the program to render
+ * @param {import("./programManager.js").ProgramManager} programManager
+ * @returns {void}
+ */
+export function mountProgram(block, programManager) {
+  const programComponent = document.querySelector(
+    `program-component[data-id="${block.id}"]`,
+  );
+  const targetElement = /** @type {HTMLElement} */ (
+    programComponent?.shadowRoot?.firstElementChild
+  );
+  const programInstance = programManager.get(block.id);
+
+  if (targetElement && targetElement.localName === "program-component-child") {
+    if (programInstance) {
+      try {
+        programInstance.mount(targetElement, block.programData.state);
+      } catch (error) {
+        console.warn(`Failed to run program for block ${block.id}:`, error);
+      }
+    } else {
+      targetElement.style.color = "red";
+      targetElement.style.fontWeight = "bold";
+      targetElement.innerText = `ERROR: program '${block.programData.name}' not initialized.`;
+    }
+  }
+}
+
+/**
  * Custom element that wraps program instances with shadow DOM
  */
 class ProgramComponent extends HTMLElement {
