@@ -1,4 +1,4 @@
-import { AbstractProgram } from "../../program.js";
+import { ProgramBase } from "../../programBase.js";
 import { h, text } from "../../packages/hyperapp/index.js";
 import { Program as PaintProgram } from "./paint.js";
 
@@ -9,7 +9,7 @@ import { Program as PaintProgram } from "./paint.js";
  * @property {number} unpaintedCount - Total number of unpainted cells
  */
 
-export class Program extends AbstractProgram {
+export class Program extends ProgramBase {
   constructor() {
     super();
     /** @type {State} */

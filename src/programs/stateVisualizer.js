@@ -1,4 +1,4 @@
-import { AbstractProgram } from "../program.js";
+import { ProgramBase } from "../programBase.js";
 import { h, text } from "../packages/hyperapp/index.js";
 
 /**
@@ -6,7 +6,7 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @property {string} connectedState - JSON string representation of connected program state
  */
 
-export class Program extends AbstractProgram {
+export class Program extends ProgramBase {
   constructor() {
     super();
     /** @type {State} */
@@ -17,7 +17,7 @@ export class Program extends AbstractProgram {
     this.allowedConnections = [
       {
         name: "default",
-        program: AbstractProgram,
+        program: ProgramBase,
       },
     ];
     this.view = this.#main;

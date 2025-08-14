@@ -1,5 +1,5 @@
 import { h, text } from "../../packages/hyperapp/index.js";
-import { AbstractProgram } from "../../program.js";
+import { ProgramBase } from "../../programBase.js";
 
 /**
  * @typedef State
@@ -7,7 +7,7 @@ import { AbstractProgram } from "../../program.js";
  * @property {string} backgroundColor
  */
 
-export class Program extends AbstractProgram {
+export class Program extends ProgramBase {
   constructor() {
     super();
     /** @type {State} */

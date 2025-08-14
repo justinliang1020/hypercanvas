@@ -1,5 +1,5 @@
 import { h, text } from "../../packages/hyperapp/index.js";
-import { AbstractProgram } from "../../program.js";
+import { ProgramBase } from "../../programBase.js";
 import { Program as PaintProgram } from "./paint.js";
 
 /**
@@ -9,7 +9,7 @@ import { Program as PaintProgram } from "./paint.js";
  * @property {number} cellSize - Cell size value
  */
 
-export class Program extends AbstractProgram {
+export class Program extends ProgramBase {
   constructor() {
     super();
     /** @type {State} */

@@ -1,4 +1,4 @@
-import { AbstractProgram } from "../program.js";
+import { ProgramBase } from "../programBase.js";
 import { Program as TextProgram } from "./system/text.js";
 import { h, text } from "../packages/hyperapp/index.js";
 
@@ -7,7 +7,7 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @property {string} value
  */
 
-export class Program extends AbstractProgram {
+export class Program extends ProgramBase {
   constructor() {
     super();
     /** @type {State} */

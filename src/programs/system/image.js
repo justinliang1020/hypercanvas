@@ -1,12 +1,12 @@
 import { h } from "../../packages/hyperapp/index.js";
-import { AbstractProgram } from "../../program.js";
+import { ProgramBase } from "../../programBase.js";
 
 /**
  * @typedef State
  * @property {string} path
  */
 
-export class Program extends AbstractProgram {
+export class Program extends ProgramBase {
   constructor() {
     super();
     /** @type {State} */

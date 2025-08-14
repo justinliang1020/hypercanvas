@@ -1,7 +1,7 @@
 import { programRegistry } from "./programRegistry.js";
 
 export class ProgramManager {
-  /** @type{Map<number,import("./program.js").AbstractProgram>}*/
+  /** @type{Map<number,import("./programBase.js").ProgramBase>}*/
   #programs;
 
   constructor() {
@@ -10,7 +10,7 @@ export class ProgramManager {
 
   /** Get an instance of a program based on an ID
    * @param {Number} id
-   * @returns {import("./program.js").AbstractProgram | undefined}
+   * @returns {import("./programBase.js").ProgramBase | undefined}
    */
   get(id) {
     return this.#programs.get(id);
