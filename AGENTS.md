@@ -25,13 +25,13 @@
 
 ## Program Development Guidelines
 
-- **Base Class**: All programs extend the `AbstractProgram` class from `src/abstractProgram.js`
+- **Base Class**: All programs extend the `ProgramBase` class from `src/programBase.js`
 - **Registration**: New programs are automatically added to the program registry. No manual steps needed for this.
 - **State Typedef**: Define a JSDoc `@typedef State` at the top with all state properties
 - **Constructor Pattern**:
   - Call `super()` first
   - Set `this.defaultState` with proper JSDoc type annotation: `/** @type {State} */`
-  - Define `this.allowedConnections` array with proper type annotation: `/** @type {import("../abstractProgram.js").AllowedConnection[]} */`
+  - Define `this.allowedConnections` array with proper type annotation: `/** @type {AllowedConnection[]} */`
   - Set `this.view = this.#main` (private method reference)
   - Optional: Set `this.subscriptions` as a function returning subscription array
 - **View Methods**: Use private arrow function methods with `#` prefix (e.g., `#main = (state) => ...`)
@@ -60,7 +60,7 @@ this.allowedConnections = [
 example code for `stateEditor.js`
 
 ```js
-import { AbstractProgram } from "../abstractProgram.js";
+import { ProgramBase } from "../programBase.js";
 import { h, text } from "../packages/hyperapp/index.js";
 
 /**
@@ -70,7 +70,7 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @property {string|null} error - Error message for invalid JSON
  */
 
-export class Program extends AbstractProgram {
+export class Program extends ProgramBase {
   constructor() {
     super();
     /** @type {State} */
@@ -83,7 +83,7 @@ export class Program extends AbstractProgram {
     this.allowedConnections = [
       {
         name: "default",
-        program: AbstractProgram,
+        program: ProgramBase,
       },
     ];
     this.view = this.#main;
@@ -220,7 +220,7 @@ export class Program extends AbstractProgram {
 example code for textStyleEditor.js
 
 ```js
-import { AbstractProgram } from "../abstractProgram.js";
+import { ProgramBase } from "../programBase.js";
 import { Program as TextProgram } from "./system/text.js";
 import { h, text } from "../packages/hyperapp/index.js";
 
@@ -229,7 +229,7 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @property {string} value
  */
 
-export class Program extends AbstractProgram {
+export class Program extends ProgramBase {
   constructor() {
     super();
     /** @type {State} */
@@ -284,8 +284,57 @@ export class Program extends AbstractProgram {
 }
 ```
 
+## State Management Patterns
+
+- **Global State**: Centralized in `src/types.js` with comprehensive JSDoc typedef for `State`
+- **Immutable Updates**: Always use spread operator for state changes: `{...state, newProp: value}`
+- **Memento Pattern**: Use `saveMementoAndReturn(prevState, newState)` for undo/redo operations
+- **Effects**: Use Hyperapp effects for async operations (file I/O, clipboard, etc.)
+- **Subscriptions**: Use for cross-program communication via `onConnectionStateChange`
+
+## Event Handling Patterns
+
+- **Pointer Events**: Use `onpointerdown`, `onpointermove`, `onpointerup` for cross-device compatibility
+- **Event Propagation**: Call `event.stopPropagation()` to prevent viewport interactions
+- **Keyboard Shortcuts**: Handle in viewport.js with proper checks for edit mode and text selection
+- **Zoom-Aware Interactions**: Scale UI elements and coordinates by `1/state.zoom` for consistent appearance
+
+## File Organization
+
+- **Core Logic**: Main app files in `src/` root
+- **Programs**: All programs in `src/programs/` with automatic registry loading
+- **System Programs**: Built-in programs in `src/programs/system/` (text, image)
+- **Custom Programs**: User programs can be organized in subdirectories
+- **Types**: Centralized JSDoc typedefs in `src/types.js`
+- **Constants**: App-wide constants in `src/constants.js`
+
+## Electron Integration
+
+- **File API**: Use `window.fileAPI` for file operations (reading, writing, image handling)
+- **Theme API**: Use `window.electronAPI` for system theme detection and changes
+- **Preload Bridge**: All Electron APIs exposed through preload.js security bridge
+- **State Persistence**: Auto-save to `user/state.json` on app quit
+- **Media Handling**: Images saved to `user/media/` directory
+
+## UI Component Patterns
+
+- **Inline Styles**: Use JavaScript objects for styling, prefer flexbox layouts
+- **Zoom Scaling**: Scale borders, handles, and UI elements by `1/state.zoom`
+- **Conditional Rendering**: Use ternary operators and array spreading for conditional elements
+- **Key Props**: Always use unique `key` props for dynamic lists to prevent DOM reuse bugs
+- **Pointer Events**: Disable with `pointerEvents: "none"` during drag operations
+
+## Connection System
+
+- **Default Connections**: Currently limited to "default" connection name
+- **Type Safety**: Import target program class for `allowedConnections` type checking
+- **State Sync**: Use `onConnectionStateChange` subscription for reactive updates
+- **Connection Management**: Automatic cleanup of invalid connections via `deleteInactiveConnections`
+
 ## Architecture Notes
 
 - Hyperapp-based reactive UI with custom block/canvas system
 - Program-based architecture where each block runs a Program class instance
 - State persistence via Electron file API to user data directory
+- Automatic program registry with recursive directory loading
+- Canvas with infinite zoom/pan, block drag/resize, and connection system
