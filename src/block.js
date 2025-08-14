@@ -18,6 +18,7 @@ import {
   getCurrentConnections,
   updateCurrentPage,
   getCurrentViewport,
+  getCurrentPage,
 } from "./pages.js";
 
 /**
@@ -28,14 +29,17 @@ import {
 
 export function block(state) {
   return (block) => {
-    const isSelected = state.selectedId === block.id;
-    const isEditing = state.editingId === block.id;
-    const isHovering = state.hoveringId === block.id;
-    const isConnecting = state.connectingId === block.id;
+    const currentPage = getCurrentPage(state);
+    if (!currentPage) return h("div", {});
+    
+    const isSelected = currentPage.selectedId === block.id;
+    const isEditing = currentPage.editingId === block.id;
+    const isHovering = currentPage.hoveringId === block.id;
+    const isConnecting = currentPage.connectingId === block.id;
     const isConnectable = isBlockConnectable(state, block.id);
     const isConnectedToHovered =
-      state.hoveringId !== null &&
-      getConnectedBlockIds(state, state.hoveringId).includes(block.id);
+      currentPage.hoveringId !== null &&
+      getConnectedBlockIds(state, currentPage.hoveringId).includes(block.id);
 
     // Having small borders, i.e. 1px, can cause rendering glitches to occur when CSS transform translations are applied such as zooming out
     // Scale outline thickness inversely with zoom to maintain consistent visual appearance
@@ -75,28 +79,30 @@ export function block(state) {
         class: { block: true, hovered: isHovering },
         onpointerover: (state, event) => {
           event.stopPropagation();
+          const currentPage = getCurrentPage(state);
+          if (!currentPage) return state;
+          
           if (
-            state.selectedId !== null &&
-            state.selectedId !== block.id &&
-            state.isBlockDragging
+            currentPage.selectedId !== null &&
+            currentPage.selectedId !== block.id &&
+            currentPage.isBlockDragging
           )
             return state;
 
           // Don't change cursor if we're over a resize handle
           const target = /** @type {HTMLElement} */ (event.target);
           if (target.classList.contains("resize-handle")) {
-            return {
-              ...state,
+            return updateCurrentPage(state, {
               hoveringId: block.id,
-            };
+            });
           }
 
           // Set cursor based on current mode
           let cursorStyle = "default";
-          if (state.connectingId !== null) {
+          if (currentPage.connectingId !== null) {
             // In connection mode, use default pointer cursor
             cursorStyle = "pointer";
-          } else if (state.editingId === block.id) {
+          } else if (currentPage.editingId === block.id) {
             // In edit mode, use default cursor
             cursorStyle = "default";
           } else {
@@ -104,53 +110,50 @@ export function block(state) {
             cursorStyle = "move";
           }
 
-          return {
-            ...state,
+          return updateCurrentPage(state, {
             hoveringId: block.id,
             cursorStyle: cursorStyle,
-          };
+          });
         },
         onpointerleave: (state, event) => {
           event.stopPropagation();
-          return {
-            ...state,
+          return updateCurrentPage(state, {
             hoveringId: null,
             cursorStyle: "default",
-          };
+          });
         },
         onpointerdown: (state, event) => {
           event.stopPropagation();
+          const currentPage = getCurrentPage(state);
+          if (!currentPage) return state;
 
           // Handle connection mode
           if (
-            state.connectingId !== null &&
+            currentPage.connectingId !== null &&
             isBlockConnectable(state, block.id)
           ) {
             // Create connection and exit connect mode
             const newState = addConnection(
               state,
               "default",
-              state.connectingId,
+              currentPage.connectingId,
               block.id,
             );
-            return {
-              ...newState,
+            return updateCurrentPage(newState, {
               connectingId: null,
               selectedId: block.id,
-            };
+            });
           }
 
           // If block is in edit mode, don't start dragging
-          if (state.editingId === block.id) {
-            return {
-              ...state,
+          if (currentPage.editingId === block.id) {
+            return updateCurrentPage(state, {
               selectedId: block.id,
-            };
+            });
           }
 
           // Normal selection and drag start
-          return {
-            ...state,
+          return updateCurrentPage(state, {
             selectedId: block.id,
             editingId: null, // Exit edit mode when selecting any block (even the same one)
             connectingId: null, // Exit connect mode when selecting any block
@@ -162,19 +165,18 @@ export function block(state) {
               startX: block.x,
               startY: block.y,
             },
-          };
+          });
         },
         ondblclick: (state, event) => {
           event.stopPropagation();
 
           // Double-click enters edit mode
-          return {
-            ...state,
+          return updateCurrentPage(state, {
             selectedId: block.id,
             editingId: block.id,
             isBlockDragging: false, // Cancel any drag that might have started
             dragStart: null,
-          };
+          });
         },
       },
       [
@@ -299,17 +301,15 @@ function ResizeHandle(handle, zoom) {
     style: style,
     onpointerenter: (state, event) => {
       event.stopPropagation();
-      return {
-        ...state,
+      return updateCurrentPage(state, {
         cursorStyle: RESIZE_CURSORS[handle] || "default",
-      };
+      });
     },
     onpointerleave: (state, event) => {
       event.stopPropagation();
-      return {
-        ...state,
+      return updateCurrentPage(state, {
         cursorStyle: "default",
-      };
+      });
     },
     onpointerdown: (state, event) => {
       event.stopPropagation();
@@ -320,8 +320,7 @@ function ResizeHandle(handle, zoom) {
       const blocks = getCurrentBlocks(state);
       const block = blocks.find((b) => b.id === blockId);
       if (!block) return state;
-      return {
-        ...state,
+      return updateCurrentPage(state, {
         resizing: {
           id: blockId,
           handle: /** @type {string} */ (
@@ -339,7 +338,7 @@ function ResizeHandle(handle, zoom) {
           startY: block.y,
         },
         cursorStyle: RESIZE_CURSORS[handle] || "default",
-      };
+      });
     },
   });
 } /**
@@ -363,8 +362,9 @@ function blockToolbar() {
         {
           onclick: (state, event) => {
             event.stopPropagation();
-            if (state.selectedId === null) return state;
-            return deleteBlock(state, state.selectedId);
+            const currentPage = getCurrentPage(state);
+            if (!currentPage || currentPage.selectedId === null) return state;
+            return deleteBlock(state, currentPage.selectedId);
           },
         },
         text("❌"),
@@ -374,8 +374,9 @@ function blockToolbar() {
         {
           onclick: (state, event) => {
             event.stopPropagation();
-            if (state.selectedId === null) return state;
-            return sendToBack(state, state.selectedId);
+            const currentPage = getCurrentPage(state);
+            if (!currentPage || currentPage.selectedId === null) return state;
+            return sendToBack(state, currentPage.selectedId);
           },
         },
         text("send to back"),
@@ -385,8 +386,9 @@ function blockToolbar() {
         {
           onclick: (state, event) => {
             event.stopPropagation();
-            if (state.selectedId === null) return state;
-            return sendToFront(state, state.selectedId);
+            const currentPage = getCurrentPage(state);
+            if (!currentPage || currentPage.selectedId === null) return state;
+            return sendToFront(state, currentPage.selectedId);
           },
         },
         text("send to front"),
@@ -396,21 +398,20 @@ function blockToolbar() {
         {
           onclick: (state, event) => {
             event.stopPropagation();
-            if (state.selectedId === null) return state;
+            const currentPage = getCurrentPage(state);
+            if (!currentPage || currentPage.selectedId === null) return state;
 
             // Toggle connect mode
-            if (state.connectingId === state.selectedId) {
+            if (currentPage.connectingId === currentPage.selectedId) {
               // Exit connect mode
-              return {
-                ...state,
+              return updateCurrentPage(state, {
                 connectingId: null,
-              };
+              });
             } else {
               // Enter connect mode
-              return {
-                ...state,
-                connectingId: state.selectedId,
-              };
+              return updateCurrentPage(state, {
+                connectingId: currentPage.selectedId,
+              });
             }
           },
         },
@@ -481,12 +482,10 @@ export function deleteBlock(currentState, blockId) {
   const blockToDelete = blocks.find((block) => block.id === blockId);
   if (!blockToDelete) throw new Error(`Block ${blockId} not found`);
 
-  const newState = {
-    ...updateCurrentPage(currentState, {
-      blocks: blocks.filter((block) => block.id !== blockId),
-    }),
+  const newState = updateCurrentPage(currentState, {
+    blocks: blocks.filter((block) => block.id !== blockId),
     selectedId: null,
-  };
+  });
 
   return saveMementoAndReturn(currentState, newState);
 }
@@ -532,12 +531,10 @@ export function addBlock(
     },
   };
 
-  const newState = {
-    ...updateCurrentPage(state, {
-      blocks: [...blocks, newBlock],
-    }),
+  const newState = updateCurrentPage(state, {
+    blocks: [...blocks, newBlock],
     selectedId: newBlock.id,
-  };
+  });
 
   return saveMementoAndReturn(state, newState);
 }
@@ -570,10 +567,11 @@ export function pasteBlock(state) {
  * @returns {import("hyperapp").Dispatchable<State>} Updated state with clipboard data
  */
 export function copySelectedBlock(state) {
-  if (state.selectedId === null) return state;
+  const currentPage = getCurrentPage(state);
+  if (!currentPage || currentPage.selectedId === null) return state;
 
   const blocks = getCurrentBlocks(state);
-  const selectedBlock = blocks.find((block) => block.id === state.selectedId);
+  const selectedBlock = blocks.find((block) => block.id === currentPage.selectedId);
   if (!selectedBlock) return state;
 
   // Create a copy of the block data for clipboard, capturing current state

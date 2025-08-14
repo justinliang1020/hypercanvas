@@ -1,5 +1,5 @@
 import { h } from "./packages/hyperapp/index.js";
-import { getCurrentBlocks, getCurrentConnections, updateCurrentPage, getCurrentViewport } from "./pages.js";
+import { getCurrentBlocks, getCurrentConnections, updateCurrentPage, getCurrentViewport, getCurrentPage } from "./pages.js";
 
 /**
  * Adds a connection between two blocks
@@ -31,8 +31,9 @@ export function addConnection(state, name, sourceBlockId, targetBlockId) {
  * @returns {boolean} True if block can be connected to
  */
 export function isBlockConnectable(state, targetBlockId) {
-  if (state.connectingId === null) return false;
-  if (state.connectingId === targetBlockId) return false; // Can't connect to self
+  const currentPage = getCurrentPage(state);
+  if (!currentPage || currentPage.connectingId === null) return false;
+  if (currentPage.connectingId === targetBlockId) return false; // Can't connect to self
 
   // For now, allow connection to any other block (simple 1-connection rule)
   // In the future, this could check program compatibility, existing connections, etc.

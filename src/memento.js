@@ -19,8 +19,6 @@ export function createMemento(state) {
   return {
     pages: JSON.parse(JSON.stringify(state.pages)),
     currentPageId: state.currentPageId,
-    selectedId: state.selectedId,
-    editingId: state.editingId,
   };
 }
 
@@ -69,17 +67,7 @@ export function undoState(state) {
     ...state,
     pages: memento.pages,
     currentPageId: memento.currentPageId,
-    selectedId: memento.selectedId,
-    editingId: memento.editingId,
     mementoManager: newMementoManager,
-    // Reset interaction states to prevent stuck drag/resize modes
-    isBlockDragging: false,
-    isViewportDragging: false,
-    resizing: null,
-    dragStart: null,
-    resizeStart: null,
-    connectingId: null,
-    cursorStyle: "default",
   };
 }
 
@@ -105,17 +93,7 @@ export function redoState(state) {
     ...state,
     pages: memento.pages,
     currentPageId: memento.currentPageId,
-    selectedId: memento.selectedId,
-    editingId: memento.editingId,
     mementoManager: newMementoManager,
-    // Reset interaction states to prevent stuck drag/resize modes
-    isBlockDragging: false,
-    isViewportDragging: false,
-    resizing: null,
-    dragStart: null,
-    resizeStart: null,
-    connectingId: null,
-    cursorStyle: "default",
   };
 }
 

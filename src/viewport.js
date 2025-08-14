@@ -37,29 +37,30 @@ export function viewport(state) {
       onpointerdown: (state, event) => {
         // Only start dragging on middle mouse button or space+click
         if (event.button === 1 || (event.button === 0 && event.shiftKey)) {
-          return {
-            ...state,
+          return updateCurrentPage(state, {
             isViewportDragging: true,
             lastX: event.clientX,
             lastY: event.clientY,
             cursorStyle: "grabbing",
             selectedId: null,
-          };
+          });
         }
 
         // Regular click - deselect blocks, exit edit mode, and exit connect mode
-        return {
-          ...state,
+        return updateCurrentPage(state, {
           selectedId: null,
           editingId: null,
           connectingId: null,
-        };
+        });
       },
       onpointermove: (state, event) => {
-        const dx = event.clientX - state.lastX;
-        const dy = event.clientY - state.lastY;
+        const currentPage = getCurrentPage(state);
+        if (!currentPage) return state;
+        
+        const dx = event.clientX - currentPage.lastX;
+        const dy = event.clientY - currentPage.lastY;
 
-        if (state.resizing) {
+        if (currentPage.resizing) {
           // Handle resizing with zoom adjustment
           const canvasRect = /** @type {HTMLElement} */ (
             document.getElementById("canvas")
@@ -71,9 +72,9 @@ export function viewport(state) {
           const canvasY = (event.clientY - canvasRect.top) / viewport.zoom;
 
           const blocks = getCurrentBlocks(state);
-          const block = blocks.find((b) => b.id == state.resizing?.id);
+          const block = blocks.find((b) => b.id == currentPage.resizing?.id);
           if (!block) return state;
-          const handler = RESIZE_HANDLERS[state.resizing.handle];
+          const handler = RESIZE_HANDLERS[currentPage.resizing.handle];
           if (!handler) return state;
 
           let newDimensions = handler(block, {
@@ -82,18 +83,18 @@ export function viewport(state) {
           });
 
           // Apply aspect ratio constraint if shift is pressed
-          if (state.isShiftPressed && state.resizeStart) {
+          if (currentPage.isShiftPressed && currentPage.resizeStart) {
             const originalBlock = {
               ...block,
-              width: state.resizeStart.startWidth,
-              height: state.resizeStart.startHeight,
-              x: state.resizeStart.startX,
-              y: state.resizeStart.startY,
+              width: currentPage.resizeStart.startWidth,
+              height: currentPage.resizeStart.startHeight,
+              x: currentPage.resizeStart.startX,
+              y: currentPage.resizeStart.startY,
             };
             newDimensions = applyAspectRatioConstraint(
               newDimensions,
               originalBlock,
-              state.resizing.handle,
+              currentPage.resizing.handle,
             );
           }
 
@@ -103,7 +104,7 @@ export function viewport(state) {
 
           return updateCurrentPage(state, {
             blocks: blocks.map((b) =>
-              b.id == state.resizing?.id
+              b.id == currentPage.resizing?.id
                 ? {
                     ...b,
                     ...newDimensions,
@@ -113,7 +114,7 @@ export function viewport(state) {
                 : b,
             ),
           });
-        } else if (state.isBlockDragging && state.editingId === null) {
+        } else if (currentPage.isBlockDragging && currentPage.editingId === null) {
           // Only allow dragging if no block is in edit mode
           // Adjust drag delta by zoom level - when zoomed in, smaller movements should result in smaller position changes
           const viewport = getCurrentViewport(state);
@@ -121,56 +122,54 @@ export function viewport(state) {
           const adjustedDy = dy / viewport.zoom;
 
           const blocks = getCurrentBlocks(state);
-          return {
-            ...updateCurrentPage(state, {
-              blocks: blocks.map((block) => {
-                if (block.id === state.selectedId) {
-                  return {
-                    ...block,
-                    x: block.x + adjustedDx,
-                    y: block.y + adjustedDy,
-                  };
-                } else {
-                  return block;
-                }
-              }),
+          return updateCurrentPage(state, {
+            blocks: blocks.map((block) => {
+              if (block.id === currentPage.selectedId) {
+                return {
+                  ...block,
+                  x: block.x + adjustedDx,
+                  y: block.y + adjustedDy,
+                };
+              } else {
+                return block;
+              }
             }),
             lastX: event.clientX,
             lastY: event.clientY,
-          };
-        } else if (state.isViewportDragging) {
+          });
+        } else if (currentPage.isViewportDragging) {
           const viewport = getCurrentViewport(state);
-          return {
-            ...updateCurrentPage(state, {
-              offsetX: viewport.offsetX + dx,
-              offsetY: viewport.offsetY + dy,
-            }),
+          return updateCurrentPage(state, {
+            offsetX: viewport.offsetX + dx,
+            offsetY: viewport.offsetY + dy,
             lastX: event.clientX,
             lastY: event.clientY,
-          };
+          });
         }
         return state;
       },
       onpointerup: (state) => {
-        const newState = {
-          ...state,
+        const currentPage = getCurrentPage(state);
+        if (!currentPage) return state;
+        
+        const newState = updateCurrentPage(state, {
           isViewportDragging: false,
           isBlockDragging: false,
           resizing: null,
           dragStart: null,
           resizeStart: null,
           cursorStyle: "default",
-        };
+        });
 
         // Save state for completed drag operation
-        if (state.dragStart && state.isBlockDragging) {
+        if (currentPage.dragStart && currentPage.isBlockDragging) {
           const blocks = getCurrentBlocks(state);
-          const draggedBlock = blocks.find((b) => b.id === state.dragStart?.id);
+          const draggedBlock = blocks.find((b) => b.id === currentPage.dragStart?.id);
           if (
             draggedBlock &&
-            state.dragStart &&
-            (draggedBlock.x !== state.dragStart.startX ||
-              draggedBlock.y !== state.dragStart.startY)
+            currentPage.dragStart &&
+            (draggedBlock.x !== currentPage.dragStart.startX ||
+              draggedBlock.y !== currentPage.dragStart.startY)
           ) {
             // Create memento from the state before the drag started
             const beforeDragState = updateCurrentPage(state, {
@@ -178,8 +177,8 @@ export function viewport(state) {
                 b.id === draggedBlock.id
                   ? {
                       ...b,
-                      x: state.dragStart?.startX || 0,
-                      y: state.dragStart?.startY || 0,
+                      x: currentPage.dragStart?.startX || 0,
+                      y: currentPage.dragStart?.startY || 0,
                     }
                   : b,
               ),
@@ -189,18 +188,18 @@ export function viewport(state) {
         }
 
         // Save state for completed resize operation
-        if (state.resizeStart && state.resizing) {
+        if (currentPage.resizeStart && currentPage.resizing) {
           const blocks = getCurrentBlocks(state);
           const resizedBlock = blocks.find(
-            (b) => b.id === state.resizeStart?.id,
+            (b) => b.id === currentPage.resizeStart?.id,
           );
           if (
             resizedBlock &&
-            state.resizeStart &&
-            (resizedBlock.width !== state.resizeStart.startWidth ||
-              resizedBlock.height !== state.resizeStart.startHeight ||
-              resizedBlock.x !== state.resizeStart.startX ||
-              resizedBlock.y !== state.resizeStart.startY)
+            currentPage.resizeStart &&
+            (resizedBlock.width !== currentPage.resizeStart.startWidth ||
+              resizedBlock.height !== currentPage.resizeStart.startHeight ||
+              resizedBlock.x !== currentPage.resizeStart.startX ||
+              resizedBlock.y !== currentPage.resizeStart.startY)
           ) {
             // Create memento from the state before the resize started
             const beforeResizeState = updateCurrentPage(state, {
@@ -208,10 +207,10 @@ export function viewport(state) {
                 b.id === resizedBlock.id
                   ? {
                       ...b,
-                      width: state.resizeStart?.startWidth || 0,
-                      height: state.resizeStart?.startHeight || 0,
-                      x: state.resizeStart?.startX || 0,
-                      y: state.resizeStart?.startY || 0,
+                      width: currentPage.resizeStart?.startWidth || 0,
+                      height: currentPage.resizeStart?.startHeight || 0,
+                      x: currentPage.resizeStart?.startX || 0,
+                      y: currentPage.resizeStart?.startY || 0,
                     }
                   : b,
               ),
@@ -265,12 +264,14 @@ export function viewport(state) {
         return state;
       },
       onkeydown: (state, event) => {
+        const currentPage = getCurrentPage(state);
+        if (!currentPage) return state;
+        
         // Track shift key state
         if (event.key === "Shift") {
-          return {
-            ...state,
+          return updateCurrentPage(state, {
             isShiftPressed: true,
-          };
+          });
         }
 
         // Check if user is interacting with an input field or has text selected
@@ -281,33 +282,30 @@ export function viewport(state) {
         switch (event.key) {
           case "Escape":
             // Exit connect mode, edit mode, or deselect
-            if (state.connectingId !== null) {
+            if (currentPage.connectingId !== null) {
               event.preventDefault();
-              return {
-                ...state,
+              return updateCurrentPage(state, {
                 connectingId: null,
-              };
-            } else if (state.editingId !== null) {
+              });
+            } else if (currentPage.editingId !== null) {
               event.preventDefault();
-              return {
-                ...state,
+              return updateCurrentPage(state, {
                 editingId: null,
-              };
-            } else if (state.selectedId !== null) {
+              });
+            } else if (currentPage.selectedId !== null) {
               event.preventDefault();
-              return {
-                ...state,
+              return updateCurrentPage(state, {
                 selectedId: null,
-              };
+              });
             }
             return state;
 
           case "Delete":
           case "Backspace":
             // Only handle block deletion if not in input field, a block is selected, and not in edit mode
-            if (state.selectedId !== null && state.editingId === null) {
+            if (currentPage.selectedId !== null && currentPage.editingId === null) {
               event.preventDefault();
-              return deleteBlock(state, state.selectedId);
+              return deleteBlock(state, currentPage.selectedId);
             }
             // Let browser handle regular text deletion
             return state;
@@ -318,8 +316,8 @@ export function viewport(state) {
               // Only handle block copy if not in input field, no text is selected, and not in edit mode
               if (
                 !hasTextSelection &&
-                state.selectedId !== null &&
-                state.editingId === null
+                currentPage.selectedId !== null &&
+                currentPage.editingId === null
               ) {
                 event.preventDefault();
                 return copySelectedBlock(state);
@@ -336,7 +334,7 @@ export function viewport(state) {
           case "v":
             // Handle paste shortcut (Ctrl+V or Cmd+V)
             if (event.ctrlKey || event.metaKey) {
-              if (state.editingId === null) {
+              if (currentPage.editingId === null) {
                 event.preventDefault();
                 return [state, [pasteEffect, state]];
               }
@@ -347,7 +345,7 @@ export function viewport(state) {
           case "Z":
             // Handle undo/redo shortcuts
             if (event.ctrlKey || event.metaKey) {
-              if (state.editingId === null) {
+              if (currentPage.editingId === null) {
                 event.preventDefault();
                 if (event.shiftKey) {
                   // Ctrl+Shift+Z or Cmd+Shift+Z = Redo
@@ -363,7 +361,7 @@ export function viewport(state) {
           case "y":
             // Handle redo shortcut (Ctrl+Y or Cmd+Y)
             if (event.ctrlKey || event.metaKey) {
-              if (state.editingId === null) {
+              if (currentPage.editingId === null) {
                 event.preventDefault();
                 return redoState(state);
               }
@@ -387,10 +385,9 @@ export function viewport(state) {
       onkeyup: (state, event) => {
         // Track shift key release
         if (event.key === "Shift") {
-          return {
-            ...state,
+          return updateCurrentPage(state, {
             isShiftPressed: false,
-          };
+          });
         }
         return state;
       },

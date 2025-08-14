@@ -86,7 +86,8 @@ function layersPanel(state) {
               alignItems: "center",
               marginBottom: "4px",
               padding: "8px",
-              backgroundColor: page.id === state.currentPageId ? "#e3f2fd" : "transparent",
+              backgroundColor:
+                page.id === state.currentPageId ? "#e3f2fd" : "transparent",
               borderRadius: "4px",
               cursor: "pointer",
             },
@@ -198,7 +199,7 @@ function programsPanel(state) {
                   dispatch((state) =>
                     addBlock(
                       state,
-                      "system/image",
+                      "system/image.js",
                       { path: result.path },
                       null, // x - use viewport center
                       null, // y - use viewport center

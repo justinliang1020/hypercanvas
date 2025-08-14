@@ -33,14 +33,25 @@
  * @property {number} offsetX - Canvas X offset for panning on this page
  * @property {number} offsetY - Canvas Y offset for panning on this page
  * @property {number} zoom - Current zoom level for this page
+ * @property {number} lastX - Last mouse X position
+ * @property {number} lastY - Last mouse Y position
+ * @property {string} cursorStyle - Current cursor style
+ * @property {boolean} isViewportDragging - Whether viewport is being dragged
+ * @property {boolean} isBlockDragging - Whether a block is being dragged
+ * @property {boolean} isShiftPressed - Whether shift key is currently pressed
+ * @property {number|null} selectedId - ID of selected block
+ * @property {number|null} editingId - ID of block in edit mode
+ * @property {number|null} hoveringId - ID of hovered block
+ * @property {number|null} connectingId - ID of block in connect mode (pending connection)
+ * @property {ResizeState|null} resizing - Current resize operation
+ * @property {DragState|null} dragStart - Drag operation start state
+ * @property {ResizeStartState|null} resizeStart - Resize operation start state
  */
 
 /**
  * @typedef {Object} Memento
  * @property {Page[]} pages - Snapshot of pages state
  * @property {string} currentPageId - Current page ID at time of snapshot
- * @property {number|null} selectedId - Selected block ID at time of snapshot
- * @property {number|null} editingId - Editing block ID at time of snapshot
  */
 
 /**
@@ -76,19 +87,6 @@
  * @typedef {Object} State
  * @property {Page[]} pages - All pages in the application
  * @property {string} currentPageId - ID of the currently active page
- * @property {number} lastX - Last mouse X position
- * @property {number} lastY - Last mouse Y position
- * @property {string} cursorStyle - Current cursor style
- * @property {boolean} isViewportDragging - Whether viewport is being dragged
- * @property {boolean} isBlockDragging - Whether a block is being dragged
- * @property {boolean} isShiftPressed - Whether shift key is currently pressed
- * @property {number|null} selectedId - ID of selected block
- * @property {number|null} editingId - ID of block in edit mode
- * @property {number|null} hoveringId - ID of hovered block
- * @property {number|null} connectingId - ID of block in connect mode (pending connection)
- * @property {ResizeState|null} resizing - Current resize operation
- * @property {DragState|null} dragStart - Drag operation start state
- * @property {ResizeStartState|null} resizeStart - Resize operation start state
  * @property {MementoManager} mementoManager - Undo/redo manager
  * @property {boolean} isDarkMode - Dark mode toggle
  * @property {boolean} sidebarVisible - Whether sidebar is visible

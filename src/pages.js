@@ -57,7 +57,20 @@ export function createPage(state, name = "New Page") {
     connections: [],
     offsetX: 0,
     offsetY: 0,
-    zoom: 1
+    zoom: 1,
+    lastX: 0,
+    lastY: 0,
+    cursorStyle: "pointer",
+    isViewportDragging: false,
+    isBlockDragging: false,
+    isShiftPressed: false,
+    selectedId: null,
+    editingId: null,
+    hoveringId: null,
+    connectingId: null,
+    resizing: null,
+    dragStart: null,
+    resizeStart: null
   };
 
   const newState = {
@@ -82,12 +95,7 @@ export function switchPage(state, pageId) {
 
   return {
     ...state,
-    currentPageId: pageId,
-    selectedId: null,
-    editingId: null,
-    hoveringId: null,
-    connectingId: null,
-    resizing: null
+    currentPageId: pageId
   };
 }
 
@@ -113,12 +121,7 @@ export function deletePage(state, pageId) {
   const newState = {
     ...state,
     pages: updatedPages,
-    currentPageId: newCurrentPageId,
-    selectedId: null,
-    editingId: null,
-    hoveringId: null,
-    connectingId: null,
-    resizing: null
+    currentPageId: newCurrentPageId
   };
 
   return saveMementoAndReturn(state, newState);
