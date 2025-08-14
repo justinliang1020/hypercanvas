@@ -9,52 +9,51 @@ import { notification, saveApplication } from "./utils.js";
 import { deleteInactiveConnections } from "./connection.js";
 
 /**
- * Creates the main application component with keyboard handling
- * @param {State} state - Current application state
- * @returns {import("hyperapp").ElementVNode<State>} Main application element
- */
-function main(state) {
-  return h(
-    "main",
-    {
-      style: {
-        cursor: state.cursorStyle,
-      },
-      class: {
-        "dark-mode": state.isDarkMode,
-      },
-    },
-    [
-      viewport(state),
-      sidebar(state),
-      notification(state),
-      // Only show floating toggle button when sidebar is hidden
-      ...(state.sidebarVisible
-        ? []
-        : [
-            h(
-              "button",
-              {
-                id: "sidebar-toggle",
-                onclick: (state) => ({
-                  ...state,
-                  sidebarVisible: !state.sidebarVisible,
-                }),
-                title: "Show sidebar",
-              },
-              text("▶"),
-            ),
-          ]),
-    ],
-  );
-}
-
-const programManager = new ProgramManager();
-/**
  * Initializes the application with saved state and starts the Hyperapp
  * @returns {Promise<void>}
  */
 async function initialize() {
+  /**
+   * Creates the main application component with keyboard handling
+   * @param {State} state - Current application state
+   * @returns {import("hyperapp").ElementVNode<State>} Main application element
+   */
+  function main(state) {
+    return h(
+      "main",
+      {
+        style: {
+          cursor: state.cursorStyle,
+        },
+        class: {
+          "dark-mode": state.isDarkMode,
+        },
+      },
+      [
+        viewport(state),
+        sidebar(state),
+        notification(state),
+        // Only show floating toggle button when sidebar is hidden
+        ...(state.sidebarVisible
+          ? []
+          : [
+              h(
+                "button",
+                {
+                  id: "sidebar-toggle",
+                  onclick: (state) => ({
+                    ...state,
+                    sidebarVisible: !state.sidebarVisible,
+                  }),
+                  title: "Show sidebar",
+                },
+                text("▶"),
+              ),
+            ]),
+      ],
+    );
+  }
+
   /** @type {State} */
   const initialState = {
     selectedId: null,
@@ -84,6 +83,8 @@ async function initialize() {
     notification: null,
     notificationVisible: false,
   };
+
+  const programManager = new ProgramManager();
 
   /** @type {State} */
   let state;
@@ -158,14 +159,6 @@ async function initialize() {
     subscriptions: (state) => [[subscription, state]],
   };
 
-  // seems to be glitchy when having a lot of history
-  const isUsingAppWithVisualizer = false;
-  if (isUsingAppWithVisualizer) {
-    appWithVisualizer(appConfig);
-  } else {
-    app(appConfig);
-  }
-
   // Listen for quit signal from main process
   //@ts-ignore
   window.electronAPI.onAppWillQuit(() => {
@@ -177,6 +170,14 @@ async function initialize() {
     //@ts-ignore
     window.electronAPI.stateSaved();
   });
+
+  // seems to be glitchy when having a lot of history
+  const isUsingAppWithVisualizer = false;
+  if (isUsingAppWithVisualizer) {
+    appWithVisualizer(appConfig);
+  } else {
+    app(appConfig);
+  }
 }
 
 initialize();
