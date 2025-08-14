@@ -52,7 +52,7 @@ function main(state) {
 // ## Initialization
 // -----------------------------
 
-const programInstanceManager = new ProgramManager();
+const programManager = new ProgramManager();
 /**
  * Initializes the application with saved state and starts the Hyperapp
  * @returns {Promise<void>}
@@ -91,16 +91,17 @@ async function initialize() {
   /**
    * Renders a program instance into its DOM element
    * @param {Block} block - Block containing the program to render
+   * @param {import("./programManager.js").ProgramManager} programManager
    * @returns {void}
    */
-  function mountProgram(block) {
+  function mountProgram(block, programManager) {
     const programComponent = document.querySelector(
       `program-component[data-id="${block.id}"]`,
     );
     const targetElement = /** @type {HTMLElement} */ (
       programComponent?.shadowRoot?.firstElementChild
     );
-    const programInstance = programInstanceManager.get(block.id);
+    const programInstance = programManager.get(block.id);
 
     if (
       targetElement &&
@@ -166,13 +167,13 @@ async function initialize() {
    */
   function subscription(dispatch, state) {
     deleteInactiveConnections(state);
-    programInstanceManager.syncPrograms(dispatch, state);
+    programManager.syncPrograms(dispatch, state);
 
     // Schedule callback for after the current hyperapp paint cycle
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         state.blocks.forEach((block) => {
-          mountProgram(block);
+          mountProgram(block, programManager);
         });
       });
     });
