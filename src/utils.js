@@ -48,7 +48,21 @@ function showNotification(dispatch, message) {
  * @param {State} state - Current application state to save
  * @returns {Promise<void>}
  */
-export async function saveApplication(dispatch, state) {
+export async function saveApplicationAndNotify(dispatch, state) {
+  try {
+    await saveApplication(state);
+    showNotification(dispatch, "State saved successfully!");
+  } catch (error) {
+    showNotification(dispatch, "Failed to save state");
+  }
+}
+
+/**
+ * Saves the application state to disk and shows success notification
+ * @param {State} state - Current application state to save
+ * @returns {Promise<void>}
+ */
+export async function saveApplication(state) {
   try {
     // Don't need to save mementoManager which is session undo/redo history
     const {
@@ -62,12 +76,8 @@ export async function saveApplication(dispatch, state) {
 
     // @ts-ignore
     await window.fileAPI.writeFile(STATE_SAVE_PATH, serializableSaveState);
-
-    // Show success notification
-    showNotification(dispatch, "State saved successfully!");
   } catch (error) {
     console.error("Failed to save application state:", error);
-    showNotification(dispatch, "Failed to save state");
   }
 }
 

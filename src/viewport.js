@@ -1,6 +1,6 @@
 import { h } from "./packages/hyperapp/index.js";
 import { pasteEffect } from "./utils.js";
-import { saveApplication } from "./utils.js";
+import { saveApplicationAndNotify } from "./utils.js";
 import { copySelectedBlock } from "./block.js";
 import { connectionLine } from "./connection.js";
 import { deleteBlock } from "./block.js";
@@ -365,7 +365,10 @@ export function viewport(state) {
             // Handle save shortcut (Ctrl+S or Cmd+S)
             if (event.ctrlKey || event.metaKey) {
               event.preventDefault();
-              return [state, (dispatch) => saveApplication(dispatch, state)];
+              return [
+                state,
+                (dispatch) => saveApplicationAndNotify(dispatch, state),
+              ];
             }
             return state;
           default:

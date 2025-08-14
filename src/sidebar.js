@@ -1,5 +1,5 @@
 import { h, text } from "./packages/hyperapp/index.js";
-import { saveApplication } from "./utils.js";
+import { saveApplicationAndNotify } from "./utils.js";
 import { addBlock } from "./block.js";
 import { MEDIA_SAVE_PATH } from "./constants.js";
 import { undoState, redoState } from "./memento.js";
@@ -132,7 +132,7 @@ function sidebar(state) {
         {
           onclick: (state) => [
             state,
-            (dispatch) => saveApplication(dispatch, state),
+            (dispatch) => saveApplicationAndNotify(dispatch, state),
           ],
         },
         text("save"),
