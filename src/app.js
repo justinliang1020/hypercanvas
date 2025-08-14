@@ -395,7 +395,7 @@ function main(state) {
 // ## Program Instance Manager
 // -----------------------------
 
-class ProgramInstanceManager {
+class ProgramManager {
   /** @type{Map<number,import("./program.js").AbstractProgram>}*/
   #programs;
 
@@ -507,7 +507,7 @@ class ProgramInstanceManager {
 // ## Initialization
 // -----------------------------
 
-const programInstanceManager = new ProgramInstanceManager();
+const programInstanceManager = new ProgramManager();
 /**
  * Initializes the application with saved state and starts the Hyperapp
  * @returns {Promise<void>}
