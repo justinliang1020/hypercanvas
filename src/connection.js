@@ -1,4 +1,5 @@
 import { h } from "./packages/hyperapp/index.js";
+import { getCurrentBlocks, getCurrentConnections, updateCurrentPage, getCurrentViewport } from "./pages.js";
 
 /**
  * Adds a connection between two blocks
@@ -17,7 +18,10 @@ export function addConnection(state, name, sourceBlockId, targetBlockId) {
   };
   // TODO: allowed connection logic
   // TODO: multiple connections per program
-  return { ...state, connections: [...state.connections, connection] };
+  const connections = getCurrentConnections(state);
+  return updateCurrentPage(state, {
+    connections: [...connections, connection],
+  });
 }
 
 /**
@@ -42,7 +46,8 @@ export function isBlockConnectable(state, targetBlockId) {
  * @returns {number[]} Array of connected block IDs
  */
 export function getConnectedBlockIds(state, sourceBlockId) {
-  return state.connections
+  const connections = getCurrentConnections(state);
+  return connections
     .filter((conn) => conn.sourceBlockId === sourceBlockId)
     .map((conn) => conn.targetBlockId);
 }
@@ -54,10 +59,11 @@ export function getConnectedBlockIds(state, sourceBlockId) {
  * @returns {import("hyperapp").ElementVNode<State>} Connection line element
  */
 export function connectionLine(state, connection) {
-  const sourceBlock = state.blocks.find(
+  const blocks = getCurrentBlocks(state);
+  const sourceBlock = blocks.find(
     (b) => b.id === connection.sourceBlockId,
   );
-  const targetBlock = state.blocks.find(
+  const targetBlock = blocks.find(
     (b) => b.id === connection.targetBlockId,
   );
 
@@ -78,7 +84,8 @@ export function connectionLine(state, connection) {
   const angle = Math.atan2(dy, dx) * (180 / Math.PI);
 
   // Scale line thickness inversely with zoom to maintain consistent visual appearance
-  const lineThickness = 3 / state.zoom;
+  const viewport = getCurrentViewport(state);
+  const lineThickness = 3 / viewport.zoom;
 
   return h("div", {
     key: `connection-${connection.sourceBlockId}-${connection.targetBlockId}`,
@@ -103,19 +110,20 @@ export function connectionLine(state, connection) {
  * @returns {State}
  */
 export function deleteInactiveConnections(state) {
-  const activeBlockIds = new Set(state.blocks.map((block) => block.id));
-  const validConnections = state.connections.filter(
+  const blocks = getCurrentBlocks(state);
+  const connections = getCurrentConnections(state);
+  const activeBlockIds = new Set(blocks.map((block) => block.id));
+  const validConnections = connections.filter(
     (connection) =>
       activeBlockIds.has(connection.sourceBlockId) &&
       activeBlockIds.has(connection.targetBlockId),
   );
 
   // Only return new state if connections actually changed
-  if (validConnections.length !== state.connections.length) {
-    return {
-      ...state,
+  if (validConnections.length !== connections.length) {
+    return updateCurrentPage(state, {
       connections: validConnections,
-    };
+    });
   }
 
   return state;

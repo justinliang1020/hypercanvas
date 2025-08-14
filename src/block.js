@@ -13,6 +13,12 @@ import {
 } from "./connection.js";
 import { getViewportCenterCoordinates } from "./viewport.js";
 import { clearUserClipboardEffect } from "./utils.js";
+import {
+  getCurrentBlocks,
+  getCurrentConnections,
+  updateCurrentPage,
+  getCurrentViewport,
+} from "./pages.js";
 
 /**
  * Creates a block component renderer
@@ -33,19 +39,20 @@ export function block(state) {
 
     // Having small borders, i.e. 1px, can cause rendering glitches to occur when CSS transform translations are applied such as zooming out
     // Scale outline thickness inversely with zoom to maintain consistent visual appearance
+    const viewport = getCurrentViewport(state);
     const outline = (() => {
       if (isConnecting) {
-        return `${4 / state.zoom}px solid orange`; // Orange for pending connection
+        return `${4 / viewport.zoom}px solid orange`; // Orange for pending connection
       } else if (isConnectable && isHovering) {
-        return `${4 / state.zoom}px solid #00ff00`; // Bright green for hovered connectable blocks
+        return `${4 / viewport.zoom}px solid #00ff00`; // Bright green for hovered connectable blocks
       } else if (isConnectable) {
-        return `${3 / state.zoom}px solid #90ee90`; // Light green for connectable blocks
+        return `${3 / viewport.zoom}px solid #90ee90`; // Light green for connectable blocks
       } else if (isConnectedToHovered) {
-        return `${3 / state.zoom}px solid purple`; // Purple for connected blocks when hovering source
+        return `${3 / viewport.zoom}px solid purple`; // Purple for connected blocks when hovering source
       } else if (isSelected) {
-        return `${4 / state.zoom}px solid blue`;
+        return `${4 / viewport.zoom}px solid blue`;
       } else if (isHovering) {
-        return `${2 / state.zoom}px solid blue`;
+        return `${2 / viewport.zoom}px solid blue`;
       } else {
         return null;
       }
@@ -179,7 +186,7 @@ export function block(state) {
         }),
         ...(isSelected && !isEditing && !isConnecting
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>
-              ResizeHandle(handle, state.zoom),
+              ResizeHandle(handle, viewport.zoom),
             )
           : []),
         isSelected && !isEditing && blockToolbar(),
@@ -310,7 +317,8 @@ function ResizeHandle(handle, zoom) {
         /** @type {HTMLElement} */ (event.target)?.parentElement?.dataset?.id ||
           "",
       );
-      const block = state.blocks.find((b) => b.id === blockId);
+      const blocks = getCurrentBlocks(state);
+      const block = blocks.find((b) => b.id === blockId);
       if (!block) return state;
       return {
         ...state,
@@ -419,17 +427,19 @@ function blockToolbar() {
  * @returns {import("hyperapp").Dispatchable<State>} Updated state
  */
 function sendToFront(currentState, blockId) {
-  const block = currentState.blocks.find((b) => b.id === blockId);
+  const blocks = getCurrentBlocks(currentState);
+  const block = blocks.find((b) => b.id === blockId);
   if (!block) return currentState;
 
   // Find the highest z-index among all blocks
-  const maxZIndex = Math.max(...currentState.blocks.map((b) => b.zIndex));
+  const maxZIndex = Math.max(...blocks.map((b) => b.zIndex));
 
   const newState = {
-    ...currentState,
-    blocks: currentState.blocks.map((b) =>
-      b.id === blockId ? { ...b, zIndex: maxZIndex + 1 } : b,
-    ),
+    ...updateCurrentPage(currentState, {
+      blocks: blocks.map((b) =>
+        b.id === blockId ? { ...b, zIndex: maxZIndex + 1 } : b,
+      ),
+    }),
   };
 
   return saveMementoAndReturn(currentState, newState);
@@ -442,17 +452,19 @@ function sendToFront(currentState, blockId) {
  * @returns {import("hyperapp").Dispatchable<State>} Updated state
  */
 function sendToBack(currentState, blockId) {
-  const block = currentState.blocks.find((b) => b.id === blockId);
+  const blocks = getCurrentBlocks(currentState);
+  const block = blocks.find((b) => b.id === blockId);
   if (!block) return currentState;
 
   // Find the lowest z-index among all blocks
-  const minZIndex = Math.min(...currentState.blocks.map((b) => b.zIndex));
+  const minZIndex = Math.min(...blocks.map((b) => b.zIndex));
 
   const newState = {
-    ...currentState,
-    blocks: currentState.blocks.map((b) =>
-      b.id === blockId ? { ...b, zIndex: minZIndex - 1 } : b,
-    ),
+    ...updateCurrentPage(currentState, {
+      blocks: blocks.map((b) =>
+        b.id === blockId ? { ...b, zIndex: minZIndex - 1 } : b,
+      ),
+    }),
   };
 
   return saveMementoAndReturn(currentState, newState);
@@ -465,14 +477,14 @@ function sendToBack(currentState, blockId) {
  * @returns {import("hyperapp").Dispatchable<State>} Updated state without the block
  */
 export function deleteBlock(currentState, blockId) {
-  const blockToDelete = currentState.blocks.find(
-    (block) => block.id === blockId,
-  );
+  const blocks = getCurrentBlocks(currentState);
+  const blockToDelete = blocks.find((block) => block.id === blockId);
   if (!blockToDelete) throw new Error(`Block ${blockId} not found`);
 
   const newState = {
-    ...currentState,
-    blocks: currentState.blocks.filter((block) => block.id !== blockId),
+    ...updateCurrentPage(currentState, {
+      blocks: blocks.filter((block) => block.id !== blockId),
+    }),
     selectedId: null,
   };
 
@@ -505,14 +517,15 @@ export function addBlock(
     x = x ?? viewportCenter.x - width / 2; // Center the block
     y = y ?? viewportCenter.y - height / 2; // Center the block
   }
+  const blocks = getCurrentBlocks(state);
   /** @type {Block} */
   const newBlock = {
-    id: Math.max(...state.blocks.map((block) => block.id), 0) + 1,
+    id: Math.max(...blocks.map((block) => block.id), 0) + 1,
     width: width,
     height: height,
     x: x,
     y: y,
-    zIndex: Math.max(...state.blocks.map((block) => block.zIndex), 0) + 1,
+    zIndex: Math.max(...blocks.map((block) => block.zIndex), 0) + 1,
     programData: {
       name: programName,
       state: programState,
@@ -520,8 +533,9 @@ export function addBlock(
   };
 
   const newState = {
-    ...state,
-    blocks: [...state.blocks, newBlock],
+    ...updateCurrentPage(state, {
+      blocks: [...blocks, newBlock],
+    }),
     selectedId: newBlock.id,
   };
 
@@ -558,9 +572,8 @@ export function pasteBlock(state) {
 export function copySelectedBlock(state) {
   if (state.selectedId === null) return state;
 
-  const selectedBlock = state.blocks.find(
-    (block) => block.id === state.selectedId,
-  );
+  const blocks = getCurrentBlocks(state);
+  const selectedBlock = blocks.find((block) => block.id === state.selectedId);
   if (!selectedBlock) return state;
 
   // Create a copy of the block data for clipboard, capturing current state

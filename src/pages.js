@@ -1,0 +1,158 @@
+import { saveMementoAndReturn } from "./memento.js";
+
+/**
+ * Gets the current page from state
+ * @param {State} state - Current application state
+ * @returns {Page|undefined} Current page or undefined if not found
+ */
+export function getCurrentPage(state) {
+  return state.pages.find(page => page.id === state.currentPageId);
+}
+
+/**
+ * Gets blocks for the current page
+ * @param {State} state - Current application state
+ * @returns {Block[]} Blocks on current page
+ */
+export function getCurrentBlocks(state) {
+  const currentPage = getCurrentPage(state);
+  return currentPage ? currentPage.blocks : [];
+}
+
+/**
+ * Gets connections for the current page
+ * @param {State} state - Current application state
+ * @returns {BlockConnection[]} Connections on current page
+ */
+export function getCurrentConnections(state) {
+  const currentPage = getCurrentPage(state);
+  return currentPage ? currentPage.connections : [];
+}
+
+/**
+ * Gets viewport data for the current page
+ * @param {State} state - Current application state
+ * @returns {{offsetX: number, offsetY: number, zoom: number}} Viewport data
+ */
+export function getCurrentViewport(state) {
+  const currentPage = getCurrentPage(state);
+  return currentPage ? {
+    offsetX: currentPage.offsetX,
+    offsetY: currentPage.offsetY,
+    zoom: currentPage.zoom
+  } : { offsetX: 0, offsetY: 0, zoom: 1 };
+}
+
+/**
+ * Creates a new page
+ * @param {State} state - Current application state
+ * @param {string} name - Name for the new page
+ * @returns {State} Updated state with new page
+ */
+export function createPage(state, name = "New Page") {
+  const newPage = {
+    id: crypto.randomUUID(),
+    name,
+    blocks: [],
+    connections: [],
+    offsetX: 0,
+    offsetY: 0,
+    zoom: 1
+  };
+
+  const newState = {
+    ...state,
+    pages: [...state.pages, newPage],
+    currentPageId: newPage.id
+  };
+
+  return saveMementoAndReturn(state, newState);
+}
+
+/**
+ * Switches to a different page
+ * @param {State} state - Current application state
+ * @param {string} pageId - ID of page to switch to
+ * @returns {State} Updated state with new current page
+ */
+export function switchPage(state, pageId) {
+  if (!state.pages.find(page => page.id === pageId)) {
+    return state;
+  }
+
+  return {
+    ...state,
+    currentPageId: pageId,
+    selectedId: null,
+    editingId: null,
+    hoveringId: null,
+    connectingId: null,
+    resizing: null
+  };
+}
+
+/**
+ * Deletes a page
+ * @param {State} state - Current application state
+ * @param {string} pageId - ID of page to delete
+ * @returns {State} Updated state with page removed
+ */
+export function deletePage(state, pageId) {
+  if (state.pages.length <= 1) {
+    return state; // Don't delete the last page
+  }
+
+  const updatedPages = state.pages.filter(page => page.id !== pageId);
+  let newCurrentPageId = state.currentPageId;
+
+  // If we're deleting the current page, switch to the first remaining page
+  if (state.currentPageId === pageId) {
+    newCurrentPageId = updatedPages[0].id;
+  }
+
+  const newState = {
+    ...state,
+    pages: updatedPages,
+    currentPageId: newCurrentPageId,
+    selectedId: null,
+    editingId: null,
+    hoveringId: null,
+    connectingId: null,
+    resizing: null
+  };
+
+  return saveMementoAndReturn(state, newState);
+}
+
+/**
+ * Renames a page
+ * @param {State} state - Current application state
+ * @param {string} pageId - ID of page to rename
+ * @param {string} newName - New name for the page
+ * @returns {State} Updated state with renamed page
+ */
+export function renamePage(state, pageId, newName) {
+  const newState = {
+    ...state,
+    pages: state.pages.map(page =>
+      page.id === pageId ? { ...page, name: newName } : page
+    )
+  };
+
+  return saveMementoAndReturn(state, newState);
+}
+
+/**
+ * Updates the current page with new data
+ * @param {State} state - Current application state
+ * @param {Partial<Page>} pageData - Data to update on current page
+ * @returns {State} Updated state
+ */
+export function updateCurrentPage(state, pageData) {
+  return {
+    ...state,
+    pages: state.pages.map(page =>
+      page.id === state.currentPageId ? { ...page, ...pageData } : page
+    )
+  };
+}

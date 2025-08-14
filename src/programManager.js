@@ -1,4 +1,5 @@
 import { programRegistry } from "./programRegistry.js";
+import { getCurrentBlocks, getCurrentConnections } from "./pages.js";
 
 export class ProgramManager {
   /** @type{Map<number,import("./programBase.js").ProgramBase>}*/
@@ -25,10 +26,12 @@ export class ProgramManager {
    * @param {State} state
    */
   syncPrograms(dispatch, state) {
-    this.#initializePrograms(state.blocks);
-    this.#cleanupDeletedPrograms(state.blocks);
-    this.#syncProgramStates(state.blocks);
-    this.#initializeConnections(state.connections);
+    const blocks = getCurrentBlocks(state);
+    const connections = getCurrentConnections(state);
+    this.#initializePrograms(blocks);
+    this.#cleanupDeletedPrograms(blocks);
+    this.#syncProgramStates(blocks);
+    this.#initializeConnections(connections);
   }
 
   /**

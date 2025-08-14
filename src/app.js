@@ -7,6 +7,7 @@ import { mountProgram, ProgramManager } from "./programManager.js";
 import { panelsContainer } from "./sidebar.js";
 import { notification, saveApplication } from "./utils.js";
 import { deleteInactiveConnections } from "./connection.js";
+import { getCurrentBlocks } from "./pages.js";
 
 /**
  * Initializes the application with saved state and starts the Hyperapp
@@ -35,16 +36,23 @@ async function initialize() {
 
   /** @type {State} */
   const initialState = {
+    pages: [{
+      id: crypto.randomUUID(),
+      name: "Page 1",
+      blocks: [],
+      connections: [],
+      offsetX: 0,
+      offsetY: 0,
+      zoom: 1
+    }],
+    currentPageId: "",
     selectedId: null,
     editingId: null,
     hoveringId: null,
     connectingId: null,
     resizing: null,
-    offsetX: 0,
-    offsetY: 0,
     lastX: 0,
     lastY: 0,
-    zoom: 1,
     cursorStyle: "pointer",
     isViewportDragging: false,
     isBlockDragging: false,
@@ -55,13 +63,14 @@ async function initialize() {
     isDarkMode: false,
     sidebarVisible: true,
     sidebarWidth: 400,
-    blocks: [],
-    connections: [],
     clipboard: null,
     programFilter: "",
     notification: null,
     notificationVisible: false,
   };
+  
+  // Set currentPageId to the first page
+  initialState.currentPageId = initialState.pages[0].id;
 
   const programManager = new ProgramManager();
 
@@ -74,6 +83,34 @@ async function initialize() {
       state = initialState;
     }
     state.mementoManager = createMementoManager();
+    
+    // Migrate old state format to new pages format
+    if (state.blocks && !state.pages) {
+      const firstPageId = crypto.randomUUID();
+      state = {
+        ...state,
+        pages: [{
+          id: firstPageId,
+          name: "Page 1",
+          blocks: state.blocks || [],
+          connections: state.connections || [],
+          offsetX: state.offsetX || 0,
+          offsetY: state.offsetY || 0,
+          zoom: state.zoom || 1
+        }],
+        currentPageId: firstPageId
+      };
+      delete state.blocks;
+      delete state.connections;
+      delete state.offsetX;
+      delete state.offsetY;
+      delete state.zoom;
+    }
+    
+    // Ensure currentPageId is set
+    if (!state.currentPageId && state.pages && state.pages.length > 0) {
+      state.currentPageId = state.pages[0].id;
+    }
   } catch {
     state = initialState;
   }
@@ -102,7 +139,7 @@ async function initialize() {
     // Schedule callback for after the current hyperapp paint cycle
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        state.blocks.forEach((block) => {
+        getCurrentBlocks(state).forEach((block) => {
           mountProgram(block, programManager);
         });
       });

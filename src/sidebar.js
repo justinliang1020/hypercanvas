@@ -4,6 +4,7 @@ import { addBlock } from "./block.js";
 import { MEDIA_SAVE_PATH } from "./constants.js";
 import { undoState, redoState } from "./memento.js";
 import { programRegistry } from "./programRegistry.js";
+import { createPage, switchPage, deletePage, renamePage } from "./pages.js";
 
 /**
  * Creates the panels container with both layers panel, programs panel and floating toggle button
@@ -57,7 +58,77 @@ function layersPanel(state) {
     },
     [
       h("h2", {}, text("Pages")),
-      h("div", {}, text("Pages functionality coming soon...")),
+      h(
+        "button",
+        {
+          onclick: (state) => createPage(state),
+          style: {
+            width: "100%",
+            padding: "8px 12px",
+            marginBottom: "10px",
+            backgroundColor: "#007acc",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+            fontSize: "12px",
+          },
+        },
+        text("+ New Page"),
+      ),
+      ...state.pages.map((page) =>
+        h(
+          "div",
+          {
+            key: page.id,
+            style: {
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "4px",
+              padding: "8px",
+              backgroundColor: page.id === state.currentPageId ? "#e3f2fd" : "transparent",
+              borderRadius: "4px",
+              cursor: "pointer",
+            },
+            onclick: (state) => switchPage(state, page.id),
+          },
+          [
+            h(
+              "span",
+              {
+                style: {
+                  flex: "1",
+                  fontSize: "12px",
+                  textAlign: "left",
+                },
+              },
+              text(page.name),
+            ),
+            state.pages.length > 1
+              ? h(
+                  "button",
+                  {
+                    style: {
+                      padding: "2px 6px",
+                      fontSize: "10px",
+                      backgroundColor: "#ff6b6b",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "2px",
+                      cursor: "pointer",
+                      marginLeft: "8px",
+                    },
+                    onclick: (state, event) => {
+                      event.stopPropagation();
+                      return deletePage(state, page.id);
+                    },
+                  },
+                  text("×"),
+                )
+              : null,
+          ],
+        ),
+      ),
     ],
   );
 }

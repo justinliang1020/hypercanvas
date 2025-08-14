@@ -25,8 +25,20 @@
  */
 
 /**
+ * @typedef {Object} Page
+ * @property {string} id - Unique page identifier
+ * @property {string} name - Display name for the page
+ * @property {Block[]} blocks - All blocks on this page
+ * @property {BlockConnection[]} connections - Connections between blocks on this page
+ * @property {number} offsetX - Canvas X offset for panning on this page
+ * @property {number} offsetY - Canvas Y offset for panning on this page
+ * @property {number} zoom - Current zoom level for this page
+ */
+
+/**
  * @typedef {Object} Memento
- * @property {Block[]} blocks - Snapshot of blocks state
+ * @property {Page[]} pages - Snapshot of pages state
+ * @property {string} currentPageId - Current page ID at time of snapshot
  * @property {number|null} selectedId - Selected block ID at time of snapshot
  * @property {number|null} editingId - Editing block ID at time of snapshot
  */
@@ -62,13 +74,10 @@
 
 /**
  * @typedef {Object} State
- * @property {Block[]} blocks - All blocks on the canvas
- * @property {BlockConnection[]} connections - Connections between blocks
- * @property {number} offsetX - Canvas X offset for panning
- * @property {number} offsetY - Canvas Y offset for panning
+ * @property {Page[]} pages - All pages in the application
+ * @property {string} currentPageId - ID of the currently active page
  * @property {number} lastX - Last mouse X position
  * @property {number} lastY - Last mouse Y position
- * @property {number} zoom - Current zoom level
  * @property {string} cursorStyle - Current cursor style
  * @property {boolean} isViewportDragging - Whether viewport is being dragged
  * @property {boolean} isBlockDragging - Whether a block is being dragged

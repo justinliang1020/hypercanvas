@@ -17,7 +17,8 @@ export function createMementoManager() {
  */
 export function createMemento(state) {
   return {
-    blocks: JSON.parse(JSON.stringify(state.blocks)),
+    pages: JSON.parse(JSON.stringify(state.pages)),
+    currentPageId: state.currentPageId,
     selectedId: state.selectedId,
     editingId: state.editingId,
   };
@@ -66,7 +67,8 @@ export function undoState(state) {
 
   return {
     ...state,
-    blocks: memento.blocks,
+    pages: memento.pages,
+    currentPageId: memento.currentPageId,
     selectedId: memento.selectedId,
     editingId: memento.editingId,
     mementoManager: newMementoManager,
@@ -101,7 +103,8 @@ export function redoState(state) {
 
   return {
     ...state,
-    blocks: memento.blocks,
+    pages: memento.pages,
+    currentPageId: memento.currentPageId,
     selectedId: memento.selectedId,
     editingId: memento.editingId,
     mementoManager: newMementoManager,

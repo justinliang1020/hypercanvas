@@ -7,6 +7,13 @@ import { deleteBlock } from "./block.js";
 import { RESIZE_HANDLERS, block } from "./block.js";
 import { MIN_SIZE, RESIZE_CURSORS } from "./constants.js";
 import { saveMementoAndReturn, redoState, undoState } from "./memento.js";
+import {
+  getCurrentPage,
+  getCurrentBlocks,
+  getCurrentConnections,
+  getCurrentViewport,
+  updateCurrentPage,
+} from "./pages.js";
 
 /**
  * Creates the main viewport component for the canvas
@@ -59,10 +66,12 @@ export function viewport(state) {
           ).getBoundingClientRect();
 
           // Calculate position relative to canvas accounting for zoom and offset
-          const canvasX = (event.clientX - canvasRect.left) / state.zoom;
-          const canvasY = (event.clientY - canvasRect.top) / state.zoom;
+          const viewport = getCurrentViewport(state);
+          const canvasX = (event.clientX - canvasRect.left) / viewport.zoom;
+          const canvasY = (event.clientY - canvasRect.top) / viewport.zoom;
 
-          const block = state.blocks.find((b) => b.id == state.resizing?.id);
+          const blocks = getCurrentBlocks(state);
+          const block = blocks.find((b) => b.id == state.resizing?.id);
           if (!block) return state;
           const handler = RESIZE_HANDLERS[state.resizing.handle];
           if (!handler) return state;
@@ -92,9 +101,8 @@ export function viewport(state) {
           const finalWidth = Math.max(MIN_SIZE, newDimensions.width);
           const finalHeight = Math.max(MIN_SIZE, newDimensions.height);
 
-          return {
-            ...state,
-            blocks: state.blocks.map((b) =>
+          return updateCurrentPage(state, {
+            blocks: blocks.map((b) =>
               b.id == state.resizing?.id
                 ? {
                     ...b,
@@ -104,37 +112,39 @@ export function viewport(state) {
                   }
                 : b,
             ),
-            lastX: event.clientX,
-            lastY: event.clientY,
-            cursorStyle: RESIZE_CURSORS[state.resizing.handle] || "default",
-          };
+          });
         } else if (state.isBlockDragging && state.editingId === null) {
           // Only allow dragging if no block is in edit mode
           // Adjust drag delta by zoom level - when zoomed in, smaller movements should result in smaller position changes
-          const adjustedDx = dx / state.zoom;
-          const adjustedDy = dy / state.zoom;
+          const viewport = getCurrentViewport(state);
+          const adjustedDx = dx / viewport.zoom;
+          const adjustedDy = dy / viewport.zoom;
 
+          const blocks = getCurrentBlocks(state);
           return {
-            ...state,
-            blocks: state.blocks.map((block) => {
-              if (block.id === state.selectedId) {
-                return {
-                  ...block,
-                  x: block.x + adjustedDx,
-                  y: block.y + adjustedDy,
-                };
-              } else {
-                return block;
-              }
+            ...updateCurrentPage(state, {
+              blocks: blocks.map((block) => {
+                if (block.id === state.selectedId) {
+                  return {
+                    ...block,
+                    x: block.x + adjustedDx,
+                    y: block.y + adjustedDy,
+                  };
+                } else {
+                  return block;
+                }
+              }),
             }),
             lastX: event.clientX,
             lastY: event.clientY,
           };
         } else if (state.isViewportDragging) {
+          const viewport = getCurrentViewport(state);
           return {
-            ...state,
-            offsetX: state.offsetX + dx,
-            offsetY: state.offsetY + dy,
+            ...updateCurrentPage(state, {
+              offsetX: viewport.offsetX + dx,
+              offsetY: viewport.offsetY + dy,
+            }),
             lastX: event.clientX,
             lastY: event.clientY,
           };
@@ -154,9 +164,8 @@ export function viewport(state) {
 
         // Save state for completed drag operation
         if (state.dragStart && state.isBlockDragging) {
-          const draggedBlock = state.blocks.find(
-            (b) => b.id === state.dragStart?.id,
-          );
+          const blocks = getCurrentBlocks(state);
+          const draggedBlock = blocks.find((b) => b.id === state.dragStart?.id);
           if (
             draggedBlock &&
             state.dragStart &&
@@ -164,9 +173,8 @@ export function viewport(state) {
               draggedBlock.y !== state.dragStart.startY)
           ) {
             // Create memento from the state before the drag started
-            const beforeDragState = {
-              ...state,
-              blocks: state.blocks.map((b) =>
+            const beforeDragState = updateCurrentPage(state, {
+              blocks: blocks.map((b) =>
                 b.id === draggedBlock.id
                   ? {
                       ...b,
@@ -175,14 +183,15 @@ export function viewport(state) {
                     }
                   : b,
               ),
-            };
+            });
             return saveMementoAndReturn(beforeDragState, newState);
           }
         }
 
         // Save state for completed resize operation
         if (state.resizeStart && state.resizing) {
-          const resizedBlock = state.blocks.find(
+          const blocks = getCurrentBlocks(state);
+          const resizedBlock = blocks.find(
             (b) => b.id === state.resizeStart?.id,
           );
           if (
@@ -194,9 +203,8 @@ export function viewport(state) {
               resizedBlock.y !== state.resizeStart.startY)
           ) {
             // Create memento from the state before the resize started
-            const beforeResizeState = {
-              ...state,
-              blocks: state.blocks.map((b) =>
+            const beforeResizeState = updateCurrentPage(state, {
+              blocks: blocks.map((b) =>
                 b.id === resizedBlock.id
                   ? {
                       ...b,
@@ -207,7 +215,7 @@ export function viewport(state) {
                     }
                   : b,
               ),
-            };
+            });
             return saveMementoAndReturn(beforeResizeState, newState);
           }
         }
@@ -224,15 +232,16 @@ export function viewport(state) {
         if (isTrackpad) {
           // Trackpad pan gesture - use deltaX and deltaY directly
           // Invert the delta values to match Figma-like behavior
-          return {
-            ...state,
-            offsetX: state.offsetX - event.deltaX,
-            offsetY: state.offsetY - event.deltaY,
-          };
+          const viewport = getCurrentViewport(state);
+          return updateCurrentPage(state, {
+            offsetX: viewport.offsetX - event.deltaX,
+            offsetY: viewport.offsetY - event.deltaY,
+          });
         } else if (event.ctrlKey || event.metaKey) {
           // Zoom gesture (Ctrl/Cmd + scroll or trackpad pinch)
+          const viewport = getCurrentViewport(state);
           const zoomDelta = -event.deltaY * 0.01;
-          const newZoom = Math.max(0.1, Math.min(5, state.zoom + zoomDelta));
+          const newZoom = Math.max(0.1, Math.min(5, viewport.zoom + zoomDelta));
 
           // Get mouse position relative to viewport for zoom centering
           const rect = /** @type {HTMLElement} */ (
@@ -242,16 +251,15 @@ export function viewport(state) {
           const mouseY = event.clientY - rect.top;
 
           // Calculate zoom offset to keep mouse position fixed
-          const zoomRatio = newZoom / state.zoom;
-          const newOffsetX = mouseX - (mouseX - state.offsetX) * zoomRatio;
-          const newOffsetY = mouseY - (mouseY - state.offsetY) * zoomRatio;
+          const zoomRatio = newZoom / viewport.zoom;
+          const newOffsetX = mouseX - (mouseX - viewport.offsetX) * zoomRatio;
+          const newOffsetY = mouseY - (mouseY - viewport.offsetY) * zoomRatio;
 
-          return {
-            ...state,
+          return updateCurrentPage(state, {
             zoom: newZoom,
             offsetX: newOffsetX,
             offsetY: newOffsetY,
-          };
+          });
         }
 
         return state;
@@ -293,6 +301,7 @@ export function viewport(state) {
               };
             }
             return state;
+
           case "Delete":
           case "Backspace":
             // Only handle block deletion if not in input field, a block is selected, and not in edit mode
@@ -392,16 +401,16 @@ export function viewport(state) {
         {
           id: "canvas",
           style: {
-            transform: `translate(${state.offsetX}px, ${state.offsetY}px) scale(${state.zoom})`,
+            transform: `translate(${getCurrentViewport(state).offsetX}px, ${getCurrentViewport(state).offsetY}px) scale(${getCurrentViewport(state).zoom})`,
           },
         },
         [
           // Render connection lines first (behind blocks)
-          ...state.connections.map((connection) =>
+          ...getCurrentConnections(state).map((connection) =>
             connectionLine(state, connection),
           ),
           // Then render blocks on top
-          ...state.blocks.map(block(state)),
+          ...getCurrentBlocks(state).map(block(state)),
         ],
       ),
     ],
@@ -507,8 +516,9 @@ export function getViewportCenterCoordinates(state) {
   const viewportCenterY = viewportHeight / 2;
 
   // Convert to canvas coordinates by accounting for zoom and offset
-  const canvasX = (viewportCenterX - state.offsetX) / state.zoom;
-  const canvasY = (viewportCenterY - state.offsetY) / state.zoom;
+  const viewport = getCurrentViewport(state);
+  const canvasX = (viewportCenterX - viewport.offsetX) / viewport.zoom;
+  const canvasY = (viewportCenterY - viewport.offsetY) / viewport.zoom;
 
   return { x: canvasX, y: canvasY };
 }
