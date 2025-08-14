@@ -109,8 +109,9 @@ async function initialize() {
   let currentState = state;
 
   /**
-   * Mutates state to remove inactive connections
+   * Action to remove inactive connections
    * @param {State} state
+   * @returns {State}
    */
   function deleteInactiveConnections(state) {
     const activeBlockIds = new Set(state.blocks.map((block) => block.id));
@@ -119,7 +120,16 @@ async function initialize() {
         activeBlockIds.has(connection.sourceBlockId) &&
         activeBlockIds.has(connection.targetBlockId),
     );
-    state.connections = validConnections;
+
+    // Only return new state if connections actually changed
+    if (validConnections.length !== state.connections.length) {
+      return {
+        ...state,
+        connections: validConnections,
+      };
+    }
+
+    return state;
   }
 
   /**
@@ -129,7 +139,7 @@ async function initialize() {
    * @returns {() => void} Cleanup function
    */
   function subscription(dispatch, state) {
-    deleteInactiveConnections(state);
+    dispatch(deleteInactiveConnections);
     programManager.syncPrograms(dispatch, state);
 
     // Schedule callback for after the current hyperapp paint cycle
