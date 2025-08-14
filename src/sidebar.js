@@ -6,26 +6,27 @@ import { undoState, redoState } from "./memento.js";
 import { programRegistry } from "./programRegistry.js";
 
 /**
- * Creates the sidebar container with both sidebar and floating toggle button
+ * Creates the panels container with both layers panel, programs panel and floating toggle button
  * @param {State} state - Current application state
- * @returns {import("hyperapp").ElementVNode<State>[]} Array of sidebar elements
+ * @returns {import("hyperapp").ElementVNode<State>[]} Array of panel elements
  */
-export function sidebarContainer(state) {
+export function panelsContainer(state) {
   return [
-    sidebar(state),
-    // Only show floating toggle button when sidebar is hidden
+    layersPanel(state),
+    programsPanel(state),
+    // Only show floating toggle button when panels are hidden
     ...(state.sidebarVisible
       ? []
       : [
           h(
             "button",
             {
-              id: "sidebar-toggle",
+              id: "panels-toggle",
               onclick: (state) => ({
                 ...state,
                 sidebarVisible: !state.sidebarVisible,
               }),
-              title: "Show sidebar",
+              title: "Show panels",
             },
             text("▶"),
           ),
@@ -34,15 +35,43 @@ export function sidebarContainer(state) {
 }
 
 /**
- * Creates the main application sidebar with action buttons
+ * Creates the layers panel on the left side
  * @param {State} state - Current application state
- * @returns {import("hyperapp").ElementVNode<State>} Sidebar element
+ * @returns {import("hyperapp").ElementVNode<State>} Layers panel element
  */
-function sidebar(state) {
+function layersPanel(state) {
   return h(
     "div",
     {
-      id: "sidebar",
+      id: "layers-panel",
+      class: {
+        hidden: !state.sidebarVisible,
+      },
+      style: {
+        pointerEvents: state.isBlockDragging ? "none" : "auto",
+      },
+      onpointerdown: (state, event) => {
+        event.stopPropagation();
+        return state;
+      },
+    },
+    [
+      h("h2", {}, text("Pages")),
+      h("div", {}, text("Pages functionality coming soon...")),
+    ],
+  );
+}
+
+/**
+ * Creates the programs panel on the right side (formerly sidebar)
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>} Programs panel element
+ */
+function programsPanel(state) {
+  return h(
+    "div",
+    {
+      id: "programs-panel",
       class: {
         hidden: !state.sidebarVisible,
       },
@@ -63,7 +92,7 @@ function sidebar(state) {
             ...state,
             sidebarVisible: !state.sidebarVisible,
           }),
-          title: "Toggle sidebar visibility",
+          title: "Toggle panels visibility",
         },
         text("◀"),
       ),

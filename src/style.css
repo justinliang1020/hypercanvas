@@ -67,7 +67,28 @@ hr {
   }
 }
 
-#sidebar {
+#layers-panel {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: white;
+  padding: 20px;
+  border-right: 1px solid #ccc;
+  z-index: 1000;
+  gap: 8px;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  width: 250px;
+}
+
+#layers-panel.hidden {
+  transform: translateX(-100%);
+}
+
+#programs-panel {
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -83,11 +104,11 @@ hr {
   box-sizing: border-box;
 }
 
-#sidebar.hidden {
+#programs-panel.hidden {
   transform: translateX(100%);
 }
 
-#sidebar-toggle {
+#panels-toggle {
   position: fixed;
   right: 10px;
   top: 10px;
@@ -101,7 +122,7 @@ hr {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-#sidebar button {
+#programs-panel button {
   width: 100%;
   padding: 8px 12px;
   text-align: left;
@@ -113,11 +134,11 @@ hr {
   white-space: nowrap;
 }
 
-#sidebar button:hover {
+#programs-panel button:hover {
   background: #f5f5f5;
 }
 
-#sidebar button:disabled {
+#programs-panel button:disabled {
   background: #f8f8f8;
   color: #999;
   cursor: not-allowed;
@@ -184,35 +205,42 @@ main.dark-mode {
     background-color: #2d2d2d;
   }
 
-  #sidebar {
+  #layers-panel {
+    background: #333;
+    border-right-color: #555;
+    color: #e0e0e0;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+  }
+
+  #programs-panel {
     background: #333;
     border-left-color: #555;
     color: #e0e0e0;
     box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
   }
 
-  #sidebar-toggle {
+  #panels-toggle {
     background: #555;
     border-color: #777;
     color: #e0e0e0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 
-  #sidebar-toggle:hover {
+  #panels-toggle:hover {
     background: #666;
   }
 
-  #sidebar button {
+  #programs-panel button {
     background: #555;
     border-color: #777;
     color: #e0e0e0;
   }
 
-  #sidebar button:hover {
+  #programs-panel button:hover {
     background: #666;
   }
 
-  #sidebar button:disabled {
+  #programs-panel button:disabled {
     background: #333;
     color: #666;
     border-color: #444;

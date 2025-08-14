@@ -4,7 +4,7 @@ import { STATE_SAVE_PATH } from "./constants.js";
 import { createMementoManager } from "./memento.js";
 import { viewport } from "./viewport.js";
 import { mountProgram, ProgramManager } from "./programManager.js";
-import { sidebarContainer } from "./sidebar.js";
+import { panelsContainer } from "./sidebar.js";
 import { notification, saveApplication } from "./utils.js";
 import { deleteInactiveConnections } from "./connection.js";
 
@@ -29,7 +29,7 @@ async function initialize() {
           "dark-mode": state.isDarkMode,
         },
       },
-      [viewport(state), ...sidebarContainer(state), notification(state)],
+      [viewport(state), ...panelsContainer(state), notification(state)],
     );
   }
 
