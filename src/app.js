@@ -6,6 +6,7 @@ import { viewport } from "./viewport.js";
 import { mountProgram, ProgramManager } from "./programManager.js";
 import { sidebar } from "./sidebar.js";
 import { notification, saveApplication } from "./utils.js";
+import { deleteInactiveConnections } from "./connection.js";
 
 /**
  * Creates the main application component with keyboard handling
@@ -107,30 +108,6 @@ async function initialize() {
   }
 
   let currentState = state;
-
-  /**
-   * Action to remove inactive connections
-   * @param {State} state
-   * @returns {State}
-   */
-  function deleteInactiveConnections(state) {
-    const activeBlockIds = new Set(state.blocks.map((block) => block.id));
-    const validConnections = state.connections.filter(
-      (connection) =>
-        activeBlockIds.has(connection.sourceBlockId) &&
-        activeBlockIds.has(connection.targetBlockId),
-    );
-
-    // Only return new state if connections actually changed
-    if (validConnections.length !== state.connections.length) {
-      return {
-        ...state,
-        connections: validConnections,
-      };
-    }
-
-    return state;
-  }
 
   /**
    * Subscription that runs after DOM repaint to render programs and handle dark mode

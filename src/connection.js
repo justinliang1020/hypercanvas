@@ -96,3 +96,27 @@ export function connectionLine(state, connection) {
     },
   });
 }
+
+/**
+ * Action to remove inactive connections
+ * @param {State} state
+ * @returns {State}
+ */
+export function deleteInactiveConnections(state) {
+  const activeBlockIds = new Set(state.blocks.map((block) => block.id));
+  const validConnections = state.connections.filter(
+    (connection) =>
+      activeBlockIds.has(connection.sourceBlockId) &&
+      activeBlockIds.has(connection.targetBlockId),
+  );
+
+  // Only return new state if connections actually changed
+  if (validConnections.length !== state.connections.length) {
+    return {
+      ...state,
+      connections: validConnections,
+    };
+  }
+
+  return state;
+}
