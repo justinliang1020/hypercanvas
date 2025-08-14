@@ -1,10 +1,10 @@
-import { app, h, text } from "./packages/hyperapp/index.js";
+import { app, h } from "./packages/hyperapp/index.js";
 import { appWithVisualizer } from "../../hyperapp-visualizer/visualizer.js";
 import { STATE_SAVE_PATH } from "./constants.js";
 import { createMementoManager } from "./memento.js";
 import { viewport } from "./viewport.js";
 import { mountProgram, ProgramManager } from "./programManager.js";
-import { sidebar } from "./sidebar.js";
+import { sidebarContainer } from "./sidebar.js";
 import { notification, saveApplication } from "./utils.js";
 import { deleteInactiveConnections } from "./connection.js";
 
@@ -29,28 +29,7 @@ async function initialize() {
           "dark-mode": state.isDarkMode,
         },
       },
-      [
-        viewport(state),
-        sidebar(state),
-        notification(state),
-        // Only show floating toggle button when sidebar is hidden
-        ...(state.sidebarVisible
-          ? []
-          : [
-              h(
-                "button",
-                {
-                  id: "sidebar-toggle",
-                  onclick: (state) => ({
-                    ...state,
-                    sidebarVisible: !state.sidebarVisible,
-                  }),
-                  title: "Show sidebar",
-                },
-                text("▶"),
-              ),
-            ]),
-      ],
+      [viewport(state), ...sidebarContainer(state), notification(state)],
     );
   }
 

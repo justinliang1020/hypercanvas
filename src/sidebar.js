@@ -6,11 +6,39 @@ import { undoState, redoState } from "./memento.js";
 import { programRegistry } from "./programRegistry.js";
 
 /**
+ * Creates the sidebar container with both sidebar and floating toggle button
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>[]} Array of sidebar elements
+ */
+export function sidebarContainer(state) {
+  return [
+    sidebar(state),
+    // Only show floating toggle button when sidebar is hidden
+    ...(state.sidebarVisible
+      ? []
+      : [
+          h(
+            "button",
+            {
+              id: "sidebar-toggle",
+              onclick: (state) => ({
+                ...state,
+                sidebarVisible: !state.sidebarVisible,
+              }),
+              title: "Show sidebar",
+            },
+            text("▶"),
+          ),
+        ]),
+  ];
+}
+
+/**
  * Creates the main application sidebar with action buttons
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State>} Sidebar element
  */
-export function sidebar(state) {
+function sidebar(state) {
   return h(
     "div",
     {
