@@ -12,7 +12,7 @@ import {
   isBlockConnectable,
 } from "./connection.js";
 import { getViewportCenterCoordinates } from "./viewport.js";
-import { clearUserClipboardEffect } from "./app.js";
+import { clearUserClipboardEffect } from "./utils.js";
 
 /**
  * Creates a block component renderer
