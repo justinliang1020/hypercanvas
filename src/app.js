@@ -20,7 +20,7 @@ async function initialize() {
    * @returns {import("hyperapp").ElementVNode<State>} Main application element
    */
   function main(state) {
-    const currentPage = state.pages.find(p => p.id === state.currentPageId);
+    const currentPage = state.pages.find((p) => p.id === state.currentPageId);
     return h(
       "main",
       {
@@ -37,28 +37,30 @@ async function initialize() {
 
   /** @type {State} */
   const initialState = {
-    pages: [{
-      id: crypto.randomUUID(),
-      name: "Page 1",
-      blocks: [],
-      connections: [],
-      offsetX: 0,
-      offsetY: 0,
-      zoom: 1,
-      lastX: 0,
-      lastY: 0,
-      cursorStyle: "pointer",
-      isViewportDragging: false,
-      isBlockDragging: false,
-      isShiftPressed: false,
-      selectedId: null,
-      editingId: null,
-      hoveringId: null,
-      connectingId: null,
-      resizing: null,
-      dragStart: null,
-      resizeStart: null
-    }],
+    pages: [
+      {
+        id: crypto.randomUUID(),
+        name: "Page 1",
+        blocks: [],
+        connections: [],
+        offsetX: 0,
+        offsetY: 0,
+        zoom: 1,
+        lastX: 0,
+        lastY: 0,
+        cursorStyle: "pointer",
+        isViewportDragging: false,
+        isBlockDragging: false,
+        isShiftPressed: false,
+        selectedId: null,
+        editingId: null,
+        hoveringId: null,
+        connectingId: null,
+        resizing: null,
+        dragStart: null,
+        resizeStart: null,
+      },
+    ],
     currentPageId: "",
     mementoManager: createMementoManager(),
     isDarkMode: false,
@@ -69,7 +71,7 @@ async function initialize() {
     notification: null,
     notificationVisible: false,
   };
-  
+
   // Set currentPageId to the first page
   initialState.currentPageId = initialState.pages[0].id;
 
@@ -84,80 +86,6 @@ async function initialize() {
       state = initialState;
     }
     state.mementoManager = createMementoManager();
-    
-    // Migrate old state format to new pages format
-    if (state.blocks && !state.pages) {
-      const firstPageId = crypto.randomUUID();
-      state = {
-        ...state,
-        pages: [{
-          id: firstPageId,
-          name: "Page 1",
-          blocks: state.blocks || [],
-          connections: state.connections || [],
-          offsetX: state.offsetX || 0,
-          offsetY: state.offsetY || 0,
-          zoom: state.zoom || 1,
-          lastX: state.lastX || 0,
-          lastY: state.lastY || 0,
-          cursorStyle: state.cursorStyle || "pointer",
-          isViewportDragging: state.isViewportDragging || false,
-          isBlockDragging: state.isBlockDragging || false,
-          isShiftPressed: state.isShiftPressed || false,
-          selectedId: state.selectedId || null,
-          editingId: state.editingId || null,
-          hoveringId: state.hoveringId || null,
-          connectingId: state.connectingId || null,
-          resizing: state.resizing || null,
-          dragStart: state.dragStart || null,
-          resizeStart: state.resizeStart || null
-        }],
-        currentPageId: firstPageId
-      };
-      delete state.blocks;
-      delete state.connections;
-      delete state.offsetX;
-      delete state.offsetY;
-      delete state.zoom;
-      delete state.lastX;
-      delete state.lastY;
-      delete state.cursorStyle;
-      delete state.isViewportDragging;
-      delete state.isBlockDragging;
-      delete state.isShiftPressed;
-      delete state.selectedId;
-      delete state.editingId;
-      delete state.hoveringId;
-      delete state.connectingId;
-      delete state.resizing;
-      delete state.dragStart;
-      delete state.resizeStart;
-    }
-    
-    // Ensure currentPageId is set
-    if (!state.currentPageId && state.pages && state.pages.length > 0) {
-      state.currentPageId = state.pages[0].id;
-    }
-    
-    // Migrate existing pages to include viewport properties
-    if (state.pages) {
-      state.pages = state.pages.map(page => ({
-        ...page,
-        lastX: page.lastX ?? 0,
-        lastY: page.lastY ?? 0,
-        cursorStyle: page.cursorStyle ?? "pointer",
-        isViewportDragging: page.isViewportDragging ?? false,
-        isBlockDragging: page.isBlockDragging ?? false,
-        isShiftPressed: page.isShiftPressed ?? false,
-        selectedId: page.selectedId ?? null,
-        editingId: page.editingId ?? null,
-        hoveringId: page.hoveringId ?? null,
-        connectingId: page.connectingId ?? null,
-        resizing: page.resizing ?? null,
-        dragStart: page.dragStart ?? null,
-        resizeStart: page.resizeStart ?? null
-      }));
-    }
   } catch {
     state = initialState;
   }
