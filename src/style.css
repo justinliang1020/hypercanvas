@@ -88,6 +88,60 @@ hr {
   transform: translateX(-100%);
 }
 
+.layers-panel-button {
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  background-color: #007acc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.layers-panel-button:hover {
+  background-color: #005a99;
+}
+
+.page-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.page-item.active {
+  background-color: #e3f2fd;
+}
+
+.page-item:hover:not(.active) {
+  background-color: #f5f5f5;
+}
+
+.page-name {
+  flex: 1;
+  font-size: 12px;
+  text-align: left;
+}
+
+.page-delete-button {
+  padding: 2px 6px;
+  font-size: 10px;
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.page-delete-button:hover {
+  background-color: #ff5252;
+}
+
 #programs-panel {
   display: flex;
   flex-direction: column;
@@ -142,6 +196,29 @@ hr {
   background: #f8f8f8;
   color: #999;
   cursor: not-allowed;
+}
+
+.programs-panel-toggle {
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.programs-panel-toggle:hover {
+  background: #f5f5f5;
+}
+
+.program-filter-input {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 12px;
+  box-sizing: border-box;
 }
 
 .toolbar-resize-handle {
@@ -212,6 +289,32 @@ main.dark-mode {
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
   }
 
+  .layers-panel-button {
+    background-color: #007acc;
+    color: #e0e0e0;
+  }
+
+  .layers-panel-button:hover {
+    background-color: #005a99;
+  }
+
+  .page-item:hover:not(.active) {
+    background-color: #444;
+  }
+
+  .page-item.active {
+    background-color: #1976d2;
+  }
+
+  .page-delete-button {
+    background-color: #ff6b6b;
+    color: #e0e0e0;
+  }
+
+  .page-delete-button:hover {
+    background-color: #ff5252;
+  }
+
   #programs-panel {
     background: #333;
     border-left-color: #555;
@@ -244,6 +347,26 @@ main.dark-mode {
     background: #333;
     color: #666;
     border-color: #444;
+  }
+
+  .programs-panel-toggle {
+    background: #555;
+    border-color: #777;
+    color: #e0e0e0;
+  }
+
+  .programs-panel-toggle:hover {
+    background: #666;
+  }
+
+  .program-filter-input {
+    background: #555;
+    border-color: #777;
+    color: #e0e0e0;
+  }
+
+  .program-filter-input::placeholder {
+    color: #aaa;
   }
 
   .block-toolbar {

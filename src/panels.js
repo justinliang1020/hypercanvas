@@ -43,18 +43,8 @@ function layersPanel(state) {
       h(
         "button",
         {
+          class: "layers-panel-button",
           onclick: (state) => createPage(state),
-          style: {
-            width: "100%",
-            padding: "8px 12px",
-            marginBottom: "10px",
-            backgroundColor: "#007acc",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-            fontSize: "12px",
-          },
         },
         text("+ New Page"),
       ),
@@ -63,15 +53,9 @@ function layersPanel(state) {
           "div",
           {
             key: page.id,
-            style: {
-              display: "flex",
-              alignItems: "center",
-              marginBottom: "4px",
-              padding: "8px",
-              backgroundColor:
-                page.id === state.currentPageId ? "#e3f2fd" : "transparent",
-              borderRadius: "4px",
-              cursor: "pointer",
+            class: {
+              "page-item": true,
+              active: page.id === state.currentPageId,
             },
             onclick: (state) => switchPage(state, page.id),
           },
@@ -79,11 +63,7 @@ function layersPanel(state) {
             h(
               "span",
               {
-                style: {
-                  flex: "1",
-                  fontSize: "12px",
-                  textAlign: "left",
-                },
+                class: "page-name",
               },
               text(page.name),
             ),
@@ -91,16 +71,7 @@ function layersPanel(state) {
               ? h(
                   "button",
                   {
-                    style: {
-                      padding: "2px 6px",
-                      fontSize: "10px",
-                      backgroundColor: "#ff6b6b",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "2px",
-                      cursor: "pointer",
-                      marginLeft: "8px",
-                    },
+                    class: "page-delete-button",
                     onclick: (state, event) => {
                       event.stopPropagation();
                       return deletePage(state, page.id);
@@ -141,6 +112,7 @@ function programsPanel(state) {
       h(
         "button",
         {
+          class: "programs-panel-toggle",
           onclick: (state) => ({
             ...state,
             panelsVisible: !state.panelsVisible,
@@ -242,13 +214,7 @@ function programButtons(state) {
       type: "text",
       placeholder: "Filter programs...",
       value: filterText,
-      style: {
-        width: "100%",
-        marginBottom: "10px",
-        padding: "8px",
-        border: "1px solid #ccc",
-        borderRadius: "4px",
-      },
+      class: "program-filter-input",
       oninput: (state, event) => ({
         ...state,
         programFilter: /** @type {HTMLInputElement} */ (event.target).value,
