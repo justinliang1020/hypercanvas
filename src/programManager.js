@@ -1,6 +1,12 @@
 import { programRegistry } from "./programRegistry.js";
 import { getCurrentBlocks, getCurrentConnections } from "./pages.js";
 
+/**
+ * ProgramManager assumes that:
+ * - the id of each program instance is unique
+ * - a program can be deleted, and a new program of that ID can be created
+ * - a program cannot be mutated to another type of program. it must first be deleted to "free up the ID"
+ */
 export class ProgramManager {
   /** @type{Map<number,import("./programBase.js").ProgramBase>}*/
   #programs;

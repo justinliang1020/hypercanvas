@@ -18,6 +18,7 @@ import {
   updateCurrentPage,
   getCurrentViewport,
   getCurrentPage,
+  getGlobalBlocks,
 } from "./pages.js";
 
 /**
@@ -515,23 +516,24 @@ export function addBlock(
     x = x ?? viewportCenter.x - width / 2; // Center the block
     y = y ?? viewportCenter.y - height / 2; // Center the block
   }
-  const blocks = getCurrentBlocks(state);
+  const globalBlocks = getGlobalBlocks(state);
   /** @type {Block} */
   const newBlock = {
-    id: Math.max(...blocks.map((block) => block.id), 0) + 1,
+    id: Math.max(...globalBlocks.map((block) => block.id), 0) + 1,
     width: width,
     height: height,
     x: x,
     y: y,
-    zIndex: Math.max(...blocks.map((block) => block.zIndex), 0) + 1,
+    zIndex: Math.max(...globalBlocks.map((block) => block.zIndex), 0) + 1,
     programData: {
       name: programName,
       state: programState,
     },
   };
 
+  const currentBlocks = getCurrentBlocks(state);
   const newState = updateCurrentPage(state, {
-    blocks: [...blocks, newBlock],
+    blocks: [...currentBlocks, newBlock],
     selectedId: newBlock.id,
   });
 

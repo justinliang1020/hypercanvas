@@ -20,6 +20,15 @@ export function getCurrentBlocks(state) {
 }
 
 /**
+ * Gets blocks for the current page
+ * @param {State} state - Current application state
+ * @returns {Block[]} Blocks on current page
+ */
+export function getGlobalBlocks(state) {
+  return state.pages.flatMap((page) => page.blocks);
+}
+
+/**
  * Gets connections for the current page
  * @param {State} state - Current application state
  * @returns {BlockConnection[]} Connections on current page
@@ -161,4 +170,3 @@ export function updateCurrentPage(state, pageData) {
     ),
   };
 }
-
