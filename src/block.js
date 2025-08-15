@@ -15,7 +15,6 @@ import { getViewportCenterCoordinates } from "./viewport.js";
 import { clearUserClipboardEffect } from "./utils.js";
 import {
   getCurrentBlocks,
-  getCurrentConnections,
   updateCurrentPage,
   getCurrentViewport,
   getCurrentPage,
@@ -31,7 +30,7 @@ export function block(state) {
   return (block) => {
     const currentPage = getCurrentPage(state);
     if (!currentPage) return h("div", {});
-    
+
     const isSelected = currentPage.selectedId === block.id;
     const isEditing = currentPage.editingId === block.id;
     const isHovering = currentPage.hoveringId === block.id;
@@ -81,7 +80,7 @@ export function block(state) {
           event.stopPropagation();
           const currentPage = getCurrentPage(state);
           if (!currentPage) return state;
-          
+
           if (
             currentPage.selectedId !== null &&
             currentPage.selectedId !== block.id &&
@@ -571,7 +570,9 @@ export function copySelectedBlock(state) {
   if (!currentPage || currentPage.selectedId === null) return state;
 
   const blocks = getCurrentBlocks(state);
-  const selectedBlock = blocks.find((block) => block.id === currentPage.selectedId);
+  const selectedBlock = blocks.find(
+    (block) => block.id === currentPage.selectedId,
+  );
   if (!selectedBlock) return state;
 
   // Create a copy of the block data for clipboard, capturing current state

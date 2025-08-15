@@ -6,7 +6,7 @@ import { saveMementoAndReturn } from "./memento.js";
  * @returns {Page|undefined} Current page or undefined if not found
  */
 export function getCurrentPage(state) {
-  return state.pages.find(page => page.id === state.currentPageId);
+  return state.pages.find((page) => page.id === state.currentPageId);
 }
 
 /**
@@ -36,11 +36,13 @@ export function getCurrentConnections(state) {
  */
 export function getCurrentViewport(state) {
   const currentPage = getCurrentPage(state);
-  return currentPage ? {
-    offsetX: currentPage.offsetX,
-    offsetY: currentPage.offsetY,
-    zoom: currentPage.zoom
-  } : { offsetX: 0, offsetY: 0, zoom: 1 };
+  return currentPage
+    ? {
+        offsetX: currentPage.offsetX,
+        offsetY: currentPage.offsetY,
+        zoom: currentPage.zoom,
+      }
+    : { offsetX: 0, offsetY: 0, zoom: 1 };
 }
 
 /**
@@ -70,13 +72,13 @@ export function createPage(state, name = "New Page") {
     connectingId: null,
     resizing: null,
     dragStart: null,
-    resizeStart: null
+    resizeStart: null,
   };
 
   const newState = {
     ...state,
     pages: [...state.pages, newPage],
-    currentPageId: newPage.id
+    currentPageId: newPage.id,
   };
 
   return saveMementoAndReturn(state, newState);
@@ -89,13 +91,13 @@ export function createPage(state, name = "New Page") {
  * @returns {State} Updated state with new current page
  */
 export function switchPage(state, pageId) {
-  if (!state.pages.find(page => page.id === pageId)) {
+  if (!state.pages.find((page) => page.id === pageId)) {
     return state;
   }
 
   return {
     ...state,
-    currentPageId: pageId
+    currentPageId: pageId,
   };
 }
 
@@ -110,7 +112,7 @@ export function deletePage(state, pageId) {
     return state; // Don't delete the last page
   }
 
-  const updatedPages = state.pages.filter(page => page.id !== pageId);
+  const updatedPages = state.pages.filter((page) => page.id !== pageId);
   let newCurrentPageId = state.currentPageId;
 
   // If we're deleting the current page, switch to the first remaining page
@@ -121,7 +123,7 @@ export function deletePage(state, pageId) {
   const newState = {
     ...state,
     pages: updatedPages,
-    currentPageId: newCurrentPageId
+    currentPageId: newCurrentPageId,
   };
 
   return saveMementoAndReturn(state, newState);
@@ -137,9 +139,9 @@ export function deletePage(state, pageId) {
 export function renamePage(state, pageId, newName) {
   const newState = {
     ...state,
-    pages: state.pages.map(page =>
-      page.id === pageId ? { ...page, name: newName } : page
-    )
+    pages: state.pages.map((page) =>
+      page.id === pageId ? { ...page, name: newName } : page,
+    ),
   };
 
   return saveMementoAndReturn(state, newState);
@@ -154,8 +156,9 @@ export function renamePage(state, pageId, newName) {
 export function updateCurrentPage(state, pageData) {
   return {
     ...state,
-    pages: state.pages.map(page =>
-      page.id === state.currentPageId ? { ...page, ...pageData } : page
-    )
+    pages: state.pages.map((page) =>
+      page.id === state.currentPageId ? { ...page, ...pageData } : page,
+    ),
   };
 }
+

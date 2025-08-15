@@ -4,7 +4,7 @@ import { addBlock } from "./block.js";
 import { MEDIA_SAVE_PATH } from "./constants.js";
 import { undoState, redoState } from "./memento.js";
 import { programRegistry } from "./programRegistry.js";
-import { createPage, switchPage, deletePage, renamePage } from "./pages.js";
+import { createPage, switchPage, deletePage } from "./pages.js";
 
 /**
  * Creates the panels container with both layers panel, programs panel and floating toggle button

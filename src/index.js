@@ -1,5 +1,11 @@
 //@ts-nocheck
-const { app, BrowserWindow, ipcMain, dialog, nativeTheme } = require("electron");
+const {
+  app,
+  BrowserWindow,
+  ipcMain,
+  dialog,
+  nativeTheme,
+} = require("electron");
 const path = require("node:path");
 const fs = require("fs").promises;
 
@@ -62,12 +68,18 @@ app.whenReady().then(() => {
 
   // Send initial theme state to renderer
   mainWindow.webContents.once("did-finish-load", () => {
-    mainWindow.webContents.send("theme-changed", nativeTheme.shouldUseDarkColors);
+    mainWindow.webContents.send(
+      "theme-changed",
+      nativeTheme.shouldUseDarkColors,
+    );
   });
 
   // Listen for system theme changes
   nativeTheme.on("updated", () => {
-    mainWindow.webContents.send("theme-changed", nativeTheme.shouldUseDarkColors);
+    mainWindow.webContents.send(
+      "theme-changed",
+      nativeTheme.shouldUseDarkColors,
+    );
   });
 });
 
@@ -428,18 +440,22 @@ ipcMain.handle("theme:getSystemTheme", () => {
 ipcMain.handle("file:listDirectory", async (event, dirPath) => {
   try {
     // Resolve relative paths from the app directory
-    const fullPath = path.isAbsolute(dirPath) ? dirPath : path.join(__dirname, dirPath);
+    const fullPath = path.isAbsolute(dirPath)
+      ? dirPath
+      : path.join(__dirname, dirPath);
     const items = await fs.readdir(fullPath, { withFileTypes: true });
-    
+
     // Return both files and directories
-    return items.map(item => {
-      if (item.isDirectory()) {
-        return item.name; // Return directory name
-      } else if (item.isFile() && item.name.endsWith('.js')) {
-        return item.name; // Return JS file name
-      }
-      return null;
-    }).filter(Boolean); // Remove null entries
+    return items
+      .map((item) => {
+        if (item.isDirectory()) {
+          return item.name; // Return directory name
+        } else if (item.isFile() && item.name.endsWith(".js")) {
+          return item.name; // Return JS file name
+        }
+        return null;
+      })
+      .filter(Boolean); // Remove null entries
   } catch (error) {
     console.error("Error listing directory:", error);
     return [];

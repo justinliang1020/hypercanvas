@@ -5,7 +5,7 @@ import { copySelectedBlock } from "./block.js";
 import { connectionLine } from "./connection.js";
 import { deleteBlock } from "./block.js";
 import { RESIZE_HANDLERS, block } from "./block.js";
-import { MIN_SIZE, RESIZE_CURSORS } from "./constants.js";
+import { MIN_SIZE } from "./constants.js";
 import { saveMementoAndReturn, redoState, undoState } from "./memento.js";
 import {
   getCurrentPage,
@@ -56,7 +56,7 @@ export function viewport(state) {
       onpointermove: (state, event) => {
         const currentPage = getCurrentPage(state);
         if (!currentPage) return state;
-        
+
         const dx = event.clientX - currentPage.lastX;
         const dy = event.clientY - currentPage.lastY;
 
@@ -114,7 +114,10 @@ export function viewport(state) {
                 : b,
             ),
           });
-        } else if (currentPage.isBlockDragging && currentPage.editingId === null) {
+        } else if (
+          currentPage.isBlockDragging &&
+          currentPage.editingId === null
+        ) {
           // Only allow dragging if no block is in edit mode
           // Adjust drag delta by zoom level - when zoomed in, smaller movements should result in smaller position changes
           const viewport = getCurrentViewport(state);
@@ -151,7 +154,7 @@ export function viewport(state) {
       onpointerup: (state) => {
         const currentPage = getCurrentPage(state);
         if (!currentPage) return state;
-        
+
         const newState = updateCurrentPage(state, {
           isViewportDragging: false,
           isBlockDragging: false,
@@ -164,7 +167,9 @@ export function viewport(state) {
         // Save state for completed drag operation
         if (currentPage.dragStart && currentPage.isBlockDragging) {
           const blocks = getCurrentBlocks(state);
-          const draggedBlock = blocks.find((b) => b.id === currentPage.dragStart?.id);
+          const draggedBlock = blocks.find(
+            (b) => b.id === currentPage.dragStart?.id,
+          );
           if (
             draggedBlock &&
             currentPage.dragStart &&
@@ -266,7 +271,7 @@ export function viewport(state) {
       onkeydown: (state, event) => {
         const currentPage = getCurrentPage(state);
         if (!currentPage) return state;
-        
+
         // Track shift key state
         if (event.key === "Shift") {
           return updateCurrentPage(state, {
@@ -303,7 +308,10 @@ export function viewport(state) {
           case "Delete":
           case "Backspace":
             // Only handle block deletion if not in input field, a block is selected, and not in edit mode
-            if (currentPage.selectedId !== null && currentPage.editingId === null) {
+            if (
+              currentPage.selectedId !== null &&
+              currentPage.editingId === null
+            ) {
               event.preventDefault();
               return deleteBlock(state, currentPage.selectedId);
             }

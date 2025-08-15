@@ -1,5 +1,11 @@
 import { h } from "./packages/hyperapp/index.js";
-import { getCurrentBlocks, getCurrentConnections, updateCurrentPage, getCurrentViewport, getCurrentPage } from "./pages.js";
+import {
+  getCurrentBlocks,
+  getCurrentConnections,
+  updateCurrentPage,
+  getCurrentViewport,
+  getCurrentPage,
+} from "./pages.js";
 
 /**
  * Adds a connection between two blocks
@@ -61,12 +67,8 @@ export function getConnectedBlockIds(state, sourceBlockId) {
  */
 export function connectionLine(state, connection) {
   const blocks = getCurrentBlocks(state);
-  const sourceBlock = blocks.find(
-    (b) => b.id === connection.sourceBlockId,
-  );
-  const targetBlock = blocks.find(
-    (b) => b.id === connection.targetBlockId,
-  );
+  const sourceBlock = blocks.find((b) => b.id === connection.sourceBlockId);
+  const targetBlock = blocks.find((b) => b.id === connection.targetBlockId);
 
   if (!sourceBlock || !targetBlock) {
     return h("div", {}); // Return empty div if blocks not found
