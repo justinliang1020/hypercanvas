@@ -16,8 +16,17 @@ export function createMementoManager() {
  * @returns {Memento} Snapshot of state for history
  */
 export function createMemento(state) {
+  const cleanPages = state.pages.map((page) => ({
+    ...page,
+    selectedId: null,
+    isBlockDragging: false,
+    dragStart: null,
+    resizing: null,
+    resizeStart: null,
+  }));
+
   return {
-    pages: JSON.parse(JSON.stringify(state.pages)),
+    pages: JSON.parse(JSON.stringify(cleanPages)),
     currentPageId: state.currentPageId,
   };
 }
@@ -96,4 +105,3 @@ export function redoState(state) {
     mementoManager: newMementoManager,
   };
 }
-
