@@ -48,9 +48,6 @@ function layersPanel(state) {
       class: {
         hidden: !state.sidebarVisible,
       },
-      style: {
-        pointerEvents: state.isBlockDragging ? "none" : "auto",
-      },
       onpointerdown: (state, event) => {
         event.stopPropagation();
         return state;
@@ -148,7 +145,6 @@ function programsPanel(state) {
         hidden: !state.sidebarVisible,
       },
       style: {
-        pointerEvents: state.isBlockDragging ? "none" : "auto",
         width: `${state.sidebarWidth}px`,
       },
       onpointerdown: (state, event) => {
