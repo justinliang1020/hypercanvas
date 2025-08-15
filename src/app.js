@@ -4,7 +4,7 @@ import { STATE_SAVE_PATH } from "./constants.js";
 import { createMementoManager } from "./memento.js";
 import { viewport } from "./viewport.js";
 import { mountProgram, ProgramManager } from "./programManager.js";
-import { panelsContainer } from "./sidebar.js";
+import { panelsContainer } from "./panels.js";
 import { notification, saveApplication } from "./utils.js";
 import { deleteInactiveConnections } from "./connection.js";
 import { getCurrentBlocks } from "./pages.js";
