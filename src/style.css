@@ -169,7 +169,7 @@ hr {
   box-sizing: border-box;
 }
 
-#viewport.sidebar-hidden {
+#viewport.panels-hidden {
   padding-right: 0;
 }
 

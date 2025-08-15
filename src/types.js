@@ -89,8 +89,8 @@
  * @property {string} currentPageId - ID of the currently active page
  * @property {MementoManager} mementoManager - Undo/redo manager
  * @property {boolean} isDarkMode - Dark mode toggle
- * @property {boolean} sidebarVisible - Whether sidebar is visible
- * @property {number} sidebarWidth - Width of sidebar in pixels
+ * @property {boolean} panelsVisible - Whether panels are visible
+ * @property {number} programsPanelWidth - Width of programs panel in pixels
  * @property {Block|null} clipboard - Copied block data
  * @property {string} programFilter - Filter text for program buttons
  * @property {string|null} notification - Current notification message

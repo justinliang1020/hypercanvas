@@ -16,7 +16,7 @@ export function panelsContainer(state) {
     layersPanel(state),
     programsPanel(state),
     // Only show floating toggle button when panels are hidden
-    ...(state.sidebarVisible ? [] : [panelsToggle(state)]),
+    ...(state.panelsVisible ? [] : [panelsToggle(state)]),
   ];
 }
 
@@ -31,7 +31,7 @@ function layersPanel(state) {
     {
       id: "layers-panel",
       class: {
-        hidden: !state.sidebarVisible,
+        hidden: !state.panelsVisible,
       },
       onpointerdown: (state, event) => {
         event.stopPropagation();
@@ -117,7 +117,7 @@ function layersPanel(state) {
 }
 
 /**
- * Creates the programs panel on the right side (formerly sidebar)
+ * Creates the programs panel on the right side
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State>} Programs panel element
  */
@@ -127,10 +127,10 @@ function programsPanel(state) {
     {
       id: "programs-panel",
       class: {
-        hidden: !state.sidebarVisible,
+        hidden: !state.panelsVisible,
       },
       style: {
-        width: `${state.sidebarWidth}px`,
+        width: `${state.programsPanelWidth}px`,
       },
       onpointerdown: (state, event) => {
         event.stopPropagation();
@@ -143,7 +143,7 @@ function programsPanel(state) {
         {
           onclick: (state) => ({
             ...state,
-            sidebarVisible: !state.sidebarVisible,
+            panelsVisible: !state.panelsVisible,
           }),
           title: "Toggle panels visibility",
         },
@@ -282,7 +282,7 @@ function panelsToggle(state) {
       id: "panels-toggle",
       onclick: (state) => ({
         ...state,
-        sidebarVisible: !state.sidebarVisible,
+        panelsVisible: !state.panelsVisible,
       }),
       title: "Show panels",
     },

@@ -26,10 +26,12 @@ export function viewport(state) {
     {
       id: "viewport",
       class: {
-        "sidebar-hidden": !state.sidebarVisible,
+        "panels-hidden": !state.panelsVisible,
       },
       style: {
-        paddingRight: state.sidebarVisible ? `${state.sidebarWidth}px` : "0",
+        paddingRight: state.panelsVisible
+          ? `${state.programsPanelWidth}px`
+          : "0",
         touchAction: "none", // Prevent default touch behaviors
         outline: "none", // Remove focus oultine
       },
@@ -513,7 +515,7 @@ function applyAspectRatioConstraint(dimensions, originalBlock, handle) {
 export function getViewportCenterCoordinates(state) {
   // Get viewport dimensions (assuming standard viewport, could be made more dynamic)
   const viewportWidth =
-    window.innerWidth - (state.sidebarVisible ? state.sidebarWidth : 0);
+    window.innerWidth - (state.panelsVisible ? state.programsPanelWidth : 0);
   const viewportHeight = window.innerHeight;
 
   // Calculate center of viewport in screen coordinates
