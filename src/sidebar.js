@@ -16,22 +16,7 @@ export function panelsContainer(state) {
     layersPanel(state),
     programsPanel(state),
     // Only show floating toggle button when panels are hidden
-    ...(state.sidebarVisible
-      ? []
-      : [
-          h(
-            "button",
-            {
-              id: "panels-toggle",
-              onclick: (state) => ({
-                ...state,
-                sidebarVisible: !state.sidebarVisible,
-              }),
-              title: "Show panels",
-            },
-            text("▶"),
-          ),
-        ]),
+    ...(state.sidebarVisible ? [] : [panelsToggle(state)]),
   ];
 }
 
@@ -283,4 +268,24 @@ function programButtons(state) {
       ),
     ),
   ]);
+}
+
+/**
+ * Toggles visibility of panels
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function panelsToggle(state) {
+  return h(
+    "button",
+    {
+      id: "panels-toggle",
+      onclick: (state) => ({
+        ...state,
+        sidebarVisible: !state.sidebarVisible,
+      }),
+      title: "Show panels",
+    },
+    text("▶"),
+  );
 }
