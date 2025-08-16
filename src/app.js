@@ -10,33 +10,29 @@ import { deleteInactiveConnections } from "./connection.js";
 import { getCurrentBlocks } from "./pages.js";
 
 /**
- * Initializes the application with saved state and starts the Hyperapp
- * @returns {Promise<void>}
+ * Creates the main application component with keyboard handling
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>} Main application element
  */
-async function initialize() {
-  /**
-   * Creates the main application component with keyboard handling
-   * @param {State} state - Current application state
-   * @returns {import("hyperapp").ElementVNode<State>} Main application element
-   */
-  function main(state) {
-    const currentPage = state.pages.find((p) => p.id === state.currentPageId);
-    return h(
-      "main",
-      {
-        style: {
-          cursor: currentPage?.cursorStyle || "default",
-        },
-        class: {
-          "dark-mode": state.isDarkMode,
-        },
+function main(state) {
+  const currentPage = state.pages.find((p) => p.id === state.currentPageId);
+  return h(
+    "main",
+    {
+      style: {
+        cursor: currentPage?.cursorStyle || "default",
       },
-      [viewport(state), ...panelsContainer(state), notification(state)],
-    );
-  }
+      class: {
+        "dark-mode": state.isDarkMode,
+      },
+    },
+    [viewport(state), ...panelsContainer(state), notification(state)],
+  );
+}
 
+function initialState() {
   /** @type {State} */
-  const initialState = {
+  const state = {
     pages: [
       {
         id: crypto.randomUUID(),
@@ -73,8 +69,56 @@ async function initialize() {
   };
 
   // Set currentPageId to the first page
-  initialState.currentPageId = initialState.pages[0].id;
+  state.currentPageId = state.pages[0].id;
+  return state;
+}
 
+/**
+ * Subscription that handles hyperapp
+ * @param {import("hyperapp").Dispatch<State>} dispatch - Function to dispatch actions
+ * @param {{state: State, programManager: ProgramManager}} props
+ * @returns {() => void} Cleanup function
+ */
+function subscription(dispatch, props) {
+  const state = props.state;
+  const programManager = props.programManager;
+
+  dispatch(deleteInactiveConnections);
+  programManager.syncPrograms(dispatch, state);
+
+  // Schedule callback for after the current hyperapp paint cycle
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      getCurrentBlocks(state).forEach((block) => {
+        mountProgram(block, programManager);
+      });
+    });
+  });
+
+  /**
+   * @param {boolean} isDark - Whether the system theme is dark
+   */
+  const handleThemeChange = (isDark) => {
+    dispatch((state) => ({
+      ...state,
+      isDarkMode: isDark,
+    }));
+  };
+  // @ts-ignore
+  const listener = window.electronAPI.onThemeChanged(handleThemeChange);
+
+  // Return cleanup function (required for subscriptions)
+  return () => {
+    // @ts-ignore
+    window.electronAPI.removeThemeListener(listener);
+  };
+}
+
+/**
+ * Initializes the application with saved state and starts the Hyperapp
+ * @returns {Promise<void>}
+ */
+async function initialize() {
   const programManager = new ProgramManager();
 
   /** @type {State} */
@@ -83,11 +127,11 @@ async function initialize() {
     // @ts-ignore
     state = await window.fileAPI.readFile(STATE_SAVE_PATH); // uncomment to have retained state
     if (!state) {
-      state = initialState;
+      state = initialState();
     }
     state.mementoManager = createMementoManager();
   } catch {
-    state = initialState;
+    state = initialState();
   }
 
   // Initialize dark mode based on system theme
@@ -99,61 +143,20 @@ async function initialize() {
     console.warn("Failed to get system theme, using default:", error);
   }
 
-  let currentState = state;
-
-  /**
-   * Subscription that runs after DOM repaint to render programs and handle dark mode
-   * @param {import("hyperapp").Dispatch<State>} dispatch - Function to dispatch actions
-   * @param {State} state
-   * @returns {() => void} Cleanup function
-   */
-  function subscription(dispatch, state) {
-    dispatch(deleteInactiveConnections);
-    programManager.syncPrograms(dispatch, state);
-
-    // Schedule callback for after the current hyperapp paint cycle
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        getCurrentBlocks(state).forEach((block) => {
-          mountProgram(block, programManager);
-        });
-      });
-    });
-
-    // Store current state for save functionality
-    currentState = state;
-
-    /**
-     * @param {boolean} isDark - Whether the system theme is dark
-     */
-    const handleThemeChange = (isDark) => {
-      dispatch((state) => ({
-        ...state,
-        isDarkMode: isDark,
-      }));
-    };
-    // @ts-ignore
-    const listener = window.electronAPI.onThemeChanged(handleThemeChange);
-
-    // Return cleanup function (required for subscriptions)
-    return () => {
-      // @ts-ignore
-      window.electronAPI.removeThemeListener(listener);
-    };
-  }
-
   /** @type {import("hyperapp").App<State>} */
   const appConfig = {
     init: state,
     view: (state) => main(state),
     node: /** @type {Node} */ (document.getElementById("app")),
-    subscriptions: (state) => [[subscription, state]],
+    subscriptions: (state) => [
+      [subscription, { state: state, programManager: programManager }],
+    ],
   };
 
   // Listen for quit signal from main process
   //@ts-ignore
   window.electronAPI.onAppWillQuit(() => {
-    saveApplication(currentState);
+    saveApplication(state);
 
     // Tell main process we're done
     //@ts-ignore
