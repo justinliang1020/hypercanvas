@@ -28,6 +28,7 @@ export class ProgramManager {
    * - Initializes programs for new blocks
    * - Cleans up programs for deleted blocks
    * - Updates block state from mounted programs
+   * - Removes inactive connections
    * @param {import("hyperapp").Dispatch<State>} dispatch
    * @param {State} state
    */
@@ -37,6 +38,7 @@ export class ProgramManager {
     this.#initializePrograms(blocks);
     this.#cleanupDeletedPrograms(blocks);
     this.#syncProgramStates(blocks);
+    this.#deleteInactiveConnections(connections, blocks);
     this.#initializeConnections(connections);
   }
 
@@ -89,6 +91,25 @@ export class ProgramManager {
       const program = this.#programs.get(block.id);
       if (program?.isMounted()) {
         block.programData.state = program.getState();
+      }
+    }
+  }
+
+  /**
+   * Removes inactive connections by modifying the connections array directly
+   * @param {BlockConnection[]} connections - Current connections array
+   * @param {Block[]} blocks - Current blocks array
+   */
+  #deleteInactiveConnections(connections, blocks) {
+    const activeBlockIds = new Set(blocks.map((block) => block.id));
+
+    for (let i = connections.length - 1; i >= 0; i--) {
+      const connection = connections[i];
+      if (
+        !activeBlockIds.has(connection.sourceBlockId) ||
+        !activeBlockIds.has(connection.targetBlockId)
+      ) {
+        connections.splice(i, 1);
       }
     }
   }
