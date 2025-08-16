@@ -7,6 +7,8 @@ import { panelsContainer } from "./panels.js";
 import { notification, saveApplication } from "./utils.js";
 import { getCurrentBlocks } from "./pages.js";
 
+initialize();
+
 /**
  * Creates the main application component with keyboard handling
  * @param {State} state - Current application state
@@ -159,5 +161,3 @@ async function initialize() {
     ],
   });
 }
-
-initialize();
