@@ -1,4 +1,5 @@
 import { app } from "./packages/hyperapp/index.js";
+import { wrapDispatch } from "./utils.js";
 
 /**
  * @abstract
@@ -45,7 +46,7 @@ export class ProgramBase {
     }
     //@ts-ignore
     this.#dispatch = app({
-      dispatch: this.#programDispatchMiddleware,
+      dispatch: this.#stateTrackingMiddleware,
       init: state,
       node: node,
       view: this.view,
@@ -159,26 +160,9 @@ export class ProgramBase {
   }
 
   /**
-   * @template S
-   * @param {(state: S) => S} fn
-   * @returns {(dispatch: import("hyperapp").Dispatch<S>) => import("hyperapp").Dispatch<S>}
-   */
-  #stateMiddleware = (fn) => (dispatch) => (action, payload) => {
-    if (Array.isArray(action) && typeof action[0] !== "function") {
-      action = /** @type {import("hyperapp").Dispatchable<S>} */ ([
-        fn(/** @type {S} */ (action[0])),
-        ...action.slice(1),
-      ]);
-    } else if (!Array.isArray(action) && typeof action !== "function") {
-      action = fn(/** @type {S} */ (action));
-    }
-    dispatch(action, payload);
-  };
-
-  /**
    * @type {(dispatch: import("hyperapp").Dispatch<any>) => import("hyperapp").Dispatch<any>}
    */
-  #programDispatchMiddleware = this.#stateMiddleware((state) => {
+  #stateTrackingMiddleware = wrapDispatch((state) => {
     this.#currentState = state;
     this.#emitStateChange(state);
     return state;

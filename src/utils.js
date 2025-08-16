@@ -163,3 +163,20 @@ export const pasteEffect = async (dispatch, state) => {
     dispatch((state) => state);
   }
 };
+
+/**
+ * @template S
+ * @param {(state: S) => S} fn
+ * @returns {(dispatch: import("hyperapp").Dispatch<S>) => import("hyperapp").Dispatch<S>}
+ */
+export const wrapDispatch = (fn) => (dispatch) => (action, payload) => {
+  if (Array.isArray(action) && typeof action[0] !== "function") {
+    action = /** @type {import("hyperapp").Dispatchable<S>} */ ([
+      fn(/** @type {S} */ (action[0])),
+      ...action.slice(1),
+    ]);
+  } else if (!Array.isArray(action) && typeof action !== "function") {
+    action = fn(/** @type {S} */ (action));
+  }
+  dispatch(action, payload);
+};
