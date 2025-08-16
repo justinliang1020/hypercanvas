@@ -45,7 +45,7 @@ export class ProgramBase {
     }
     //@ts-ignore
     this.#dispatch = app({
-      dispatch: this.#logStateMiddleware,
+      dispatch: this.#programDispatchMiddleware,
       init: state,
       node: node,
       view: this.view,
@@ -178,7 +178,7 @@ export class ProgramBase {
   /**
    * @type {(dispatch: import("hyperapp").Dispatch<any>) => import("hyperapp").Dispatch<any>}
    */
-  #logStateMiddleware = this.#stateMiddleware((state) => {
+  #programDispatchMiddleware = this.#stateMiddleware((state) => {
     this.#currentState = state;
     this.#emitStateChange(state);
     return state;
