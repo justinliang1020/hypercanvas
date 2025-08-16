@@ -149,6 +149,33 @@ export class ProgramBase {
   }
 
   /**
+   * @param {import("hyperapp").Action<any>} action
+   * @returns {import("hyperapp").Subscription<any>}
+   */
+  onAppStateChange(action) {
+    /**
+     * @param {import("hyperapp").Dispatch<any>} dispatch
+     * @param {import("hyperapp").Action<any>} action
+     * @returns {() => void}
+     */
+    function appStateSubscriber(dispatch, action) {
+      /**
+       * @param {Event} ev
+       */
+      function handler(ev) {
+        const customEvent = /** @type {CustomEvent<{state: any}>} */ (ev);
+        dispatch(action, customEvent.detail.state);
+      }
+      addEventListener("appStateChange", handler);
+      return () => removeEventListener("appStateChange", handler);
+    }
+    return [appStateSubscriber, action];
+  }
+
+  /**
+   * Emit
+
+  /**
    * Emits a state change event
    * @param {any} state
    */

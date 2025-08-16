@@ -4,7 +4,7 @@ import { createMementoManager } from "./memento.js";
 import { viewport } from "./viewport.js";
 import { mountProgram, ProgramManager } from "./programManager.js";
 import { panelsContainer } from "./panels.js";
-import { notification, saveApplication } from "./utils.js";
+import { notification, saveApplication, wrapDispatch } from "./utils.js";
 import { getCurrentBlocks } from "./pages.js";
 
 initialize();
@@ -113,6 +113,15 @@ function subscription(dispatch, props) {
   };
 }
 
+const dispatchMiddleware = wrapDispatch((state) => {
+  const event = new CustomEvent("appStateChange", {
+    detail: { state },
+  });
+  dispatchEvent(event);
+
+  return state;
+});
+
 /**
  * Initializes the application with saved state and starts the Hyperapp
  * @returns {Promise<void>}
@@ -159,5 +168,6 @@ async function initialize() {
     subscriptions: (state) => [
       [subscription, { state: state, programManager: programManager }],
     ],
+    dispatch: dispatchMiddleware,
   });
 }
