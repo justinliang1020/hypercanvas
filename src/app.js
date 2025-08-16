@@ -1,12 +1,10 @@
 import { app, h } from "./packages/hyperapp/index.js";
-import { appWithVisualizer } from "../../hyperapp-visualizer/visualizer.js";
 import { STATE_SAVE_PATH } from "./constants.js";
 import { createMementoManager } from "./memento.js";
 import { viewport } from "./viewport.js";
 import { mountProgram, ProgramManager } from "./programManager.js";
 import { panelsContainer } from "./panels.js";
 import { notification, saveApplication } from "./utils.js";
-
 import { getCurrentBlocks } from "./pages.js";
 
 /**
@@ -142,16 +140,6 @@ async function initialize() {
     console.warn("Failed to get system theme, using default:", error);
   }
 
-  /** @type {import("hyperapp").App<State>} */
-  const appConfig = {
-    init: state,
-    view: (state) => main(state),
-    node: /** @type {Node} */ (document.getElementById("app")),
-    subscriptions: (state) => [
-      [subscription, { state: state, programManager: programManager }],
-    ],
-  };
-
   // Listen for quit signal from main process
   //@ts-ignore
   window.electronAPI.onAppWillQuit(() => {
@@ -162,13 +150,14 @@ async function initialize() {
     window.electronAPI.stateSaved();
   });
 
-  // seems to be glitchy when having a lot of history
-  const isUsingAppWithVisualizer = false;
-  if (isUsingAppWithVisualizer) {
-    appWithVisualizer(appConfig);
-  } else {
-    app(appConfig);
-  }
+  app({
+    init: state,
+    view: (state) => main(state),
+    node: /** @type {Node} */ (document.getElementById("app")),
+    subscriptions: (state) => [
+      [subscription, { state: state, programManager: programManager }],
+    ],
+  });
 }
 
 initialize();
