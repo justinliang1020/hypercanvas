@@ -127,20 +127,20 @@ export class ProgramBase {
   onConnectionStateChange(name, action) {
     /**
      * @param {import("hyperapp").Dispatch<any>} dispatch
-     * @param {{name: String, action: import("hyperapp").Action<any>, program: ProgramBase}} options
+     * @param {{name: String, action: import("hyperapp").Action<any>, program: ProgramBase}} props
      * @returns {() => void}
      */
-    function programStateSubscriber(dispatch, options) {
+    function programStateSubscriber(dispatch, props) {
       /**
        * @param {Event} ev
        */
       function handler(ev) {
         const customEvent =
           /** @type {CustomEvent<{id: Number, state: any}>} */ (ev);
-        const connectedProgram = options.program.getConnection(options.name);
+        const connectedProgram = props.program.getConnection(props.name);
         if (!connectedProgram || customEvent.detail.id !== connectedProgram.id)
           return;
-        dispatch(options.action, customEvent.detail.state);
+        dispatch(props.action, customEvent.detail.state);
       }
       addEventListener("programStateChange", handler);
       return () => removeEventListener("programStateChange", handler);
