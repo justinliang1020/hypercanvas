@@ -58,12 +58,12 @@ export const programRegistry = await loadPrograms();
 /**
  * Example of what programRegistry looks like:
  * {
- *   "history": HistoryProgram,
- *   "paint": PaintProgram,
- *   "stateEditor": StateEditorProgram,
- *   "stateVisualizer": StateVisualizerProgram,
- *   "textStyleEditor": TextStyleEditorProgram,
- *   "system/image": ImageProgram,
- *   "system/text": TextProgram
+ *   "history.js": HistoryProgram,
+ *   "paint.js": PaintProgram,
+ *   "stateEditor.js": StateEditorProgram,
+ *   "stateVisualizer.js": StateVisualizerProgram,
+ *   "textStyleEditor.js": TextStyleEditorProgram,
+ *   "system/image.js": ImageProgram,
+ *   "system/text.js": TextProgram
  * }
  */

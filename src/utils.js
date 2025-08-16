@@ -127,7 +127,7 @@ export const pasteEffect = async (dispatch, state) => {
           dispatch((state) =>
             addBlock(
               state,
-              "system/image",
+              "system/image.js",
               { path: result.path },
               null, // x - use viewport center
               null, // y - use viewport center
