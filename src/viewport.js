@@ -41,8 +41,6 @@ export function viewport(state) {
         if (event.button === 1 || (event.button === 0 && event.shiftKey)) {
           return updateCurrentPage(state, {
             isViewportDragging: true,
-            lastX: event.clientX,
-            lastY: event.clientY,
             cursorStyle: "grabbing",
             selectedId: null,
           });
@@ -59,8 +57,15 @@ export function viewport(state) {
         const currentPage = getCurrentPage(state);
         if (!currentPage) return state;
 
-        const dx = event.clientX - currentPage.lastX;
-        const dy = event.clientY - currentPage.lastY;
+        // Calculate deltas using previous mouse position
+        const dx = event.clientX - currentPage.mouseX;
+        const dy = event.clientY - currentPage.mouseY;
+
+        // Update state with current mouse position for next calculation
+        state = updateCurrentPage(state, {
+          mouseX: event.clientX,
+          mouseY: event.clientY,
+        });
 
         if (currentPage.resizing) {
           // Handle resizing with zoom adjustment
@@ -139,16 +144,12 @@ export function viewport(state) {
                 return block;
               }
             }),
-            lastX: event.clientX,
-            lastY: event.clientY,
           });
         } else if (currentPage.isViewportDragging) {
           const viewport = getCurrentViewport(state);
           return updateCurrentPage(state, {
             offsetX: viewport.offsetX + dx,
             offsetY: viewport.offsetY + dy,
-            lastX: event.clientX,
-            lastY: event.clientY,
           });
         }
         return state;
@@ -233,32 +234,34 @@ export function viewport(state) {
 
         // Check if this is a trackpad gesture (typically has smaller deltaY values and ctrlKey for zoom)
         const isTrackpad = Math.abs(event.deltaY) < 50 && !event.ctrlKey;
+        const page = getCurrentPage(state);
+        if (!page) return state;
 
         if (isTrackpad) {
           // Trackpad pan gesture - use deltaX and deltaY directly
           // Invert the delta values to match Figma-like behavior
-          const viewport = getCurrentViewport(state);
           return updateCurrentPage(state, {
-            offsetX: viewport.offsetX - event.deltaX,
-            offsetY: viewport.offsetY - event.deltaY,
+            offsetX: page.offsetX - event.deltaX,
+            offsetY: page.offsetY - event.deltaY,
           });
         } else if (event.ctrlKey || event.metaKey) {
           // Zoom gesture (Ctrl/Cmd + scroll or trackpad pinch)
-          const viewport = getCurrentViewport(state);
           const zoomDelta = -event.deltaY * 0.01;
-          const newZoom = Math.max(0.1, Math.min(5, viewport.zoom + zoomDelta));
+          const newZoom = Math.max(0.1, Math.min(5, page.zoom + zoomDelta));
 
           // Get mouse position relative to viewport for zoom centering
           const rect = /** @type {HTMLElement} */ (
             event.currentTarget
           )?.getBoundingClientRect();
-          const mouseX = event.clientX - rect.left;
-          const mouseY = event.clientY - rect.top;
+          const relativeMouseX = page.mouseX - rect.left;
+          const relativeMouseY = page.mouseY - rect.top;
 
           // Calculate zoom offset to keep mouse position fixed
-          const zoomRatio = newZoom / viewport.zoom;
-          const newOffsetX = mouseX - (mouseX - viewport.offsetX) * zoomRatio;
-          const newOffsetY = mouseY - (mouseY - viewport.offsetY) * zoomRatio;
+          const zoomRatio = newZoom / page.zoom;
+          const newOffsetX =
+            relativeMouseX - (relativeMouseX - page.offsetX) * zoomRatio;
+          const newOffsetY =
+            relativeMouseY - (relativeMouseY - page.offsetY) * zoomRatio;
 
           return updateCurrentPage(state, {
             zoom: newZoom,
@@ -305,7 +308,6 @@ export function viewport(state) {
               });
             }
             return state;
-
           case "Delete":
           case "Backspace":
             // Only handle block deletion if not in input field, a block is selected, and not in edit mode

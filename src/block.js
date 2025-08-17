@@ -159,8 +159,6 @@ export function block(state) {
             selectedId: block.id,
             editingId: null, // Exit edit mode when selecting any block (even the same one)
             connectingId: null, // Exit connect mode when selecting any block
-            lastX: event.clientX,
-            lastY: event.clientY,
             isBlockDragging: true,
             dragStart: {
               id: block.id,
@@ -334,9 +332,6 @@ function ResizeHandle(handle, zoom) {
           startY: block.y,
         },
         selectedId: blockId,
-        lastX: event.clientX,
-        lastY: event.clientY,
-
         cursorStyle: RESIZE_CURSORS[handle] || "default",
       });
     },

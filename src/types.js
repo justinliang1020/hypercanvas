@@ -33,8 +33,8 @@
  * @property {number} offsetX - Canvas X offset for panning on this page
  * @property {number} offsetY - Canvas Y offset for panning on this page
  * @property {number} zoom - Current zoom level for this page
- * @property {number} lastX - Last mouse X position
- * @property {number} lastY - Last mouse Y position
+ * @property {number} mouseX - Current mouse X position
+ * @property {number} mouseY - Current mouse Y position
  * @property {string} cursorStyle - Current cursor style
  * @property {boolean} isViewportDragging - Whether viewport is being dragged
  * @property {boolean} isBlockDragging - Whether a block is being dragged
