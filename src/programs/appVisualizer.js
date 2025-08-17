@@ -87,9 +87,8 @@ export class Program extends ProgramBase {
     }
 
     const heightOverrides = {
-      resizing: 4,
+      resizing: 8,
       dragStart: 5,
-      resizeStart: 7,
     };
 
     const properties = Object.keys(currentPage).map((key) => ({

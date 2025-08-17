@@ -45,7 +45,6 @@
  * @property {number|null} connectingId - ID of block in connect mode (pending connection)
  * @property {ResizeState|null} resizing - Current resize operation
  * @property {DragState|null} dragStart - Drag operation start state
- * @property {ResizeStartState|null} resizeStart - Resize operation start state
  */
 
 /**
@@ -65,20 +64,15 @@
  * @typedef {Object} ResizeState
  * @property {number} id - Block ID being resized
  * @property {string} handle - Resize handle (nw, ne, sw, se, n, s, e, w)
- */
-
-/**
- * @typedef {Object} DragState
- * @property {number} id - Block ID being dragged
+ * @property {number} startWidth - Initial width
+ * @property {number} startHeight - Initial height
  * @property {number} startX - Initial X position
  * @property {number} startY - Initial Y position
  */
 
 /**
- * @typedef {Object} ResizeStartState
- * @property {number} id - Block ID
- * @property {number} startWidth - Initial width
- * @property {number} startHeight - Initial height
+ * @typedef {Object} DragState
+ * @property {number} id - Block ID being dragged
  * @property {number} startX - Initial X position
  * @property {number} startY - Initial Y position
  */

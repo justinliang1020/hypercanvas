@@ -22,7 +22,6 @@ export function createMemento(state) {
     isBlockDragging: false,
     dragStart: null,
     resizing: null,
-    resizeStart: null,
   }));
 
   return {

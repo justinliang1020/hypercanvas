@@ -328,17 +328,15 @@ function ResizeHandle(handle, zoom) {
           handle: /** @type {string} */ (
             /** @type {HTMLElement} */ (event.target).dataset.handle
           ),
-        },
-        selectedId: blockId,
-        lastX: event.clientX,
-        lastY: event.clientY,
-        resizeStart: {
-          id: blockId,
           startWidth: block.width,
           startHeight: block.height,
           startX: block.x,
           startY: block.y,
         },
+        selectedId: blockId,
+        lastX: event.clientX,
+        lastY: event.clientY,
+
         cursorStyle: RESIZE_CURSORS[handle] || "default",
       });
     },

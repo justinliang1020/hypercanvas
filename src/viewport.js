@@ -85,13 +85,13 @@ export function viewport(state) {
           });
 
           // Apply aspect ratio constraint if shift is pressed
-          if (currentPage.isShiftPressed && currentPage.resizeStart) {
+          if (currentPage.isShiftPressed && currentPage.resizing) {
             const originalBlock = {
               ...block,
-              width: currentPage.resizeStart.startWidth,
-              height: currentPage.resizeStart.startHeight,
-              x: currentPage.resizeStart.startX,
-              y: currentPage.resizeStart.startY,
+              width: currentPage.resizing.startWidth,
+              height: currentPage.resizing.startHeight,
+              x: currentPage.resizing.startX,
+              y: currentPage.resizing.startY,
             };
             newDimensions = applyAspectRatioConstraint(
               newDimensions,
@@ -162,7 +162,6 @@ export function viewport(state) {
           isBlockDragging: false,
           resizing: null,
           dragStart: null,
-          resizeStart: null,
           cursorStyle: "default",
         });
 
@@ -195,18 +194,18 @@ export function viewport(state) {
         }
 
         // Save state for completed resize operation
-        if (currentPage.resizeStart && currentPage.resizing) {
+        if (currentPage.resizing) {
           const blocks = getCurrentBlocks(state);
           const resizedBlock = blocks.find(
-            (b) => b.id === currentPage.resizeStart?.id,
+            (b) => b.id === currentPage.resizing?.id,
           );
           if (
             resizedBlock &&
-            currentPage.resizeStart &&
-            (resizedBlock.width !== currentPage.resizeStart.startWidth ||
-              resizedBlock.height !== currentPage.resizeStart.startHeight ||
-              resizedBlock.x !== currentPage.resizeStart.startX ||
-              resizedBlock.y !== currentPage.resizeStart.startY)
+            currentPage.resizing &&
+            (resizedBlock.width !== currentPage.resizing.startWidth ||
+              resizedBlock.height !== currentPage.resizing.startHeight ||
+              resizedBlock.x !== currentPage.resizing.startX ||
+              resizedBlock.y !== currentPage.resizing.startY)
           ) {
             // Create memento from the state before the resize started
             const beforeResizeState = updateCurrentPage(state, {
@@ -214,10 +213,10 @@ export function viewport(state) {
                 b.id === resizedBlock.id
                   ? {
                       ...b,
-                      width: currentPage.resizeStart?.startWidth || 0,
-                      height: currentPage.resizeStart?.startHeight || 0,
-                      x: currentPage.resizeStart?.startX || 0,
-                      y: currentPage.resizeStart?.startY || 0,
+                      width: currentPage.resizing?.startWidth || 0,
+                      height: currentPage.resizing?.startHeight || 0,
+                      x: currentPage.resizing?.startX || 0,
+                      y: currentPage.resizing?.startY || 0,
                     }
                   : b,
               ),

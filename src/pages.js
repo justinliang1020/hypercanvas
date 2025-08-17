@@ -81,7 +81,6 @@ export function createPage(state, name = "New Page") {
     connectingId: null,
     resizing: null,
     dragStart: null,
-    resizeStart: null,
   };
 
   const newState = {

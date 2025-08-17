@@ -54,7 +54,6 @@ function initialState() {
         connectingId: null,
         resizing: null,
         dragStart: null,
-        resizeStart: null,
       },
     ],
     currentPageId: "",
