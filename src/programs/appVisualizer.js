@@ -32,6 +32,8 @@ export class Program extends ProgramBase {
     /** @type {Record<string, import("hyperapp").ElementVNode<ProgramState>>} */
     const visualizations = {
       "Current Page": this.#currentPage(state),
+      "Current Page Blocks": this.#currentPageBlocks(state),
+      "Current Page Connections": this.#currentPageConnections(state),
     };
     const visualization =
       visualizations[state.visualizationName] ||
@@ -86,16 +88,81 @@ export class Program extends ProgramBase {
       return h("div", {}, text("No current page found"));
     }
 
+    /** @type {Record<string, number>} */
     const heightOverrides = {
       resizing: 8,
       dragStart: 5,
     };
 
+    /** @type {Record<string, string>} */
+    const valueOverrides = {
+      blocks: "<See Block Table>",
+      connections: "<See Connections Table>",
+    };
+
     const properties = Object.keys(currentPage).map((key) => ({
       name: key,
-      //@ts-ignore
-      value: currentPage[key],
-      //@ts-ignore
+      value: valueOverrides[key] || /** @type {any} */ (currentPage)[key],
+      height: heightOverrides[key],
+    }));
+
+    return this.#table(properties);
+  };
+
+  /**
+   * @param {ProgramState} state
+   * @returns {import("hyperapp").ElementVNode<ProgramState>}
+   */
+  #currentPageBlocks = (state) => {
+    const currentPage = state.appState.pages.find(
+      (page) => page.id === state.appState.currentPageId,
+    );
+
+    if (!currentPage) {
+      return h("div", {}, text("No current page found"));
+    }
+
+    const currentPageBlocks = currentPage.blocks;
+
+    /** @type {Record<string, number>} */
+    const heightOverrides = {};
+
+    /** @type {Record<string, string>} */
+    const valueOverrides = {};
+
+    const properties = Object.keys(currentPageBlocks).map((key) => ({
+      name: key,
+      value: valueOverrides[key] || /** @type {any} */ (currentPageBlocks)[key],
+      height: heightOverrides[key],
+    }));
+
+    return this.#table(properties);
+  };
+
+  /**
+   * @param {ProgramState} state
+   * @returns {import("hyperapp").ElementVNode<ProgramState>}
+   */
+  #currentPageConnections = (state) => {
+    const currentPage = state.appState.pages.find(
+      (page) => page.id === state.appState.currentPageId,
+    );
+
+    if (!currentPage) {
+      return h("div", {}, text("No current page found"));
+    }
+
+    const object = currentPage.connections;
+
+    /** @type {Record<string, number>} */
+    const heightOverrides = {};
+
+    /** @type {Record<string, string>} */
+    const valueOverrides = {};
+
+    const properties = Object.keys(object).map((key) => ({
+      name: key,
+      value: valueOverrides[key] || /** @type {any} */ (object)[key],
       height: heightOverrides[key],
     }));
 
@@ -111,7 +178,6 @@ export class Program extends ProgramBase {
       "div",
       { style: { overflow: "auto" } },
       h("div", { style: { marginBottom: "20px" } }, [
-        h("h4", {}, text("Page Properties")),
         h(
           "table",
           {
