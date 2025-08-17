@@ -5,6 +5,7 @@ import { h, text } from "../packages/hyperapp/index.js";
 /**
  * @typedef State
  * @property {string} value
+ * @property {number} fontSize
  */
 
 export class Program extends ProgramBase {
@@ -13,6 +14,7 @@ export class Program extends ProgramBase {
     /** @type {State} */
     this.defaultState = {
       value: "#000000",
+      fontSize: 14,
     };
     /** @type {AllowedConnection[]} */
     this.allowedConnections = [
@@ -44,6 +46,23 @@ export class Program extends ProgramBase {
           return newState;
         },
       }),
+      h("input", {
+        type: "number",
+        value: state.fontSize,
+        min: "8",
+        max: "72",
+        oninput: (state, event) => {
+          const newFontSize = parseInt(
+            /** @type{HTMLInputElement}*/ (event.target).value,
+          );
+          const newState = {
+            ...state,
+            fontSize: newFontSize,
+          };
+          this.#changeFontSize(newState);
+          return newState;
+        },
+      }),
     ]);
 
   /**
@@ -57,6 +76,20 @@ export class Program extends ProgramBase {
     textProgramInstance.modifyState({
       ...textProgramState,
       backgroundColor: state.value,
+    });
+  };
+
+  /**
+   * @param {State} state
+   * @returns {void}
+   */
+  #changeFontSize = (state) => {
+    const textProgramInstance = this.getConnection("default");
+    if (!textProgramInstance) return;
+    const textProgramState = textProgramInstance.getState();
+    textProgramInstance.modifyState({
+      ...textProgramState,
+      fontSize: state.fontSize,
     });
   };
 }

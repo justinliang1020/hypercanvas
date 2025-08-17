@@ -5,6 +5,7 @@ import { ProgramBase } from "../../programBase.js";
  * @typedef State
  * @property {string} text
  * @property {string} backgroundColor
+ * @property {number} fontSize
  */
 
 export class Program extends ProgramBase {
@@ -14,6 +15,7 @@ export class Program extends ProgramBase {
     this.defaultState = {
       text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
       backgroundColor: "transparent",
+      fontSize: 14,
     };
     /** @type {AllowedConnection[]} */
     this.allowedConnections = [];
@@ -39,6 +41,7 @@ export class Program extends ProgramBase {
           resize: "none",
           overflow: "hidden",
           outline: "none",
+          fontSize: `${state.fontSize}px`,
         },
         oninput: (state, event) => ({
           ...state,
