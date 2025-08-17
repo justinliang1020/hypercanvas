@@ -37,7 +37,7 @@ export function viewport(state) {
       },
       tabindex: -1, // Make the main element focusable for keyboard events
       onpointerdown: (state, event) => {
-        // Only start dragging on middle mouse button or space+click
+        // Only start dragging on middle mouse button or shift+click
         if (event.button === 1 || (event.button === 0 && event.shiftKey)) {
           return updateCurrentPage(state, {
             isViewportDragging: true,
