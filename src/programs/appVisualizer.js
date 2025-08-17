@@ -4,6 +4,7 @@ import { h, text } from "../packages/hyperapp/index.js";
 /**
  * @typedef ProgramState
  * @property {State} appState - JSON string representation of connected program state
+ * @property {String} visualizationName
  */
 
 export class Program extends ProgramBase {
@@ -11,7 +12,9 @@ export class Program extends ProgramBase {
     super();
     /** @type {ProgramState} */
     this.defaultState = {
-      connectedState: "{}",
+      //TODO: appState should default to the app state
+      appState: {},
+      visualizationName: "Current Page",
     };
     /** @type {AllowedConnection[]} */
     this.allowedConnections = [];
@@ -25,36 +28,56 @@ export class Program extends ProgramBase {
    * @param {ProgramState} state
    * @returns {import("hyperapp").ElementVNode<ProgramState>}
    */
-  #main = (state) =>
-    h("section", { style: { padding: "10px", fontFamily: "monospace" } }, [
-      h("h3", {}, text("Connected Program State")),
-      this.#pages(state),
-    ]);
-
-  /**
-   * @param {ProgramState} state
-   * @returns {import("hyperapp").ElementVNode<ProgramState>}
-   */
-  #jsonPre = (state) =>
-    h(
-      "pre",
-      {
-        style: {
-          padding: "10px",
-          border: "3px solid #ccc", // border size needs to be 3px or greater to avoid visual artifact glitch when zooming out
-          borderRadius: "4px",
-          overflow: "auto",
-          maxHeight: "400px",
-        },
-      },
-      text(JSON.stringify(state.appState, null, 2)),
+  #main = (state) => {
+    /** @type {Record<string, import("hyperapp").ElementVNode<ProgramState>>} */
+    const visualizations = {
+      "Current Page": this.#currentPage(state),
+    };
+    const visualization =
+      visualizations[state.visualizationName] ||
+      h(
+        "div",
+        { style: { color: "#ff6b6b", padding: "10px" } },
+        text(`Invalid visualization name: ${state.visualizationName}`),
+      );
+    return h(
+      "section",
+      { style: { padding: "10px", fontFamily: "monospace" } },
+      [
+        h(
+          "select",
+          {
+            value: state.visualizationName,
+            style: {
+              marginBottom: "10px",
+              padding: "5px",
+              fontSize: "14px",
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+            },
+            onchange: (
+              /** @type {ProgramState} */ state,
+              /** @type {Event} */ event,
+            ) => ({
+              ...state,
+              visualizationName: /** @type {HTMLSelectElement} */ (event.target)
+                .value,
+            }),
+          },
+          Object.keys(visualizations).map((name) =>
+            h("option", { value: name, key: name }, text(name)),
+          ),
+        ),
+        visualization,
+      ],
     );
+  };
 
   /**
    * @param {ProgramState} state
    * @returns {import("hyperapp").ElementVNode<ProgramState>}
    */
-  #pages = (state) => {
+  #currentPage = (state) => {
     const currentPage = state.appState.pages.find(
       (page) => page.id === state.appState.currentPageId,
     );
@@ -63,127 +86,142 @@ export class Program extends ProgramBase {
       return h("div", {}, text("No current page found"));
     }
 
-    return h("div", { style: { overflow: "auto" } }, [
-      this.#pagePropertiesTable(currentPage),
-    ]);
+    const heightOverrides = {
+      resizing: 4,
+      dragStart: 5,
+      resizeStart: 7,
+    };
+
+    const properties = Object.keys(currentPage).map((key) => ({
+      name: key,
+      //@ts-ignore
+      value: currentPage[key],
+      //@ts-ignore
+      height: heightOverrides[key],
+    }));
+
+    return this.#table(properties);
   };
 
   /**
-   * @param {Page} page
+   * @param {{name: String, value: any, height?: number}[]} properties
    * @returns {import("hyperapp").ElementVNode<ProgramState>}
    */
-  #pagePropertiesTable = (page) => {
-    const properties = [
-      { name: "offsetX", value: page.offsetX },
-      { name: "offsetY", value: page.offsetY },
-      { name: "zoom", value: page.zoom },
-      { name: "lastX", value: page.lastX },
-      { name: "lastY", value: page.lastY },
-      { name: "cursorStyle", value: page.cursorStyle },
-      {
-        name: "isViewportDragging",
-        value: page.isViewportDragging,
-      },
-      { name: "isBlockDragging", value: page.isBlockDragging },
-      { name: "isShiftPressed", value: page.isShiftPressed },
-      { name: "selectedId", value: page.selectedId },
-      { name: "editingId", value: page.editingId },
-      { name: "hoveringId", value: page.hoveringId },
-      { name: "connectingId", value: page.connectingId },
-      // { name: "resizing", value: page.resizing },
-      // { name: "dragStart", value: page.dragStart },
-      // { name: "resizeStart", value: page.resizeStart },
-    ];
-
-    return h("div", { style: { marginBottom: "20px" } }, [
-      h("h4", {}, text("Page Properties")),
-      h(
-        "table",
-        {
-          style: {
-            borderCollapse: "collapse",
-            width: "100%",
-            border: "1px solid #ccc",
-            fontSize: "12px",
+  #table(properties) {
+    return h(
+      "div",
+      { style: { overflow: "auto" } },
+      h("div", { style: { marginBottom: "20px" } }, [
+        h("h4", {}, text("Page Properties")),
+        h(
+          "table",
+          {
+            style: {
+              borderCollapse: "collapse",
+              width: "100%",
+              border: "1px solid #ccc",
+              fontSize: "12px",
+            },
           },
-        },
-        [
-          h("thead", {}, [
-            h("tr", { style: { backgroundColor: "#f5f5f5" } }, [
-              h(
-                "th",
-                {
-                  style: {
-                    border: "1px solid #ccc",
-                    padding: "8px",
-                    textAlign: "left",
-                    fontWeight: "bold",
-                  },
-                },
-                text("Property"),
-              ),
-              h(
-                "th",
-                {
-                  style: {
-                    border: "1px solid #ccc",
-                    padding: "8px",
-                    textAlign: "left",
-                    fontWeight: "bold",
-                  },
-                },
-                text("Value"),
-              ),
-            ]),
-          ]),
-          h(
-            "tbody",
-            {},
-            properties.map((prop) =>
-              h("tr", { key: prop.name }, [
+          [
+            h("thead", {}, [
+              h("tr", { style: { backgroundColor: "#f5f5f5" } }, [
                 h(
-                  "td",
+                  "th",
                   {
                     style: {
                       border: "1px solid #ccc",
                       padding: "8px",
                       textAlign: "left",
+                      fontWeight: "bold",
+                      width: "1%",
+                      whiteSpace: "nowrap",
                     },
                   },
-                  text(prop.name),
+                  text("Property"),
                 ),
                 h(
-                  "td",
+                  "th",
                   {
                     style: {
                       border: "1px solid #ccc",
                       padding: "8px",
                       textAlign: "left",
+                      fontWeight: "bold",
                     },
                   },
-
-                  this.#value(prop.value),
+                  text("Value"),
                 ),
               ]),
+            ]),
+            h(
+              "tbody",
+              {},
+              properties.map((prop) =>
+                h("tr", { key: prop.name }, [
+                  h(
+                    "td",
+                    {
+                      style: {
+                        border: "1px solid #ccc",
+                        padding: "8px",
+                        textAlign: "left",
+                        width: "1%",
+                        whiteSpace: "nowrap",
+                      },
+                    },
+                    text(prop.name),
+                  ),
+                  h(
+                    "td",
+                    {
+                      style: {
+                        border: "1px solid #ccc",
+                        padding: "8px",
+                        textAlign: "left",
+                      },
+                    },
+
+                    this.#value(prop.value, prop.height),
+                  ),
+                ]),
+              ),
             ),
-          ),
-        ],
-      ),
-    ]);
-  };
+          ],
+        ),
+      ]),
+    );
+  }
 
   /**
    * @param {any} value
+   * @param {number} [height]
    */
-  #value = (value) => {
+  #value = (value, height) => {
     if (value instanceof Object) {
+      let jsonString = JSON.stringify(value, null, 2);
+      if (height && height > 1) {
+        const currentLines = jsonString.split("\n").length;
+        const extraLines = height - currentLines;
+        if (extraLines > 0) {
+          jsonString += "\n".repeat(extraLines);
+        }
+      }
       return h(
         "pre",
         { style: { margin: "0", fontSize: "11px" } },
-        text(JSON.stringify(value, null, 2)),
+        text(jsonString),
       );
     } else {
-      return text(value === null ? "null" : String(value));
+      let valueString = value === null ? "null" : String(value);
+      if (height && height > 1) {
+        valueString += "\n".repeat(height);
+      }
+      return h(
+        "pre",
+        { style: { margin: "0", fontSize: "11px" } },
+        text(valueString),
+      );
     }
   };
 

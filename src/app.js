@@ -121,7 +121,7 @@ const dispatchMiddleware = wrapDispatch((state) => {
   const safeToEmitState = JSON.parse(
     JSON.stringify(state, (key, value) => {
       // Skip the problematic properties
-      if (key === "mementoManager") return undefined;
+      // if (key === "mementoManager") return undefined;
       if (key === "state" && typeof value === "object" && value !== null)
         return undefined;
       return value;
