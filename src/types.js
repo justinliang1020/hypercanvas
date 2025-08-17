@@ -95,6 +95,7 @@
  * @property {string} programFilter - Filter text for program buttons
  * @property {string|null} notification - Current notification message
  * @property {boolean} notificationVisible - Whether notification is visible
+ * @property {string|null} editingPageId - ID of page currently being renamed
  */
 
 /**

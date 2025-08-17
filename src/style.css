@@ -121,10 +121,29 @@ hr {
   background-color: #f5f5f5;
 }
 
-.page-name {
+.page-name-base {
   flex: 1;
   font-size: 12px;
   text-align: left;
+  font-family: inherit;
+  color: inherit;
+}
+
+.page-name {
+  border: 1px solid transparent;
+  border-radius: 2px;
+  padding: 2px 4px;
+  box-sizing: border-box;
+}
+
+.page-name-input {
+  background: transparent;
+  border: 1px solid #007acc;
+  border-radius: 2px;
+  padding: 2px 4px;
+  box-sizing: border-box;
+  margin: 0;
+  outline: none;
 }
 
 .page-delete-button {
@@ -367,6 +386,11 @@ main.dark-mode {
 
   .program-filter-input::placeholder {
     color: #aaa;
+  }
+
+  .page-name-input {
+    background: #555;
+    border-color: #007acc;
   }
 
   .block-toolbar {

@@ -4,7 +4,7 @@ import { addBlock } from "./block.js";
 import { MEDIA_SAVE_PATH } from "./constants.js";
 import { undoState, redoState } from "./memento.js";
 import { programRegistry } from "./programRegistry.js";
-import { createPage, switchPage, deletePage } from "./pages.js";
+import { createPage, switchPage, deletePage, renamePage } from "./pages.js";
 
 /**
  * Creates the panels container with both layers panel, programs panel and floating toggle button
@@ -48,42 +48,85 @@ function layersPanel(state) {
         },
         text("+ New Page"),
       ),
-      ...state.pages.map((page) =>
-        h(
-          "div",
-          {
-            key: page.id,
-            class: {
-              "page-item": true,
-              active: page.id === state.currentPageId,
-            },
-            onclick: (state) => switchPage(state, page.id),
-          },
-          [
-            h(
+      ...pageLabels(state),
+    ],
+  );
+}
+
+/**
+ * Creates the layers panel on the left side
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>[]} Layers panel element
+ */
+function pageLabels(state) {
+  return state.pages.map((page) =>
+    h(
+      "div",
+      {
+        key: page.id,
+        class: {
+          "page-item": true,
+          active: page.id === state.currentPageId,
+        },
+        onclick: (state) => {
+          const newState = switchPage(state, page.id);
+          // Only clear editing state if we're not clicking on the currently editing page
+          return state.editingPageId !== null && state.editingPageId !== page.id
+            ? { ...newState, editingPageId: null }
+            : newState;
+        },
+      },
+      [
+        state.editingPageId === page.id
+          ? h("input", {
+              type: "text",
+              value: page.name,
+              class: "page-name-base page-name-input",
+              oninput: (state, event) => {
+                const newName = /** @type {HTMLInputElement} */ (event.target)
+                  .value;
+                return renamePage(state, page.id, newName);
+              },
+              onkeydown: (state, event) => {
+                const keyEvent = /** @type {KeyboardEvent} */ (event);
+                if (keyEvent.key === "Enter" || keyEvent.key === "Escape") {
+                  keyEvent.preventDefault();
+                  return { ...state, editingPageId: null };
+                }
+                return state;
+              },
+              onblur: (state) => ({ ...state, editingPageId: null }),
+              onpointerdown: (state, event) => {
+                event.stopPropagation();
+                return state;
+              },
+            })
+          : h(
               "span",
               {
-                class: "page-name",
+                class: "page-name-base page-name",
+                ondblclick: (state) => ({
+                  ...state,
+                  editingPageId: page.id,
+                }),
               },
               text(page.name),
             ),
-            state.pages.length > 1
-              ? h(
-                  "button",
-                  {
-                    class: "page-delete-button",
-                    onclick: (state, event) => {
-                      event.stopPropagation();
-                      return deletePage(state, page.id);
-                    },
-                  },
-                  text("×"),
-                )
-              : null,
-          ],
-        ),
-      ),
-    ],
+        state.pages.length > 1
+          ? h(
+              "button",
+              {
+                class: "page-delete-button",
+                onclick: (state, event) => {
+                  event.stopPropagation();
+                  return deletePage(state, page.id);
+                },
+              },
+              text("×"),
+            )
+          : null,
+      ],
+    ),
   );
 }
 

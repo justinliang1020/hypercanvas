@@ -66,6 +66,7 @@ function initialState() {
     programFilter: "",
     notification: null,
     notificationVisible: false,
+    editingPageId: null,
   };
 
   // Set currentPageId to the first page
