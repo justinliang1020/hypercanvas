@@ -154,8 +154,9 @@ export const pasteEffect = async (dispatch, state) => {
       const textProgramState = {
         text: text,
         backgroundColor: "transparent",
+        fontSize: 18,
       };
-      dispatch(addBlock(state, "system/text", textProgramState));
+      dispatch(addBlock(state, "system/text.js", textProgramState));
       return;
     }
   } catch (error) {
