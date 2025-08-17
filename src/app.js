@@ -46,7 +46,6 @@ function initialState() {
         mouseY: 0,
         cursorStyle: "pointer",
         isViewportDragging: false,
-        isBlockDragging: false,
         isShiftPressed: false,
         selectedId: null,
         editingId: null,

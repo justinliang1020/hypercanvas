@@ -121,10 +121,7 @@ export function viewport(state) {
                 : b,
             ),
           });
-        } else if (
-          currentPage.isBlockDragging &&
-          currentPage.editingId === null
-        ) {
+        } else if (currentPage.dragStart && currentPage.editingId === null) {
           // Only allow dragging if no block is in edit mode
           // Adjust drag delta by zoom level - when zoomed in, smaller movements should result in smaller position changes
           const viewport = getCurrentViewport(state);
@@ -160,14 +157,13 @@ export function viewport(state) {
 
         const newState = updateCurrentPage(state, {
           isViewportDragging: false,
-          isBlockDragging: false,
           resizing: null,
           dragStart: null,
           cursorStyle: "default",
         });
 
         // Save state for completed drag operation
-        if (currentPage.dragStart && currentPage.isBlockDragging) {
+        if (currentPage.dragStart) {
           const blocks = getCurrentBlocks(state);
           const draggedBlock = blocks.find(
             (b) => b.id === currentPage.dragStart?.id,

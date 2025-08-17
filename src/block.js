@@ -87,7 +87,7 @@ export function block(state) {
           if (
             currentPage.selectedId !== null &&
             currentPage.selectedId !== block.id &&
-            currentPage.isBlockDragging
+            currentPage.dragStart !== null
           )
             return state;
 
@@ -159,7 +159,6 @@ export function block(state) {
             selectedId: block.id,
             editingId: null, // Exit edit mode when selecting any block (even the same one)
             connectingId: null, // Exit connect mode when selecting any block
-            isBlockDragging: true,
             dragStart: {
               id: block.id,
               startX: block.x,
@@ -174,7 +173,6 @@ export function block(state) {
           return updateCurrentPage(state, {
             selectedId: block.id,
             editingId: block.id,
-            isBlockDragging: false, // Cancel any drag that might have started
             dragStart: null,
           });
         },

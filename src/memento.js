@@ -19,7 +19,6 @@ export function createMemento(state) {
   const cleanPages = state.pages.map((page) => ({
     ...page,
     selectedId: null,
-    isBlockDragging: false,
     dragStart: null,
     resizing: null,
   }));

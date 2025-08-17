@@ -37,7 +37,6 @@
  * @property {number} mouseY - Current mouse Y position
  * @property {string} cursorStyle - Current cursor style
  * @property {boolean} isViewportDragging - Whether viewport is being dragged
- * @property {boolean} isBlockDragging - Whether a block is being dragged
  * @property {boolean} isShiftPressed - Whether shift key is currently pressed
  * @property {number|null} selectedId - ID of selected block
  * @property {number|null} editingId - ID of block in edit mode
