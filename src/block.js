@@ -53,6 +53,8 @@ export function block(state) {
         return `${3 / viewport.zoom}px solid #90ee90`; // Light green for connectable blocks
       } else if (isConnectedToHovered) {
         return `${3 / viewport.zoom}px solid purple`; // Purple for connected blocks when hovering source
+      } else if (isEditing) {
+        return `${4 / viewport.zoom}px solid skyblue`;
       } else if (isSelected) {
         return `${4 / viewport.zoom}px solid blue`;
       } else if (isHovering) {
