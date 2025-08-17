@@ -113,9 +113,22 @@ function subscription(dispatch, props) {
   };
 }
 
+/**
+ * @type {(dispatch: import("hyperapp").Dispatch<State>) => import("hyperapp").Dispatch<State>}
+ */
 const dispatchMiddleware = wrapDispatch((state) => {
+  const safeToEmitState = JSON.parse(
+    JSON.stringify(state, (key, value) => {
+      // Skip the problematic properties
+      if (key === "mementoManager") return undefined;
+      if (key === "state" && typeof value === "object" && value !== null)
+        return undefined;
+      return value;
+    }),
+  );
+
   const event = new CustomEvent("appStateChange", {
-    detail: { state },
+    detail: { state: safeToEmitState },
   });
   dispatchEvent(event);
 
