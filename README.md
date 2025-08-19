@@ -1,6 +1,8 @@
-# hypercanvas (working name)
+# hypercanvas
 
 visual javascript canvas thing
+
+**WARNING: IN PRE-ALPHA STATE. USE AT YOUR OWN DISCRETION. CONTACT JUSTIN FOR ANYTHING**
 
 ## development
 
