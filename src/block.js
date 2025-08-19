@@ -68,7 +68,7 @@ export function block(state) {
     /**
      * @param {State} state
      * @param {PointerEvent} event
-     * @returns {State}
+     * @returns {import("./packages/hyperapp").Dispatchable<State>}
      */
     function onpointerover(state, event) {
       event.stopPropagation();
@@ -114,7 +114,7 @@ export function block(state) {
     /**
      * @param {State} state
      * @param {PointerEvent} event
-     * @returns {State}
+     * @returns {import("./packages/hyperapp").Dispatchable<State>}
      */
     function onpointerleave(state, event) {
       event.stopPropagation();
@@ -127,7 +127,7 @@ export function block(state) {
     /**
      * @param {State} state
      * @param {PointerEvent} event
-     * @returns {State}
+     * @returns {import("./packages/hyperapp").Dispatchable<State>}
      */
     function onpointerdown(state, event) {
       const currentPage = getCurrentPage(state);
@@ -175,7 +175,7 @@ export function block(state) {
     /**
      * @param {State} state
      * @param {MouseEvent} event
-     * @returns {State}
+     * @returns {import("./packages/hyperapp").Dispatchable<State>}
      */
     function ondblclick(state, event) {
       event.stopPropagation();
