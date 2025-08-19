@@ -14,6 +14,11 @@ import {
   getCurrentViewport,
   updateCurrentPage,
 } from "./pages.js";
+import {
+  deselectAllBlocks,
+  getSelectedBlockId,
+  hasSelection,
+} from "./selection.js";
 
 /**
  * Creates the main viewport component for the canvas
@@ -39,19 +44,14 @@ export function viewport(state) {
       onpointerdown: (state, event) => {
         // Only start dragging on middle mouse button or shift+click
         if (event.button === 1 || (event.button === 0 && event.shiftKey)) {
-          return updateCurrentPage(state, {
-            isViewportDragging: true,
-            cursorStyle: "grabbing",
-            selectedId: null,
-          });
-        }
+        const deselectedState = deselectAllBlocks(state);
+        return updateCurrentPage(deselectedState, {
+          isViewportDragging: true,
+          cursorStyle: "grabbing",
+        });        }
 
         // Regular click - deselect blocks, exit edit mode, and exit connect mode
-        return updateCurrentPage(state, {
-          selectedId: null,
-          editingId: null,
-          connectingId: null,
-        });
+        return deselectAllBlocks(state);
       },
       onpointermove: (state, event) => {
         const currentPage = getCurrentPage(state);
@@ -129,9 +129,10 @@ export function viewport(state) {
           const adjustedDy = dy / viewport.zoom;
 
           const blocks = getCurrentBlocks(state);
+          const selectedBlockId = getSelectedBlockId(state);
           return updateCurrentPage(state, {
             blocks: blocks.map((block) => {
-              if (block.id === currentPage.selectedId) {
+              if (block.id === selectedBlockId) {
                 return {
                   ...block,
                   x: block.x + adjustedDx,
@@ -297,22 +298,21 @@ export function viewport(state) {
               return updateCurrentPage(state, {
                 editingId: null,
               });
-            } else if (currentPage.selectedId !== null) {
+            } else if (hasSelection(state)) {
               event.preventDefault();
-              return updateCurrentPage(state, {
-                selectedId: null,
-              });
+              return deselectAllBlocks(state);
             }
             return state;
           case "Delete":
           case "Backspace":
             // Only handle block deletion if not in input field, a block is selected, and not in edit mode
+            const selectedBlockId = getSelectedBlockId(state);
             if (
-              currentPage.selectedId !== null &&
+              selectedBlockId !== null &&
               currentPage.editingId === null
             ) {
               event.preventDefault();
-              return deleteBlock(state, currentPage.selectedId);
+              return deleteBlock(state, selectedBlockId);
             }
             // Let browser handle regular text deletion
             return state;
@@ -323,7 +323,7 @@ export function viewport(state) {
               // Only handle block copy if not in input field, no text is selected, and not in edit mode
               if (
                 !hasTextSelection &&
-                currentPage.selectedId !== null &&
+                hasSelection(state) &&
                 currentPage.editingId === null
               ) {
                 event.preventDefault();

@@ -20,6 +20,12 @@ import {
   getCurrentPage,
   getGlobalBlocks,
 } from "./pages.js";
+import {
+  isBlockSelected,
+  selectBlock,
+  getSelectedBlock,
+  getSelectedBlockId,
+} from "./selection.js";
 
 /**
  * Creates a block component renderer
@@ -32,7 +38,7 @@ export function block(state) {
     const currentPage = getCurrentPage(state);
     if (!currentPage) return h("div", {});
 
-    const isSelected = currentPage.selectedId === block.id;
+    const isSelected = isBlockSelected(state, block.id);
     const isEditing = currentPage.editingId === block.id;
     const isHovering = currentPage.hoveringId === block.id;
     const isConnecting = currentPage.connectingId === block.id;
@@ -85,8 +91,8 @@ export function block(state) {
           if (!currentPage) return state;
 
           if (
-            currentPage.selectedId !== null &&
-            currentPage.selectedId !== block.id &&
+            getSelectedBlockId(state) !== null &&
+            getSelectedBlockId(state) !== block.id &&
             currentPage.dragStart !== null
           )
             return state;
@@ -141,24 +147,17 @@ export function block(state) {
               currentPage.connectingId,
               block.id,
             );
-            return updateCurrentPage(newState, {
-              connectingId: null,
-              selectedId: block.id,
-            });
+            return selectBlock(newState, block.id);
           }
 
           // If block is in edit mode, don't start dragging
           if (currentPage.editingId === block.id) {
-            return updateCurrentPage(state, {
-              selectedId: block.id,
-            });
+            return selectBlock(state, block.id);
           }
 
           // Normal selection and drag start
-          return updateCurrentPage(state, {
-            selectedId: block.id,
-            editingId: null, // Exit edit mode when selecting any block (even the same one)
-            connectingId: null, // Exit connect mode when selecting any block
+          const selectedState = selectBlock(state, block.id);
+          return updateCurrentPage(selectedState, {
             dragStart: {
               id: block.id,
               startX: block.x,
@@ -170,8 +169,8 @@ export function block(state) {
           event.stopPropagation();
 
           // Double-click enters edit mode
-          return updateCurrentPage(state, {
-            selectedId: block.id,
+          const selectedState = selectBlock(state, block.id);
+          return updateCurrentPage(selectedState, {
             editingId: block.id,
             dragStart: null,
           });
@@ -318,21 +317,20 @@ function ResizeHandle(handle, zoom) {
       const blocks = getCurrentBlocks(state);
       const block = blocks.find((b) => b.id === blockId);
       if (!block) return state;
-      return updateCurrentPage(state, {
-        resizing: {
-          id: blockId,
-          handle: /** @type {string} */ (
-            /** @type {HTMLElement} */ (event.target).dataset.handle
-          ),
-          startWidth: block.width,
-          startHeight: block.height,
-          startX: block.x,
-          startY: block.y,
-        },
-        selectedId: blockId,
-        cursorStyle: RESIZE_CURSORS[handle] || "default",
-      });
-    },
+        const selectedState = selectBlock(state, blockId);
+        return updateCurrentPage(selectedState, {
+          resizing: {
+            id: blockId,
+            handle: /** @type {string} */ (
+              /** @type {HTMLElement} */ (event.target).dataset.handle
+            ),
+            startWidth: block.width,
+            startHeight: block.height,
+            startX: block.x,
+            startY: block.y,
+          },
+          cursorStyle: RESIZE_CURSORS[handle] || "default",
+        });    },
   });
 } /**
  * Creates a toolbar for selected blocks with action buttons
@@ -355,9 +353,9 @@ function blockToolbar() {
         {
           onclick: (state, event) => {
             event.stopPropagation();
-            const currentPage = getCurrentPage(state);
-            if (!currentPage || currentPage.selectedId === null) return state;
-            return deleteBlock(state, currentPage.selectedId);
+            const selectedBlockId = getSelectedBlockId(state);
+            if (selectedBlockId === null) return state;
+            return deleteBlock(state, selectedBlockId);
           },
         },
         text("❌"),
@@ -367,9 +365,9 @@ function blockToolbar() {
         {
           onclick: (state, event) => {
             event.stopPropagation();
-            const currentPage = getCurrentPage(state);
-            if (!currentPage || currentPage.selectedId === null) return state;
-            return sendToBack(state, currentPage.selectedId);
+            const selectedBlockId = getSelectedBlockId(state);
+            if (selectedBlockId === null) return state;
+            return sendToBack(state, selectedBlockId);
           },
         },
         text("send to back"),
@@ -379,9 +377,9 @@ function blockToolbar() {
         {
           onclick: (state, event) => {
             event.stopPropagation();
-            const currentPage = getCurrentPage(state);
-            if (!currentPage || currentPage.selectedId === null) return state;
-            return sendToFront(state, currentPage.selectedId);
+            const selectedBlockId = getSelectedBlockId(state);
+            if (selectedBlockId === null) return state;
+            return sendToFront(state, selectedBlockId);
           },
         },
         text("send to front"),
@@ -392,10 +390,11 @@ function blockToolbar() {
           onclick: (state, event) => {
             event.stopPropagation();
             const currentPage = getCurrentPage(state);
-            if (!currentPage || currentPage.selectedId === null) return state;
+            const selectedBlockId = getSelectedBlockId(state);
+            if (!currentPage || selectedBlockId === null) return state;
 
             // Toggle connect mode
-            if (currentPage.connectingId === currentPage.selectedId) {
+            if (currentPage.connectingId === selectedBlockId) {
               // Exit connect mode
               return updateCurrentPage(state, {
                 connectingId: null,
@@ -403,7 +402,7 @@ function blockToolbar() {
             } else {
               // Enter connect mode
               return updateCurrentPage(state, {
-                connectingId: currentPage.selectedId,
+                connectingId: selectedBlockId,
               });
             }
           },
@@ -527,10 +526,11 @@ export function addBlock(
   const currentBlocks = getCurrentBlocks(state);
   const newState = updateCurrentPage(state, {
     blocks: [...currentBlocks, newBlock],
-    selectedId: newBlock.id,
   });
+  
+  const selectedState = selectBlock(newState, newBlock.id);
 
-  return saveMementoAndReturn(state, newState);
+  return saveMementoAndReturn(state, selectedState);
 }
 
 /**
@@ -561,13 +561,7 @@ export function pasteBlock(state) {
  * @returns {import("hyperapp").Dispatchable<State>} Updated state with clipboard data
  */
 export function copySelectedBlock(state) {
-  const currentPage = getCurrentPage(state);
-  if (!currentPage || currentPage.selectedId === null) return state;
-
-  const blocks = getCurrentBlocks(state);
-  const selectedBlock = blocks.find(
-    (block) => block.id === currentPage.selectedId,
-  );
+  const selectedBlock = getSelectedBlock(state);
   if (!selectedBlock) return state;
 
   // Create a copy of the block data for clipboard, capturing current state
