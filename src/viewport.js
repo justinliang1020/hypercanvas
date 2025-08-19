@@ -1,9 +1,8 @@
 import { h } from "./packages/hyperapp/index.js";
 import { pasteEffect } from "./utils.js";
 import { saveApplicationAndNotify } from "./utils.js";
-import { copySelectedBlock } from "./block.js";
+import { copySelectedBlock, deleteSelectedBlocks } from "./block.js";
 import { connectionLine } from "./connection.js";
-import { deleteBlock } from "./block.js";
 import { RESIZE_HANDLERS, block } from "./block.js";
 import { MIN_SIZE } from "./constants.js";
 import { saveMementoAndReturn, redoState, undoState } from "./memento.js";
@@ -534,7 +533,7 @@ export function viewport(state) {
             const selectedBlockId = getSelectedBlockId(state);
             if (selectedBlockId !== null && currentPage.editingId === null) {
               event.preventDefault();
-              return deleteBlock(state, selectedBlockId);
+              return deleteSelectedBlocks(state);
             }
             // Let browser handle regular text deletion
             return state;

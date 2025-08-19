@@ -327,20 +327,21 @@ function ResizeHandle(handle, zoom) {
       const blocks = getCurrentBlocks(state);
       const block = blocks.find((b) => b.id === blockId);
       if (!block) return state;
-        const selectedState = selectBlock(state, blockId);
-        return updateCurrentPage(selectedState, {
-          resizing: {
-            id: blockId,
-            handle: /** @type {string} */ (
-              /** @type {HTMLElement} */ (event.target).dataset.handle
-            ),
-            startWidth: block.width,
-            startHeight: block.height,
-            startX: block.x,
-            startY: block.y,
-          },
-          cursorStyle: RESIZE_CURSORS[handle] || "default",
-        });    },
+      const selectedState = selectBlock(state, blockId);
+      return updateCurrentPage(selectedState, {
+        resizing: {
+          id: blockId,
+          handle: /** @type {string} */ (
+            /** @type {HTMLElement} */ (event.target).dataset.handle
+          ),
+          startWidth: block.width,
+          startHeight: block.height,
+          startX: block.x,
+          startY: block.y,
+        },
+        cursorStyle: RESIZE_CURSORS[handle] || "default",
+      });
+    },
   });
 } /**
  * Creates a toolbar for selected blocks with action buttons
@@ -358,18 +359,6 @@ function blockToolbar() {
       },
     },
     [
-      h(
-        "button",
-        {
-          onclick: (state, event) => {
-            event.stopPropagation();
-            const selectedBlockId = getSelectedBlockId(state);
-            if (selectedBlockId === null) return state;
-            return deleteBlock(state, selectedBlockId);
-          },
-        },
-        text("❌"),
-      ),
       h(
         "button",
         {
@@ -475,21 +464,21 @@ function sendToBack(currentState, blockId) {
 
 /**
  * Deletes a block from the state
- * @param {State} currentState - Current application state
- * @param {number} blockId - ID of block to delete
+ * @param {State} state - Current application state
  * @returns {import("hyperapp").Dispatchable<State>} Updated state without the block
  */
-export function deleteBlock(currentState, blockId) {
-  const blocks = getCurrentBlocks(currentState);
-  const blockToDelete = blocks.find((block) => block.id === blockId);
-  if (!blockToDelete) throw new Error(`Block ${blockId} not found`);
+export function deleteSelectedBlocks(state) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return state;
 
-  const newState = updateCurrentPage(currentState, {
-    blocks: blocks.filter((block) => block.id !== blockId),
+  const newState = updateCurrentPage(state, {
+    blocks: currentPage.blocks.filter(
+      (block) => !currentPage.selectedIds.includes(block.id),
+    ),
     selectedIds: [],
   });
 
-  return saveMementoAndReturn(currentState, newState);
+  return saveMementoAndReturn(state, newState);
 }
 
 /**
@@ -537,7 +526,7 @@ export function addBlock(
   const newState = updateCurrentPage(state, {
     blocks: [...currentBlocks, newBlock],
   });
-  
+
   const selectedState = selectBlock(newState, newBlock.id);
 
   return saveMementoAndReturn(state, selectedState);
