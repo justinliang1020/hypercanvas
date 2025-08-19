@@ -23,7 +23,6 @@ import {
 import {
   isBlockSelected,
   selectBlock,
-  getSelectedBlock,
   getSelectedBlockId,
   getSelectedBlocks,
   toggleBlockSelection,
@@ -490,8 +489,7 @@ export function deleteSelectedBlocks(state) {
  * @param {number | null} y - Y position on canvas. If null, uses viewport's center X coordinate
  * @param {number} width - Block width in pixels
  * @param {number} height - Block height in pixels
- * @returns {import("hyperapp").Dispatchable<State>} Updated state with new block
- */
+ * @returns {State} Updated state with new block */
 export function addBlock(
   state,
   programName,
@@ -533,47 +531,104 @@ export function addBlock(
 }
 
 /**
- * Pastes a block from clipboard into the state
+ * Adds multiple blocks to the state
  * @param {State} state - Current application state
- * @returns {import("hyperapp").Dispatchable<State>} Updated state with pasted block
+ * @param {Array<{programName: string, programState?: Object|null, x?: number|null, y?: number|null, width?: number, height?: number}>} blockConfigs - Array of block configurations
+ * @returns {{state: State, blockIds: number[]}} Updated state with new blocks and array of new block IDs
  */
-export function pasteBlock(state) {
-  const blockData = state.clipboard;
-  if (blockData === null) {
-    return state;
+function addBlocks(state, blockConfigs) {
+  if (!Array.isArray(blockConfigs) || blockConfigs.length === 0) {
+    return { state, blockIds: [] };
   }
 
-  return addBlock(
-    state,
-    blockData.programData.name,
-    blockData.programData.state,
-    blockData.x + PASTE_OFFSET_X,
-    blockData.y + PASTE_OFFSET_Y,
-    blockData.width,
-    blockData.height,
-  );
+  let currentState = state;
+  const newBlockIds = [];
+
+  // Add each block sequentially
+  for (const config of blockConfigs) {
+    const {
+      programName,
+      programState = null,
+      x = null,
+      y = null,
+      width = 200,
+      height = 200,
+    } = config;
+
+    currentState = addBlock(
+      currentState,
+      programName,
+      programState,
+      x,
+      y,
+      width,
+      height,
+    );
+
+    // Get the ID of the newly added block
+    const currentBlocks = getCurrentBlocks(currentState);
+    const lastBlock = currentBlocks[currentBlocks.length - 1];
+    if (lastBlock) {
+      newBlockIds.push(lastBlock.id);
+    }
+  }
+
+  return { state: currentState, blockIds: newBlockIds };
 }
 
 /**
- * Copies the selected block to application clipboard
+ * Pastes blocks from clipboard into the state
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").Dispatchable<State>} Updated state with pasted blocks
+ */
+export function pasteBlocks(state) {
+  const clipboardData = state.clipboard;
+  if (clipboardData === null) {
+    return state;
+  }
+
+  // Transform clipboard data into block configurations for addBlocks
+  const blockConfigs = clipboardData.map((blockData) => ({
+    programName: blockData.programData.name,
+    programState: blockData.programData.state,
+    x: blockData.x + PASTE_OFFSET_X,
+    y: blockData.y + PASTE_OFFSET_Y,
+    width: blockData.width,
+    height: blockData.height,
+  }));
+
+  const { state: newState, blockIds } = addBlocks(state, blockConfigs);
+
+  // Select all pasted blocks
+  if (blockIds.length > 0) {
+    return updateCurrentPage(newState, {
+      selectedIds: blockIds,
+    });
+  }
+
+  return newState;
+}
+
+/**
+ * Copies the selected blocks to application clipboard
  * @param {State} state - Current application state
  * @returns {import("hyperapp").Dispatchable<State>} Updated state with clipboard data
  */
-export function copySelectedBlock(state) {
-  const selectedBlock = getSelectedBlock(state);
-  if (!selectedBlock) return state;
+export function copySelectedBlocks(state) {
+  const selectedBlocks = getSelectedBlocks(state);
+  if (selectedBlocks.length === 0) return state;
 
-  // Create a copy of the block data for clipboard, capturing current state
-  /** @type {Block} */
-  const blockData = {
-    ...selectedBlock,
+  // Create copies of the block data for clipboard, capturing current state
+  /** @type {Block[]} */
+  const blocksData = selectedBlocks.map((block) => ({
+    ...block,
     id: -1, // not a "real" block
-  };
+  }));
 
   return [
     {
       ...state,
-      clipboard: blockData,
+      clipboard: blocksData,
     },
     clearUserClipboardEffect,
   ];

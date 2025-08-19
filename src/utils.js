@@ -1,4 +1,4 @@
-import { addBlock, pasteBlock } from "./block.js";
+import { addBlock, pasteBlocks } from "./block.js";
 import { MEDIA_SAVE_PATH, STATE_SAVE_PATH } from "./constants.js";
 import { h, text } from "./packages/hyperapp/index.js";
 
@@ -147,7 +147,7 @@ export const pasteEffect = async (dispatch, state) => {
 
     const text = await navigator.clipboard.readText();
     if (text.trim() === "") {
-      dispatch(pasteBlock(state));
+      dispatch((state) => pasteBlocks(state));
       return;
     } else {
       /** @type {import("./programs/system/text.js").State} */

@@ -1,7 +1,7 @@
 import { h } from "./packages/hyperapp/index.js";
 import { pasteEffect } from "./utils.js";
 import { saveApplicationAndNotify } from "./utils.js";
-import { copySelectedBlock, deleteSelectedBlocks } from "./block.js";
+import { copySelectedBlocks, deleteSelectedBlocks } from "./block.js";
 import { connectionLine } from "./connection.js";
 import { RESIZE_HANDLERS, block } from "./block.js";
 import { MIN_SIZE } from "./constants.js";
@@ -548,7 +548,7 @@ export function viewport(state) {
                 currentPage.editingId === null
               ) {
                 event.preventDefault();
-                return copySelectedBlock(state);
+                return copySelectedBlocks(state);
               } else {
                 // Let browser handle regular text copy
                 return {

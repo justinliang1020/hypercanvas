@@ -94,7 +94,7 @@
  * @property {boolean} isDarkMode - Dark mode toggle
  * @property {boolean} panelsVisible - Whether panels are visible
  * @property {number} programsPanelWidth - Width of programs panel in pixels
- * @property {Block|null} clipboard - Copied block data
+ * @property {Block[]|null} clipboard - Copied block data
  * @property {string} programFilter - Filter text for program buttons
  * @property {string|null} notification - Current notification message
  * @property {boolean} notificationVisible - Whether notification is visible
