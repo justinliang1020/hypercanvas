@@ -17,10 +17,33 @@ import {
 import {
   deselectAllBlocks,
   getSelectedBlockId,
+  getSelectedBlockIds,
   getSelectedBlocks,
   getSelectionBoundingBox,
   hasSelection,
 } from "./selection.js";
+
+/**
+ * Checks if a point is within the selection bounding box
+ * @param {State} state - Current application state
+ * @param {number} canvasX - X coordinate in canvas space
+ * @param {number} canvasY - Y coordinate in canvas space
+ * @returns {boolean} True if point is within selection bounds
+ */
+function isPointInSelectionBounds(state, canvasX, canvasY) {
+  const selectedBlocks = getSelectedBlocks(state);
+  if (selectedBlocks.length <= 1) return false;
+  
+  const boundingBox = getSelectionBoundingBox(state);
+  if (!boundingBox) return false;
+  
+  return (
+    canvasX >= boundingBox.x &&
+    canvasX <= boundingBox.x + boundingBox.width &&
+    canvasY >= boundingBox.y &&
+    canvasY <= boundingBox.y + boundingBox.height
+  );
+}
 
 /**
  * Creates the main viewport component for the canvas
@@ -52,6 +75,33 @@ export function viewport(state) {
             isViewportDragging: true,
             cursorStyle: "grabbing",
           });
+        }
+
+        // Calculate canvas coordinates for click position
+        const canvasRect = /** @type {HTMLElement} */ (
+          document.getElementById("canvas")
+        ).getBoundingClientRect();
+        const viewport = getCurrentViewport(state);
+        const canvasX = (event.clientX - canvasRect.left) / viewport.zoom;
+        const canvasY = (event.clientY - canvasRect.top) / viewport.zoom;
+
+        // Check if click is within selection bounding box for multi-select
+        const isInSelectionBounds = isPointInSelectionBounds(state, canvasX, canvasY);
+        
+        // If clicking within selection bounds and not shift-clicking, start drag
+        if (isInSelectionBounds && !event.shiftKey) {
+          const selectedBlocks = getSelectedBlocks(state);
+          if (selectedBlocks.length > 0) {
+            // Use the first selected block as the drag reference
+            const referenceBlock = selectedBlocks[0];
+            return updateCurrentPage(state, {
+              dragStart: {
+                id: referenceBlock.id,
+                startX: referenceBlock.x,
+                startY: referenceBlock.y,
+              },
+            });
+          }
         }
 
         // Regular click (not shift+click) - deselect blocks, exit edit mode, and exit connect mode
@@ -138,10 +188,10 @@ export function viewport(state) {
           const adjustedDy = dy / viewport.zoom;
 
           const blocks = getCurrentBlocks(state);
-          const selectedBlockId = getSelectedBlockId(state);
+          const selectedBlockIds = getSelectedBlockIds(state);
           return updateCurrentPage(state, {
             blocks: blocks.map((block) => {
-              if (block.id === selectedBlockId) {
+              if (selectedBlockIds.includes(block.id)) {
                 return {
                   ...block,
                   x: block.x + adjustedDx,
@@ -175,26 +225,51 @@ export function viewport(state) {
         // Save state for completed drag operation
         if (currentPage.dragStart) {
           const blocks = getCurrentBlocks(state);
+          const selectedBlockIds = getSelectedBlockIds(state);
           const draggedBlock = blocks.find(
             (b) => b.id === currentPage.dragStart?.id,
           );
-          if (
-            draggedBlock &&
-            currentPage.dragStart &&
-            (draggedBlock.x !== currentPage.dragStart.startX ||
-              draggedBlock.y !== currentPage.dragStart.startY)
-          ) {
+          
+          // Check if any selected block has moved
+          const hasAnyBlockMoved = selectedBlockIds.some((blockId) => {
+            const block = blocks.find((b) => b.id === blockId);
+            if (!block || !currentPage.dragStart) return false;
+            
+            // For the dragged block, compare with its start position
+            if (blockId === currentPage.dragStart.id) {
+              return (
+                block.x !== currentPage.dragStart.startX ||
+                block.y !== currentPage.dragStart.startY
+              );
+            }
+            
+            // For other selected blocks, we need to calculate their original positions
+            // based on the drag delta applied to the dragged block
+            const dragDeltaX = (currentPage.dragStart.startX || 0) - (draggedBlock?.x || 0);
+            const dragDeltaY = (currentPage.dragStart.startY || 0) - (draggedBlock?.y || 0);
+            const originalX = block.x + dragDeltaX;
+            const originalY = block.y + dragDeltaY;
+            
+            return Math.abs(block.x - originalX) > 0.1 || Math.abs(block.y - originalY) > 0.1;
+          });
+
+          if (hasAnyBlockMoved && draggedBlock && currentPage.dragStart) {
+            // Calculate the drag delta from the dragged block
+            const dragDeltaX = (draggedBlock.x || 0) - (currentPage.dragStart.startX || 0);
+            const dragDeltaY = (draggedBlock.y || 0) - (currentPage.dragStart.startY || 0);
+            
             // Create memento from the state before the drag started
             const beforeDragState = updateCurrentPage(state, {
-              blocks: blocks.map((b) =>
-                b.id === draggedBlock.id
-                  ? {
-                      ...b,
-                      x: currentPage.dragStart?.startX || 0,
-                      y: currentPage.dragStart?.startY || 0,
-                    }
-                  : b,
-              ),
+              blocks: blocks.map((b) => {
+                if (selectedBlockIds.includes(b.id)) {
+                  return {
+                    ...b,
+                    x: b.x - dragDeltaX,
+                    y: b.y - dragDeltaY,
+                  };
+                }
+                return b;
+              }),
             });
             return saveMementoAndReturn(beforeDragState, newState);
           }
