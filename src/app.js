@@ -47,7 +47,7 @@ function initialState() {
         cursorStyle: "pointer",
         isViewportDragging: false,
         isShiftPressed: false,
-        selectedId: null,
+        selectedIds: [],
         editingId: null,
         hoveringId: null,
         connectingId: null,

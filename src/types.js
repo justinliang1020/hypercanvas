@@ -38,7 +38,7 @@
  * @property {string} cursorStyle - Current cursor style
  * @property {boolean} isViewportDragging - Whether viewport is being dragged
  * @property {boolean} isShiftPressed - Whether shift key is currently pressed
- * @property {number|null} selectedId - ID of selected block
+ * @property {number[]} selectedIds - IDs of selected blocks
  * @property {number|null} editingId - ID of block in edit mode
  * @property {number|null} hoveringId - ID of hovered block
  * @property {number|null} connectingId - ID of block in connect mode (pending connection)

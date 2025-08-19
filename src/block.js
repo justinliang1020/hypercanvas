@@ -476,7 +476,7 @@ export function deleteBlock(currentState, blockId) {
 
   const newState = updateCurrentPage(currentState, {
     blocks: blocks.filter((block) => block.id !== blockId),
-    selectedId: null,
+    selectedIds: [],
   });
 
   return saveMementoAndReturn(currentState, newState);

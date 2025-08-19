@@ -8,7 +8,7 @@ import { getCurrentPage, getCurrentBlocks, updateCurrentPage } from "./pages.js"
  */
 export function isBlockSelected(state, blockId) {
   const currentPage = getCurrentPage(state);
-  return currentPage?.selectedId === blockId;
+  return currentPage?.selectedIds?.includes(blockId) ?? false;
 }
 
 /**
@@ -18,13 +18,12 @@ export function isBlockSelected(state, blockId) {
  */
 export function getSelectedBlocks(state) {
   const currentPage = getCurrentPage(state);
-  if (!currentPage || currentPage.selectedId === null) {
+  if (!currentPage || !currentPage.selectedIds || currentPage.selectedIds.length === 0) {
     return [];
   }
   
   const blocks = getCurrentBlocks(state);
-  const selectedBlock = blocks.find(block => block.id === currentPage.selectedId);
-  return selectedBlock ? [selectedBlock] : [];
+  return blocks.filter(block => currentPage.selectedIds.includes(block.id));
 }
 
 /**
@@ -34,10 +33,7 @@ export function getSelectedBlocks(state) {
  */
 export function getSelectedBlockIds(state) {
   const currentPage = getCurrentPage(state);
-  if (!currentPage || currentPage.selectedId === null) {
-    return [];
-  }
-  return [currentPage.selectedId];
+  return currentPage?.selectedIds ?? [];
 }
 
 /**
@@ -47,18 +43,18 @@ export function getSelectedBlockIds(state) {
  */
 export function hasSelection(state) {
   const currentPage = getCurrentPage(state);
-  return currentPage?.selectedId !== null;
+  return (currentPage?.selectedIds?.length ?? 0) > 0;
 }
 
 /**
- * Selects a block (currently single selection only)
+ * Selects a block (replaces current selection for single-select behavior)
  * @param {State} state - Current application state
  * @param {number} blockId - ID of block to select
  * @returns {State} Updated state with block selected
  */
 export function selectBlock(state, blockId) {
   return updateCurrentPage(state, {
-    selectedId: blockId,
+    selectedIds: [blockId],
     editingId: null, // Exit edit mode when selecting
     connectingId: null, // Exit connect mode when selecting
   });
@@ -71,7 +67,7 @@ export function selectBlock(state, blockId) {
  */
 export function deselectAllBlocks(state) {
   return updateCurrentPage(state, {
-    selectedId: null,
+    selectedIds: [],
     editingId: null,
     connectingId: null,
   });
@@ -93,6 +89,6 @@ export function getSelectedBlock(state) {
  * @returns {number|null} The selected block ID or null if none selected
  */
 export function getSelectedBlockId(state) {
-  const currentPage = getCurrentPage(state);
-  return currentPage?.selectedId ?? null;
+  const selectedIds = getSelectedBlockIds(state);
+  return selectedIds.length > 0 ? selectedIds[0] : null;
 }

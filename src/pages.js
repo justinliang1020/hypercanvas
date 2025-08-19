@@ -74,7 +74,7 @@ export function createPage(state, name = "New Page") {
     cursorStyle: "pointer",
     isViewportDragging: false,
     isShiftPressed: false,
-    selectedId: null,
+    selectedIds: [],
     editingId: null,
     hoveringId: null,
     connectingId: null,
