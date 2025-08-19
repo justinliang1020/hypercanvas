@@ -4,6 +4,8 @@ import {
   PASTE_OFFSET_X,
   PASTE_OFFSET_Y,
   RESIZE_CURSORS,
+  OUTLINE_COLORS,
+  OUTLINE_WIDTHS,
 } from "./constants.js";
 import { saveMementoAndReturn } from "./memento.js";
 import {
@@ -51,28 +53,18 @@ export function block(state) {
 
     // Having small borders, i.e. 1px, can cause rendering glitches to occur when CSS transform translations are applied such as zooming out
     // Scale outline thickness inversely with zoom to maintain consistent visual appearance
-    const viewport = getCurrentViewport(state);
-    const outline = (() => {
-      if (isConnecting) {
-        return `${4 / viewport.zoom}px solid orange`; // Orange for pending connection
-      } else if (isConnectable && isHovering) {
-        return `${4 / viewport.zoom}px solid #00ff00`; // Bright green for hovered connectable blocks
-      } else if (isConnectable) {
-        return `${3 / viewport.zoom}px solid #90ee90`; // Light green for connectable blocks
-      } else if (isConnectedToHovered) {
-        return `${3 / viewport.zoom}px solid purple`; // Purple for connected blocks when hovering source
-      } else if (isEditing) {
-        return `${4 / viewport.zoom}px solid skyblue`;
-      } else if (isMultiSelect) {
-        return ``;
-      } else if (isSelected) {
-        return `${4 / viewport.zoom}px solid blue`;
-      } else if (isHovering) {
-        return `${2 / viewport.zoom}px solid blue`;
-      } else {
-        return null;
-      }
-    })();
+    const outline = getBlockOutline(
+      {
+        isConnecting,
+        isConnectable,
+        isHovering,
+        isConnectedToHovered,
+        isEditing,
+        isMultiSelect,
+        isSelected,
+      },
+      state,
+    );
 
     /**
      * @param {State} state
@@ -226,13 +218,107 @@ export function block(state) {
         }),
         ...(isSelected && !isEditing && !isConnecting && !isMultiSelect
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>
-              ResizeHandle(handle, viewport.zoom),
+              ResizeHandle(handle, currentPage.zoom),
             )
           : []),
         isSelected && !isEditing && !isMultiSelect && blockToolbar(),
       ],
     );
   };
+}
+
+/**
+ * Creates a CSS outline string with zoom-adjusted width
+ * @param {number} width - Base width in pixels
+ * @param {string} color - CSS color value
+ * @param {number} zoom - Current zoom level
+ * @returns {string} CSS outline property value
+ */
+function createOutline(width, color, zoom) {
+  return `${width / zoom}px solid ${color}`;
+}
+
+/**
+ * Determines the outline style for a block based on its current state
+ * @param {{isConnecting: boolean, isConnectable: boolean, isHovering: boolean, isConnectedToHovered: boolean, isEditing: boolean, isMultiSelect: boolean, isSelected: boolean}} blockState - Block state flags
+ * @param {State} state - Application state
+ * @returns {string|null} CSS outline property value
+ */
+function getBlockOutline(blockState, state) {
+  const {
+    isConnecting,
+    isConnectable,
+    isHovering,
+    isConnectedToHovered,
+    isEditing,
+    isMultiSelect,
+    isSelected,
+  } = blockState;
+
+  const viewport = getCurrentViewport(state);
+
+  // Priority order matters - most specific states first
+  if (isConnecting) {
+    return createOutline(
+      OUTLINE_WIDTHS.THICK,
+      OUTLINE_COLORS.CONNECTING,
+      viewport.zoom,
+    );
+  }
+
+  if (isConnectable && isHovering) {
+    return createOutline(
+      OUTLINE_WIDTHS.THICK,
+      OUTLINE_COLORS.CONNECTABLE_HOVER,
+      viewport.zoom,
+    );
+  }
+
+  if (isConnectable) {
+    return createOutline(
+      OUTLINE_WIDTHS.MEDIUM,
+      OUTLINE_COLORS.CONNECTABLE,
+      viewport.zoom,
+    );
+  }
+
+  if (isConnectedToHovered) {
+    return createOutline(
+      OUTLINE_WIDTHS.MEDIUM,
+      OUTLINE_COLORS.CONNECTED_TO_HOVERED,
+      viewport.zoom,
+    );
+  }
+
+  if (isEditing) {
+    return createOutline(
+      OUTLINE_WIDTHS.THICK,
+      OUTLINE_COLORS.EDITING,
+      viewport.zoom,
+    );
+  }
+
+  if (isMultiSelect) {
+    return ""; // No outline for multi-select
+  }
+
+  if (isSelected) {
+    return createOutline(
+      OUTLINE_WIDTHS.THICK,
+      OUTLINE_COLORS.SELECTED,
+      viewport.zoom,
+    );
+  }
+
+  if (isHovering) {
+    return createOutline(
+      OUTLINE_WIDTHS.THIN,
+      OUTLINE_COLORS.HOVERING,
+      viewport.zoom,
+    );
+  }
+
+  return null; // Default: no outline
 }
 
 /**

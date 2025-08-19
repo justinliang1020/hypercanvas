@@ -21,3 +21,19 @@ export const RESIZE_CURSORS = {
   w: "ew-resize",
   e: "ew-resize",
 };
+
+export const OUTLINE_COLORS = {
+  CONNECTING: 'orange',
+  CONNECTABLE_HOVER: '#00ff00',
+  CONNECTABLE: '#90ee90',
+  CONNECTED_TO_HOVERED: 'purple',
+  EDITING: 'skyblue',
+  SELECTED: 'blue',
+  HOVERING: 'blue'
+};
+
+export const OUTLINE_WIDTHS = {
+  THICK: 4,    // For important states
+  MEDIUM: 3,   // For secondary states  
+  THIN: 2      // For hover states
+};
