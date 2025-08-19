@@ -13,11 +13,7 @@ import {
 } from "./selection.js";
 
 /**
- * @typedef {{ percentX: number, percentY: number }} ResizeEventData
- */
-
-/**
- * @type {Record<string, (block: Block, e: ResizeEventData) => {width:number,height:number,x:number,y:number}>}
+ * @type {Record<ResizeString, ResizeHandler>}
  */
 export const RESIZE_HANDLERS = {
   nw: (block, e) => ({
@@ -71,10 +67,13 @@ export const RESIZE_HANDLERS = {
 };
 
 /**
- * Apply aspect ratio constraints
- * @param {{width:number,height:number,x:number,y:number}} dimensions
- * @param {Block} originalBlock
- * @param {string} handle
+ * Apply aspect ratio constraints for a resize operation based on the original block and active handle.
+ * Maintains the original aspect ratio while respecting minimum size.
+ *
+ * @param {{width:number,height:number,x:number,y:number}} dimensions - Proposed dimensions from a resize handler
+ * @param {Block} originalBlock - The original block used to derive the aspect ratio
+ * @param {"nw"|"ne"|"sw"|"se"|"n"|"s"|"e"|"w"} handle - Active resize handle
+ * @returns {{width:number,height:number,x:number,y:number}} Constrained dimensions
  */
 function applyAspectRatioConstraint(dimensions, originalBlock, handle) {
   const originalAspectRatio = originalBlock.width / originalBlock.height;
@@ -140,7 +139,17 @@ function applyAspectRatioConstraint(dimensions, originalBlock, handle) {
   return dimensions;
 }
 
-/** Unified resize handle for blocks and multi-select */
+/**
+ * Unified resize handle for blocks and multi-select.
+ * Renders an interactive handle div with proper cursor and pointer handlers.
+ *
+ * @param {{
+ *   handle: ResizeString,
+ *   zoom: number,
+ *   context: "block"|"multi"
+ * }} props
+ * @returns {import("hyperapp").ElementVNode<any>}
+ */
 export function ResizeHandle({ handle, zoom, context }) {
   const handleSize = 10 / zoom;
   const handleOffset = 5 / zoom;
@@ -205,7 +214,7 @@ export function ResizeHandle({ handle, zoom, context }) {
         return updateCurrentPage(selectedState, {
           resizing: {
             id: blockId,
-            handle: /** @type {string} */ (
+            handle: /** @type {ResizeString} */ (
               /** @type {HTMLElement} */ (event.target).dataset.handle
             ),
             startWidth: block.width,
@@ -248,10 +257,14 @@ export function ResizeHandle({ handle, zoom, context }) {
   });
 }
 
-/** Handle pointermove during resize. Returns new State. */
 /**
- * @param {State} state
- * @param {PointerEvent} event
+ * Handle pointermove during resize.
+ * Computes new dimensions for either a single block or the multi-select bounding box,
+ * applies aspect ratio locking when Shift is pressed, and updates page blocks.
+ *
+ * @param {State} state - Current application state
+ * @param {PointerEvent} event - Pointer event from the canvas
+ * @returns {State} New application state with updated block sizes/positions
  */
 export function handleResizePointerMove(state, event) {
   const page = getCurrentPage(state);

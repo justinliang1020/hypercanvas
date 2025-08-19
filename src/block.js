@@ -1,6 +1,5 @@
 import { h, text } from "./packages/hyperapp/index.js";
 import {
-  MIN_SIZE,
   PASTE_OFFSET_X,
   PASTE_OFFSET_Y,
   OUTLINE_COLORS,
@@ -219,7 +218,7 @@ export function block(state) {
         ...(isSelected && !isEditing && !isConnecting && !isMultiSelect
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>
               ResizeHandle({
-                handle,
+                handle: /** @type{ResizeString} */ (handle),
                 zoom: currentPage.zoom,
                 context: "block",
               }),

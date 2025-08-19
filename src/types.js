@@ -71,7 +71,7 @@
 /**
  * @typedef {Object} ResizeState
  * @property {number|string} id - Block ID being resized or "selection-bounding-box" for multi-select
- * @property {string} handle - Resize handle (nw, ne, sw, se, n, s, e, w)
+ * @property {ResizeString} handle - Resize handle (nw, ne, sw, se, n, s, e, w)
  * @property {number} startWidth - Initial width
  * @property {number} startHeight - Initial height
  * @property {number} startX - Initial X position
@@ -103,6 +103,10 @@
 
 /**
  * @typedef {(block: Block, e: {percentX: number, percentY: number}) => {width: number, height: number, x: number, y: number}} ResizeHandler
+ */
+
+/**
+ * @typedef {"nw"|"ne"|"sw"|"se"|"n"|"s"|"e"|"w"} ResizeString
  */
 
 /**

@@ -555,7 +555,11 @@ function selectionBoundingBox(state) {
       // Add resize handles for multi-select
       ...(!isResizing
         ? Object.keys(RESIZE_HANDLERS).map((handle) =>
-            ResizeHandle({ handle, zoom: viewport.zoom, context: "multi" }),
+            ResizeHandle({
+              handle: /** @type{ResizeString} */ (handle),
+              zoom: viewport.zoom,
+              context: "multi",
+            }),
           )
         : []),
     ],
