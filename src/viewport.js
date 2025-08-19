@@ -17,6 +17,8 @@ import {
 import {
   deselectAllBlocks,
   getSelectedBlockId,
+  getSelectedBlocks,
+  getSelectionBoundingBox,
   hasSelection,
 } from "./selection.js";
 
@@ -42,16 +44,23 @@ export function viewport(state) {
       },
       tabindex: -1, // Make the main element focusable for keyboard events
       onpointerdown: (state, event) => {
-        // Only start dragging on middle mouse button or shift+click
-        if (event.button === 1 || (event.button === 0 && event.shiftKey)) {
-        const deselectedState = deselectAllBlocks(state);
-        return updateCurrentPage(deselectedState, {
-          isViewportDragging: true,
-          cursorStyle: "grabbing",
-        });        }
+        // Only start dragging on middle mouse button
+        // Remove shift+click viewport dragging to allow shift+click block selection
+        if (event.button === 1) {
+          const deselectedState = deselectAllBlocks(state);
+          return updateCurrentPage(deselectedState, {
+            isViewportDragging: true,
+            cursorStyle: "grabbing",
+          });
+        }
 
-        // Regular click - deselect blocks, exit edit mode, and exit connect mode
-        return deselectAllBlocks(state);
+        // Regular click (not shift+click) - deselect blocks, exit edit mode, and exit connect mode
+        // Allow shift+click to pass through to blocks for multi-select
+        if (!event.shiftKey) {
+          return deselectAllBlocks(state);
+        }
+
+        return state;
       },
       onpointermove: (state, event) => {
         const currentPage = getCurrentPage(state);
@@ -307,10 +316,7 @@ export function viewport(state) {
           case "Backspace":
             // Only handle block deletion if not in input field, a block is selected, and not in edit mode
             const selectedBlockId = getSelectedBlockId(state);
-            if (
-              selectedBlockId !== null &&
-              currentPage.editingId === null
-            ) {
+            if (selectedBlockId !== null && currentPage.editingId === null) {
               event.preventDefault();
               return deleteBlock(state, selectedBlockId);
             }
@@ -415,7 +421,9 @@ export function viewport(state) {
           ),
           // Then render blocks on top
           ...getCurrentBlocks(state).map(block(state)),
-        ],
+          // Render selection bounding box above blocks
+          selectionBoundingBox(state),
+        ].filter(Boolean),
       ),
     ],
   );
@@ -502,6 +510,38 @@ function applyAspectRatioConstraint(dimensions, originalBlock, handle) {
   }
 
   return dimensions;
+}
+
+/**
+ * Creates a selection bounding box component for multi-select
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State> | null} Selection bounding box element or null
+ */
+function selectionBoundingBox(state) {
+  const selectedBlocks = getSelectedBlocks(state);
+  if (selectedBlocks.length <= 1) {
+    return null; // No bounding box for single or no selection
+  }
+
+  const boundingBox = getSelectionBoundingBox(state);
+  if (!boundingBox) {
+    return null;
+  }
+
+  const viewport = getCurrentViewport(state);
+  const outlineWidth = 4 / viewport.zoom;
+
+  return h("div", {
+    key: "selection-bounding-box",
+    class: "selection-bounding-box",
+    style: {
+      left: `${boundingBox.x}px`,
+      top: `${boundingBox.y}px`,
+      width: `${boundingBox.width}px`,
+      height: `${boundingBox.height}px`,
+      outlineWidth: `${outlineWidth}px`,
+    },
+  });
 }
 
 /**

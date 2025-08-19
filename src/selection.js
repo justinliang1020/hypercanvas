@@ -1,4 +1,8 @@
-import { getCurrentPage, getCurrentBlocks, updateCurrentPage } from "./pages.js";
+import {
+  getCurrentPage,
+  getCurrentBlocks,
+  updateCurrentPage,
+} from "./pages.js";
 
 /**
  * Checks if a block is currently selected
@@ -18,12 +22,16 @@ export function isBlockSelected(state, blockId) {
  */
 export function getSelectedBlocks(state) {
   const currentPage = getCurrentPage(state);
-  if (!currentPage || !currentPage.selectedIds || currentPage.selectedIds.length === 0) {
+  if (
+    !currentPage ||
+    !currentPage.selectedIds ||
+    currentPage.selectedIds.length === 0
+  ) {
     return [];
   }
-  
+
   const blocks = getCurrentBlocks(state);
-  return blocks.filter(block => currentPage.selectedIds.includes(block.id));
+  return blocks.filter((block) => currentPage.selectedIds.includes(block.id));
 }
 
 /**
@@ -92,3 +100,102 @@ export function getSelectedBlockId(state) {
   const selectedIds = getSelectedBlockIds(state);
   return selectedIds.length > 0 ? selectedIds[0] : null;
 }
+
+/**
+ * Adds a block to the current selection (for multi-select)
+ * @param {State} state - Current application state
+ * @param {number} blockId - ID of block to add to selection
+ * @returns {State} Updated state with block added to selection
+ */
+export function addBlockToSelection(state, blockId) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return state;
+
+  const currentSelectedIds = currentPage.selectedIds || [];
+  if (currentSelectedIds.includes(blockId)) {
+    return state; // Already selected
+  }
+
+  return updateCurrentPage(state, {
+    selectedIds: [...currentSelectedIds, blockId],
+    editingId: null, // Exit edit mode when selecting
+    connectingId: null, // Exit connect mode when selecting
+  });
+}
+
+/**
+ * Removes a block from the current selection (for multi-select)
+ * @param {State} state - Current application state
+ * @param {number} blockId - ID of block to remove from selection
+ * @returns {State} Updated state with block removed from selection
+ */
+export function removeBlockFromSelection(state, blockId) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return state;
+
+  const currentSelectedIds = currentPage.selectedIds || [];
+  const newSelectedIds = currentSelectedIds.filter((id) => id !== blockId);
+
+  return updateCurrentPage(state, {
+    selectedIds: newSelectedIds,
+    editingId: null, // Exit edit mode when deselecting
+    connectingId: null, // Exit connect mode when deselecting
+  });
+}
+
+/**
+ * Toggles a block's selection state (for shift-click behavior)
+ * @param {State} state - Current application state
+ * @param {number} blockId - ID of block to toggle
+ * @returns {State} Updated state with block selection toggled
+ */
+export function toggleBlockSelection(state, blockId) {
+  if (isBlockSelected(state, blockId)) {
+    return removeBlockFromSelection(state, blockId);
+  } else {
+    return addBlockToSelection(state, blockId);
+  }
+}
+
+/**
+ * Calculates the bounding box that encompasses all selected blocks
+ * @param {State} state - Current application state
+ * @returns {{x: number, y: number, width: number, height: number} | null} Bounding box or null if no selection
+ */
+export function getSelectionBoundingBox(state) {
+  const selectedBlocks = getSelectedBlocks(state);
+  if (selectedBlocks.length === 0) {
+    return null;
+  }
+
+  if (selectedBlocks.length === 1) {
+    const block = selectedBlocks[0];
+    return {
+      x: block.x,
+      y: block.y,
+      width: block.width,
+      height: block.height,
+    };
+  }
+
+  // Calculate bounding box for multiple blocks
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  selectedBlocks.forEach((block) => {
+    minX = Math.min(minX, block.x);
+    minY = Math.min(minY, block.y);
+    maxX = Math.max(maxX, block.x + block.width);
+    maxY = Math.max(maxY, block.y + block.height);
+  });
+
+  return {
+    x: minX,
+    y: minY,
+    width: maxX - minX,
+    height: maxY - minY,
+  };
+}
+

@@ -25,6 +25,8 @@ import {
   selectBlock,
   getSelectedBlock,
   getSelectedBlockId,
+  getSelectedBlocks,
+  toggleBlockSelection,
 } from "./selection.js";
 
 /**
@@ -39,6 +41,8 @@ export function block(state) {
     if (!currentPage) return h("div", {});
 
     const isSelected = isBlockSelected(state, block.id);
+    const selectedBlocks = getSelectedBlocks(state);
+    const isMultiSelect = selectedBlocks.length > 1;
     const isEditing = currentPage.editingId === block.id;
     const isHovering = currentPage.hoveringId === block.id;
     const isConnecting = currentPage.connectingId === block.id;
@@ -61,7 +65,8 @@ export function block(state) {
         return `${3 / viewport.zoom}px solid purple`; // Purple for connected blocks when hovering source
       } else if (isEditing) {
         return `${4 / viewport.zoom}px solid skyblue`;
-      } else if (isSelected) {
+      } else if (isSelected && !isMultiSelect) {
+        // Only show individual outline for single selection
         return `${4 / viewport.zoom}px solid blue`;
       } else if (isHovering) {
         return `${2 / viewport.zoom}px solid blue`;
@@ -153,6 +158,11 @@ export function block(state) {
           // If block is in edit mode, don't start dragging
           if (currentPage.editingId === block.id) {
             return selectBlock(state, block.id);
+          }
+
+          // Handle shift-click for multi-select
+          if (event.shiftKey) {
+            return toggleBlockSelection(state, block.id);
           }
 
           // Normal selection and drag start

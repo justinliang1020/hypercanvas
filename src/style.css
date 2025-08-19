@@ -67,6 +67,16 @@ hr {
   }
 }
 
+/* Selection bounding box styles */
+.selection-bounding-box {
+  position: absolute;
+  pointer-events: none;
+  outline: 4px solid #007acc;
+  outline-offset: -2px;
+  z-index: 1000;
+  box-sizing: border-box;
+}
+
 #layers-panel {
   display: flex;
   flex-direction: column;
@@ -427,6 +437,10 @@ main.dark-mode {
 
   hr {
     background-color: #555;
+  }
+
+  .selection-bounding-box {
+    outline-color: blue;
   }
 }
 
