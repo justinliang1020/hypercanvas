@@ -64,8 +64,9 @@ export function block(state) {
         return `${3 / viewport.zoom}px solid purple`; // Purple for connected blocks when hovering source
       } else if (isEditing) {
         return `${4 / viewport.zoom}px solid skyblue`;
-      } else if (isSelected && !isMultiSelect) {
-        // Only show individual outline for single selection
+      } else if (isMultiSelect) {
+        return ``;
+      } else if (isSelected) {
         return `${4 / viewport.zoom}px solid blue`;
       } else if (isHovering) {
         return `${2 / viewport.zoom}px solid blue`;
@@ -110,8 +111,10 @@ export function block(state) {
           }
 
           // Set cursor based on current mode
-          let cursorStyle = "default";
-          if (currentPage.connectingId !== null) {
+          let cursorStyle;
+          if (isMultiSelect) {
+            cursorStyle = "default";
+          } else if (currentPage.connectingId !== null) {
             // In connection mode, use default pointer cursor
             cursorStyle = "pointer";
           } else if (currentPage.editingId === block.id) {
@@ -135,9 +138,11 @@ export function block(state) {
           });
         },
         onpointerdown: (state, event) => {
-          event.stopPropagation();
           const currentPage = getCurrentPage(state);
           if (!currentPage) return state;
+          if (isMultiSelect) return state;
+
+          event.stopPropagation();
 
           // Handle connection mode
           if (
