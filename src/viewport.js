@@ -626,7 +626,9 @@ export function viewport(state) {
         {
           id: "canvas",
           style: {
-            transform: `translate(${getCurrentViewport(state).offsetX}px, ${getCurrentViewport(state).offsetY}px) scale(${getCurrentViewport(state).zoom})`,
+            // `translateZ(0)` required to fix rendering glitch where small borders and zoomed out would create rendering artifacts
+            // The problem occurs because browsers have difficulty rendering fractional pixels when scaling,
+            transform: `translate(${getCurrentViewport(state).offsetX}px, ${getCurrentViewport(state).offsetY}px) scale(${getCurrentViewport(state).zoom}) translateZ(0)`,
           },
         },
         [
