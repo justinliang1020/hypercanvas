@@ -193,7 +193,7 @@ export function block(state) {
             pointerEvents: isEditing ? null : "none",
           },
         }),
-        ...(isSelected && !isEditing && !isConnecting
+        ...(isSelected && !isEditing && !isConnecting && !isMultiSelect
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>
               ResizeHandle(handle, viewport.zoom),
             )

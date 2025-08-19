@@ -60,13 +60,23 @@
  */
 
 /**
+ * @typedef {Object} OriginalBlockState
+ * @property {number} id - Block ID
+ * @property {number} x - Original X position
+ * @property {number} y - Original Y position
+ * @property {number} width - Original width
+ * @property {number} height - Original height
+ */
+
+/**
  * @typedef {Object} ResizeState
- * @property {number} id - Block ID being resized
+ * @property {number|string} id - Block ID being resized or "selection-bounding-box" for multi-select
  * @property {string} handle - Resize handle (nw, ne, sw, se, n, s, e, w)
  * @property {number} startWidth - Initial width
  * @property {number} startHeight - Initial height
  * @property {number} startX - Initial X position
  * @property {number} startY - Initial Y position
+ * @property {OriginalBlockState[]} [originalBlocks] - Original block states for multi-select resize
  */
 
 /**
