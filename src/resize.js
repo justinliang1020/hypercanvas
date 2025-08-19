@@ -182,25 +182,39 @@ export function ResizeHandle({ handle, zoom, context }) {
     style.bottom = `${handleSize}px`;
   }
 
+  /**
+   * @param {State} state
+   * @param {PointerEvent} event
+   * @returns {State}
+   */
+  function onpointerenter(state, event) {
+    event.stopPropagation();
+    return updateCurrentPage(state, {
+      cursorStyle: RESIZE_CURSORS[handle] || "default",
+    });
+  }
+
+  /**
+   * @param {State} state
+   * @param {PointerEvent} event
+   * @returns {State}
+   */
+  function onpointerleave(state, event) {
+    event.stopPropagation();
+    return updateCurrentPage(state, { cursorStyle: "default" });
+  }
+
   const commonProps = {
     class: `resize-handle ${handle}`,
     "data-handle": handle,
     style,
+    onpointerenter,
+    onpointerleave,
   };
 
   if (context === "block") {
     return h("div", {
       ...commonProps,
-      onpointerenter: (state, event) => {
-        event.stopPropagation();
-        return updateCurrentPage(state, {
-          cursorStyle: RESIZE_CURSORS[handle] || "default",
-        });
-      },
-      onpointerleave: (state, event) => {
-        event.stopPropagation();
-        return updateCurrentPage(state, { cursorStyle: "default" });
-      },
       onpointerdown: (state, event) => {
         event.stopPropagation();
         const blockId = parseInt(
@@ -252,6 +266,8 @@ export function ResizeHandle({ handle, zoom, context }) {
             height: block.height,
           })),
         },
+
+        cursorStyle: RESIZE_CURSORS[handle] || "default",
       });
     },
   });
