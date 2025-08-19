@@ -202,7 +202,7 @@ export function block(state) {
               ResizeHandle(handle, viewport.zoom),
             )
           : []),
-        isSelected && !isEditing && blockToolbar(),
+        isSelected && !isEditing && !isMultiSelect && blockToolbar(),
       ],
     );
   };
