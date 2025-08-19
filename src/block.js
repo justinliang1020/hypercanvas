@@ -154,7 +154,7 @@ export function block(state) {
 
       // If block is in edit mode, don't start dragging
       if (currentPage.editingId === block.id) {
-        return selectBlock(state, block.id);
+        return state;
       }
 
       // Handle shift-click for multi-select
