@@ -33,7 +33,6 @@ import {
  * @param {State} state - Current application state
  * @returns {(block: Block) => import("hyperapp").ElementVNode<State>} Block renderer function
  */
-
 export function block(state) {
   return (block) => {
     const currentPage = getCurrentPage(state);
@@ -75,6 +74,129 @@ export function block(state) {
       }
     })();
 
+    /**
+     * @param {State} state
+     * @param {PointerEvent} event
+     * @returns {State}
+     */
+    function onpointerover(state, event) {
+      event.stopPropagation();
+      const currentPage = getCurrentPage(state);
+      if (!currentPage) return state;
+
+      if (
+        getSelectedBlockId(state) !== null &&
+        getSelectedBlockId(state) !== block.id &&
+        currentPage.dragStart !== null
+      )
+        return state;
+
+      // Don't change cursor if we're over a resize handle
+      const target = /** @type {HTMLElement} */ (event.target);
+      if (target.classList.contains("resize-handle")) {
+        return updateCurrentPage(state, {
+          hoveringId: block.id,
+        });
+      }
+
+      // Set cursor based on current mode
+      let cursorStyle;
+      if (isMultiSelect) {
+        cursorStyle = "default";
+      } else if (currentPage.connectingId !== null) {
+        // In connection mode, use default pointer cursor
+        cursorStyle = "pointer";
+      } else if (currentPage.editingId === block.id) {
+        // In edit mode, use default cursor
+        cursorStyle = "default";
+      } else {
+        // Normal mode, use move cursor
+        cursorStyle = "move";
+      }
+
+      return updateCurrentPage(state, {
+        hoveringId: block.id,
+        cursorStyle: cursorStyle,
+      });
+    }
+
+    /**
+     * @param {State} state
+     * @param {PointerEvent} event
+     * @returns {State}
+     */
+    function onpointerleave(state, event) {
+      event.stopPropagation();
+      return updateCurrentPage(state, {
+        hoveringId: null,
+        cursorStyle: "default",
+      });
+    }
+
+    /**
+     * @param {State} state
+     * @param {PointerEvent} event
+     * @returns {State}
+     */
+    function onpointerdown(state, event) {
+      const currentPage = getCurrentPage(state);
+      if (!currentPage) return state;
+      if (isMultiSelect) return state;
+
+      event.stopPropagation();
+
+      // Handle connection mode
+      if (
+        currentPage.connectingId !== null &&
+        isBlockConnectable(state, block.id)
+      ) {
+        // Create connection and exit connect mode
+        const newState = addConnection(
+          state,
+          "default",
+          currentPage.connectingId,
+          block.id,
+        );
+        return selectBlock(newState, block.id);
+      }
+
+      // If block is in edit mode, don't start dragging
+      if (currentPage.editingId === block.id) {
+        return selectBlock(state, block.id);
+      }
+
+      // Handle shift-click for multi-select
+      if (event.shiftKey) {
+        return toggleBlockSelection(state, block.id);
+      }
+
+      // Normal selection and drag start
+      const selectedState = selectBlock(state, block.id);
+      return updateCurrentPage(selectedState, {
+        dragStart: {
+          id: block.id,
+          startX: block.x,
+          startY: block.y,
+        },
+      });
+    }
+
+    /**
+     * @param {State} state
+     * @param {MouseEvent} event
+     * @returns {State}
+     */
+    function ondblclick(state, event) {
+      event.stopPropagation();
+
+      // Double-click enters edit mode
+      const selectedState = selectBlock(state, block.id);
+      return updateCurrentPage(selectedState, {
+        editingId: block.id,
+        dragStart: null,
+      });
+    }
+
     return h(
       "div",
       {
@@ -90,105 +212,10 @@ export function block(state) {
           zIndex: `${block.zIndex}`,
         },
         class: { block: true, hovered: isHovering },
-        onpointerover: (state, event) => {
-          event.stopPropagation();
-          const currentPage = getCurrentPage(state);
-          if (!currentPage) return state;
-
-          if (
-            getSelectedBlockId(state) !== null &&
-            getSelectedBlockId(state) !== block.id &&
-            currentPage.dragStart !== null
-          )
-            return state;
-
-          // Don't change cursor if we're over a resize handle
-          const target = /** @type {HTMLElement} */ (event.target);
-          if (target.classList.contains("resize-handle")) {
-            return updateCurrentPage(state, {
-              hoveringId: block.id,
-            });
-          }
-
-          // Set cursor based on current mode
-          let cursorStyle;
-          if (isMultiSelect) {
-            cursorStyle = "default";
-          } else if (currentPage.connectingId !== null) {
-            // In connection mode, use default pointer cursor
-            cursorStyle = "pointer";
-          } else if (currentPage.editingId === block.id) {
-            // In edit mode, use default cursor
-            cursorStyle = "default";
-          } else {
-            // Normal mode, use move cursor
-            cursorStyle = "move";
-          }
-
-          return updateCurrentPage(state, {
-            hoveringId: block.id,
-            cursorStyle: cursorStyle,
-          });
-        },
-        onpointerleave: (state, event) => {
-          event.stopPropagation();
-          return updateCurrentPage(state, {
-            hoveringId: null,
-            cursorStyle: "default",
-          });
-        },
-        onpointerdown: (state, event) => {
-          const currentPage = getCurrentPage(state);
-          if (!currentPage) return state;
-          if (isMultiSelect) return state;
-
-          event.stopPropagation();
-
-          // Handle connection mode
-          if (
-            currentPage.connectingId !== null &&
-            isBlockConnectable(state, block.id)
-          ) {
-            // Create connection and exit connect mode
-            const newState = addConnection(
-              state,
-              "default",
-              currentPage.connectingId,
-              block.id,
-            );
-            return selectBlock(newState, block.id);
-          }
-
-          // If block is in edit mode, don't start dragging
-          if (currentPage.editingId === block.id) {
-            return selectBlock(state, block.id);
-          }
-
-          // Handle shift-click for multi-select
-          if (event.shiftKey) {
-            return toggleBlockSelection(state, block.id);
-          }
-
-          // Normal selection and drag start
-          const selectedState = selectBlock(state, block.id);
-          return updateCurrentPage(selectedState, {
-            dragStart: {
-              id: block.id,
-              startX: block.x,
-              startY: block.y,
-            },
-          });
-        },
-        ondblclick: (state, event) => {
-          event.stopPropagation();
-
-          // Double-click enters edit mode
-          const selectedState = selectBlock(state, block.id);
-          return updateCurrentPage(selectedState, {
-            editingId: block.id,
-            dragStart: null,
-          });
-        },
+        onpointerover,
+        onpointerleave,
+        onpointerdown,
+        ondblclick,
       },
       [
         h("program-component", {
@@ -306,46 +333,67 @@ function ResizeHandle(handle, zoom) {
     style.bottom = `${handleSize}px`;
   }
 
+  /**
+   * @param {State} state
+   * @param {PointerEvent} event
+   * @returns {State}
+   */
+  function onpointerenter(state, event) {
+    event.stopPropagation();
+    return updateCurrentPage(state, {
+      cursorStyle: RESIZE_CURSORS[handle] || "default",
+    });
+  }
+
+  /**
+   * @param {State} state
+   * @param {PointerEvent} event
+   * @returns {State}
+   */
+  function onpointerleave(state, event) {
+    event.stopPropagation();
+    return updateCurrentPage(state, {
+      cursorStyle: "default",
+    });
+  }
+
+  /**
+   * @param {State} state
+   * @param {PointerEvent} event
+   * @returns {State}
+   */
+  function onpointerdown(state, event) {
+    event.stopPropagation();
+    const blockId = parseInt(
+      /** @type {HTMLElement} */ (event.target)?.parentElement?.dataset?.id ||
+        "",
+    );
+    const blocks = getCurrentBlocks(state);
+    const block = blocks.find((b) => b.id === blockId);
+    if (!block) return state;
+    const selectedState = selectBlock(state, blockId);
+    return updateCurrentPage(selectedState, {
+      resizing: {
+        id: blockId,
+        handle: /** @type {string} */ (
+          /** @type {HTMLElement} */ (event.target).dataset.handle
+        ),
+        startWidth: block.width,
+        startHeight: block.height,
+        startX: block.x,
+        startY: block.y,
+      },
+      cursorStyle: RESIZE_CURSORS[handle] || "default",
+    });
+  }
+
   return h("div", {
     class: `resize-handle ${handle}`,
     "data-handle": handle,
     style: style,
-    onpointerenter: (state, event) => {
-      event.stopPropagation();
-      return updateCurrentPage(state, {
-        cursorStyle: RESIZE_CURSORS[handle] || "default",
-      });
-    },
-    onpointerleave: (state, event) => {
-      event.stopPropagation();
-      return updateCurrentPage(state, {
-        cursorStyle: "default",
-      });
-    },
-    onpointerdown: (state, event) => {
-      event.stopPropagation();
-      const blockId = parseInt(
-        /** @type {HTMLElement} */ (event.target)?.parentElement?.dataset?.id ||
-          "",
-      );
-      const blocks = getCurrentBlocks(state);
-      const block = blocks.find((b) => b.id === blockId);
-      if (!block) return state;
-      const selectedState = selectBlock(state, blockId);
-      return updateCurrentPage(selectedState, {
-        resizing: {
-          id: blockId,
-          handle: /** @type {string} */ (
-            /** @type {HTMLElement} */ (event.target).dataset.handle
-          ),
-          startWidth: block.width,
-          startHeight: block.height,
-          startX: block.x,
-          startY: block.y,
-        },
-        cursorStyle: RESIZE_CURSORS[handle] || "default",
-      });
-    },
+    onpointerenter,
+    onpointerleave,
+    onpointerdown,
   });
 } /**
  * Creates a toolbar for selected blocks with action buttons
