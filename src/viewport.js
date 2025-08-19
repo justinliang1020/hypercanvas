@@ -1,10 +1,13 @@
 import { h } from "./packages/hyperapp/index.js";
 import { pasteEffect } from "./utils.js";
 import { saveApplicationAndNotify } from "./utils.js";
-import { copySelectedBlocks, deleteSelectedBlocks } from "./block.js";
+import { copySelectedBlocks, deleteSelectedBlocks, block } from "./block.js";
 import { connectionLine } from "./connection.js";
-import { RESIZE_HANDLERS, block } from "./block.js";
-import { MIN_SIZE } from "./constants.js";
+import {
+  RESIZE_HANDLERS,
+  ResizeHandle,
+  handleResizePointerMove,
+} from "./resize.js";
 import { saveMementoAndReturn, redoState, undoState } from "./memento.js";
 import {
   getCurrentPage,
@@ -130,142 +133,8 @@ export function viewport(state) {
         });
 
         if (currentPage.resizing) {
-          // Handle resizing with zoom adjustment
-          const canvasRect = /** @type {HTMLElement} */ (
-            document.getElementById("canvas")
-          ).getBoundingClientRect();
-
-          // Calculate position relative to canvas accounting for zoom and offset
-          const viewport = getCurrentViewport(state);
-          const canvasX = (event.clientX - canvasRect.left) / viewport.zoom;
-          const canvasY = (event.clientY - canvasRect.top) / viewport.zoom;
-
-          const blocks = getCurrentBlocks(state);
-
-          // Handle multi-select bounding box resize
-          if (currentPage.resizing.id === "selection-bounding-box") {
-            const handler = RESIZE_HANDLERS[currentPage.resizing.handle];
-            if (!handler || !currentPage.resizing.originalBlocks) return state;
-
-            // Create a virtual bounding box for resize calculation
-            /** @type {Block} */
-            const virtualBoundingBox = {
-              id: -1, // Virtual block ID
-              x: currentPage.resizing.startX,
-              y: currentPage.resizing.startY,
-              width: currentPage.resizing.startWidth,
-              height: currentPage.resizing.startHeight,
-              zIndex: 0, // Not used for resize calculation
-              programData: { name: "", state: null }, // Not used for resize calculation
-            };
-
-            let newBoundingBoxDimensions = handler(virtualBoundingBox, {
-              percentX: canvasX,
-              percentY: canvasY,
-            });
-
-            // Apply aspect ratio constraint if shift is pressed
-            if (currentPage.isShiftPressed) {
-              newBoundingBoxDimensions = applyAspectRatioConstraint(
-                newBoundingBoxDimensions,
-                virtualBoundingBox,
-                currentPage.resizing.handle,
-              );
-            }
-
-            // Calculate scaling factors
-            const scaleX =
-              newBoundingBoxDimensions.width / currentPage.resizing.startWidth;
-            const scaleY =
-              newBoundingBoxDimensions.height /
-              currentPage.resizing.startHeight;
-
-            return updateCurrentPage(state, {
-              blocks: blocks.map((block) => {
-                const originalBlock =
-                  currentPage.resizing?.originalBlocks?.find(
-                    (orig) => orig.id === block.id,
-                  );
-                if (!originalBlock || !currentPage.resizing) return block;
-
-                // Calculate relative position within original bounding box
-                const relativeX =
-                  (originalBlock.x - currentPage.resizing.startX) /
-                  currentPage.resizing.startWidth;
-                const relativeY =
-                  (originalBlock.y - currentPage.resizing.startY) /
-                  currentPage.resizing.startHeight;
-
-                // Calculate new position and size
-                const newWidth = Math.max(
-                  MIN_SIZE,
-                  originalBlock.width * scaleX,
-                );
-                const newHeight = Math.max(
-                  MIN_SIZE,
-                  originalBlock.height * scaleY,
-                );
-                const newX =
-                  newBoundingBoxDimensions.x +
-                  relativeX * newBoundingBoxDimensions.width;
-                const newY =
-                  newBoundingBoxDimensions.y +
-                  relativeY * newBoundingBoxDimensions.height;
-
-                return {
-                  ...block,
-                  x: newX,
-                  y: newY,
-                  width: newWidth,
-                  height: newHeight,
-                };
-              }),
-            });
-          } else {
-            // Handle single block resize (existing logic)
-            const block = blocks.find((b) => b.id == currentPage.resizing?.id);
-            if (!block) return state;
-            const handler = RESIZE_HANDLERS[currentPage.resizing.handle];
-            if (!handler) return state;
-
-            let newDimensions = handler(block, {
-              percentX: canvasX,
-              percentY: canvasY,
-            });
-
-            // Apply aspect ratio constraint if shift is pressed
-            if (currentPage.isShiftPressed && currentPage.resizing) {
-              const originalBlock = {
-                ...block,
-                width: currentPage.resizing.startWidth,
-                height: currentPage.resizing.startHeight,
-                x: currentPage.resizing.startX,
-                y: currentPage.resizing.startY,
-              };
-              newDimensions = applyAspectRatioConstraint(
-                newDimensions,
-                originalBlock,
-                currentPage.resizing.handle,
-              );
-            }
-
-            // Ensure minimum size
-            const finalWidth = Math.max(MIN_SIZE, newDimensions.width);
-            const finalHeight = Math.max(MIN_SIZE, newDimensions.height);
-
-            return updateCurrentPage(state, {
-              blocks: blocks.map((b) =>
-                b.id == currentPage.resizing?.id
-                  ? {
-                      ...b,
-                      ...newDimensions,
-                      width: finalWidth,
-                      height: finalHeight,
-                    }
-                  : b,
-              ),
-            });
-          }
+          // Handle resizing
+          return handleResizePointerMove(state, event);
         } else if (currentPage.dragStart && currentPage.editingId === null) {
           // Only allow dragging if no block is in edit mode
           // Adjust drag delta by zoom level - when zoomed in, smaller movements should result in smaller position changes
@@ -647,89 +516,6 @@ export function viewport(state) {
 }
 
 /**
- * Applies aspect ratio constraint to resize dimensions
- * @param {{width: number, height: number, x: number, y: number}} dimensions - Original dimensions from resize handler
- * @param {Block} originalBlock - Original block before resize
- * @param {string} handle - Resize handle being used
- * @returns {{width: number, height: number, x: number, y: number}} Constrained dimensions maintaining aspect ratio
- */
-function applyAspectRatioConstraint(dimensions, originalBlock, handle) {
-  const originalAspectRatio = originalBlock.width / originalBlock.height;
-
-  // For corner handles, maintain aspect ratio
-  if (["nw", "ne", "sw", "se"].includes(handle)) {
-    // Calculate both possible constrained dimensions
-    const constrainedByWidth = {
-      width: dimensions.width,
-      height: dimensions.width / originalAspectRatio,
-      x: dimensions.x,
-      y: dimensions.y,
-    };
-
-    const constrainedByHeight = {
-      width: dimensions.height * originalAspectRatio,
-      height: dimensions.height,
-      x: dimensions.x,
-      y: dimensions.y,
-    };
-
-    // Choose the constraint that results in the smaller overall size change
-    // This prevents the block from growing too aggressively
-    const widthArea = constrainedByWidth.width * constrainedByWidth.height;
-    const heightArea = constrainedByHeight.width * constrainedByHeight.height;
-
-    const useWidthConstraint = widthArea <= heightArea;
-    let result = useWidthConstraint ? constrainedByWidth : constrainedByHeight;
-
-    // Apply minimum size constraints
-    result.width = Math.max(MIN_SIZE, result.width);
-    result.height = Math.max(MIN_SIZE, result.height);
-
-    // Adjust positions based on handle type and which constraint we're using
-    if (useWidthConstraint) {
-      // When constraining by width, adjust Y for north handles
-      if (handle.includes("n")) {
-        const heightDiff = result.height - dimensions.height;
-        result.y = dimensions.y - heightDiff;
-      }
-    } else {
-      // When constraining by height, adjust X for west handles
-      if (handle.includes("w")) {
-        const widthDiff = result.width - dimensions.width;
-        result.x = dimensions.x - widthDiff;
-      }
-    }
-
-    return result;
-  }
-
-  // For edge handles, maintain aspect ratio by adjusting the other dimension
-  if (["n", "s"].includes(handle)) {
-    // Height is changing, adjust width
-    const newWidth = dimensions.height * originalAspectRatio;
-    const widthDiff = newWidth - originalBlock.width;
-    return {
-      ...dimensions,
-      width: Math.max(MIN_SIZE, newWidth),
-      x: originalBlock.x - widthDiff / 2, // Center the width change
-    };
-  }
-
-  if (["e", "w"].includes(handle)) {
-    // Width is changing, adjust height
-    const newHeight = dimensions.width / originalAspectRatio;
-    const heightDiff = newHeight - originalBlock.height;
-    return {
-      ...dimensions,
-      height: Math.max(MIN_SIZE, newHeight),
-      y: originalBlock.y - heightDiff / 2, // Center the height change
-    };
-  }
-
-  return dimensions;
-}
-
-/**
  * Creates a selection bounding box component for multi-select
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State> | null} Selection bounding box element or null
@@ -769,96 +555,11 @@ function selectionBoundingBox(state) {
       // Add resize handles for multi-select
       ...(!isResizing
         ? Object.keys(RESIZE_HANDLERS).map((handle) =>
-            MultiSelectResizeHandle(handle, viewport.zoom, boundingBox),
+            ResizeHandle({ handle, zoom: viewport.zoom, context: "multi" }),
           )
         : []),
     ],
   );
-}
-
-/**
- * Creates a resize handle component for multi-select bounding box
- * @param {string} handle - Handle position (nw, ne, sw, se, n, s, e, w)
- * @param {number} zoom - Current zoom level for scaling
- * @param {{x: number, y: number, width: number, height: number}} boundingBox - Selection bounding box
- * @returns {import("hyperapp").ElementVNode<State>} Resize handle element
- */
-function MultiSelectResizeHandle(handle, zoom, boundingBox) {
-  // Scale handle sizes inversely with zoom to maintain consistent visual appearance
-  const handleSize = 10 / zoom;
-  const handleOffset = 5 / zoom;
-  const borderWidth = 1 / zoom;
-
-  // Determine if this is a corner handle
-  const isCorner = ["nw", "ne", "sw", "se"].includes(handle);
-  const isEdge = ["n", "s", "e", "w"].includes(handle);
-
-  /** @type {import("hyperapp").StyleProp} */
-  const style = {
-    position: "absolute",
-    backgroundColor: isCorner ? "white" : "transparent",
-    border: isCorner ? `${borderWidth}px solid blue` : "none",
-    width: isEdge && ["n", "s"].includes(handle) ? "auto" : `${handleSize}px`,
-    height: isEdge && ["e", "w"].includes(handle) ? "auto" : `${handleSize}px`,
-    pointerEvents: "auto",
-    cursor:
-      {
-        nw: "nw-resize",
-        ne: "ne-resize",
-        sw: "sw-resize",
-        se: "se-resize",
-        n: "n-resize",
-        s: "s-resize",
-        e: "e-resize",
-        w: "w-resize",
-      }[handle] || "default",
-  };
-
-  // Add positioning based on handle type
-  if (handle.includes("n")) style.top = `-${handleOffset}px`;
-  if (handle.includes("s")) style.bottom = `-${handleOffset}px`;
-  if (handle.includes("e")) style.right = `-${handleOffset}px`;
-  if (handle.includes("w")) style.left = `-${handleOffset}px`;
-
-  // Edge handle positioning
-  if (["n", "s"].includes(handle)) {
-    style.left = `${handleSize}px`;
-    style.right = `${handleSize}px`;
-  }
-  if (["e", "w"].includes(handle)) {
-    style.top = `${handleSize}px`;
-    style.bottom = `${handleSize}px`;
-  }
-
-  return h("div", {
-    class: `resize-handle ${handle}`,
-    "data-handle": handle,
-    style: style,
-    onpointerdown: (state, event) => {
-      event.stopPropagation();
-      const selectedBlocks = getSelectedBlocks(state);
-      const boundingBox = getSelectionBoundingBox(state);
-      if (!boundingBox || selectedBlocks.length <= 1) return state;
-
-      return updateCurrentPage(state, {
-        resizing: {
-          id: "selection-bounding-box",
-          handle: handle,
-          startWidth: boundingBox.width,
-          startHeight: boundingBox.height,
-          startX: boundingBox.x,
-          startY: boundingBox.y,
-          originalBlocks: selectedBlocks.map((block) => ({
-            id: block.id,
-            x: block.x,
-            y: block.y,
-            width: block.width,
-            height: block.height,
-          })),
-        },
-      });
-    },
-  });
 }
 
 /**

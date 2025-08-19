@@ -3,11 +3,11 @@ import {
   MIN_SIZE,
   PASTE_OFFSET_X,
   PASTE_OFFSET_Y,
-  RESIZE_CURSORS,
   OUTLINE_COLORS,
   OUTLINE_WIDTHS,
 } from "./constants.js";
 import { saveMementoAndReturn } from "./memento.js";
+import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
 import {
   addConnection,
   getConnectedBlockIds,
@@ -218,7 +218,11 @@ export function block(state) {
         }),
         ...(isSelected && !isEditing && !isConnecting && !isMultiSelect
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>
-              ResizeHandle(handle, currentPage.zoom),
+              ResizeHandle({
+                handle,
+                zoom: currentPage.zoom,
+                context: "block",
+              }),
             )
           : []),
         isSelected && !isEditing && !isMultiSelect && blockToolbar(),
@@ -321,167 +325,11 @@ function getBlockOutline(blockState, state) {
   return null; // Default: no outline
 }
 
-/**
- * @type {Record<string, ResizeHandler>}
- */
-
-export const RESIZE_HANDLERS = {
-  nw: (block, e) => ({
-    width: block.x + block.width - e.percentX,
-    height: block.y + block.height - e.percentY,
-    x: Math.min(block.x + block.width - MIN_SIZE, e.percentX),
-    y: Math.min(block.y + block.height - MIN_SIZE, e.percentY),
-  }),
-  ne: (block, e) => ({
-    width: e.percentX - block.x,
-    height: block.y + block.height - e.percentY,
-    x: block.x,
-    y: Math.min(block.y + block.height - MIN_SIZE, e.percentY),
-  }),
-  sw: (block, e) => ({
-    width: block.x + block.width - e.percentX,
-    height: e.percentY - block.y,
-    x: Math.min(block.x + block.width - MIN_SIZE, e.percentX),
-    y: block.y,
-  }),
-  se: (block, e) => ({
-    width: e.percentX - block.x,
-    height: e.percentY - block.y,
-    x: block.x,
-    y: block.y,
-  }),
-  n: (block, e) => ({
-    width: block.width,
-    height: block.y + block.height - e.percentY,
-    x: block.x,
-    y: Math.min(block.y + block.height - MIN_SIZE, e.percentY),
-  }),
-  s: (block, e) => ({
-    width: block.width,
-    height: e.percentY - block.y,
-    x: block.x,
-    y: block.y,
-  }),
-  w: (block, e) => ({
-    width: block.x + block.width - e.percentX,
-    height: block.height,
-    x: Math.min(block.x + block.width - MIN_SIZE, e.percentX),
-    y: block.y,
-  }),
-  e: (block, e) => ({
-    width: e.percentX - block.x,
-    height: block.height,
-    x: block.x,
-    y: block.y,
-  }),
-}; // -----------------------------
+// -----------------------------
 // ## Components
 // -----------------------------
+
 /**
- * Creates a resize handle component for block resizing
- * @param {string} handle - Handle position (nw, ne, sw, se, n, s, e, w)
- * @param {number} zoom - Current zoom level for scaling
- * @returns {import("hyperapp").ElementVNode<State>} Resize handle element
- */
-
-function ResizeHandle(handle, zoom) {
-  // Scale handle sizes inversely with zoom to maintain consistent visual appearance
-  const handleSize = 10 / zoom;
-  const handleOffset = 5 / zoom;
-  const borderWidth = 1 / zoom;
-
-  // Determine if this is a corner handle
-  const isCorner = ["nw", "ne", "sw", "se"].includes(handle);
-  const isEdge = ["n", "s", "e", "w"].includes(handle);
-
-  /** @type {import("hyperapp").StyleProp} */
-  const style = {
-    position: "absolute",
-    backgroundColor: isCorner ? "white" : "transparent",
-    border: isCorner ? `${borderWidth}px solid blue` : "none",
-    width: isEdge && ["n", "s"].includes(handle) ? "auto" : `${handleSize}px`,
-    height: isEdge && ["e", "w"].includes(handle) ? "auto" : `${handleSize}px`,
-  };
-
-  // Add positioning based on handle type
-  if (handle.includes("n")) style.top = `-${handleOffset}px`;
-  if (handle.includes("s")) style.bottom = `-${handleOffset}px`;
-  if (handle.includes("e")) style.right = `-${handleOffset}px`;
-  if (handle.includes("w")) style.left = `-${handleOffset}px`;
-
-  // Edge handle positioning
-  if (["n", "s"].includes(handle)) {
-    style.left = `${handleSize}px`;
-    style.right = `${handleSize}px`;
-  }
-  if (["e", "w"].includes(handle)) {
-    style.top = `${handleSize}px`;
-    style.bottom = `${handleSize}px`;
-  }
-
-  /**
-   * @param {State} state
-   * @param {PointerEvent} event
-   * @returns {State}
-   */
-  function onpointerenter(state, event) {
-    event.stopPropagation();
-    return updateCurrentPage(state, {
-      cursorStyle: RESIZE_CURSORS[handle] || "default",
-    });
-  }
-
-  /**
-   * @param {State} state
-   * @param {PointerEvent} event
-   * @returns {State}
-   */
-  function onpointerleave(state, event) {
-    event.stopPropagation();
-    return updateCurrentPage(state, {
-      cursorStyle: "default",
-    });
-  }
-
-  /**
-   * @param {State} state
-   * @param {PointerEvent} event
-   * @returns {State}
-   */
-  function onpointerdown(state, event) {
-    event.stopPropagation();
-    const blockId = parseInt(
-      /** @type {HTMLElement} */ (event.target)?.parentElement?.dataset?.id ||
-        "",
-    );
-    const blocks = getCurrentBlocks(state);
-    const block = blocks.find((b) => b.id === blockId);
-    if (!block) return state;
-    const selectedState = selectBlock(state, blockId);
-    return updateCurrentPage(selectedState, {
-      resizing: {
-        id: blockId,
-        handle: /** @type {string} */ (
-          /** @type {HTMLElement} */ (event.target).dataset.handle
-        ),
-        startWidth: block.width,
-        startHeight: block.height,
-        startX: block.x,
-        startY: block.y,
-      },
-      cursorStyle: RESIZE_CURSORS[handle] || "default",
-    });
-  }
-
-  return h("div", {
-    class: `resize-handle ${handle}`,
-    "data-handle": handle,
-    style: style,
-    onpointerenter,
-    onpointerleave,
-    onpointerdown,
-  });
-} /**
  * Creates a toolbar for selected blocks with action buttons
  * @returns {import("hyperapp").ElementVNode<State>} Block toolbar element
  */
