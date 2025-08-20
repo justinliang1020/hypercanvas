@@ -93,6 +93,7 @@ export function viewport(state) {
           ? getCurrentPage(state)?.selectedIds || []
           : [],
         previewSelectedIds: [], // Clear any existing preview
+        editingId: null,
       });
     }
 
