@@ -1,7 +1,9 @@
+import { h } from "./packages/hyperapp/index.js";
 import {
   getCurrentPage,
   getCurrentBlocks,
   updateCurrentPage,
+  getCurrentViewport,
 } from "./pages.js";
 
 /**
@@ -210,3 +212,125 @@ export function getSelectionBoundingBox(state) {
   };
 }
 
+/**
+ * Creates a visual selection box component during drag
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State> | null} Selection box element or null
+ */
+export function selectionBoxComponent(state) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage || !currentPage.selectionBox) {
+    return null;
+  }
+
+  const { startX, startY, currentX, currentY } = currentPage.selectionBox;
+
+  // Calculate rectangle bounds
+  const minX = Math.min(startX, currentX);
+  const maxX = Math.max(startX, currentX);
+  const minY = Math.min(startY, currentY);
+  const maxY = Math.max(startY, currentY);
+
+  const width = maxX - minX;
+  const height = maxY - minY;
+
+  const viewport = getCurrentViewport(state);
+  const outlineWidth = 1 / viewport.zoom;
+
+  return h("div", {
+    key: "selection-box",
+    style: {
+      left: `${minX}px`,
+      top: `${minY}px`,
+      width: `${width}px`,
+      height: `${height}px`,
+      border: `${outlineWidth}px dashed #007acc`,
+      backgroundColor: "rgba(0, 122, 204, 0.1)",
+      position: "absolute",
+      pointerEvents: "none",
+    },
+  });
+}
+
+/**
+ * Handles completion of selection box drag operation
+ * @param {State} state - Current application state
+ * @param {SelectionBoxState} selectionBox - Selection box state
+ * @returns {State} Updated state with blocks selected
+ */
+export function handleSelectionBoxComplete(state, selectionBox) {
+  const newSelectedIds = calculatePreviewSelection(state, selectionBox);
+
+  return updateCurrentPage(state, {
+    selectedIds: newSelectedIds,
+    previewSelectedIds: [], // Clear preview after selection is finalized
+  });
+}
+
+/**
+ * Calculates which blocks would be selected by the current selection box
+ * @param {State} state - Current application state
+ * @param {SelectionBoxState} selectionBox - Selection box state
+ * @returns {number[]} Array of block IDs that would be selected
+ */
+
+export function calculatePreviewSelection(state, selectionBox) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return [];
+
+  // Calculate selection rectangle bounds
+  const minX = Math.min(selectionBox.startX, selectionBox.currentX);
+  const maxX = Math.max(selectionBox.startX, selectionBox.currentX);
+  const minY = Math.min(selectionBox.startY, selectionBox.currentY);
+  const maxY = Math.max(selectionBox.startY, selectionBox.currentY);
+
+  // Find blocks that intersect with selection rectangle
+  const blocks = getCurrentBlocks(state);
+  const intersectingBlockIds = blocks
+    .filter((block) => {
+      // Check if block intersects with selection rectangle
+      const blockRight = block.x + block.width;
+      const blockBottom = block.y + block.height;
+
+      return !(
+        block.x > maxX ||
+        blockRight < minX ||
+        block.y > maxY ||
+        blockBottom < minY
+      );
+    })
+    .map((block) => block.id);
+
+  // Return preview selection based on current selection and shift key
+  const currentSelectedIds = currentPage.selectedIds || [];
+
+  if (currentPage.isShiftPressed) {
+    // Shift+drag: add to existing selection
+    return [...new Set([...currentSelectedIds, ...intersectingBlockIds])];
+  } else {
+    // Regular drag: replace selection
+    return intersectingBlockIds;
+  }
+}
+
+/**
+ * Checks if a point is within the selection bounding box
+ * @param {State} state - Current application state
+ * @param {number} canvasX - X coordinate in canvas space
+ * @param {number} canvasY - Y coordinate in canvas space
+ * @returns {boolean} True if point is within selection bounds
+ */
+export function isPointInSelectionBounds(state, canvasX, canvasY) {
+  const selectedBlocks = getSelectedBlocks(state);
+  if (selectedBlocks.length <= 1) return false;
+
+  const boundingBox = getSelectionBoundingBox(state);
+  if (!boundingBox) return false;
+
+  return (
+    canvasX >= boundingBox.x &&
+    canvasX <= boundingBox.x + boundingBox.width &&
+    canvasY >= boundingBox.y &&
+    canvasY <= boundingBox.y + boundingBox.height
+  );
+}
