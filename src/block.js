@@ -23,6 +23,7 @@ import {
 } from "./pages.js";
 import {
   isBlockSelected,
+  isBlockPreviewSelected,
   selectBlock,
   getSelectedBlockId,
   getSelectedBlocks,
@@ -40,6 +41,7 @@ export function block(state) {
     if (!currentPage) return h("div", {});
 
     const isSelected = isBlockSelected(state, block.id);
+    const isPreviewSelected = isBlockPreviewSelected(state, block.id);
     const selectedBlocks = getSelectedBlocks(state);
     const isMultiSelect = selectedBlocks.length > 1;
     const isEditing = currentPage.editingId === block.id;
@@ -61,6 +63,7 @@ export function block(state) {
         isEditing,
         isMultiSelect,
         isSelected,
+        isPreviewSelected,
       },
       state,
     );
@@ -243,7 +246,7 @@ function createOutline(width, color, zoom) {
 
 /**
  * Determines the outline style for a block based on its current state
- * @param {{isConnecting: boolean, isConnectable: boolean, isHovering: boolean, isConnectedToHovered: boolean, isEditing: boolean, isMultiSelect: boolean, isSelected: boolean}} blockState - Block state flags
+ * @param {{isConnecting: boolean, isConnectable: boolean, isHovering: boolean, isConnectedToHovered: boolean, isEditing: boolean, isMultiSelect: boolean, isSelected: boolean, isPreviewSelected: boolean}} blockState - Block state flags
  * @param {State} state - Application state
  * @returns {string|null} CSS outline property value
  */
@@ -256,6 +259,7 @@ function getBlockOutline(blockState, state) {
     isEditing,
     isMultiSelect,
     isSelected,
+    isPreviewSelected,
   } = blockState;
 
   const viewport = getCurrentViewport(state);
@@ -309,6 +313,14 @@ function getBlockOutline(blockState, state) {
     return createOutline(
       OUTLINE_WIDTHS.THICK,
       OUTLINE_COLORS.SELECTED,
+      viewport.zoom,
+    );
+  }
+
+  if (isPreviewSelected) {
+    return createOutline(
+      OUTLINE_WIDTHS.MEDIUM,
+      OUTLINE_COLORS.PREVIEW_SELECTED,
       viewport.zoom,
     );
   }

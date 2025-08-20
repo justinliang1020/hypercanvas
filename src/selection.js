@@ -16,6 +16,17 @@ export function isBlockSelected(state, blockId) {
 }
 
 /**
+ * Checks if a block is in preview selection (during selection box drag)
+ * @param {State} state - Current application state
+ * @param {number} blockId - ID of block to check
+ * @returns {boolean} True if block is in preview selection
+ */
+export function isBlockPreviewSelected(state, blockId) {
+  const currentPage = getCurrentPage(state);
+  return currentPage?.previewSelectedIds?.includes(blockId) ?? false;
+}
+
+/**
  * Gets all currently selected blocks
  * @param {State} state - Current application state
  * @returns {Block[]} Array of selected blocks

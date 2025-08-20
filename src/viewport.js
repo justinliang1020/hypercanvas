@@ -23,8 +23,6 @@ import {
   getSelectedBlocks,
   getSelectionBoundingBox,
   hasSelection,
-  addBlockToSelection,
-  selectBlock,
 } from "./selection.js";
 
 /**
@@ -94,6 +92,7 @@ export function viewport(state) {
         selectedIds: event.shiftKey
           ? getCurrentPage(state)?.selectedIds || []
           : [],
+        previewSelectedIds: [], // Clear any existing preview
       });
     }
 
@@ -158,12 +157,21 @@ export function viewport(state) {
       const canvasX = (event.clientX - canvasRect.left) / viewport.zoom;
       const canvasY = (event.clientY - canvasRect.top) / viewport.zoom;
 
+      const updatedSelectionBox = {
+        ...currentPage.selectionBox,
+        currentX: canvasX,
+        currentY: canvasY,
+      };
+
+      // Calculate preview selection in real-time
+      const previewSelectedIds = calculatePreviewSelection(
+        state,
+        updatedSelectionBox,
+      );
+
       return updateCurrentPage(state, {
-        selectionBox: {
-          ...currentPage.selectionBox,
-          currentX: canvasX,
-          currentY: canvasY,
-        },
+        selectionBox: updatedSelectionBox,
+        previewSelectedIds,
       });
     }
     return state;
@@ -661,14 +669,14 @@ function isPointInSelectionBounds(state, canvasX, canvasY) {
 }
 
 /**
- * Handles completion of selection box drag operation
+ * Calculates which blocks would be selected by the current selection box
  * @param {State} state - Current application state
  * @param {SelectionBoxState} selectionBox - Selection box state
- * @returns {State} Updated state with blocks selected
+ * @returns {number[]} Array of block IDs that would be selected
  */
-function handleSelectionBoxComplete(state, selectionBox) {
+function calculatePreviewSelection(state, selectionBox) {
   const currentPage = getCurrentPage(state);
-  if (!currentPage) return state;
+  if (!currentPage) return [];
 
   // Calculate selection rectangle bounds
   const minX = Math.min(selectionBox.startX, selectionBox.currentX);
@@ -693,22 +701,30 @@ function handleSelectionBoxComplete(state, selectionBox) {
     })
     .map((block) => block.id);
 
-  // Update selection based on current selection and shift key
+  // Return preview selection based on current selection and shift key
   const currentSelectedIds = currentPage.selectedIds || [];
-  let newSelectedIds;
 
   if (currentPage.isShiftPressed) {
     // Shift+drag: add to existing selection
-    newSelectedIds = [
-      ...new Set([...currentSelectedIds, ...intersectingBlockIds]),
-    ];
+    return [...new Set([...currentSelectedIds, ...intersectingBlockIds])];
   } else {
     // Regular drag: replace selection
-    newSelectedIds = intersectingBlockIds;
+    return intersectingBlockIds;
   }
+}
+
+/**
+ * Handles completion of selection box drag operation
+ * @param {State} state - Current application state
+ * @param {SelectionBoxState} selectionBox - Selection box state
+ * @returns {State} Updated state with blocks selected
+ */
+function handleSelectionBoxComplete(state, selectionBox) {
+  const newSelectedIds = calculatePreviewSelection(state, selectionBox);
 
   return updateCurrentPage(state, {
     selectedIds: newSelectedIds,
+    previewSelectedIds: [], // Clear preview after selection is finalized
   });
 }
 
