@@ -5,6 +5,7 @@ import {
   updateCurrentPage,
   getCurrentViewport,
 } from "./pages.js";
+import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
 
 /**
  * Checks if a block is currently selected
@@ -332,5 +333,55 @@ export function isPointInSelectionBounds(state, canvasX, canvasY) {
     canvasX <= boundingBox.x + boundingBox.width &&
     canvasY >= boundingBox.y &&
     canvasY <= boundingBox.y + boundingBox.height
+  );
+}
+/**
+ * Creates a selection bounding box component for multi-select
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State> | null} Selection bounding box element or null
+ */
+export function selectionBoundingBox(state) {
+  const selectedBlocks = getSelectedBlocks(state);
+  if (selectedBlocks.length <= 1) {
+    return null; // No bounding box for single or no selection
+  }
+
+  const boundingBox = getSelectionBoundingBox(state);
+  if (!boundingBox) {
+    return null;
+  }
+
+  const viewport = getCurrentViewport(state);
+  const outlineWidth = 4 / viewport.zoom;
+  const currentPage = getCurrentPage(state);
+  const isResizing = currentPage?.resizing?.id === "selection-bounding-box";
+
+  return h(
+    "div",
+    {
+      key: "selection-bounding-box",
+      class: "selection-bounding-box",
+      style: {
+        left: `${boundingBox.x}px`,
+        top: `${boundingBox.y}px`,
+        width: `${boundingBox.width}px`,
+        height: `${boundingBox.height}px`,
+        outline: `${outlineWidth}px solid blue`,
+        position: "absolute",
+        pointerEvents: "none",
+      },
+    },
+    [
+      // Add resize handles for multi-select
+      ...(!isResizing
+        ? Object.keys(RESIZE_HANDLERS).map((handle) =>
+            ResizeHandle({
+              handle: /** @type{ResizeString} */ (handle),
+              zoom: viewport.zoom,
+              context: "multi",
+            }),
+          )
+        : []),
+    ],
   );
 }
