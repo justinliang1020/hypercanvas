@@ -23,6 +23,8 @@ import {
   getSelectedBlocks,
   getSelectionBoundingBox,
   hasSelection,
+  addBlockToSelection,
+  selectBlock,
 } from "./selection.js";
 
 /**
@@ -78,10 +80,21 @@ export function viewport(state) {
       }
     }
 
-    // Regular click (not shift+click) - deselect blocks, exit edit mode, and exit connect mode
-    // Allow shift+click to pass through to blocks for multi-select
-    if (!event.shiftKey) {
-      return deselectAllBlocks(state);
+    // Left click on empty space - start selection box dragging
+    if (event.button === 0) {
+      // Calculate canvas coordinates for selection box start
+      return updateCurrentPage(state, {
+        selectionBox: {
+          startX: canvasX,
+          startY: canvasY,
+          currentX: canvasX,
+          currentY: canvasY,
+        },
+        // Only deselect if not shift-clicking (to allow additive selection)
+        selectedIds: event.shiftKey
+          ? getCurrentPage(state)?.selectedIds || []
+          : [],
+      });
     }
 
     return state;
@@ -136,6 +149,22 @@ export function viewport(state) {
         offsetX: viewport.offsetX + dx,
         offsetY: viewport.offsetY + dy,
       });
+    } else if (currentPage.selectionBox) {
+      // Update selection box during drag
+      const canvasRect = /** @type {HTMLElement} */ (
+        document.getElementById("canvas")
+      ).getBoundingClientRect();
+      const viewport = getCurrentViewport(state);
+      const canvasX = (event.clientX - canvasRect.left) / viewport.zoom;
+      const canvasY = (event.clientY - canvasRect.top) / viewport.zoom;
+
+      return updateCurrentPage(state, {
+        selectionBox: {
+          ...currentPage.selectionBox,
+          currentX: canvasX,
+          currentY: canvasY,
+        },
+      });
     }
     return state;
   }
@@ -147,12 +176,20 @@ export function viewport(state) {
     const currentPage = getCurrentPage(state);
     if (!currentPage) return state;
 
-    const newState = updateCurrentPage(state, {
+    let newState = updateCurrentPage(state, {
       isViewportDragging: false,
       resizing: null,
       dragStart: null,
       cursorStyle: "default",
     });
+
+    // Handle selection box completion
+    if (currentPage.selectionBox) {
+      newState = handleSelectionBoxComplete(newState, currentPage.selectionBox);
+      newState = updateCurrentPage(newState, {
+        selectionBox: null,
+      });
+    }
 
     // Save state for completed drag operation
     if (currentPage.dragStart) {
@@ -519,6 +556,8 @@ export function viewport(state) {
           ...getCurrentBlocks(state).map(block(state)),
           // Render selection bounding box above blocks
           selectionBoundingBox(state),
+          // Render selection box during drag
+          selectionBoxComponent(state),
         ].filter(Boolean),
       ),
     ],
@@ -619,4 +658,96 @@ function isPointInSelectionBounds(state, canvasX, canvasY) {
     canvasY >= boundingBox.y &&
     canvasY <= boundingBox.y + boundingBox.height
   );
+}
+
+/**
+ * Handles completion of selection box drag operation
+ * @param {State} state - Current application state
+ * @param {SelectionBoxState} selectionBox - Selection box state
+ * @returns {State} Updated state with blocks selected
+ */
+function handleSelectionBoxComplete(state, selectionBox) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return state;
+
+  // Calculate selection rectangle bounds
+  const minX = Math.min(selectionBox.startX, selectionBox.currentX);
+  const maxX = Math.max(selectionBox.startX, selectionBox.currentX);
+  const minY = Math.min(selectionBox.startY, selectionBox.currentY);
+  const maxY = Math.max(selectionBox.startY, selectionBox.currentY);
+
+  // Find blocks that intersect with selection rectangle
+  const blocks = getCurrentBlocks(state);
+  const intersectingBlockIds = blocks
+    .filter((block) => {
+      // Check if block intersects with selection rectangle
+      const blockRight = block.x + block.width;
+      const blockBottom = block.y + block.height;
+
+      return !(
+        block.x > maxX ||
+        blockRight < minX ||
+        block.y > maxY ||
+        blockBottom < minY
+      );
+    })
+    .map((block) => block.id);
+
+  // Update selection based on current selection and shift key
+  const currentSelectedIds = currentPage.selectedIds || [];
+  let newSelectedIds;
+
+  if (currentPage.isShiftPressed) {
+    // Shift+drag: add to existing selection
+    newSelectedIds = [
+      ...new Set([...currentSelectedIds, ...intersectingBlockIds]),
+    ];
+  } else {
+    // Regular drag: replace selection
+    newSelectedIds = intersectingBlockIds;
+  }
+
+  return updateCurrentPage(state, {
+    selectedIds: newSelectedIds,
+  });
+}
+
+/**
+ * Creates a visual selection box component during drag
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State> | null} Selection box element or null
+ */
+function selectionBoxComponent(state) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage || !currentPage.selectionBox) {
+    return null;
+  }
+
+  const { startX, startY, currentX, currentY } = currentPage.selectionBox;
+
+  // Calculate rectangle bounds
+  const minX = Math.min(startX, currentX);
+  const maxX = Math.max(startX, currentX);
+  const minY = Math.min(startY, currentY);
+  const maxY = Math.max(startY, currentY);
+
+  const width = maxX - minX;
+  const height = maxY - minY;
+
+  const viewport = getCurrentViewport(state);
+  const outlineWidth = 1 / viewport.zoom;
+
+  return h("div", {
+    key: "selection-box",
+    style: {
+      left: `${minX}px`,
+      top: `${minY}px`,
+      width: `${width}px`,
+      height: `${height}px`,
+      border: `${outlineWidth}px dashed #007acc`,
+      backgroundColor: "rgba(0, 122, 204, 0.1)",
+      position: "absolute",
+      pointerEvents: "none",
+    },
+  });
 }

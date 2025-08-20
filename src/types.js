@@ -44,6 +44,7 @@
  * @property {number|null} connectingId - ID of block in connect mode (pending connection)
  * @property {ResizeState|null} resizing - Current resize operation
  * @property {DragState|null} dragStart - Drag operation start state
+ * @property {SelectionBoxState|null} selectionBox - Selection box drag state
  */
 
 /**
@@ -84,6 +85,14 @@
  * @property {number} id - Block ID being dragged
  * @property {number} startX - Initial X position
  * @property {number} startY - Initial Y position
+ */
+
+/**
+ * @typedef {Object} SelectionBoxState
+ * @property {number} startX - Starting X position in canvas coordinates
+ * @property {number} startY - Starting Y position in canvas coordinates
+ * @property {number} currentX - Current X position in canvas coordinates
+ * @property {number} currentY - Current Y position in canvas coordinates
  */
 
 /**
