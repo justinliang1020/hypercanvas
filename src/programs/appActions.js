@@ -81,12 +81,13 @@ export class Program extends ProgramBase {
         diff,
       },
     ];
-    
+
     return {
       ...state,
-      actionDiffs: newActionDiffs.length > 1000 
-        ? newActionDiffs.slice(-1000) 
-        : newActionDiffs,
+      actionDiffs:
+        newActionDiffs.length > 1000
+          ? newActionDiffs.slice(-1000)
+          : newActionDiffs,
     };
   };
 
@@ -96,6 +97,7 @@ export class Program extends ProgramBase {
    * @returns {{path: string, value: any}[]}
    */
   #calculateDiff = (prevState, state) => {
+    /** @type {{path: string, value: any}[]} */
     const changes = [];
     this.#findChanges(prevState, state, "", changes);
     return changes;
