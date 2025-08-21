@@ -3,7 +3,7 @@ import { h, text } from "../packages/hyperapp/index.js";
 
 /**
  * @typedef ProgramState
- * @property {{actionName: string, prevState: State, state: State}[]} appDispatches
+ * @property {{actionName: string, diff: {path: string, value: any}[]}[]} actionDiffs
  */
 
 export class Program extends ProgramBase {
@@ -11,7 +11,7 @@ export class Program extends ProgramBase {
     super();
     /** @type {ProgramState} */
     this.defaultState = {
-      appDispatches: [],
+      actionDiffs: [],
     };
     /** @type {AllowedConnection[]} */
     this.allowedConnections = [];
@@ -26,19 +26,14 @@ export class Program extends ProgramBase {
    * @returns {import("hyperapp").ElementVNode<ProgramState>}
    */
   #main = (state) => {
-    const latestDispatch = state.appDispatches.at(-1);
-    if (!latestDispatch) {
+    const latestAction = state.actionDiffs.at(-1);
+    if (!latestAction) {
       return h(
         "div",
         { style: { padding: "10px", fontFamily: "monospace" } },
-        text("No dispatches yet"),
+        text("No actions yet"),
       );
     }
-
-    const changes = this.#calculateDiff(
-      latestDispatch.prevState,
-      latestDispatch.state,
-    );
 
     return h(
       "div",
@@ -54,14 +49,14 @@ export class Program extends ProgramBase {
         h(
           "div",
           { style: { fontWeight: "bold", marginBottom: "10px" } },
-          text(`Action: ${latestDispatch.actionName}`),
+          text(`Action: ${latestAction.actionName}`),
         ),
         h(
           "div",
           { style: { marginBottom: "5px", fontWeight: "bold" } },
           text("Changes:"),
         ),
-        ...changes.map((change) =>
+        ...latestAction.diff.map((change) =>
           h(
             "div",
             { style: { marginBottom: "2px" } },
@@ -78,16 +73,20 @@ export class Program extends ProgramBase {
    * @returns {ProgramState}
    */
   #updateAppState = (state, payload) => {
+    const diff = this.#calculateDiff(payload.prevState, payload.state);
+    const newActionDiffs = [
+      ...state.actionDiffs,
+      {
+        actionName: payload.action.name,
+        diff,
+      },
+    ];
+    
     return {
       ...state,
-      appDispatches: [
-        ...state.appDispatches,
-        {
-          actionName: payload.action.name,
-          prevState: payload.prevState,
-          state: payload.state,
-        },
-      ],
+      actionDiffs: newActionDiffs.length > 1000 
+        ? newActionDiffs.slice(-1000) 
+        : newActionDiffs,
     };
   };
 
