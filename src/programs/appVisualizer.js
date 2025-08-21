@@ -20,7 +20,7 @@ export class Program extends ProgramBase {
     this.allowedConnections = [];
     this.view = this.#main;
     this.subscriptions = () => {
-      return [this.onAppStateChange(this.#updateAppState)];
+      return [this.onAppDispatch(this.#updateAppState)];
     };
   }
 
@@ -292,13 +292,13 @@ export class Program extends ProgramBase {
 
   /**
    * @param {ProgramState} state
-   * @param {State} appState
+   * @param {any} payload
    * @returns {ProgramState}
    */
-  #updateAppState = (state, appState) => {
+  #updateAppState = (state, payload) => {
     return {
       ...state,
-      appState: appState,
+      appState: payload.state,
     };
   };
 }

@@ -124,3 +124,11 @@
  * @property {String} name
  * @property {typeof import('./programBase.js').ProgramBase} program
  */
+
+/**
+ * @typedef {Object} AppDispatchEventDetail
+ * @property {State} state - doesn't include program states
+ * @property {import("hyperapp").Action<State>} action
+ * @property {any} payload
+ * @property {State} prevState - doesn't include program states
+ */

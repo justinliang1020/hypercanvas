@@ -4,7 +4,7 @@ import { createMementoManager } from "./memento.js";
 import { viewport } from "./viewport.js";
 import { mountProgram, ProgramManager } from "./programManager.js";
 import { panelsContainer } from "./panels.js";
-import { notification, saveApplication, wrapDispatch } from "./utils.js";
+import { notification, saveApplication } from "./utils.js";
 import { getCurrentBlocks } from "./pages.js";
 
 initialize();
@@ -115,10 +115,10 @@ function subscription(dispatch, props) {
 }
 
 /**
- * @type {(dispatch: import("hyperapp").Dispatch<State>) => import("hyperapp").Dispatch<State>}
+ * @param {any} state
  */
-const dispatchMiddleware = wrapDispatch((state) => {
-  const safeToEmitState = JSON.parse(
+function safeToEmitState(state) {
+  return JSON.parse(
     JSON.stringify(state, (key, value) => {
       // Skip the problematic properties
       // if (key === "mementoManager") return undefined;
@@ -127,14 +127,50 @@ const dispatchMiddleware = wrapDispatch((state) => {
       return value;
     }),
   );
+}
 
-  const event = new CustomEvent("appStateChange", {
-    detail: { state: safeToEmitState },
-  });
-  dispatchEvent(event);
+/** @type{import("hyperapp").Action<State> | null} */
+let prevDispatchAction = null;
+/** @type{any} */
+let prevDispatchPayload = null;
+/** @type{State | null} */
+let prevState = null;
 
-  return state;
-});
+/**
+ * For now, i won't think about effects or manual dispatch. Only actions and state
+ * @type {(dispatch: import("hyperapp").Dispatch<State>) => import("hyperapp").Dispatch<State>}
+ */
+const dispatchMiddleware = (dispatch) => (action, payload) => {
+  // Action<S, P>
+  if (typeof action === "function") {
+    prevDispatchAction = action;
+    prevDispatchPayload = payload;
+  }
+  if (Array.isArray(action) && typeof action[0] !== "function") {
+    // [state: S, ...effects: MaybeEffect<S, P>[]]
+  } else if (!Array.isArray(action) && typeof action !== "function") {
+    // state
+    const state = action;
+    if (prevDispatchAction !== null && prevDispatchAction.name) {
+      /** @type {AppDispatchEventDetail} */
+      const detail = {
+        state: safeToEmitState(state),
+        action: prevDispatchAction,
+        payload: prevDispatchPayload,
+        prevState: safeToEmitState(prevState),
+      };
+      const event = new CustomEvent("appDispatch", {
+        detail,
+      });
+      dispatchEvent(event);
+    }
+    prevDispatchAction = null;
+    prevDispatchPayload = null;
+    // @ts-ignore
+    prevState = state;
+  }
+  dispatch(action, payload);
+};
 
 /**
  * Initializes the application with saved state and starts the Hyperapp
