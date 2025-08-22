@@ -5,6 +5,7 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @typedef ProgramState
  * @property {{actionName: string, diff: {path: string, value: any}[], count: number, timestamp: number}[]} groupedActions
  * @property {string[]} uniqueActionNames
+ * @property {boolean} isPaused
  */
 
 export class Program extends ProgramBase {
@@ -14,6 +15,7 @@ export class Program extends ProgramBase {
     this.defaultState = {
       groupedActions: [],
       uniqueActionNames: [],
+      isPaused: false,
     };
     /** @type {AllowedConnection[]} */
     this.allowedConnections = [];
@@ -54,14 +56,46 @@ export class Program extends ProgramBase {
       },
       [
         h(
-          "h3",
+          "div",
           {
             style: {
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
               margin: "0 0 10px 0",
-              color: isDarkMode ? "#e0e0e0" : "#333",
             },
           },
-          text("App Actions Timeline"),
+          [
+            h(
+              "h3",
+              {
+                style: {
+                  margin: "0",
+                  color: isDarkMode ? "#e0e0e0" : "#333",
+                },
+              },
+              text("App Actions Timeline"),
+            ),
+            h(
+              "button",
+              {
+                style: {
+                  padding: "4px 8px",
+                  backgroundColor: state.isPaused ? "#f44336" : "#4caf50",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "11px",
+                },
+                onclick: (/** @type {ProgramState} */ state) => ({
+                  ...state,
+                  isPaused: !state.isPaused,
+                }),
+              },
+              text(state.isPaused ? "Resume" : "Pause"),
+            ),
+          ],
         ),
         this.#renderTable(state),
       ],
@@ -310,6 +344,11 @@ export class Program extends ProgramBase {
    * @returns {ProgramState}
    */
   #updateAppState = (state, payload) => {
+    // If paused, don't process new diffs
+    if (state.isPaused) {
+      return state;
+    }
+
     const diff = this.#calculateDiff(payload.prevState, payload.state);
     const actionName = payload.action.name;
     const timestamp = Date.now();
