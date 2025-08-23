@@ -152,6 +152,7 @@ function programsPanel(state) {
       },
       style: {
         width: `${state.programsPanelWidth}px`,
+        overflowY: "auto",
       },
       onpointerdown: (state, event) => {
         event.stopPropagation();
