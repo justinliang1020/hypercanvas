@@ -462,18 +462,15 @@ function onkeydown(state, event) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return state;
 
-  // Track shift key state
-  if (event.key === "Shift") {
-    return updateCurrentPage(state, {
-      isShiftPressed: true,
-    });
-  }
-
   // Check if user is interacting with an input field or has text selected
   const hasTextSelection = (window.getSelection()?.toString() ?? "").length > 0;
 
   // Handle keyboard shortcuts
   switch (event.key) {
+    case "Shift":
+      return updateCurrentPage(state, {
+        isShiftPressed: true,
+      });
     case "Escape":
       // Exit connect mode, edit mode, or deselect
       if (currentPage.connectingId !== null) {
