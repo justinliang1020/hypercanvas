@@ -100,7 +100,10 @@ export function block(state) {
       } else if (currentPage.connectingId !== null) {
         // In connection mode, use default pointer cursor
         cursorStyle = "pointer";
-      } else if (currentPage.editingId === block.id) {
+      } else if (
+        currentPage.editingId === block.id ||
+        currentPage.isAltPressed
+      ) {
         // In edit mode, use default cursor
         cursorStyle = "default";
       } else {
@@ -155,7 +158,7 @@ export function block(state) {
       }
 
       // If block is in edit mode, don't start dragging
-      if (currentPage.editingId === block.id) {
+      if (currentPage.editingId === block.id || currentPage.isAltPressed) {
         return state;
       }
 
@@ -182,6 +185,12 @@ export function block(state) {
      */
     function ondblclick(state, event) {
       event.stopPropagation();
+
+      const currentPage = getCurrentPage(state);
+      if (!currentPage) return state;
+      if (currentPage.isAltPressed) {
+        return state;
+      }
 
       // Double-click enters edit mode
       const selectedState = selectBlock(state, block.id);
@@ -215,7 +224,8 @@ export function block(state) {
         h("program-component", {
           "data-id": block.id, // used for mounting program
           style: {
-            pointerEvents: isEditing ? null : "none",
+            pointerEvents:
+              isEditing || currentPage.isAltPressed ? null : "none",
           },
         }),
         ...(isSelected && !isEditing && !isConnecting && !isMultiSelect

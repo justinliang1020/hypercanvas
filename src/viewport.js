@@ -471,6 +471,10 @@ function onkeydown(state, event) {
       return updateCurrentPage(state, {
         isShiftPressed: true,
       });
+    case "Alt":
+      return updateCurrentPage(state, {
+        isAltPressed: true,
+      });
     case "Escape":
       // Exit connect mode, edit mode, or deselect
       if (currentPage.connectingId !== null) {
@@ -579,6 +583,10 @@ function onkeyup(state, event) {
   if (event.key === "Shift") {
     return updateCurrentPage(state, {
       isShiftPressed: false,
+    });
+  } else if (event.key === "Alt") {
+    return updateCurrentPage(state, {
+      isAltPressed: false,
     });
   }
   return state;

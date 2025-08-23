@@ -54,6 +54,31 @@ export function getCurrentViewport(state) {
     : { offsetX: 0, offsetY: 0, zoom: 1 };
 }
 
+/** @type {Page} */
+export const defaultPage = {
+  id: crypto.randomUUID(),
+  name: "New Page",
+  blocks: [],
+  connections: [],
+  offsetX: 0,
+  offsetY: 0,
+  zoom: 1,
+  mouseX: 0,
+  mouseY: 0,
+  cursorStyle: "pointer",
+  isViewportDragging: false,
+  isShiftPressed: false,
+  isAltPressed: false,
+  selectedIds: [],
+  editingId: null,
+  hoveringId: null,
+  connectingId: null,
+  resizing: null,
+  dragStart: null,
+  previewSelectedIds: [],
+  selectionBox: null,
+};
+
 /**
  * Creates a new page
  * @param {State} state - Current application state
@@ -61,28 +86,8 @@ export function getCurrentViewport(state) {
  * @returns {State} Updated state with new page
  */
 export function createPage(state, name = "New Page") {
-  const newPage = {
-    id: crypto.randomUUID(),
-    name,
-    blocks: [],
-    connections: [],
-    offsetX: 0,
-    offsetY: 0,
-    zoom: 1,
-    mouseX: 0,
-    mouseY: 0,
-    cursorStyle: "pointer",
-    isViewportDragging: false,
-    isShiftPressed: false,
-    selectedIds: [],
-    editingId: null,
-    hoveringId: null,
-    connectingId: null,
-    resizing: null,
-    dragStart: null,
-    previewSelectedIds: [],
-    selectionBox: null,
-  };
+  const newPage = defaultPage;
+  newPage.name = name;
 
   const newState = {
     ...state,

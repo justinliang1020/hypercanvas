@@ -5,7 +5,7 @@ import { viewport } from "./viewport.js";
 import { mountProgram, ProgramManager } from "./programManager.js";
 import { panelsContainer } from "./panels.js";
 import { notification, saveApplication } from "./utils.js";
-import { getCurrentBlocks } from "./pages.js";
+import { defaultPage, getCurrentBlocks } from "./pages.js";
 
 initialize();
 
@@ -33,30 +33,7 @@ function main(state) {
 function initialState() {
   /** @type {State} */
   const state = {
-    pages: [
-      {
-        id: crypto.randomUUID(),
-        name: "Page 1",
-        blocks: [],
-        connections: [],
-        offsetX: 0,
-        offsetY: 0,
-        zoom: 1,
-        mouseX: 0,
-        mouseY: 0,
-        cursorStyle: "pointer",
-        isViewportDragging: false,
-        isShiftPressed: false,
-        selectedIds: [],
-        editingId: null,
-        hoveringId: null,
-        connectingId: null,
-        resizing: null,
-        dragStart: null,
-        previewSelectedIds: [],
-        selectionBox: null,
-      },
-    ],
+    pages: [defaultPage],
     currentPageId: "",
     mementoManager: createMementoManager(),
     isDarkMode: false,
