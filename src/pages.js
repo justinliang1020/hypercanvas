@@ -80,6 +80,8 @@ export function createPage(state, name = "New Page") {
     connectingId: null,
     resizing: null,
     dragStart: null,
+    previewSelectedIds: [],
+    selectionBox: null,
   };
 
   const newState = {
