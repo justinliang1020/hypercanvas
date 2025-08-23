@@ -14,6 +14,8 @@ export class ProgramBase {
   /** @type {AllowedConnection[]} */
   allowedConnections = [];
   defaultState = {};
+  /** @type {EditorBase | null} */
+  editor = null;
   /** @type {Number} */
   id = -1;
   /** @type {((state: any) => import("hyperapp").VNode<any>) | undefined} - imported from import("hyperapp").App<any> */
@@ -194,4 +196,17 @@ export class ProgramBase {
     this.#emitStateChange(state);
     return state;
   });
+}
+
+//TODO: fix this and decide what to do
+export class EditorBase extends ProgramBase {
+  /** @type{ProgramBase | null} */
+  #program = null;
+
+  /**
+   * @returns {ProgramBase | null}
+   */
+  getProgram() {
+    return this.#program;
+  }
 }

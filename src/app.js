@@ -2,10 +2,15 @@ import { app, h } from "./packages/hyperapp/index.js";
 import { STATE_SAVE_PATH } from "./constants.js";
 import { createMementoManager } from "./memento.js";
 import { viewport } from "./viewport.js";
-import { mountProgram, ProgramManager } from "./programManager.js";
+import {
+  mountEditorProgram,
+  mountProgram,
+  ProgramManager,
+} from "./programManager.js";
 import { panelsContainer } from "./panels.js";
 import { notification, saveApplication } from "./utils.js";
 import { defaultPage, getCurrentBlocks } from "./pages.js";
+import { getFirstSelectedBlock, getFirstSelectedBlockId } from "./selection.js";
 
 initialize();
 
@@ -69,6 +74,7 @@ function subscription(dispatch, props) {
       getCurrentBlocks(state).forEach((block) => {
         mountProgram(block, programManager);
       });
+      mountEditorProgram(getFirstSelectedBlock(state), programManager);
     });
   });
 

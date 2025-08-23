@@ -25,7 +25,7 @@ import {
   isBlockSelected,
   isBlockPreviewSelected,
   selectBlock,
-  getSelectedBlockId,
+  getFirstSelectedBlockId,
   getSelectedBlocks,
   toggleBlockSelection,
 } from "./selection.js";
@@ -79,8 +79,8 @@ export function block(state) {
       if (!currentPage) return state;
 
       if (
-        getSelectedBlockId(state) !== null &&
-        getSelectedBlockId(state) !== block.id &&
+        getFirstSelectedBlockId(state) !== null &&
+        getFirstSelectedBlockId(state) !== block.id &&
         currentPage.dragStart !== null
       )
         return state;
@@ -379,7 +379,7 @@ function blockToolbar() {
         {
           onclick: (state, event) => {
             event.stopPropagation();
-            const selectedBlockId = getSelectedBlockId(state);
+            const selectedBlockId = getFirstSelectedBlockId(state);
             if (selectedBlockId === null) return state;
             return sendToBack(state, selectedBlockId);
           },
@@ -391,7 +391,7 @@ function blockToolbar() {
         {
           onclick: (state, event) => {
             event.stopPropagation();
-            const selectedBlockId = getSelectedBlockId(state);
+            const selectedBlockId = getFirstSelectedBlockId(state);
             if (selectedBlockId === null) return state;
             return sendToFront(state, selectedBlockId);
           },
@@ -404,7 +404,7 @@ function blockToolbar() {
           onclick: (state, event) => {
             event.stopPropagation();
             const currentPage = getCurrentPage(state);
-            const selectedBlockId = getSelectedBlockId(state);
+            const selectedBlockId = getFirstSelectedBlockId(state);
             if (!currentPage || selectedBlockId === null) return state;
 
             // Toggle connect mode

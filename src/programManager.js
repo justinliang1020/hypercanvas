@@ -165,6 +165,42 @@ export function mountProgram(block, programManager) {
 }
 
 /**
+ * Renders the selected block's program editor into the editor DOM element
+ * @param {Block | null} selectedBlock - Block containing the program to render
+ * @param {import("./programManager.js").ProgramManager} programManager
+ * @returns {void}
+ */
+export function mountEditorProgram(selectedBlock, programManager) {
+  if (selectedBlock === null) return;
+  console.log("moew");
+
+  const editorProgramComponent = document.querySelector(
+    `program-component[data-id="editor-${selectedBlock.id}"]`,
+  );
+  const targetElement = /** @type {HTMLElement} */ (
+    editorProgramComponent?.shadowRoot?.firstElementChild
+  );
+  const programInstance = programManager.get(selectedBlock.id);
+
+  if (targetElement && targetElement.localName === "program-component-child") {
+    if (programInstance) {
+      try {
+        programInstance.mount(targetElement, selectedBlock.programData.state);
+      } catch (error) {
+        console.warn(
+          `Failed to run editor program for block ${selectedBlock.id}:`,
+          error,
+        );
+      }
+    } else {
+      targetElement.style.color = "red";
+      targetElement.style.fontWeight = "bold";
+      targetElement.innerText = `ERROR: editor '${selectedBlock.programData.name}' not initialized.`;
+    }
+  }
+}
+
+/**
  * Custom element that wraps program instances with shadow DOM
  */
 class ProgramComponent extends HTMLElement {
@@ -179,6 +215,8 @@ class ProgramComponent extends HTMLElement {
     const el = document.createElement("program-component-child");
     this.shadowRoot.appendChild(el);
   }
+
+  // need to get it so that when the data-id changes, the program-component-child is nuked and reloaded
 }
 
 /**

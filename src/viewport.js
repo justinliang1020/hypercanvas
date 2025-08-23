@@ -15,7 +15,7 @@ import {
 import {
   calculatePreviewSelection,
   deselectAllBlocks,
-  getSelectedBlockId,
+  getFirstSelectedBlockId,
   getSelectedBlockIds,
   getSelectedBlocks,
   handleSelectionBoxComplete,
@@ -495,7 +495,7 @@ function onkeydown(state, event) {
     case "Delete":
     case "Backspace":
       // Only handle block deletion if not in input field, a block is selected, and not in edit mode
-      const selectedBlockId = getSelectedBlockId(state);
+      const selectedBlockId = getFirstSelectedBlockId(state);
       if (selectedBlockId !== null && currentPage.editingId === null) {
         event.preventDefault();
         return deleteSelectedBlocks(state);

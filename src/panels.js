@@ -4,7 +4,14 @@ import { addBlock } from "./block.js";
 import { MEDIA_SAVE_PATH } from "./constants.js";
 import { undoState, redoState } from "./memento.js";
 import { programRegistry } from "./programRegistry.js";
-import { createPage, switchPage, deletePage, renamePage } from "./pages.js";
+import {
+  createPage,
+  switchPage,
+  deletePage,
+  renamePage,
+  getCurrentPage,
+} from "./pages.js";
+import { getFirstSelectedBlockId } from "./selection.js";
 
 /**
  * Creates the panels container with both layers panel, programs panel and floating toggle button
@@ -219,9 +226,22 @@ function programsPanel(state) {
         text("save"),
       ),
       h("hr", {}),
+      editor(state),
       programButtons(state),
     ],
   );
+}
+
+/**
+ * Creates a program buttons component with filter functionality
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
+ */
+function editor(state) {
+  const firstSelectedBlockId = getFirstSelectedBlockId(state);
+  return h("program-component", {
+    "data-id": `editor-${firstSelectedBlockId}`,
+  });
 }
 
 /**

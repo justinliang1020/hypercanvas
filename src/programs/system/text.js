@@ -1,5 +1,5 @@
 import { h, text } from "../../packages/hyperapp/index.js";
-import { ProgramBase } from "../../programBase.js";
+import { ProgramBase, EditorBase } from "../../programBase.js";
 
 /**
  * @typedef State
@@ -20,6 +20,8 @@ export class Program extends ProgramBase {
     /** @type {AllowedConnection[]} */
     this.allowedConnections = [];
     this.view = this.#main;
+    //TODO: unsure if this works
+    this.editor = new Editor();
   }
 
   /**
@@ -50,4 +52,89 @@ export class Program extends ProgramBase {
       },
       text(state.text),
     );
+}
+
+/**
+ * @typedef EditorState
+ * @property {string} value
+ * @property {number} fontSize
+ */
+
+class Editor extends EditorBase {
+  constructor() {
+    super();
+    /** @type {EditorState} */
+    this.defaultState = {
+      value: "#000000",
+      fontSize: 14,
+    };
+    this.view = this.#main;
+  }
+
+  /**
+   * @param {EditorState} state
+   * @returns {import("hyperapp").ElementVNode<EditorState>}
+   */
+  #main = (state) =>
+    h("section", {}, [
+      h("h3", {}, text("Text Style Editor")),
+      h("input", {
+        type: "color",
+        value: state.value,
+        oninput: (state, event) => {
+          const newValue = /** @type{HTMLInputElement}*/ (event.target).value;
+          const newState = {
+            ...state,
+            value: newValue,
+          };
+          this.#changeBackground(newState);
+          return newState;
+        },
+      }),
+      h("input", {
+        type: "number",
+        value: state.fontSize,
+        min: "8",
+        max: "72",
+        oninput: (state, event) => {
+          const newFontSize = parseInt(
+            /** @type{HTMLInputElement}*/ (event.target).value,
+          );
+          const newState = {
+            ...state,
+            fontSize: newFontSize,
+          };
+          this.#changeFontSize(newState);
+          return newState;
+        },
+      }),
+    ]);
+
+  /**
+   * @param {EditorState} state
+   * @returns {void}
+   */
+  #changeBackground = (state) => {
+    const textProgramInstance = this.getConnection("default");
+    if (!textProgramInstance) return;
+    const textProgramState = textProgramInstance.getState();
+    textProgramInstance.modifyState({
+      ...textProgramState,
+      backgroundColor: state.value,
+    });
+  };
+
+  /**
+   * @param {EditorState} state
+   * @returns {void}
+   */
+  #changeFontSize = (state) => {
+    const textProgramInstance = this.getConnection("default");
+    if (!textProgramInstance) return;
+    const textProgramState = textProgramInstance.getState();
+    textProgramInstance.modifyState({
+      ...textProgramState,
+      fontSize: state.fontSize,
+    });
+  };
 }

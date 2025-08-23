@@ -100,7 +100,7 @@ export function deselectAllBlocks(state) {
  * @param {State} state - Current application state
  * @returns {Block|null} The selected block or null if none selected
  */
-export function getSelectedBlock(state) {
+export function getFirstSelectedBlock(state) {
   const selectedBlocks = getSelectedBlocks(state);
   return selectedBlocks.length > 0 ? selectedBlocks[0] : null;
 }
@@ -110,7 +110,7 @@ export function getSelectedBlock(state) {
  * @param {State} state - Current application state
  * @returns {number|null} The selected block ID or null if none selected
  */
-export function getSelectedBlockId(state) {
+export function getFirstSelectedBlockId(state) {
   const selectedIds = getSelectedBlockIds(state);
   return selectedIds.length > 0 ? selectedIds[0] : null;
 }
