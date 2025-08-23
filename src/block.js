@@ -214,7 +214,7 @@ export function block(state) {
           height: `${block.height}px`,
           zIndex: `${block.zIndex}`,
         },
-        class: { block: true, hovered: isHovering },
+        class: { block: true },
         onpointerover,
         onpointerleave,
         onpointerdown,
@@ -272,14 +272,22 @@ function getBlockOutline(blockState, state) {
     isPreviewSelected,
   } = blockState;
 
-  const viewport = getCurrentViewport(state);
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return null;
 
   // Priority order matters - most specific states first
+  if (currentPage.isAltPressed) {
+    return createOutline(
+      OUTLINE_WIDTHS.THICK,
+      OUTLINE_COLORS.INTERACT_MODE,
+      currentPage.zoom,
+    );
+  }
   if (isConnecting) {
     return createOutline(
       OUTLINE_WIDTHS.THICK,
       OUTLINE_COLORS.CONNECTING,
-      viewport.zoom,
+      currentPage.zoom,
     );
   }
 
@@ -287,7 +295,7 @@ function getBlockOutline(blockState, state) {
     return createOutline(
       OUTLINE_WIDTHS.THICK,
       OUTLINE_COLORS.CONNECTABLE_HOVER,
-      viewport.zoom,
+      currentPage.zoom,
     );
   }
 
@@ -295,7 +303,7 @@ function getBlockOutline(blockState, state) {
     return createOutline(
       OUTLINE_WIDTHS.MEDIUM,
       OUTLINE_COLORS.CONNECTABLE,
-      viewport.zoom,
+      currentPage.zoom,
     );
   }
 
@@ -303,7 +311,7 @@ function getBlockOutline(blockState, state) {
     return createOutline(
       OUTLINE_WIDTHS.MEDIUM,
       OUTLINE_COLORS.CONNECTED_TO_HOVERED,
-      viewport.zoom,
+      currentPage.zoom,
     );
   }
 
@@ -311,7 +319,7 @@ function getBlockOutline(blockState, state) {
     return createOutline(
       OUTLINE_WIDTHS.THICK,
       OUTLINE_COLORS.EDITING,
-      viewport.zoom,
+      currentPage.zoom,
     );
   }
 
@@ -323,7 +331,7 @@ function getBlockOutline(blockState, state) {
     return createOutline(
       OUTLINE_WIDTHS.THICK,
       OUTLINE_COLORS.SELECTED,
-      viewport.zoom,
+      currentPage.zoom,
     );
   }
 
@@ -331,7 +339,7 @@ function getBlockOutline(blockState, state) {
     return createOutline(
       OUTLINE_WIDTHS.MEDIUM,
       OUTLINE_COLORS.PREVIEW_SELECTED,
-      viewport.zoom,
+      currentPage.zoom,
     );
   }
 
@@ -339,7 +347,7 @@ function getBlockOutline(blockState, state) {
     return createOutline(
       OUTLINE_WIDTHS.THIN,
       OUTLINE_COLORS.HOVERING,
-      viewport.zoom,
+      currentPage.zoom,
     );
   }
 

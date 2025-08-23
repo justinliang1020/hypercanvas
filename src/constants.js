@@ -23,18 +23,19 @@ export const RESIZE_CURSORS = {
 };
 
 export const OUTLINE_COLORS = {
-  CONNECTING: 'orange',
-  CONNECTABLE_HOVER: '#00ff00',
-  CONNECTABLE: '#90ee90',
-  CONNECTED_TO_HOVERED: 'purple',
-  EDITING: 'skyblue',
-  SELECTED: 'blue',
-  PREVIEW_SELECTED: 'rgba(0, 122, 204, 0.6)', // Semi-transparent blue for preview
-  HOVERING: 'blue'
+  CONNECTING: "orange",
+  CONNECTABLE_HOVER: "#00ff00",
+  CONNECTABLE: "#90ee90",
+  CONNECTED_TO_HOVERED: "purple",
+  EDITING: "skyblue",
+  SELECTED: "blue",
+  PREVIEW_SELECTED: "rgba(0, 122, 204, 0.6)", // Semi-transparent blue for preview
+  HOVERING: "blue",
+  INTERACT_MODE: "green",
 };
 
 export const OUTLINE_WIDTHS = {
-  THICK: 4,    // For important states
-  MEDIUM: 3,   // For secondary states  
-  THIN: 2      // For hover states
+  THICK: 4, // For important states
+  MEDIUM: 3, // For secondary states
+  THIN: 2, // For hover states
 };
