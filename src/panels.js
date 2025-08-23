@@ -167,22 +167,6 @@ function programsPanel(state) {
       h(
         "button",
         {
-          onclick: undoState,
-          disabled: state.mementoManager.undoStack.length === 0,
-        },
-        text("↶ Undo"),
-      ),
-      h(
-        "button",
-        {
-          onclick: redoState,
-          disabled: state.mementoManager.redoStack.length === 0,
-        },
-        text("↷ Redo"),
-      ),
-      h(
-        "button",
-        {
           onclick: (state) => [
             state,
             async (dispatch) => {
