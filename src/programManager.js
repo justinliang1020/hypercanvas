@@ -209,14 +209,37 @@ class ProgramComponent extends HTMLElement {
     this.attachShadow({ mode: "open" });
   }
 
+  static get observedAttributes() {
+    return ["data-id"];
+  }
+
   connectedCallback() {
+    this.#createChild();
+  }
+
+  disconnectedCallback() {
+    if (this.shadowRoot) {
+      this.shadowRoot.innerHTML = "";
+    }
+  }
+
+  /**
+   * @param {string} name
+   * @param {string|null} oldValue
+   * @param {string|null} newValue
+   */
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === "data-id" && oldValue !== newValue) {
+      this.#createChild();
+    }
+  }
+
+  #createChild() {
     if (!this.shadowRoot) return;
     this.shadowRoot.innerHTML = "";
     const el = document.createElement("program-component-child");
     this.shadowRoot.appendChild(el);
   }
-
-  // need to get it so that when the data-id changes, the program-component-child is nuked and reloaded
 }
 
 /**
