@@ -60,12 +60,13 @@ export class Program extends ProgramBase {
  */
 
 export class Editor extends EditorBase {
-  constructor() {
-    super();
+  /** @param {ProgramBase} program */
+  constructor(program) {
+    super(program);
     /** @type {EditorState} */
     this.defaultState = {
-      value: "#000000",
-      fontSize: 14,
+      value: this.#getColor(),
+      fontSize: this.#getFontSize(),
     };
     this.view = this.#main;
   }
@@ -136,4 +137,20 @@ export class Editor extends EditorBase {
       fontSize: state.fontSize,
     });
   };
+
+  #getFontSize() {
+    const textProgramInstance = this.program;
+    if (!textProgramInstance) return;
+    /** @type {State} */
+    const textProgramState = textProgramInstance.getState();
+    return textProgramState.fontSize;
+  }
+
+  #getColor() {
+    const textProgramInstance = this.program;
+    if (!textProgramInstance) return;
+    /** @type {State} */
+    const textProgramState = textProgramInstance.getState();
+    return textProgramState.backgroundColor;
+  }
 }

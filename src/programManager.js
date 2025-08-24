@@ -188,11 +188,9 @@ export function mountEditorProgram(selectedBlock, programManager) {
     programInstance &&
     Editor
   ) {
-    const editorInstance = new Editor();
-    editorInstance.program = programInstance;
+    const editorInstance = new Editor(programInstance);
     try {
-      //TODO: how to get state to persist of editor
-      editorInstance.editorMount(targetElement, null);
+      editorInstance.mount(targetElement, null);
     } catch (error) {
       console.warn(
         `Failed to run editor program for block ${selectedBlock.id}:`,
