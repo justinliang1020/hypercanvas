@@ -201,12 +201,25 @@ export class ProgramBase {
 //TODO: fix this and decide what to do
 export class EditorBase extends ProgramBase {
   /** @type{ProgramBase | null} */
-  #program = null;
+  program = null;
 
-  /**
-   * @returns {ProgramBase | null}
+  /** Runs a hyperapp program on a node. If no state is passed in, it uses the default state of the program.
+   * @param {HTMLElement} node
+   * @param {Object | null} state
    */
-  getProgram() {
-    return this.#program;
+  editorMount(node, state) {
+    if (!this.view) {
+      throw Error("App config is undefined");
+    }
+    if (state === null) {
+      state = this.defaultState;
+    }
+    //@ts-ignore
+    app({
+      init: state,
+      node: node,
+      view: this.view,
+      subscriptions: this.subscriptions,
+    });
   }
 }

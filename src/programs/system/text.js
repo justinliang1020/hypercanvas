@@ -115,7 +115,7 @@ class Editor extends EditorBase {
    * @returns {void}
    */
   #changeBackground = (state) => {
-    const textProgramInstance = this.getConnection("default");
+    const textProgramInstance = this.program;
     if (!textProgramInstance) return;
     const textProgramState = textProgramInstance.getState();
     textProgramInstance.modifyState({
@@ -129,7 +129,7 @@ class Editor extends EditorBase {
    * @returns {void}
    */
   #changeFontSize = (state) => {
-    const textProgramInstance = this.getConnection("default");
+    const textProgramInstance = this.program;
     if (!textProgramInstance) return;
     const textProgramState = textProgramInstance.getState();
     textProgramInstance.modifyState({

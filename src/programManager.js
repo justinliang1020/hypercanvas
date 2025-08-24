@@ -183,9 +183,11 @@ export function mountEditorProgram(selectedBlock, programManager) {
   const programInstance = programManager.get(selectedBlock.id);
 
   if (targetElement && targetElement.localName === "program-component-child") {
-    if (programInstance) {
+    if (programInstance && programInstance.editor) {
+      programInstance.editor.program = programInstance;
       try {
-        programInstance.mount(targetElement, selectedBlock.programData.state);
+        //TODO: how to get state to persist of editor
+        programInstance.editor.editorMount(targetElement, null);
       } catch (error) {
         console.warn(
           `Failed to run editor program for block ${selectedBlock.id}:`,
