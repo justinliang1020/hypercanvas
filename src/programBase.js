@@ -206,7 +206,7 @@ export class ProgramBase {
 /**
  * @template ProgramState
  * @template EditorState
- * @extends ProgramBase<ProgramState>
+ * @extends ProgramBase<EditorState>
  */
 export class EditorBase extends ProgramBase {
   /** @param {ProgramBase<ProgramState> | undefined} program */
@@ -217,7 +217,7 @@ export class EditorBase extends ProgramBase {
 
   /** Runs a hyperapp program on a node. If no state is passed in, it uses the default state of the program.
    * @param {HTMLElement} node
-   * @param {ProgramState | null} state
+   * @param {EditorState | null} state
    */
   mount(node, state) {
     if (!this.view) {

@@ -124,6 +124,7 @@ export class Editor extends EditorBase {
     const textProgramInstance = this.program;
     if (!textProgramInstance) return;
     const textProgramState = textProgramInstance.getState();
+    if (!textProgramState) return;
     textProgramInstance.modifyState({
       ...textProgramState,
       backgroundColor: state.value,
@@ -138,6 +139,7 @@ export class Editor extends EditorBase {
     const textProgramInstance = this.program;
     if (!textProgramInstance) return;
     const textProgramState = textProgramInstance.getState();
+    if (!textProgramState) return;
     textProgramInstance.modifyState({
       ...textProgramState,
       fontSize: state.fontSize,
@@ -145,18 +147,20 @@ export class Editor extends EditorBase {
   };
 
   #getFontSize() {
+    const defaultFontSize = 14;
     const textProgramInstance = this.program;
-    if (!textProgramInstance) return;
-    const textProgramState = textProgramInstance.getState(); //TODO: how to get state automatically here, right now it says 1. Type '{}' is missing the following properties from type 'State': text, backgroundColor, fontSize [2739]
-    if (!textProgramState) return;
+    if (!textProgramInstance) return defaultFontSize;
+    const textProgramState = textProgramInstance.getState();
+    if (!textProgramState) return defaultFontSize;
     return textProgramState.fontSize;
   }
 
   #getColor() {
+    const defaultColor = "#000000";
     const textProgramInstance = this.program;
-    if (!textProgramInstance) return;
+    if (!textProgramInstance) return defaultColor;
     const textProgramState = textProgramInstance.getState();
-    if (!textProgramState) return;
+    if (!textProgramState) return defaultColor;
     return textProgramState.backgroundColor;
   }
 }
