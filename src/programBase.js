@@ -2,19 +2,21 @@ import { app } from "./packages/hyperapp/index.js";
 import { wrapDispatch } from "./utils.js";
 
 /**
+ * @template TState
  * @abstract
  */
 export class ProgramBase {
   /** @type{import("hyperapp").Dispatch<any> | null}*/
   #dispatch = null;
-  /** @type{Object.<string, (ProgramBase | null)>} */
+  /** @type{Object.<string, (ProgramBase<any> | null)>} */
   #connections = {};
-  /** @type {any} */
+  /** @type {TState | null} */
   #currentState = null;
   /** @type {AllowedConnection[]} */
   allowedConnections = [];
-  defaultState = {};
-  /** @type {EditorBase | null} */
+  /** @type {TState | null} */
+  defaultState = null;
+  /** @type {EditorBase<any, TState> | null} */
   editor = null;
   /** @type {Number} */
   id = -1;
@@ -34,7 +36,7 @@ export class ProgramBase {
 
   /** Runs a hyperapp program on a node. If no state is passed in, it uses the default state of the program.
    * @param {HTMLElement} node
-   * @param {Object | null} state
+   * @param {TState | null} state
    */
   mount(node, state) {
     if (this.id === -1) {
@@ -62,18 +64,18 @@ export class ProgramBase {
 
   /**
    * returns the current state
-   * @returns {object}
+   * @returns {TState | null}
    */
   getState() {
     if (!this.#dispatch) {
       console.error("no dispatch function");
-      return {};
+      return null;
     }
-    return this.#currentState || {};
+    return this.#currentState || null;
   }
 
   /**
-   * @param {object} state
+   * @param {TState} state
    */
   modifyState(state) {
     if (this.#dispatch) {
@@ -85,7 +87,7 @@ export class ProgramBase {
 
   /**
    * @param {String} name
-   * @param {ProgramBase} program
+   * @param {ProgramBase<any>} program
    */
   setConnection(name, program) {
     for (const allowedConnection of this.allowedConnections) {
@@ -104,7 +106,7 @@ export class ProgramBase {
 
   /**
    * @param {String} name
-   * @returns {ProgramBase | null}
+   * @returns {ProgramBase<any> | null}
    */
   getConnection(name) {
     return this.#connections[name];
@@ -129,7 +131,7 @@ export class ProgramBase {
   onConnectionStateChange(name, action) {
     /**
      * @param {import("hyperapp").Dispatch<any>} dispatch
-     * @param {{name: String, action: import("hyperapp").Action<any>, program: ProgramBase}} props
+     * @param {{name: String, action: import("hyperapp").Action<any>, program: ProgramBase<any>}} props
      * @returns {() => void}
      */
     function programStateSubscriber(dispatch, props) {
@@ -198,8 +200,16 @@ export class ProgramBase {
   });
 }
 
+// Editor is stateless. UI should be rebuilt on each click away from the program it is editing
+// TODO: do some type thing to get the state of the connected program as a param into the functions here,
+
+/**
+ * @template ProgramState
+ * @template EditorState
+ * @extends ProgramBase<ProgramState>
+ */
 export class EditorBase extends ProgramBase {
-  /** @param {ProgramBase | undefined} program */
+  /** @param {ProgramBase<ProgramState> | undefined} program */
   constructor(program) {
     super();
     this.program = program;
@@ -207,7 +217,7 @@ export class EditorBase extends ProgramBase {
 
   /** Runs a hyperapp program on a node. If no state is passed in, it uses the default state of the program.
    * @param {HTMLElement} node
-   * @param {Object | null} state
+   * @param {ProgramState | null} state
    */
   mount(node, state) {
     if (!this.view) {
@@ -224,4 +234,8 @@ export class EditorBase extends ProgramBase {
       subscriptions: this.subscriptions,
     });
   }
+
+  // the following functions should have type for state
+  // getState()
+  // modifyState()
 }

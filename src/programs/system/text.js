@@ -8,6 +8,9 @@ import { ProgramBase, EditorBase } from "../../programBase.js";
  * @property {number} fontSize
  */
 
+/**
+ * @augments ProgramBase<State>
+ */
 export class Program extends ProgramBase {
   constructor() {
     super();
@@ -59,8 +62,11 @@ export class Program extends ProgramBase {
  * @property {number} fontSize
  */
 
+/**
+ * @augments EditorBase<State, EditorState>
+ */
 export class Editor extends EditorBase {
-  /** @param {ProgramBase} program */
+  /** @param {ProgramBase<State>} program */
   constructor(program) {
     super(program);
     /** @type {EditorState} */
@@ -141,16 +147,16 @@ export class Editor extends EditorBase {
   #getFontSize() {
     const textProgramInstance = this.program;
     if (!textProgramInstance) return;
-    /** @type {State} */
-    const textProgramState = textProgramInstance.getState();
+    const textProgramState = textProgramInstance.getState(); //TODO: how to get state automatically here, right now it says 1. Type '{}' is missing the following properties from type 'State': text, backgroundColor, fontSize [2739]
+    if (!textProgramState) return;
     return textProgramState.fontSize;
   }
 
   #getColor() {
     const textProgramInstance = this.program;
     if (!textProgramInstance) return;
-    /** @type {State} */
     const textProgramState = textProgramInstance.getState();
+    if (!textProgramState) return;
     return textProgramState.backgroundColor;
   }
 }
