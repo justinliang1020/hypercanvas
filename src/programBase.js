@@ -200,8 +200,8 @@ export class ProgramBase {
 
 //TODO: fix this and decide what to do
 export class EditorBase extends ProgramBase {
-  /** @type{ProgramBase | null} */
-  program = null;
+  /** @type {ProgramBase | undefined} */
+  program;
 
   /** Runs a hyperapp program on a node. If no state is passed in, it uses the default state of the program.
    * @param {HTMLElement} node

@@ -20,8 +20,7 @@ export class Program extends ProgramBase {
     /** @type {AllowedConnection[]} */
     this.allowedConnections = [];
     this.view = this.#main;
-    //TODO: unsure if this works
-    this.editor = new Editor();
+    // don't want to have to manually set an editor param in here
   }
 
   /**
@@ -60,7 +59,7 @@ export class Program extends ProgramBase {
  * @property {number} fontSize
  */
 
-class Editor extends EditorBase {
+export class Editor extends EditorBase {
   constructor() {
     super();
     /** @type {EditorState} */

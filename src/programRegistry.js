@@ -1,6 +1,6 @@
 /**
  * Recursively loads programs from a directory
- * @param {Object.<string, any>} registry - Registry to populate
+ * @param {ProgramRegistry} registry - Registry to populate
  * @param {string} dirPath - Directory path relative to programs/
  * @param {string} namespace - Namespace prefix for program names
  */
@@ -18,6 +18,7 @@ async function loadFromDirectory(registry, dirPath = "", namespace = "") {
         const importPath = `./programs${dirPath ? "/" + dirPath : ""}/${item}`;
 
         try {
+          registry[fullProgramName] = {};
           const module = await import(importPath);
           const ProgramClass = Object.values(module).find(
             /** @param {any} export_ */
@@ -25,10 +26,17 @@ async function loadFromDirectory(registry, dirPath = "", namespace = "") {
               export_?.prototype &&
               export_.prototype.constructor.name === "Program",
           );
-          registry[fullProgramName] = ProgramClass || null;
+          registry[fullProgramName]["program"] = ProgramClass;
+          const EditorClass = Object.values(module).find(
+            /** @param {any} export_ */
+            (export_) =>
+              export_?.prototype &&
+              export_.prototype.constructor.name === "Editor",
+          );
+          registry[fullProgramName]["editor"] = EditorClass || null;
         } catch (error) {
           console.error(`Failed to load program ${importPath}:`, error);
-          registry[fullProgramName] = null;
+          registry[fullProgramName] = {};
         }
       } else {
         // Recurse into subdirectory
@@ -44,26 +52,14 @@ async function loadFromDirectory(registry, dirPath = "", namespace = "") {
 
 /**
  * Dynamically loads all program files from src/programs/ including subdirectories
- * @returns {Promise<Object.<string, (typeof import("./programBase.js").ProgramBase | null)>>}
+ * @returns {Promise<ProgramRegistry>}
  */
 async function loadPrograms() {
-  /** @type {Object.<string, (typeof import("./programBase.js").ProgramBase | null)>} */
+  /** @type {ProgramRegistry} */
   const registry = {};
   await loadFromDirectory(registry);
   return registry;
 }
 
-/** @type{Object.<string, (typeof import("./programBase.js").ProgramBase | null)>} */
+/** @type {ProgramRegistry} */
 export const programRegistry = await loadPrograms();
-/**
- * Example of what programRegistry looks like:
- * {
- *   "history.js": HistoryProgram,
- *   "paint.js": PaintProgram,
- *   "stateEditor.js": StateEditorProgram,
- *   "stateVisualizer.js": StateVisualizerProgram,
- *   "textStyleEditor.js": TextStyleEditorProgram,
- *   "system/image.js": ImageProgram,
- *   "system/text.js": TextProgram
- * }
- */

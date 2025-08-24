@@ -133,3 +133,7 @@
  * @property {any} payload
  * @property {State} prevState - doesn't include program states
  */
+
+/**
+ * @typedef {Object.<string, {program?: typeof import("./programBase.js").ProgramBase | null, editor?: typeof import("./programBase.js").EditorBase | null}>} ProgramRegistry
+ */

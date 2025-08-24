@@ -47,7 +47,7 @@ export class ProgramManager {
    * @param {String} name
    */
   #initializeProgram(id, name) {
-    const Program = programRegistry[name];
+    const Program = programRegistry[name].program;
     if (Program) {
       const programInstance = new Program();
       programInstance.setId(id);
@@ -172,7 +172,6 @@ export function mountProgram(block, programManager) {
  */
 export function mountEditorProgram(selectedBlock, programManager) {
   if (selectedBlock === null) return;
-  console.log("moew");
 
   const editorProgramComponent = document.querySelector(
     `program-component[data-id="editor-${selectedBlock.id}"]`,
@@ -181,13 +180,15 @@ export function mountEditorProgram(selectedBlock, programManager) {
     editorProgramComponent?.shadowRoot?.firstElementChild
   );
   const programInstance = programManager.get(selectedBlock.id);
+  const Editor = programRegistry[selectedBlock.programData.name].editor;
 
   if (targetElement && targetElement.localName === "program-component-child") {
-    if (programInstance && programInstance.editor) {
-      programInstance.editor.program = programInstance;
+    if (programInstance && Editor) {
+      const editorInstance = new Editor();
+      editorInstance.program = programInstance;
       try {
         //TODO: how to get state to persist of editor
-        programInstance.editor.editorMount(targetElement, null);
+        editorInstance.editorMount(targetElement, null);
       } catch (error) {
         console.warn(
           `Failed to run editor program for block ${selectedBlock.id}:`,
