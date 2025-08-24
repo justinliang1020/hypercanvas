@@ -182,23 +182,22 @@ export function mountEditorProgram(selectedBlock, programManager) {
   const programInstance = programManager.get(selectedBlock.id);
   const Editor = programRegistry[selectedBlock.programData.name].editor;
 
-  if (targetElement && targetElement.localName === "program-component-child") {
-    if (programInstance && Editor) {
-      const editorInstance = new Editor();
-      editorInstance.program = programInstance;
-      try {
-        //TODO: how to get state to persist of editor
-        editorInstance.editorMount(targetElement, null);
-      } catch (error) {
-        console.warn(
-          `Failed to run editor program for block ${selectedBlock.id}:`,
-          error,
-        );
-      }
-    } else {
-      targetElement.style.color = "red";
-      targetElement.style.fontWeight = "bold";
-      targetElement.innerText = `ERROR: editor '${selectedBlock.programData.name}' not initialized.`;
+  if (
+    targetElement &&
+    targetElement.localName === "program-component-child" &&
+    programInstance &&
+    Editor
+  ) {
+    const editorInstance = new Editor();
+    editorInstance.program = programInstance;
+    try {
+      //TODO: how to get state to persist of editor
+      editorInstance.editorMount(targetElement, null);
+    } catch (error) {
+      console.warn(
+        `Failed to run editor program for block ${selectedBlock.id}:`,
+        error,
+      );
     }
   }
 }
