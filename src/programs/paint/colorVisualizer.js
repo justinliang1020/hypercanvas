@@ -19,6 +19,7 @@ export class Program extends ProgramBase {
     this.defaultState = {
       colorCounts: {},
       totalCells: 0,
+      unpaintedCount: 0,
     };
     /** @type {AllowedConnection[]} */
     this.allowedConnections = [

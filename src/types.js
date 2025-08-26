@@ -123,7 +123,7 @@
 /**
  * @typedef {Object} AllowedConnection
  * @property {String} name
- * @property {typeof import('./programBase.js').ProgramBase} program
+ * @property {typeof import('./programBase.js').ProgramBase<Object>} program
  */
 
 /**

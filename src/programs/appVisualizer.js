@@ -3,7 +3,7 @@ import { h, text } from "../packages/hyperapp/index.js";
 
 /**
  * @typedef ProgramState
- * @property {State} appState - JSON string representation of connected program state
+ * @property {State | null} appState - JSON string representation of connected program state
  * @property {String} visualizationName
  */
 
@@ -83,8 +83,12 @@ export class Program extends ProgramBase {
    * @returns {import("hyperapp").ElementVNode<ProgramState>}
    */
   #currentPage = (state) => {
+    if (state.appState === null) {
+      return h("div", {}, text("No app state"));
+    }
+
     const currentPage = state.appState.pages.find(
-      (page) => page.id === state.appState.currentPageId,
+      (page) => page.id === state.appState?.currentPageId,
     );
 
     if (!currentPage) {
@@ -117,8 +121,12 @@ export class Program extends ProgramBase {
    * @returns {import("hyperapp").ElementVNode<ProgramState>}
    */
   #currentPageBlocks = (state) => {
+    if (state.appState === null) {
+      return h("div", {}, text("No app state"));
+    }
+
     const currentPage = state.appState.pages.find(
-      (page) => page.id === state.appState.currentPageId,
+      (page) => page.id === state.appState?.currentPageId,
     );
 
     if (!currentPage) {
@@ -147,8 +155,12 @@ export class Program extends ProgramBase {
    * @returns {import("hyperapp").ElementVNode<ProgramState>}
    */
   #currentPageConnections = (state) => {
+    if (state.appState === null) {
+      return h("div", {}, text("No app state"));
+    }
+
     const currentPage = state.appState.pages.find(
-      (page) => page.id === state.appState.currentPageId,
+      (page) => page.id === state.appState?.currentPageId,
     );
 
     if (!currentPage) {
