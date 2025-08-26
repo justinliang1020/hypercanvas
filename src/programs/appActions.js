@@ -33,10 +33,6 @@ export class Program extends ProgramBase {
    * @returns {import("hyperapp").ElementVNode<ProgramState>}
    */
   #main = (state) => {
-    //@ts-ignore
-    const isDarkMode = document
-      .querySelector("main")
-      .classList.contains("dark-mode");
     if (state.groupedActions.length === 0) {
       return h(
         "div",
@@ -57,50 +53,59 @@ export class Program extends ProgramBase {
           boxSizing: "border-box",
         },
       },
+      [this.#header(state), this.#renderTable(state)],
+    );
+  };
+
+  /**
+   * @param {ProgramState} state
+   * @returns {import("hyperapp").ElementVNode<ProgramState>}
+   */
+  #header = (state) => {
+    //@ts-ignore
+    const isDarkMode = document
+      .querySelector("main")
+      .classList.contains("dark-mode");
+    return h(
+      "div",
+      {
+        style: {
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          margin: "0 0 10px 0",
+        },
+      },
       [
         h(
-          "div",
+          "h3",
           {
             style: {
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              margin: "0 0 10px 0",
+              margin: "0",
+              color: isDarkMode ? "#e0e0e0" : "#333",
             },
           },
-          [
-            h(
-              "h3",
-              {
-                style: {
-                  margin: "0",
-                  color: isDarkMode ? "#e0e0e0" : "#333",
-                },
-              },
-              text("App Actions Timeline"),
-            ),
-            h(
-              "button",
-              {
-                style: {
-                  padding: "4px 8px",
-                  backgroundColor: state.isPaused ? "#f44336" : "#4caf50",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  fontSize: "11px",
-                },
-                onclick: (/** @type {ProgramState} */ state) => ({
-                  ...state,
-                  isPaused: !state.isPaused,
-                }),
-              },
-              text(state.isPaused ? "Resume" : "Pause"),
-            ),
-          ],
+          text("App Actions Timeline"),
         ),
-        this.#renderTable(state),
+        h(
+          "button",
+          {
+            style: {
+              padding: "4px 8px",
+              backgroundColor: state.isPaused ? "#f44336" : "#4caf50",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "11px",
+            },
+            onclick: (/** @type {ProgramState} */ state) => ({
+              ...state,
+              isPaused: !state.isPaused,
+            }),
+          },
+          text(state.isPaused ? "Resume" : "Pause"),
+        ),
       ],
     );
   };
