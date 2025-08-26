@@ -71,7 +71,7 @@ export class Editor extends EditorBase {
     super(program);
     /** @type {EditorState} */
     this.defaultState = {
-      value: this.#getColor(),
+      value: this.#getBackgroundColor(),
       fontSize: this.#getFontSize(),
     };
     this.view = this.#main;
@@ -155,12 +155,12 @@ export class Editor extends EditorBase {
     return textProgramState.fontSize;
   }
 
-  #getColor() {
-    const defaultColor = "#000000";
+  #getBackgroundColor() {
+    const defaultBackgroundColor = "#000000";
     const textProgramInstance = this.program;
-    if (!textProgramInstance) return defaultColor;
+    if (!textProgramInstance) return defaultBackgroundColor;
     const textProgramState = textProgramInstance.getState();
-    if (!textProgramState) return defaultColor;
+    if (!textProgramState) return defaultBackgroundColor;
     return textProgramState.backgroundColor;
   }
 }
