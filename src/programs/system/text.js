@@ -2,21 +2,23 @@ import { h, text } from "../../packages/hyperapp/index.js";
 import { ProgramBase, EditorBase } from "../../programBase.js";
 
 /**
- * @typedef State
+ * @typedef ProgramState
  * @property {string} text
+ * @property {string} color
  * @property {string} backgroundColor
  * @property {number} fontSize
  */
 
 /**
- * @extends ProgramBase<State>
+ * @extends ProgramBase<ProgramState>
  */
 export class Program extends ProgramBase {
   constructor() {
     super();
-    /** @type {State} */
+    /** @type {ProgramState} */
     this.defaultState = {
       text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      color: "black",
       backgroundColor: "transparent",
       fontSize: 14,
     };
@@ -27,8 +29,8 @@ export class Program extends ProgramBase {
   }
 
   /**
-   * @param {State} state
-   * @returns {import("hyperapp").ElementVNode<State>}
+   * @param {ProgramState} state
+   * @returns {import("hyperapp").ElementVNode<ProgramState>}
    * */
   #main = (state) =>
     h(
@@ -41,7 +43,7 @@ export class Program extends ProgramBase {
           padding: "10px",
           border: "0px",
           backgroundColor: state.backgroundColor,
-          color: "inherit",
+          color: state.color,
           resize: "none",
           overflow: "hidden",
           outline: "none",
@@ -58,20 +60,22 @@ export class Program extends ProgramBase {
 
 /**
  * @typedef EditorState
- * @property {string} value
+ * @property {string} color
+ * @property {string} backgroundColor
  * @property {number} fontSize
  */
 
 /**
- * @augments EditorBase<State, EditorState>
+ * @augments EditorBase<ProgramState, EditorState>
  */
 export class Editor extends EditorBase {
-  /** @param {ProgramBase<State>} program */
+  /** @param {ProgramBase<ProgramState>} program */
   constructor(program) {
     super(program);
     /** @type {EditorState} */
     this.defaultState = {
-      value: this.#getBackgroundColor(),
+      color: this.#getColor(),
+      backgroundColor: this.#getBackgroundColor(),
       fontSize: this.#getFontSize(),
     };
     this.view = this.#main;
@@ -86,14 +90,29 @@ export class Editor extends EditorBase {
       h("h3", {}, text("Text Style Editor")),
       h("input", {
         type: "color",
-        value: state.value,
+        value: state.color,
         oninput: (state, event) => {
           const newValue = /** @type{HTMLInputElement}*/ (event.target).value;
+          /** @type {EditorState} */
           const newState = {
             ...state,
-            value: newValue,
+            color: newValue,
           };
-          this.#changeBackground(newState);
+          this.#changeColor(newState);
+          return newState;
+        },
+      }),
+      h("input", {
+        type: "color",
+        value: state.backgroundColor,
+        oninput: (state, event) => {
+          const newValue = /** @type{HTMLInputElement}*/ (event.target).value;
+          /** @type {EditorState} */
+          const newState = {
+            ...state,
+            backgroundColor: newValue,
+          };
+          this.#changeBackgroundColor(newState);
           return newState;
         },
       }),
@@ -106,6 +125,7 @@ export class Editor extends EditorBase {
           const newFontSize = parseInt(
             /** @type{HTMLInputElement}*/ (event.target).value,
           );
+          /** @type {EditorState} */
           const newState = {
             ...state,
             fontSize: newFontSize,
@@ -120,14 +140,29 @@ export class Editor extends EditorBase {
    * @param {EditorState} state
    * @returns {void}
    */
-  #changeBackground = (state) => {
+  #changeBackgroundColor = (state) => {
     const textProgramInstance = this.program;
     if (!textProgramInstance) return;
     const textProgramState = textProgramInstance.getState();
     if (!textProgramState) return;
     textProgramInstance.modifyState({
       ...textProgramState,
-      backgroundColor: state.value,
+      backgroundColor: state.backgroundColor,
+    });
+  };
+
+  /**
+   * @param {EditorState} state
+   * @returns {void}
+   */
+  #changeColor = (state) => {
+    const textProgramInstance = this.program;
+    if (!textProgramInstance) return;
+    const textProgramState = textProgramInstance.getState();
+    if (!textProgramState) return;
+    textProgramInstance.modifyState({
+      ...textProgramState,
+      backgroundColor: state.backgroundColor,
     });
   };
 
@@ -162,5 +197,12 @@ export class Editor extends EditorBase {
     const textProgramState = textProgramInstance.getState();
     if (!textProgramState) return defaultBackgroundColor;
     return textProgramState.backgroundColor;
+  }
+
+  #getColor() {
+    const defaultColor = "#000000";
+    const textProgramState = this.getProgramState();
+    if (!textProgramState) return defaultColor;
+    return textProgramState.color;
   }
 }

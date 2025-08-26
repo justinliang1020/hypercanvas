@@ -209,7 +209,7 @@ export class ProgramBase {
  * @extends ProgramBase<EditorState>
  */
 export class EditorBase extends ProgramBase {
-  /** @param {ProgramBase<ProgramState> | undefined} program */
+  /** @param {ProgramBase<ProgramState>} program */
   constructor(program) {
     super();
     this.program = program;
@@ -233,6 +233,10 @@ export class EditorBase extends ProgramBase {
       view: this.view,
       subscriptions: this.subscriptions,
     });
+  }
+
+  getProgramState() {
+    return this.program.getState();
   }
 
   // the following functions should have type for state

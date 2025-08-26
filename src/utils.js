@@ -150,10 +150,11 @@ export const pasteEffect = async (dispatch, state) => {
       dispatch((state) => pasteBlocks(state));
       return;
     } else {
-      /** @type {import("./programs/system/text.js").State} */
+      /** @type {import("./programs/system/text.js").ProgramState} */
       const textProgramState = {
         text: text,
         backgroundColor: "transparent",
+        color: "black",
         fontSize: 18,
       };
       dispatch(addBlock(state, "system/text.js", textProgramState));
