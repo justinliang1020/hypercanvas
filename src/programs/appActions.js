@@ -309,11 +309,30 @@ export class Program extends ProgramBase {
               style: {
                 fontSize: "9px",
                 marginBottom: "1px",
-                color: isDarkMode ? "#e0e0e0" : "#333",
                 wordBreak: "break-word",
               },
             },
-            text(`${change.path}: ${this.#formatValue(change.value)}`),
+            [
+              h(
+                "span",
+                {
+                  style: {
+                    color: isDarkMode ? "#e0e0e0" : "#333",
+                  },
+                },
+                text(change.path),
+              ),
+              h("br", {}),
+              h(
+                "span",
+                {
+                  style: {
+                    color: "orange",
+                  },
+                },
+                text(this.#formatValue(change.value)),
+              ),
+            ],
           ),
       ),
       action.diff.length > maxDiffLength
