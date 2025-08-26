@@ -75,11 +75,12 @@ export class ProgramBase {
   }
 
   /**
-   * @param {TState} state
+   * @param {Partial<TState>} modifiedState
    */
-  modifyState(state) {
+  modifyState(modifiedState) {
     if (this.#dispatch) {
-      this.#dispatch(() => state);
+      const newState = { ...this.#currentState, ...modifiedState };
+      this.#dispatch(() => newState);
     } else {
       throw Error("No dispatch");
     }
@@ -209,10 +210,11 @@ export class ProgramBase {
  * @extends ProgramBase<EditorState>
  */
 export class EditorBase extends ProgramBase {
+  #program;
   /** @param {ProgramBase<ProgramState>} program */
   constructor(program) {
     super();
-    this.program = program;
+    this.#program = program;
   }
 
   /** Runs a hyperapp program on a node. If no state is passed in, it uses the default state of the program.
@@ -235,11 +237,17 @@ export class EditorBase extends ProgramBase {
     });
   }
 
+  /**
+   * @returns {ProgramState | null}
+   */
   getProgramState() {
-    return this.program.getState();
+    return this.#program.getState();
   }
 
-  // the following functions should have type for state
-  // getState()
-  // modifyState()
+  /**
+   * @param {Partial<ProgramState>} newProgramState
+   */
+  modifyProgramState(newProgramState) {
+    return this.#program.modifyState(newProgramState);
+  }
 }

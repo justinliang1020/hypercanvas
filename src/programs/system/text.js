@@ -141,12 +141,7 @@ export class Editor extends EditorBase {
    * @returns {void}
    */
   #changeBackgroundColor = (state) => {
-    const textProgramInstance = this.program;
-    if (!textProgramInstance) return;
-    const textProgramState = textProgramInstance.getState();
-    if (!textProgramState) return;
-    textProgramInstance.modifyState({
-      ...textProgramState,
+    this.modifyProgramState({
       backgroundColor: state.backgroundColor,
     });
   };
@@ -156,13 +151,8 @@ export class Editor extends EditorBase {
    * @returns {void}
    */
   #changeColor = (state) => {
-    const textProgramInstance = this.program;
-    if (!textProgramInstance) return;
-    const textProgramState = textProgramInstance.getState();
-    if (!textProgramState) return;
-    textProgramInstance.modifyState({
-      ...textProgramState,
-      backgroundColor: state.backgroundColor,
+    this.modifyProgramState({
+      color: state.color,
     });
   };
 
@@ -171,30 +161,21 @@ export class Editor extends EditorBase {
    * @returns {void}
    */
   #changeFontSize = (state) => {
-    const textProgramInstance = this.program;
-    if (!textProgramInstance) return;
-    const textProgramState = textProgramInstance.getState();
-    if (!textProgramState) return;
-    textProgramInstance.modifyState({
-      ...textProgramState,
+    this.modifyProgramState({
       fontSize: state.fontSize,
     });
   };
 
   #getFontSize() {
     const defaultFontSize = 14;
-    const textProgramInstance = this.program;
-    if (!textProgramInstance) return defaultFontSize;
-    const textProgramState = textProgramInstance.getState();
+    const textProgramState = this.getProgramState();
     if (!textProgramState) return defaultFontSize;
     return textProgramState.fontSize;
   }
 
   #getBackgroundColor() {
     const defaultBackgroundColor = "#000000";
-    const textProgramInstance = this.program;
-    if (!textProgramInstance) return defaultBackgroundColor;
-    const textProgramState = textProgramInstance.getState();
+    const textProgramState = this.getProgramState();
     if (!textProgramState) return defaultBackgroundColor;
     return textProgramState.backgroundColor;
   }
