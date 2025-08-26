@@ -118,10 +118,7 @@ export class Program extends ProgramBase {
     return {
       ...state,
       connectedState: jsonString,
-      editableState:
-        state.editableState === state.connectedState
-          ? jsonString
-          : state.editableState,
+      editableState: jsonString,
     };
   };
 
