@@ -2,7 +2,7 @@
   "compilerOptions": {
     "checkJs": true,
     "allowJs": true,
-    "maxNodeModuleJsDepth": 3,
+    "maxNodeModuleJsDepth": 0,
     "noEmit": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
