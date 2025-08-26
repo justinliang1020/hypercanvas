@@ -3,7 +3,6 @@ import { h, text } from "../packages/hyperapp/index.js";
 
 /**
  * @typedef State
- * @property {string} connectedState - JSON string representation of connected program state
  * @property {string} editableState - Editable JSON string in textarea
  * @property {string|null} error - Error message for invalid JSON
  */
@@ -16,7 +15,6 @@ export class Program extends ProgramBase {
     super();
     /** @type {State} */
     this.defaultState = {
-      connectedState: "{}",
       editableState: "{}",
       error: null,
     };
@@ -117,7 +115,6 @@ export class Program extends ProgramBase {
     const jsonString = JSON.stringify(connectedState, null, 2);
     return {
       ...state,
-      connectedState: jsonString,
       editableState: jsonString,
     };
   };
