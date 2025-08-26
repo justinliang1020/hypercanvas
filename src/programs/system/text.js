@@ -33,29 +33,26 @@ export class Program extends ProgramBase {
    * @returns {import("hyperapp").ElementVNode<ProgramState>}
    * */
   #main = (state) =>
-    h(
-      "textarea",
-      {
-        style: {
-          boxSizing: "border-box",
-          width: "100%",
-          height: "100%",
-          padding: "10px",
-          border: "0px",
-          backgroundColor: state.backgroundColor,
-          color: state.color,
-          resize: "none",
-          overflow: "hidden",
-          outline: "none",
-          fontSize: `${state.fontSize}px`,
-        },
-        oninput: (state, event) => ({
-          ...state,
-          text: /** @type {HTMLInputElement}*/ (event.target).value,
-        }),
+    h("textarea", {
+      style: {
+        boxSizing: "border-box",
+        width: "100%",
+        height: "100%",
+        padding: "10px",
+        border: "0px",
+        backgroundColor: state.backgroundColor,
+        color: state.color,
+        resize: "none",
+        overflow: "hidden",
+        outline: "none",
+        fontSize: `${state.fontSize}px`,
       },
-      text(state.text),
-    );
+      oninput: (state, event) => ({
+        ...state,
+        text: /** @type {HTMLInputElement}*/ (event.target).value,
+      }),
+      value: state.text,
+    });
 }
 
 /**
