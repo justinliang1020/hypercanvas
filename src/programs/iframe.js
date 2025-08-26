@@ -7,6 +7,9 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @property {string} inputUrl
  */
 
+/**
+ * @extends ProgramBase<State>
+ */
 export class Program extends ProgramBase {
   constructor() {
     super();

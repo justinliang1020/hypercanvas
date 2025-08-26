@@ -6,6 +6,9 @@ import { ProgramBase } from "../../programBase.js";
  * @property {string} path
  */
 
+/**
+ * @extends ProgramBase<State>
+ */
 export class Program extends ProgramBase {
   constructor() {
     super();

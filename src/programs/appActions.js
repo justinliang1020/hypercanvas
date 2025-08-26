@@ -8,6 +8,9 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @property {boolean} isPaused
  */
 
+/**
+ * @extends ProgramBase<ProgramState>
+ */
 export class Program extends ProgramBase {
   constructor() {
     super();

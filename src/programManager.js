@@ -8,7 +8,7 @@ import { getCurrentBlocks, getCurrentConnections } from "./pages.js";
  * - a program cannot be mutated to another type of program. it must first be deleted to "free up the ID"
  */
 export class ProgramManager {
-  /** @type{Map<number,import("./programBase.js").ProgramBase>}*/
+  /** @type{Map<number,import("./programBase.js").ProgramBase<any>>}*/
   #programs;
 
   constructor() {
@@ -17,7 +17,7 @@ export class ProgramManager {
 
   /** Get an instance of a program based on an ID
    * @param {Number} id
-   * @returns {import("./programBase.js").ProgramBase | undefined}
+   * @returns {import("./programBase.js").ProgramBase<any> | undefined}
    */
   get(id) {
     return this.#programs.get(id);
@@ -29,10 +29,10 @@ export class ProgramManager {
    * - Cleans up programs for deleted blocks
    * - Updates block state from mounted programs
    * - Removes inactive connections
-   * @param {import("hyperapp").Dispatch<State>} dispatch
+   * @param {import("hyperapp").Dispatch<State>} _
    * @param {State} state
    */
-  syncPrograms(dispatch, state) {
+  syncPrograms(_, state) {
     const blocks = getCurrentBlocks(state);
     const connections = getCurrentConnections(state);
     this.#initializePrograms(blocks);

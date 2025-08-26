@@ -6,6 +6,9 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @property {String} hello
  */
 
+/**
+ * @extends ProgramBase<ProgramState>
+ */
 export class Program extends ProgramBase {
   constructor() {
     super();

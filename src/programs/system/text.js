@@ -9,7 +9,7 @@ import { ProgramBase, EditorBase } from "../../programBase.js";
  */
 
 /**
- * @augments ProgramBase<State>
+ * @extends ProgramBase<State>
  */
 export class Program extends ProgramBase {
   constructor() {

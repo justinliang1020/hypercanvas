@@ -9,6 +9,9 @@ import { Program as PaintProgram } from "./paint.js";
  * @property {number} cellSize - Cell size value
  */
 
+/**
+ * @extends ProgramBase<State>
+ */
 export class Program extends ProgramBase {
   constructor() {
     super();

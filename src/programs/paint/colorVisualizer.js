@@ -9,6 +9,9 @@ import { Program as PaintProgram } from "./paint.js";
  * @property {number} unpaintedCount - Total number of unpainted cells
  */
 
+/**
+ * @extends ProgramBase<State>
+ */
 export class Program extends ProgramBase {
   constructor() {
     super();

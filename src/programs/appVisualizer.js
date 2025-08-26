@@ -7,13 +7,16 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @property {String} visualizationName
  */
 
+/**
+ * @extends ProgramBase<ProgramState>
+ */
 export class Program extends ProgramBase {
   constructor() {
     super();
     /** @type {ProgramState} */
     this.defaultState = {
       //TODO: appState should default to the app state
-      appState: {},
+      appState: null,
       visualizationName: "Current Page",
     };
     /** @type {AllowedConnection[]} */

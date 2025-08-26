@@ -6,6 +6,9 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @property {string} connectedState - JSON string representation of connected program state
  */
 
+/**
+ * @extends ProgramBase<State>
+ */
 export class Program extends ProgramBase {
   constructor() {
     super();

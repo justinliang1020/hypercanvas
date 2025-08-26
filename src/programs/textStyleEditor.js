@@ -8,6 +8,9 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @property {number} fontSize
  */
 
+/**
+ * @extends ProgramBase<State>
+ */
 export class Program extends ProgramBase {
   constructor() {
     super();

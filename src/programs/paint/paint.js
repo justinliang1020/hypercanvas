@@ -14,6 +14,9 @@ import { ProgramBase } from "../../programBase.js";
  * @property {string[]} colorPalette - Available colors
  */
 
+/**
+ * @extends ProgramBase<State>
+ */
 export class Program extends ProgramBase {
   constructor() {
     super();
