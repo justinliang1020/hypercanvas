@@ -6,7 +6,7 @@
  * @property {number} x - X position on canvas
  * @property {number} y - Y position on canvas
  * @property {number} zIndex - Stacking order (higher = front)
- * @property {string} programName - Program name TODO: remove
+ * @property {string} viewName - Program name
  */
 
 /**

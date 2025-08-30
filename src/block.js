@@ -493,7 +493,7 @@ export function deleteSelectedBlocks(state) {
 /**
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
- * @param {string} programName - Name of program to instantiate
+ * @param {string} viewName - Name of program to instantiate
  * @param {number | null} x - X position on canvas. If null, uses viewport's center X coordinate
  * @param {number | null} y - Y position on canvas. If null, uses viewport's center X coordinate
  * @param {number} width - Block width in pixels
@@ -501,7 +501,7 @@ export function deleteSelectedBlocks(state) {
  * @returns {State} Updated state with new block */
 export function addBlock(
   state,
-  programName,
+  viewName,
   x = null,
   y = null,
   width = 200,
@@ -522,7 +522,7 @@ export function addBlock(
     x: x,
     y: y,
     zIndex: Math.max(...globalBlocks.map((block) => block.zIndex), 0) + 1,
-    programName,
+    viewName: viewName,
   };
 
   const currentBlocks = getCurrentBlocks(state);
@@ -579,7 +579,7 @@ export function pasteBlocks(state) {
 
   // Transform clipboard data into block configurations for addBlocks
   const blockConfigs = clipboardData.map((blockData) => ({
-    programName: blockData.programName,
+    programName: blockData.viewName,
     x: blockData.x + PASTE_OFFSET_X,
     y: blockData.y + PASTE_OFFSET_Y,
     width: blockData.width,

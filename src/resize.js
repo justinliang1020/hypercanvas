@@ -307,7 +307,7 @@ export function handleResizePointerMove(state, event) {
       width: page.resizing.startWidth,
       height: page.resizing.startHeight,
       zIndex: 0,
-      programName: "",
+      viewName: "",
     };
 
     let newBBox = handler(virtualBoundingBox, {
