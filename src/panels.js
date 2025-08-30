@@ -2,8 +2,15 @@ import { h, text } from "./packages/hyperapp/index.js";
 import { saveApplicationAndNotify } from "./utils.js";
 import { addBlock } from "./block.js";
 import { MEDIA_SAVE_PATH } from "./constants.js";
-import { createPage, switchPage, deletePage, renamePage } from "./pages.js";
+import {
+  createPage,
+  switchPage,
+  deletePage,
+  renamePage,
+  getCurrentPage,
+} from "./pages.js";
 import { getFirstSelectedBlockId } from "./selection.js";
+import { programRegistry } from "./program.js";
 
 /**
  * Creates the panels container with both layers panel, programs panel and floating toggle button
@@ -210,7 +217,7 @@ function programsPanel(state) {
       ),
       h("hr", {}),
       editor(state),
-      programButtons(state),
+      viewButtons(state),
     ],
   );
 }
@@ -232,15 +239,19 @@ function editor(state) {
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
  */
-function programButtons(state) {
+function viewButtons(state) {
   const filterText = state.programFilter || "";
-  const filteredPrograms = ["dummy1", "dummy2"];
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return h("div", {}, text("error"));
+  const filteredViews = programRegistry[currentPage.programName].views.map(
+    (f) => f.name,
+  );
 
   return h("div", {}, [
-    h("h2", {}, text("add program")),
+    h("h2", {}, text("add view")),
     h("input", {
       type: "text",
-      placeholder: "Filter programs...",
+      placeholder: "Filter views...",
       value: filterText,
       class: "program-filter-input",
       oninput: (state, event) => ({
@@ -252,13 +263,13 @@ function programButtons(state) {
         return state;
       },
     }),
-    ...filteredPrograms.map((programName) =>
+    ...filteredViews.map((viewName) =>
       h(
         "button",
         {
-          onclick: (state) => addBlock(state, programName),
+          onclick: (state) => addBlock(state, viewName),
         },
-        text(`${programName.replaceAll("/", " / ")}`),
+        text(viewName),
       ),
     ),
   ]);

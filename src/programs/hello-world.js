@@ -12,14 +12,14 @@ export const TestProgram = {
     n: 0,
   },
   // want to have specific control over what views get rendered. generic API that still gives control
-  views: [helloWorld],
+  views: [counter, hello],
 };
 
 /**
  * @param {ProgramState} state
  * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
  */
-function helloWorld(state) {
+function counter(state) {
   return h("div", {}, [
     h(
       "button",
@@ -43,4 +43,12 @@ function helloWorld(state) {
     ),
     h("p", {}, text(state.n)),
   ]);
+}
+
+/**
+ * @param {ProgramState} state
+ * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
+ */
+function hello(state) {
+  return h("div", {}, text("hello world"));
 }

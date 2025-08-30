@@ -94,6 +94,6 @@ function wrapProgramActions(element, currentPage) {
 /**
  * @type {Record<String, Program<any>>}
  */
-const programRegistry = {
+export const programRegistry = {
   testProgram: TestProgram,
 };
