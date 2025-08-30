@@ -124,17 +124,8 @@ export const pasteEffect = async (dispatch, state) => {
           MEDIA_SAVE_PATH,
         );
         if (result.success) {
-          dispatch((state) =>
-            addBlock(
-              state,
-              "system/image.js",
-              { path: result.path },
-              null, // x - use viewport center
-              null, // y - use viewport center
-              result.width,
-              result.height,
-            ),
-          );
+          //TODO: should i remove image pasting
+          console.log("Would paste image");
           return;
         }
       } catch (error) {
@@ -150,6 +141,7 @@ export const pasteEffect = async (dispatch, state) => {
       dispatch((state) => pasteBlocks(state));
       return;
     } else {
+      //TODO: should i remove text pasting
       console.log(`Would paste text: ${text}`);
       return;
     }

@@ -175,18 +175,8 @@ function programsPanel(state) {
                   // @ts-ignore
                   await window.fileAPI.uploadImageFromDialog(MEDIA_SAVE_PATH);
                 if (!result.canceled && result.success) {
-                  console.log(`Image uploaded: ${result.filename}`);
-                  dispatch((state) =>
-                    addBlock(
-                      state,
-                      "system/image.js",
-                      { path: result.path },
-                      null, // x - use viewport center
-                      null, // y - use viewport center
-                      result.width,
-                      result.height,
-                    ),
-                  );
+                  //TODO: should i delete image uploading
+                  console.log(`Would upload image: ${result.filename}`);
                 }
               } catch (error) {
                 console.error("Failed to upload image:", error);

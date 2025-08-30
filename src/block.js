@@ -493,7 +493,6 @@ export function deleteSelectedBlocks(state) {
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
  * @param {string} programName - Name of program to instantiate
- * @param {Object|null} programState - Initial state for the program
  * @param {number | null} x - X position on canvas. If null, uses viewport's center X coordinate
  * @param {number | null} y - Y position on canvas. If null, uses viewport's center X coordinate
  * @param {number} width - Block width in pixels
@@ -502,7 +501,6 @@ export function deleteSelectedBlocks(state) {
 export function addBlock(
   state,
   programName,
-  programState = null,
   x = null,
   y = null,
   width = 200,
@@ -552,24 +550,9 @@ function addBlocks(state, blockConfigs) {
 
   // Add each block sequentially
   for (const config of blockConfigs) {
-    const {
-      programName,
-      programState = null,
-      x = null,
-      y = null,
-      width = 200,
-      height = 200,
-    } = config;
+    const { programName, x = null, y = null, width = 200 } = config;
 
-    currentState = addBlock(
-      currentState,
-      programName,
-      programState,
-      x,
-      y,
-      width,
-      height,
-    );
+    currentState = addBlock(currentState, programName, x, y, width);
 
     // Get the ID of the newly added block
     const currentBlocks = getCurrentBlocks(currentState);
