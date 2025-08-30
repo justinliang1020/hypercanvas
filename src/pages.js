@@ -78,6 +78,7 @@ export const defaultPage = {
   previewSelectedIds: [],
   selectionBox: null,
   state: { n: 0 },
+  programName: "testProgram",
 };
 
 /**

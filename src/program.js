@@ -1,6 +1,6 @@
 import { h, text } from "./packages/hyperapp/index.js";
 import { updateCurrentPage } from "./pages.js";
-import { helloWorld } from "./programs/hello-world.js";
+import { TestProgram } from "./programs/hello-world.js";
 
 /**
  * Creates a higher-order action that transforms between app state and page state
@@ -35,9 +35,10 @@ function createPageAction(currentPage, pageAction) {
  * @param {Page} currentPage
  * @returns {import("hyperapp").ElementVNode<State>} Block renderer function
  */
-export function programView(currentPage) {
+export function view(currentPage) {
   // Get the program view with page state
-  const programElement = helloWorld(currentPage.state);
+  const program = programRegistry[currentPage.programName];
+  const programElement = program.views[0](currentPage.state); //TODO: proper selection of view
   const wrappedElement = wrapProgramActions(programElement, currentPage);
 
   try {
@@ -88,3 +89,10 @@ function wrapProgramActions(element, currentPage) {
     children: wrappedChildren,
   };
 }
+
+/**
+ * @type {Record<String, Program<any>>}
+ */
+const programRegistry = {
+  testProgram: TestProgram,
+};

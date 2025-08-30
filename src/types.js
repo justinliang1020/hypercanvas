@@ -6,7 +6,7 @@
  * @property {number} x - X position on canvas
  * @property {number} y - Y position on canvas
  * @property {number} zIndex - Stacking order (higher = front)
- * @property {string} programName - Program name
+ * @property {string} programName - Program name TODO: remove
  */
 
 /**
@@ -40,6 +40,7 @@
  * @property {DragState|null} dragStart - Drag operation start state
  * @property {SelectionBoxState|null} selectionBox - Selection box drag state
  * @property {any} state - State of app inside this page
+ * @property {string} programName - Program name, should have the same state type as the page state
  **/
 
 /**
@@ -119,4 +120,12 @@
  * @property {import("hyperapp").Action<State>} action
  * @property {any} payload
  * @property {State} prevState - doesn't include program states
+ */
+
+/**
+ * @template S
+ * @typedef Program
+ * @property {S} initialState
+ * @property {((state: S) => import("hyperapp").ElementVNode<S>)[]} views
+ * worry about subscriptions later, i don't really use them
  */

@@ -28,7 +28,7 @@ import {
   getSelectedBlocks,
   toggleBlockSelection,
 } from "./selection.js";
-import { programView } from "./program.js";
+import { view } from "./program.js";
 
 /**
  * Creates a block component renderer
@@ -221,7 +221,7 @@ export function block(state) {
         ondblclick,
       },
       [
-        programView(currentPage),
+        view(currentPage),
         ...(isSelected && !isEditing && !isConnecting && !isMultiSelect
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>
               ResizeHandle({

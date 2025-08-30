@@ -1,14 +1,6 @@
 import { h, text } from "../packages/hyperapp/index.js";
 
 /**
- * @template State
- * @typedef Program
- * @property {State} init
- * @property {((state: State) => import("hyperapp").ElementVNode<State>)[]} views
- * worry about subscriptions later, i don't really use them
- */
-
-/**
  * @typedef ProgramState
  * @property {number} n
  */
@@ -16,7 +8,7 @@ import { h, text } from "../packages/hyperapp/index.js";
 /** @type {Program<ProgramState>} */
 export const TestProgram = {
   // initial state that can be reset to in event of catastrophe
-  init: {
+  initialState: {
     n: 0,
   },
   // want to have specific control over what views get rendered. generic API that still gives control
@@ -27,7 +19,7 @@ export const TestProgram = {
  * @param {ProgramState} state
  * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
  */
-export function helloWorld(state) {
+function helloWorld(state) {
   return h("div", {}, [
     h(
       "button",
