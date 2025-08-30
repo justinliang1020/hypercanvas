@@ -2,19 +2,19 @@ import { h, text } from "../packages/hyperapp/index.js";
 
 /**
  * @template State
- * @typedef App
+ * @typedef Program
  * @property {State} init
  * @property {((state: State) => import("hyperapp").ElementVNode<State>)[]} views
  * worry about subscriptions later, i don't really use them
  */
 
 /**
- * @typedef AppState
+ * @typedef ProgramState
  * @property {number} n
  */
 
-/** @type {App<AppState>} */
-export const TestApp = {
+/** @type {Program<ProgramState>} */
+export const TestProgram = {
   // initial state that can be reset to in event of catastrophe
   init: {
     n: 0,
@@ -24,15 +24,15 @@ export const TestApp = {
 };
 
 /**
- * @param {AppState} state
- * @returns {import("hyperapp").ElementVNode<AppState>} Block renderer function
+ * @param {ProgramState} state
+ * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
  */
 export function helloWorld(state) {
   return h("div", {}, [
     h(
       "button",
       {
-        onclick: (state, event) => {
+        onclick: (state) => {
           console.log(state);
           return { ...state, n: state.n - 1 };
         },
@@ -42,7 +42,7 @@ export function helloWorld(state) {
     h(
       "button",
       {
-        onclick: (state, event) => {
+        onclick: (state) => {
           console.log(state);
           return { ...state, n: state.n + 1 };
         },
