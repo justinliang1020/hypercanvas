@@ -28,31 +28,27 @@ export const TestApp = {
  * @returns {import("hyperapp").ElementVNode<AppState>} Block renderer function
  */
 export function helloWorld(state) {
-  try {
-    return h("div", {}, [
-      h(
-        "button",
-        {
-          onclick: (state, event) => {
-            console.log(state);
-            return { ...state, n: state.n - 1 };
-          },
+  return h("div", {}, [
+    h(
+      "button",
+      {
+        onclick: (state, event) => {
+          console.log(state);
+          return { ...state, n: state.n - 1 };
         },
-        text("-"),
-      ),
-      h(
-        "button",
-        {
-          onclick: (state, event) => {
-            console.log(state);
-            return { ...state, n: state.n + 1 };
-          },
+      },
+      text("-"),
+    ),
+    h(
+      "button",
+      {
+        onclick: (state, event) => {
+          console.log(state);
+          return { ...state, n: state.n + 1 };
         },
-        text("+"),
-      ),
-      h("p", {}, text(state.n)),
-    ]);
-  } catch {
-    return h("p", {}, text("error"));
-  }
+      },
+      text("+"),
+    ),
+    h("p", {}, text(state.n)),
+  ]);
 }
