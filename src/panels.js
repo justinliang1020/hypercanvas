@@ -50,7 +50,7 @@ function layersPanel(state) {
         "button",
         {
           class: "layers-panel-button",
-          onclick: (state) => createPage(state),
+          onclick: (state) => createPage(state, "testProgram"),
         },
         text("+ New Page"),
       ),
