@@ -77,6 +77,7 @@ export const defaultPage = {
   dragStart: null,
   previewSelectedIds: [],
   selectionBox: null,
+  state: { n: 0 },
 };
 
 /**

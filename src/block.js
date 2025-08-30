@@ -28,6 +28,7 @@ import {
   getSelectedBlocks,
   toggleBlockSelection,
 } from "./selection.js";
+import { helloWorld } from "./programs/hello-world.js";
 
 /**
  * Creates a block component renderer
@@ -220,7 +221,7 @@ export function block(state) {
         ondblclick,
       },
       [
-        h("p", {}, text("hello world ")),
+        programView(currentPage),
         ...(isSelected && !isEditing && !isConnecting && !isMultiSelect
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>
               ResizeHandle({
@@ -234,6 +235,15 @@ export function block(state) {
       ],
     );
   };
+}
+
+/**
+ * @param {Page} currentPage
+ * @returns {import("hyperapp").ElementVNode<State>} Block renderer function
+ */
+function programView(currentPage) {
+  //@ts-ignore
+  return h("p", {}, helloWorld(currentPage.state));
 }
 
 /**

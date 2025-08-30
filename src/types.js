@@ -39,7 +39,8 @@
  * @property {ResizeState|null} resizing - Current resize operation
  * @property {DragState|null} dragStart - Drag operation start state
  * @property {SelectionBoxState|null} selectionBox - Selection box drag state
- */
+ * @property {any} state - State of app inside this page
+ **/
 
 /**
  * @typedef {Object} Memento
