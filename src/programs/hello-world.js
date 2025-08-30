@@ -35,10 +35,20 @@ export function helloWorld(state) {
         {
           onclick: (state, event) => {
             console.log(state);
+            return { ...state, n: state.n - 1 };
+          },
+        },
+        text("-"),
+      ),
+      h(
+        "button",
+        {
+          onclick: (state, event) => {
+            console.log(state);
             return { ...state, n: state.n + 1 };
           },
         },
-        text("increment"),
+        text("+"),
       ),
       h("p", {}, text(state.n)),
     ]);
