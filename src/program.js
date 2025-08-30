@@ -33,12 +33,16 @@ function createPageAction(currentPage, pageAction) {
 
 /**
  * @param {Page} currentPage
+ * @param {String} viewName
  * @returns {import("hyperapp").ElementVNode<State>} Block renderer function
  */
-export function view(currentPage) {
+export function view(currentPage, viewName) {
   // Get the program view with page state
   const program = programRegistry[currentPage.programName];
-  const programElement = program.views[0](currentPage.state); //TODO: proper selection of view
+  const viewFunction = program.views.find((v) => v.name === viewName);
+  if (viewFunction === undefined)
+    return h("p", {}, text("error: no view function"));
+  const programElement = viewFunction(currentPage.state);
   const wrappedElement = wrapProgramActions(programElement, currentPage);
 
   try {

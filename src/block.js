@@ -221,7 +221,7 @@ export function block(state) {
         ondblclick,
       },
       [
-        view(currentPage),
+        view(currentPage, block.viewName),
         ...(isSelected && !isEditing && !isConnecting && !isMultiSelect
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>
               ResizeHandle({
