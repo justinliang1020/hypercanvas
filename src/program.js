@@ -70,6 +70,7 @@ function wrapProgramActions(element, currentPage) {
     ) {
       wrappedProps[propName] = createPageAction(
         currentPage,
+        //@ts-ignore  TODO: investigate
         element.props[propName],
       );
     }
