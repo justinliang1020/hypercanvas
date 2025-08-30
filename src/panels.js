@@ -47,13 +47,32 @@ function layersPanel(state) {
     [
       h("h2", {}, text("Pages")),
       h(
+        "select",
+        {
+          onchange: (state, event) => {
+            //@ts-ignore TODO: fix
+            const programName = event.target.value;
+            return {
+              ...state,
+              selectedProgramName: programName,
+            };
+          },
+        },
+        [
+          ...Object.keys(programRegistry).map((programName) =>
+            h("option", { value: programName }, text(programName)),
+          ),
+        ],
+      ),
+      h(
         "button",
         {
           class: "layers-panel-button",
-          onclick: (state) => createPage(state, "testProgram"),
+          onclick: (state) => createPage(state, state.selectedProgramName),
         },
         text("+ New Page"),
       ),
+
       ...pageLabels(state),
     ],
   );

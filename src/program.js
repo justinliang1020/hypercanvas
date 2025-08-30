@@ -1,6 +1,7 @@
 import { h, text } from "./packages/hyperapp/index.js";
 import { updateCurrentPage } from "./pages.js";
-import { TestProgram } from "./programs/hello-world.js";
+import { TestProgram } from "./programs/testProgram.js";
+import { TestProgram2 } from "./programs/testProgram2.js";
 
 /**
  * Creates a higher-order action that transforms between app state and page state
@@ -100,4 +101,5 @@ function wrapProgramActions(element, currentPage) {
  */
 export const programRegistry = {
   testProgram: TestProgram,
+  testProgram2: TestProgram2,
 };

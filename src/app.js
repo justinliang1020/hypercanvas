@@ -43,6 +43,7 @@ function initialState() {
     notification: null,
     notificationVisible: false,
     editingPageId: null,
+    selectedProgramName: "",
   };
 
   // Set currentPageId to the first page

@@ -104,6 +104,7 @@
  * @property {string|null} notification - Current notification message
  * @property {boolean} notificationVisible - Whether notification is visible
  * @property {string|null} editingPageId - ID of page currently being renamed
+ * @property {String} selectedProgramName - Selected program name of page to be created
  */
 
 /**
