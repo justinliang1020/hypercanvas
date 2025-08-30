@@ -17,7 +17,6 @@ import { clearUserClipboardEffect } from "./utils.js";
 import {
   getCurrentBlocks,
   updateCurrentPage,
-  getCurrentViewport,
   getCurrentPage,
   getGlobalBlocks,
 } from "./pages.js";
@@ -221,13 +220,7 @@ export function block(state) {
         ondblclick,
       },
       [
-        h("program-component", {
-          "data-id": block.id, // used for mounting program
-          style: {
-            pointerEvents:
-              isEditing || currentPage.isAltPressed ? null : "none",
-          },
-        }),
+        h("p", {}, text("hello world ")),
         ...(isSelected && !isEditing && !isConnecting && !isMultiSelect
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>
               ResizeHandle({
@@ -530,10 +523,7 @@ export function addBlock(
     x: x,
     y: y,
     zIndex: Math.max(...globalBlocks.map((block) => block.zIndex), 0) + 1,
-    programData: {
-      name: programName,
-      state: programState,
-    },
+    programName,
   };
 
   const currentBlocks = getCurrentBlocks(state);
@@ -605,8 +595,7 @@ export function pasteBlocks(state) {
 
   // Transform clipboard data into block configurations for addBlocks
   const blockConfigs = clipboardData.map((blockData) => ({
-    programName: blockData.programData.name,
-    programState: blockData.programData.state,
+    programName: blockData.programName,
     x: blockData.x + PASTE_OFFSET_X,
     y: blockData.y + PASTE_OFFSET_Y,
     width: blockData.width,

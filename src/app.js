@@ -2,15 +2,9 @@ import { app, h } from "./packages/hyperapp/index.js";
 import { STATE_SAVE_PATH } from "./constants.js";
 import { createMementoManager } from "./memento.js";
 import { viewport } from "./viewport.js";
-import {
-  mountEditorProgram,
-  mountProgram,
-  ProgramManager,
-} from "./programManager.js";
 import { panelsContainer } from "./panels.js";
 import { notification, saveApplication } from "./utils.js";
-import { defaultPage, getCurrentBlocks } from "./pages.js";
-import { getFirstSelectedBlock, getFirstSelectedBlockId } from "./selection.js";
+import { defaultPage } from "./pages.js";
 
 initialize();
 
@@ -59,25 +53,10 @@ function initialState() {
 /**
  * Subscription that handles hyperapp
  * @param {import("hyperapp").Dispatch<State>} dispatch - Function to dispatch actions
- * @param {{state: State, programManager: ProgramManager}} props
+ * @param {{state: State}} props
  * @returns {() => void} Cleanup function
  */
 function subscription(dispatch, props) {
-  const state = props.state;
-  const programManager = props.programManager;
-
-  programManager.syncPrograms(dispatch, state);
-
-  // Schedule callback for after the current hyperapp paint cycle
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      getCurrentBlocks(state).forEach((block) => {
-        mountProgram(block, programManager);
-      });
-      mountEditorProgram(getFirstSelectedBlock(state), programManager);
-    });
-  });
-
   /**
    * @param {boolean} isDark - Whether the system theme is dark
    */
@@ -160,8 +139,6 @@ const dispatchMiddleware = (dispatch) => (action, payload) => {
  * @returns {Promise<void>}
  */
 async function initialize() {
-  const programManager = new ProgramManager();
-
   /** @type {State} */
   let state;
   try {
@@ -198,9 +175,7 @@ async function initialize() {
     init: state,
     view: (state) => main(state),
     node: /** @type {Node} */ (document.getElementById("app")),
-    subscriptions: (state) => [
-      [subscription, { state: state, programManager: programManager }],
-    ],
+    subscriptions: (state) => [[subscription, { state: state }]],
     dispatch: dispatchMiddleware,
   });
 }

@@ -16,6 +16,7 @@ import {
  * @type {Record<ResizeString, ResizeHandler>}
  */
 export const RESIZE_HANDLERS = {
+  //TODO: refactor this to not use type block, rather a specialized type that just has the properties needed
   nw: (block, e) => ({
     width: block.x + block.width - e.percentX,
     height: block.y + block.height - e.percentY,
@@ -306,7 +307,7 @@ export function handleResizePointerMove(state, event) {
       width: page.resizing.startWidth,
       height: page.resizing.startHeight,
       zIndex: 0,
-      programData: { name: "", state: null },
+      programName: "",
     };
 
     let newBBox = handler(virtualBoundingBox, {

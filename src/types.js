@@ -6,15 +6,7 @@
  * @property {number} x - X position on canvas
  * @property {number} y - Y position on canvas
  * @property {number} zIndex - Stacking order (higher = front)
- * @property {ProgramData} programData - Associated program data
- */
-
-/**
- * @typedef {Object} ProgramData - Data for Hyperapp Program
- * @property {string} name - Unique program name for mounting hyperapp program
- * @property {Object | null} state - State of hyperapp program instance, constantly synced.
- * If 'null', the program will be mounted with its default state.
- * This is state value only impacts the state of program on mount, i.e. it cannot be edited to edit the state of a program
+ * @property {string} programName - Program name
  */
 
 /**
@@ -121,19 +113,9 @@
  */
 
 /**
- * @typedef {Object} AllowedConnection
- * @property {String} name
- * @property {typeof import('./programBase.js').ProgramBase<any>} program
- */
-
-/**
  * @typedef {Object} AppDispatchEventDetail
  * @property {State} state - doesn't include program states
  * @property {import("hyperapp").Action<State>} action
  * @property {any} payload
  * @property {State} prevState - doesn't include program states
- */
-
-/**
- * @typedef {Object.<string, {program?: typeof import("./programBase.js").ProgramBase | null, editor?: typeof import("./programBase.js").EditorBase | null}>} ProgramRegistry
  */

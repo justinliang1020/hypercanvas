@@ -2,15 +2,7 @@ import { h, text } from "./packages/hyperapp/index.js";
 import { saveApplicationAndNotify } from "./utils.js";
 import { addBlock } from "./block.js";
 import { MEDIA_SAVE_PATH } from "./constants.js";
-import { undoState, redoState } from "./memento.js";
-import { programRegistry } from "./programRegistry.js";
-import {
-  createPage,
-  switchPage,
-  deletePage,
-  renamePage,
-  getCurrentPage,
-} from "./pages.js";
+import { createPage, switchPage, deletePage, renamePage } from "./pages.js";
 import { getFirstSelectedBlockId } from "./selection.js";
 
 /**
@@ -252,9 +244,7 @@ function editor(state) {
  */
 function programButtons(state) {
   const filterText = state.programFilter || "";
-  const filteredPrograms = Object.keys(programRegistry).filter((programName) =>
-    programName.toLowerCase().includes(filterText.toLowerCase()),
-  );
+  const filteredPrograms = ["dummy1", "dummy2"];
 
   return h("div", {}, [
     h("h2", {}, text("add program")),
