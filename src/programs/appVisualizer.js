@@ -13,7 +13,7 @@ export const AppVisualizerProgram = {
     appState: null,
   },
   // want to have specific control over what views get rendered. generic API that still gives control
-  views: [show, currentPage],
+  views: [show, currentPage, currentBlocks],
   // subscriptions for this program
   subscriptions: (state) => [[syncAppState, {}]],
 };
@@ -63,4 +63,16 @@ function currentPage(state) {
   if (!currentPage) return h("div", {}, text("no page"));
 
   return table(currentPage);
+}
+
+/**
+ * @param {ProgramState} state
+ * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
+ */
+function currentBlocks(state) {
+  if (!state.appState) return h("div", {}, text("null"));
+  const currentPage = getCurrentPage(state.appState);
+  if (!currentPage) return h("div", {}, text("no page"));
+
+  return table(currentPage.blocks);
 }

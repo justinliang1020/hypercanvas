@@ -84,9 +84,7 @@ function safeToEmitState(state) {
   return JSON.parse(
     JSON.stringify(state, (key, value) => {
       // Skip the problematic properties
-      // if (key === "mementoManager") return undefined;
-      if (key === "state" && typeof value === "object" && value !== null)
-        return undefined;
+      if (key === "state") return "<redacted>";
       return value;
     }),
   );

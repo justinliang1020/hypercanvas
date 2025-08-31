@@ -1,9 +1,25 @@
 import { h, text } from "../packages/hyperapp/index.js";
+import { stateVisualizer } from "./utils.js";
 
 /**
  * @typedef ProgramState
  * @property {number} n
  */
+
+/** @type {Program<ProgramState>} */
+export const TestProgram = {
+  // initial state that can be reset to in event of catastrophe
+  initialState: {
+    n: 1,
+  },
+  // want to have specific control over what views get rendered. generic API that still gives control
+  views: [counter, hello, count, stateVisualizer],
+  // subscriptions for this program
+  subscriptions: (state) => [
+    [timerSubscription, {}],
+    [timerSubscription2, {}],
+  ],
+};
 
 /**
  * Test subscription that increments the counter every second
@@ -48,21 +64,6 @@ function timerSubscription2(dispatch, props) {
     clearInterval(interval);
   };
 }
-
-/** @type {Program<ProgramState>} */
-export const TestProgram = {
-  // initial state that can be reset to in event of catastrophe
-  initialState: {
-    n: 1,
-  },
-  // want to have specific control over what views get rendered. generic API that still gives control
-  views: [counter, hello, count],
-  // subscriptions for this program
-  subscriptions: (state) => [
-    [timerSubscription, {}],
-    [timerSubscription2, {}],
-  ],
-};
 
 /**
  * Effect that handles pasting content from clipboard (images or text)

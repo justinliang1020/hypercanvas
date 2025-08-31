@@ -95,3 +95,11 @@ export function table(obj) {
     ),
   );
 }
+
+/**
+ * @param {any} state
+ * @returns {import("hyperapp").ElementVNode<any>} Block renderer function
+ */
+export function stateVisualizer(state) {
+  return table(state);
+}
