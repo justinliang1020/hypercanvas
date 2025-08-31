@@ -1,7 +1,9 @@
+import { getCurrentPage } from "../pages.js";
 import { h, text } from "../packages/hyperapp/index.js";
+
 /**
  * @typedef ProgramState
- * @property {any} appState
+ * @property {State | null} appState
  */
 /** @type {Program<ProgramState>} */
 export const AppVisualizerProgram = {
@@ -10,7 +12,7 @@ export const AppVisualizerProgram = {
     appState: null,
   },
   // want to have specific control over what views get rendered. generic API that still gives control
-  views: [show],
+  views: [show, currentPage],
   // subscriptions for this program
   subscriptions: (state) => [[syncAppState, {}]],
 };
@@ -48,4 +50,14 @@ function syncAppState(dispatch, props) {
  */
 function show(state) {
   return h("div", {}, text(JSON.stringify(state.appState)));
+}
+
+/**
+ * @param {ProgramState} state
+ * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
+ */
+function currentPage(state) {
+  if (!state.appState) return h("div", {}, text("null"));
+  const currentPage = getCurrentPage(state.appState);
+  return h("div", {}, text(JSON.stringify(currentPage)));
 }
