@@ -178,7 +178,7 @@ async function initialize() {
     node: /** @type {Node} */ (document.getElementById("app")),
     subscriptions: (state) => [
       [themeChangeSubscription, {}],
-      [programSubscriptionManager, { state: state }],
+      [programSubscriptionManager, {}],
     ],
     dispatch: dispatchMiddleware,
   });

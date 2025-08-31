@@ -8,7 +8,7 @@ import { TestProgram2 } from "./programs/testProgram2.js";
  * @param {Page} currentPage - Current page context
  * @returns {import("hyperapp").Dispatch<any>} Wrapped dispatch
  */
-function createWrappedDispatch(dispatch, currentPage) {
+export function createWrappedDispatch(dispatch, currentPage) {
   return (programAction) => {
     const appAction = createPageAction(currentPage, programAction);
     return dispatch(appAction);
@@ -103,14 +103,18 @@ function handleObjectResult(appState, currentPage, resultObject) {
  */
 function createPageAction(currentPage, pageAction) {
   return (appState, props) => {
-    const result = pageAction(currentPage.state, props);
+    // Get the current page state from app state, not the stale currentPage.state
+    const freshCurrentPage = appState.pages.find(p => p.id === currentPage.id);
+    if (!freshCurrentPage) return appState;
+    
+    const result = pageAction(freshCurrentPage.state, props);
 
     if (typeof result === "function") {
-      return handleFunctionResult(currentPage, result);
+      return handleFunctionResult(freshCurrentPage, result);
     } else if (Array.isArray(result)) {
-      return handleArrayResult(appState, currentPage, result);
+      return handleArrayResult(appState, freshCurrentPage, result);
     } else if (result && typeof result === "object") {
-      return handleObjectResult(appState, currentPage, result);
+      return handleObjectResult(appState, freshCurrentPage, result);
     } else {
       return appState;
     }
@@ -181,38 +185,61 @@ function createPageSubscriptions(page, dispatch) {
   const program = programRegistry[page.programName];
   const cleanupFunctions = [];
 
+  console.log(`Creating subscriptions for page ${page.id} with program ${page.programName}`);
+
   if (program.subscriptions) {
     const programSubs = program.subscriptions(page.state);
+    console.log(`Found ${programSubs.length} subscriptions for this program`);
 
     for (const sub of programSubs) {
       const [subFn, ...args] = sub;
+      console.log(`Creating subscription: ${subFn.name}`);
       const wrappedDispatch = createWrappedDispatch(dispatch, page);
       const cleanup = subFn(wrappedDispatch, ...args);
       if (cleanup) cleanupFunctions.push(cleanup);
     }
   }
 
+  console.log(`Created ${cleanupFunctions.length} cleanup functions`);
   return cleanupFunctions;
 }
+
+/** @type {(() => void)[]} */
+let globalCleanups = [];
 
 /**
  * Program subscription manager that handles all program subscriptions
  * @param {import("hyperapp").Dispatch<State>} dispatch - App-level dispatch function
- * @param {{state: State}} props - Props containing app state
+ * @param {{}} props - Empty props (must stay stable)
  * @returns {() => void} Cleanup function
  */
 export function programSubscriptionManager(dispatch, props) {
-  const { state } = props;
-  /** @type {(() => void)[]} */
-  const allCleanupFunctions = [];
+  console.log('programSubscriptionManager called with stable props');
+  
+  // Clean up any existing subscriptions first
+  globalCleanups.forEach(cleanup => cleanup());
+  globalCleanups = [];
+  
+  // Get current state
+  let currentState = null;
+  dispatch(state => {
+    currentState = state;
+    return state;
+  });
 
-  for (const page of state.pages) {
-    const pageCleanups = createPageSubscriptions(page, dispatch);
-    allCleanupFunctions.push(...pageCleanups);
-  }
+  if (!currentState) return () => {};
+
+  const currentPage = currentState.pages.find(p => p.id === currentState.currentPageId);
+  if (!currentPage) return () => {};
+
+  console.log(`Creating subscriptions for page: ${currentPage.programName}`);
+  const pageCleanups = createPageSubscriptions(currentPage, dispatch);
+  globalCleanups = pageCleanups;
 
   return () => {
-    allCleanupFunctions.forEach((/** @type {() => void} */ fn) => fn());
+    console.log('Cleaning up all program subscriptions');
+    globalCleanups.forEach(cleanup => cleanup());
+    globalCleanups = [];
   };
 }
 
