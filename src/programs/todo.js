@@ -52,6 +52,20 @@ function newInputValue(state, event) {
   };
 }
 
+/**
+ * @param {ProgramState} state
+ * @param {number} index
+ * @returns {ProgramState} Block renderer function
+ */
+function toggleTodo(state, index) {
+  return {
+    ...state,
+    todos: state.todos.map((todo, i) =>
+      i === index ? { ...todo, checked: !todo.checked } : todo,
+    ),
+  };
+}
+
 // ----------------
 // Views
 // ----------------
@@ -81,7 +95,7 @@ function todosView(state) {
     h(
       "ul",
       {},
-      state.todos.map((t) => todo(t)),
+      state.todos.map((t, index) => todo(t, index)),
     ),
   ]);
 }
@@ -92,9 +106,9 @@ function todosView(state) {
  */
 function todoPreview(state) {
   if (state.todos.length > 0) {
-    return todo(state.todos[0]);
+    return todo(state.todos[0], 0);
   }
-  return todo({ value: "todos is empty, this is a preview", checked: false });
+  return h("p", {}, text("no todos"));
 }
 
 /**
@@ -118,11 +132,25 @@ function reset(state) {
 
 /**
  * @param {Todo} todo
+ * @param {number} index
  * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
  */
-function todo(todo) {
+function todo(todo, index) {
   return h("li", { style: { display: "flex" } }, [
-    h("input", { type: "checkbox" }),
-    h("p", {}, text(todo.value)),
+    h("input", {
+      type: "checkbox",
+      checked: todo.checked,
+      onclick: (state) => toggleTodo(state, index),
+    }),
+    h(
+      "p",
+      {
+        style: {
+          textDecoration: todo.checked ? "line-through" : "none",
+          opacity: todo.checked ? "0.6" : "1",
+        },
+      },
+      text(todo.value),
+    ),
   ]);
 }
