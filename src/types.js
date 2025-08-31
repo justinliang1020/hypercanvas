@@ -119,5 +119,5 @@
  * @typedef Program
  * @property {S} initialState
  * @property {((state: S) => import("hyperapp").ElementVNode<S>)[]} views
- * worry about subscriptions later, i don't really use them
+ * @property {((state: S) => import("hyperapp").Subscription<S>[])} [subscriptions]
  */

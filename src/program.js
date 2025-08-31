@@ -1,5 +1,4 @@
 import { h, text } from "./packages/hyperapp/index.js";
-import { updateCurrentPage } from "./pages.js";
 import { TestProgram } from "./programs/testProgram.js";
 import { TestProgram2 } from "./programs/testProgram2.js";
 
@@ -62,7 +61,9 @@ function createPageAction(currentPage, pageAction) {
         {
           ...appState,
           pages: appState.pages.map((page) =>
-            page.id === currentPage.id ? { ...page, state: newPageState } : page,
+            page.id === currentPage.id
+              ? { ...page, state: newPageState }
+              : page,
           ),
         },
         ...wrappedEffects,
@@ -153,6 +154,7 @@ function wrapProgramActions(element, currentPage) {
  */
 function programSubscriptionManager(dispatch, props) {
   const { state } = props;
+  /** @type {(() => void)[]} */
   const cleanupFunctions = [];
 
   // For each page, start its program subscriptions
@@ -160,11 +162,14 @@ function programSubscriptionManager(dispatch, props) {
     const program = programRegistry[page.programName];
     if (program.subscriptions) {
       const programSubs = program.subscriptions(page.state);
-      
+
       for (const sub of programSubs) {
         const [subFn, ...args] = sub;
         // Capture page in closure to prevent reference sharing
-        const wrappedDispatch = ((currentPage) => (action) => dispatch(createPageAction(currentPage, action)))(page);
+        const wrappedDispatch = (
+          (currentPage) => (/** @type {any} */ action) =>
+            dispatch(createPageAction(currentPage, action))
+        )(page);
         const cleanup = subFn(wrappedDispatch, ...args);
         if (cleanup) cleanupFunctions.push(cleanup);
       }
@@ -172,7 +177,7 @@ function programSubscriptionManager(dispatch, props) {
   }
 
   return () => {
-    cleanupFunctions.forEach(fn => fn());
+    cleanupFunctions.forEach((/** @type {() => void} */ fn) => fn());
   };
 }
 
