@@ -2,6 +2,7 @@ import { h, text } from "./packages/hyperapp/index.js";
 import { AppVisualizerProgram } from "./programs/appVisualizer.js";
 import { TestProgram } from "./programs/testProgram.js";
 import { TestProgram2 } from "./programs/testProgram2.js";
+import { TodoProgram } from "./programs/todo.js";
 
 /**
  * Creates a wrapped dispatch that transforms program actions to app actions
@@ -266,4 +267,5 @@ export const programRegistry = {
   testProgram: TestProgram,
   testProgram2: TestProgram2,
   appVisualizerProgram: AppVisualizerProgram,
+  todoProgram: TodoProgram,
 };
