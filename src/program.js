@@ -47,8 +47,7 @@ export function view(currentPage, viewName) {
   const wrappedElement = wrapProgramActions(programElement, currentPage);
 
   try {
-    //@ts-ignore
-    return h("p", {}, wrappedElement);
+    return wrappedElement;
   } catch {
     return h("p", {}, text("error"));
   }
