@@ -66,6 +66,18 @@ function toggleTodo(state, index) {
   };
 }
 
+/**
+ * @param {ProgramState} state
+ * @param {number} index
+ * @returns {ProgramState} Block renderer function
+ */
+function deleteTodo(state, index) {
+  return {
+    ...state,
+    todos: state.todos.filter((todo, i) => i !== index),
+  };
+}
+
 // ----------------
 // Views
 // ----------------
@@ -136,21 +148,33 @@ function reset(state) {
  * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
  */
 function todo(todo, index) {
-  return h("li", { style: { display: "flex" } }, [
-    h("input", {
-      type: "checkbox",
-      checked: todo.checked,
-      onclick: (state) => toggleTodo(state, index),
-    }),
-    h(
-      "p",
-      {
-        style: {
-          textDecoration: todo.checked ? "line-through" : "none",
-          opacity: todo.checked ? "0.6" : "1",
+  return h(
+    "li",
+    { style: { display: "flex", alignItems: "center", gap: "0.2em" } },
+    [
+      h("input", {
+        type: "checkbox",
+        checked: todo.checked,
+        onclick: (state) => toggleTodo(state, index),
+      }),
+      h(
+        "p",
+        {
+          style: {
+            textDecoration: todo.checked ? "line-through" : "none",
+            opacity: todo.checked ? "0.6" : "1",
+          },
         },
-      },
-      text(todo.value),
-    ),
-  ]);
+        text(todo.value),
+      ),
+      h(
+        "button",
+        {
+          style: { height: "100%", backgroundColor: "red" },
+          onclick: (state) => deleteTodo(state, index),
+        },
+        text("X"),
+      ),
+    ],
+  );
 }
