@@ -9,7 +9,7 @@ import { h, text } from "../packages/hyperapp/index.js";
 export const TestProgram = {
   // initial state that can be reset to in event of catastrophe
   initialState: {
-    n: 0,
+    n: 1,
   },
   // want to have specific control over what views get rendered. generic API that still gives control
   views: [counter, hello, count],

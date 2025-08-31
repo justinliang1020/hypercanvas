@@ -1,4 +1,5 @@
 import { saveMementoAndReturn } from "./memento.js";
+import { programRegistry } from "./program.js";
 
 /**
  * Gets the current page from state
@@ -82,6 +83,7 @@ export function createPage(state, programName, name = "New Page") {
     ...defaultPage,
     name,
     programName,
+    state: programRegistry[programName].initialState,
   };
 
   const newState = {
