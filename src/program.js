@@ -224,12 +224,10 @@ export function programSubscriptionManager(dispatch, props) {
   });
 
   if (!currentState) return () => {};
-  const currentPage = currentState.pages.find(
-    /** @param {Page} p */ (p) => p.id === currentState?.currentPageId,
+  const pageCleanups = currentState.pages.map((/** @type {Page}*/ page) =>
+    createPageSubscriptions(page, dispatch),
   );
-  if (!currentPage) return () => {};
 
-  const pageCleanups = createPageSubscriptions(currentPage, dispatch);
   globalCleanups = pageCleanups;
 
   return () => {
