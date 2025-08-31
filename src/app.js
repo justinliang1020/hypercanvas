@@ -55,10 +55,9 @@ function initialState() {
 /**
  * Subscription that handles hyperapp
  * @param {import("hyperapp").Dispatch<State>} dispatch - Function to dispatch actions
- * @param {{state: State}} props
  * @returns {() => void} Cleanup function
  */
-function subscription(dispatch, props) {
+function themeChangeSubscription(dispatch) {
   /**
    * @param {boolean} isDark - Whether the system theme is dark
    */
@@ -178,8 +177,8 @@ async function initialize() {
     view: (state) => main(state),
     node: /** @type {Node} */ (document.getElementById("app")),
     subscriptions: (state) => [
-      [subscription, { state: state }],
-      [programSubscriptionManager, { state: state }]
+      [themeChangeSubscription, {}],
+      [programSubscriptionManager, { state: state }],
     ],
     dispatch: dispatchMiddleware,
   });
