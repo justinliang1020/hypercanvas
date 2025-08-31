@@ -49,6 +49,7 @@ function layersPanel(state) {
       h(
         "select",
         {
+          value: state.selectedProgramName,
           onchange: (state, event) => {
             //@ts-ignore TODO: fix
             const programName = event.target.value;

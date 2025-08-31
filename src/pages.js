@@ -81,6 +81,7 @@ export function createPage(state, programName, name = "New Page") {
   /** @type {Page} */
   const newPage = {
     ...defaultPage,
+    id: crypto.randomUUID(),
     name,
     programName,
     state: programRegistry[programName].initialState,
