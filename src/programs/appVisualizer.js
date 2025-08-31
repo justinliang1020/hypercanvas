@@ -27,13 +27,16 @@ function syncAppState(dispatch, props) {
    */
   function handler(ev) {
     const customEvent = /** @type {CustomEvent<{state: any}>} */ (ev);
-    dispatch((state) => {
-      const newState = {
-        ...state,
-        appState: customEvent.detail.state,
-      };
-      return newState;
-    });
+    // breaks without requestAnimationFrame, unsure why
+    requestAnimationFrame(() =>
+      dispatch((state) => {
+        const newState = {
+          ...state,
+          appState: customEvent.detail.state,
+        };
+        return newState;
+      }),
+    );
   }
   addEventListener("appDispatch", handler);
   return () => removeEventListener("appDispatch", handler);
@@ -46,21 +49,3 @@ function syncAppState(dispatch, props) {
 function show(state) {
   return h("div", {}, text(JSON.stringify(state.appState)));
 }
-
-//
-// /**
-//  * @param {import("hyperapp").Dispatch<any>} dispatch
-//  * @param {import("hyperapp").Action<any>} action
-//  * @returns {() => void}
-//  */
-// function appStateSubscriber(dispatch, action) {
-//   /**
-//    * @param {Event} ev
-//    */
-//   function handler(ev) {
-//     const customEvent = /** @type {CustomEvent<{state: any}>} */ (ev);
-//     dispatch(action, customEvent.detail);
-//   }
-//   addEventListener("appDispatch", handler);
-//   return () => removeEventListener("appDispatch", handler);
-// }

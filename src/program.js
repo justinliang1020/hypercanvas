@@ -231,6 +231,7 @@ export function programSubscriptionManager(dispatch, props) {
 
   globalCleanups = pageCleanups;
 
+  // TODO: investigate. cleanups don't actually run becaue susbscription manager only runs once
   return () => {
     globalCleanups.forEach((cleanup) => cleanup());
     globalCleanups = [];
