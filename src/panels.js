@@ -267,7 +267,7 @@ function viewButtons(state) {
   );
 
   return h("div", {}, [
-    h("h2", {}, text("add view")),
+    h("h2", {}, text(currentPage.programName)),
     h("input", {
       type: "text",
       placeholder: "Filter views...",
