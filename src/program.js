@@ -59,12 +59,22 @@ function createPageAction(currentPage, pageAction) {
         wrapProgramEffect(effect, currentPage),
       );
       return [
-        updateCurrentPage(appState, { state: newPageState }),
+        {
+          ...appState,
+          pages: appState.pages.map((page) =>
+            page.id === currentPage.id ? { ...page, state: newPageState } : page,
+          ),
+        },
         ...wrappedEffects,
       ];
     } else if (result && typeof result === "object") {
-      // If result is a state object, update the page state
-      return updateCurrentPage(appState, { state: result });
+      // If result is a state object, update the specific page state
+      return {
+        ...appState,
+        pages: appState.pages.map((page) =>
+          page.id === currentPage.id ? { ...page, state: result } : page,
+        ),
+      };
     } else {
       // Return unchanged app state for other cases
       return appState;
@@ -153,7 +163,8 @@ function programSubscriptionManager(dispatch, props) {
       
       for (const sub of programSubs) {
         const [subFn, ...args] = sub;
-        const wrappedDispatch = (action) => dispatch(createPageAction(page, action));
+        // Capture page in closure to prevent reference sharing
+        const wrappedDispatch = ((currentPage) => (action) => dispatch(createPageAction(currentPage, action)))(page);
         const cleanup = subFn(wrappedDispatch, ...args);
         if (cleanup) cleanupFunctions.push(cleanup);
       }
