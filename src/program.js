@@ -205,23 +205,25 @@ let globalCleanups = [];
  * @param {import("hyperapp").Dispatch<State>} dispatch - App-level dispatch function
  * @param {{}} props - Empty props (must stay stable)
  * @returns {() => void} Cleanup function
+ *
+ * NOTE: props must remain an empty object {} to prevent subscription restarts.
+ * Hyperapp's patchSubs compares subscription arguments and restarts when they change.
+ * Passing state as props would cause restarts on every state change (mouse moves, etc.),
+ * delaying effects. Instead, we get current state internally via dispatch.
  */
 export function programSubscriptionManager(dispatch, props) {
   // Clean up any existing subscriptions first
   globalCleanups.forEach((cleanup) => cleanup());
   globalCleanups = [];
 
-  // Get current state
-  /** @type {State | null} */
-  let currentState = null;
+  /** @type{any} should be `State` but the typing here is weird */
+  let currentState;
   dispatch((state) => {
     currentState = state;
     return state;
   });
 
   if (!currentState) return () => {};
-
-  //@ts-ignore
   const currentPage = currentState.pages.find(
     /** @param {Page} p */ (p) => p.id === currentState?.currentPageId,
   );
