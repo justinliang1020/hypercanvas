@@ -183,24 +183,17 @@ function createPageSubscriptions(page, dispatch) {
   const program = programRegistry[page.programName];
   const cleanupFunctions = [];
 
-  console.log(
-    `Creating subscriptions for page ${page.id} with program ${page.programName}`,
-  );
-
   if (program.subscriptions) {
     const programSubs = program.subscriptions(page.state);
-    console.log(`Found ${programSubs.length} subscriptions for this program`);
 
     for (const sub of programSubs) {
       const [subFn, ...args] = sub;
-      console.log(`Creating subscription: ${subFn.name}`);
       const wrappedDispatch = createWrappedDispatch(dispatch, page);
       const cleanup = subFn(wrappedDispatch, ...args);
       if (cleanup) cleanupFunctions.push(cleanup);
     }
   }
 
-  console.log(`Created ${cleanupFunctions.length} cleanup functions`);
   return cleanupFunctions;
 }
 
@@ -214,8 +207,6 @@ let globalCleanups = [];
  * @returns {() => void} Cleanup function
  */
 export function programSubscriptionManager(dispatch, props) {
-  console.log("programSubscriptionManager called with stable props");
-
   // Clean up any existing subscriptions first
   globalCleanups.forEach((cleanup) => cleanup());
   globalCleanups = [];
@@ -236,12 +227,10 @@ export function programSubscriptionManager(dispatch, props) {
   );
   if (!currentPage) return () => {};
 
-  console.log(`Creating subscriptions for page: ${currentPage.programName}`);
   const pageCleanups = createPageSubscriptions(currentPage, dispatch);
   globalCleanups = pageCleanups;
 
   return () => {
-    console.log("Cleaning up all program subscriptions");
     globalCleanups.forEach((cleanup) => cleanup());
     globalCleanups = [];
   };

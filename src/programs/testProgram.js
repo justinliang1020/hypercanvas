@@ -12,22 +12,17 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @returns {() => void} Cleanup function
  */
 function timerSubscription(dispatch, props) {
-  console.log('timerSubscription created');
   const interval = setInterval(() => {
-    console.log('timerSubscription tick - incrementing');
     dispatch((state) => {
-      console.log('timerSubscription: current state.n =', state.n);
       const newState = {
         ...state,
         n: state.n + 1,
       };
-      console.log('timerSubscription: new state.n =', newState.n);
       return newState;
     });
   }, 200);
 
   return () => {
-    console.log('timerSubscription cleaned up');
     clearInterval(interval);
   };
 }
@@ -39,22 +34,17 @@ function timerSubscription(dispatch, props) {
  * @returns {() => void} Cleanup function
  */
 function timerSubscription2(dispatch, props) {
-  console.log('timerSubscription2 created');
   const interval = setInterval(() => {
-    console.log('timerSubscription2 tick - resetting to 0');
     dispatch((state) => {
-      console.log('timerSubscription2: current state.n =', state.n);
       const newState = {
         ...state,
         n: 0,
       };
-      console.log('timerSubscription2: new state.n =', newState.n);
       return newState;
     });
   }, 2000);
 
   return () => {
-    console.log('timerSubscription2 cleaned up');
     clearInterval(interval);
   };
 }
@@ -80,7 +70,6 @@ export const TestProgram = {
  * @param {ProgramState} state
  */
 export const testEffect = (dispatch, state) => {
-  console.log(state);
   // This now works - dispatch operates on program state only
   dispatch((state) => ({
     ...state,
