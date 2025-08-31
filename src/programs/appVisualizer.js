@@ -61,19 +61,18 @@ function currentPage(state) {
   const currentPage = getCurrentPage(state.appState);
   if (!currentPage) return h("div", {}, text("no page"));
 
-  return table(
-    Object.keys(currentPage).map((key) => ({
-      name: key,
-      value: /** @type {any} */ (currentPage)[key],
-    })),
-  );
+  return table(currentPage);
 }
 
 /**
- * @param {{name: String, value: any}[]} properties
+ * @param {Object} obj
  * @returns {import("hyperapp").ElementVNode<ProgramState>}
  */
-function table(properties) {
+function table(obj) {
+  const properties = Object.keys(obj).map((key) => ({
+    name: key,
+    value: /** @type {any} */ (obj)[key],
+  }));
   return h(
     "div",
     {
