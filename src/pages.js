@@ -29,16 +29,6 @@ export function getGlobalBlocks(state) {
 }
 
 /**
- * Gets connections for the current page
- * @param {State} state - Current application state
- * @returns {BlockConnection[]} Connections on current page
- */
-export function getCurrentConnections(state) {
-  const currentPage = getCurrentPage(state);
-  return currentPage ? currentPage.connections : [];
-}
-
-/**
  * Gets viewport data for the current page
  * @param {State} state - Current application state
  * @returns {{offsetX: number, offsetY: number, zoom: number}} Viewport data
@@ -59,7 +49,6 @@ export const defaultPage = {
   id: crypto.randomUUID(),
   name: "New Page",
   blocks: [],
-  connections: [],
   offsetX: 0,
   offsetY: 0,
   zoom: 1,
@@ -72,7 +61,6 @@ export const defaultPage = {
   selectedIds: [],
   editingId: null,
   hoveringId: null,
-  connectingId: null,
   resizing: null,
   dragStart: null,
   previewSelectedIds: [],

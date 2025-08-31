@@ -7,11 +7,6 @@ import {
 } from "./constants.js";
 import { saveMementoAndReturn } from "./memento.js";
 import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
-import {
-  addConnection,
-  getConnectedBlockIds,
-  isBlockConnectable,
-} from "./connection.js";
 import { getViewportCenterCoordinates } from "./viewport.js";
 import { clearUserClipboardEffect } from "./utils.js";
 import {
@@ -46,20 +41,12 @@ export function block(state) {
     const isMultiSelect = selectedBlocks.length > 1;
     const isEditing = currentPage.editingId === block.id;
     const isHovering = currentPage.hoveringId === block.id;
-    const isConnecting = currentPage.connectingId === block.id;
-    const isConnectable = isBlockConnectable(state, block.id);
-    const isConnectedToHovered =
-      currentPage.hoveringId !== null &&
-      getConnectedBlockIds(state, currentPage.hoveringId).includes(block.id);
 
     // Having small borders, i.e. 1px, can cause rendering glitches to occur when CSS transform translations are applied such as zooming out
     // Scale outline thickness inversely with zoom to maintain consistent visual appearance
     const outline = getBlockOutline(
       {
-        isConnecting,
-        isConnectable,
         isHovering,
-        isConnectedToHovered,
         isEditing,
         isMultiSelect,
         isSelected,
@@ -97,9 +84,6 @@ export function block(state) {
       let cursorStyle;
       if (isMultiSelect) {
         cursorStyle = "default";
-      } else if (currentPage.connectingId !== null) {
-        // In connection mode, use default pointer cursor
-        cursorStyle = "pointer";
       } else if (
         currentPage.editingId === block.id ||
         currentPage.isAltPressed
@@ -141,21 +125,6 @@ export function block(state) {
       if (isMultiSelect) return state;
 
       event.stopPropagation();
-
-      // Handle connection mode
-      if (
-        currentPage.connectingId !== null &&
-        isBlockConnectable(state, block.id)
-      ) {
-        // Create connection and exit connect mode
-        const newState = addConnection(
-          state,
-          "default",
-          currentPage.connectingId,
-          block.id,
-        );
-        return selectBlock(newState, block.id);
-      }
 
       // If block is in edit mode, don't start dragging
       if (currentPage.editingId === block.id || currentPage.isAltPressed) {
@@ -222,7 +191,7 @@ export function block(state) {
       },
       [
         view(currentPage, block.viewName),
-        ...(isSelected && !isEditing && !isConnecting && !isMultiSelect
+        ...(isSelected && !isEditing && !isMultiSelect
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>
               ResizeHandle({
                 handle: /** @type{ResizeString} */ (handle),
@@ -250,16 +219,13 @@ function createOutline(width, color, zoom) {
 
 /**
  * Determines the outline style for a block based on its current state
- * @param {{isConnecting: boolean, isConnectable: boolean, isHovering: boolean, isConnectedToHovered: boolean, isEditing: boolean, isMultiSelect: boolean, isSelected: boolean, isPreviewSelected: boolean}} blockState - Block state flags
+ * @param {{isHovering: boolean, isEditing: boolean, isMultiSelect: boolean, isSelected: boolean, isPreviewSelected: boolean}} blockState - Block state flags
  * @param {State} state - Application state
  * @returns {string|null} CSS outline property value
  */
 function getBlockOutline(blockState, state) {
   const {
-    isConnecting,
-    isConnectable,
     isHovering,
-    isConnectedToHovered,
     isEditing,
     isMultiSelect,
     isSelected,
@@ -274,37 +240,6 @@ function getBlockOutline(blockState, state) {
     return createOutline(
       OUTLINE_WIDTHS.THICK,
       OUTLINE_COLORS.INTERACT_MODE,
-      currentPage.zoom,
-    );
-  }
-  if (isConnecting) {
-    return createOutline(
-      OUTLINE_WIDTHS.THICK,
-      OUTLINE_COLORS.CONNECTING,
-      currentPage.zoom,
-    );
-  }
-
-  if (isConnectable && isHovering) {
-    return createOutline(
-      OUTLINE_WIDTHS.THICK,
-      OUTLINE_COLORS.CONNECTABLE_HOVER,
-      currentPage.zoom,
-    );
-  }
-
-  if (isConnectable) {
-    return createOutline(
-      OUTLINE_WIDTHS.MEDIUM,
-      OUTLINE_COLORS.CONNECTABLE,
-      currentPage.zoom,
-    );
-  }
-
-  if (isConnectedToHovered) {
-    return createOutline(
-      OUTLINE_WIDTHS.MEDIUM,
-      OUTLINE_COLORS.CONNECTED_TO_HOVERED,
       currentPage.zoom,
     );
   }
@@ -391,31 +326,6 @@ function blockToolbar() {
           },
         },
         text("send to front"),
-      ),
-      h(
-        "button",
-        {
-          onclick: (state, event) => {
-            event.stopPropagation();
-            const currentPage = getCurrentPage(state);
-            const selectedBlockId = getFirstSelectedBlockId(state);
-            if (!currentPage || selectedBlockId === null) return state;
-
-            // Toggle connect mode
-            if (currentPage.connectingId === selectedBlockId) {
-              // Exit connect mode
-              return updateCurrentPage(state, {
-                connectingId: null,
-              });
-            } else {
-              // Enter connect mode
-              return updateCurrentPage(state, {
-                connectingId: selectedBlockId,
-              });
-            }
-          },
-        },
-        text("connect"),
       ),
     ],
   );

@@ -10,18 +10,10 @@
  */
 
 /**
- * @typedef {Object} BlockConnection
- * @property {string} name - Connection name/type
- * @property {number} sourceBlockId - ID of source block
- * @property {number} targetBlockId - ID of target block
- */
-
-/**
  * @typedef {Object} Page
  * @property {string} id - Unique page identifier
  * @property {string} name - Display name for the page
  * @property {Block[]} blocks - All blocks on this page
- * @property {BlockConnection[]} connections - Connections between blocks on this page
  * @property {number} offsetX - Canvas X offset for panning on this page
  * @property {number} offsetY - Canvas Y offset for panning on this page
  * @property {number} zoom - Current zoom level for this page
@@ -35,7 +27,6 @@
  * @property {number[]} previewSelectedIds - IDs of blocks that would be selected (during selection box drag)
  * @property {number|null} editingId - ID of block in edit mode
  * @property {number|null} hoveringId - ID of hovered block
- * @property {number|null} connectingId - ID of block in connect mode (pending connection)
  * @property {ResizeState|null} resizing - Current resize operation
  * @property {DragState|null} dragStart - Drag operation start state
  * @property {SelectionBoxState|null} selectionBox - Selection box drag state

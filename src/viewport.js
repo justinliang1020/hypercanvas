@@ -2,13 +2,11 @@ import { h } from "./packages/hyperapp/index.js";
 import { pasteEffect } from "./utils.js";
 import { saveApplicationAndNotify } from "./utils.js";
 import { copySelectedBlocks, deleteSelectedBlocks, block } from "./block.js";
-import { connectionLine } from "./connection.js";
 import { handleResizePointerMove } from "./resize.js";
 import { saveMementoAndReturn, redoState, undoState } from "./memento.js";
 import {
   getCurrentPage,
   getCurrentBlocks,
-  getCurrentConnections,
   getCurrentViewport,
   updateCurrentPage,
 } from "./pages.js";
@@ -476,13 +474,7 @@ function onkeydown(state, event) {
         isAltPressed: true,
       });
     case "Escape":
-      // Exit connect mode, edit mode, or deselect
-      if (currentPage.connectingId !== null) {
-        event.preventDefault();
-        return updateCurrentPage(state, {
-          connectingId: null,
-        });
-      } else if (currentPage.editingId !== null) {
+      if (currentPage.editingId !== null) {
         event.preventDefault();
         return updateCurrentPage(state, {
           editingId: null,
@@ -631,11 +623,7 @@ export function viewport(state) {
           },
         },
         [
-          // Render connection lines first (behind blocks)
-          ...getCurrentConnections(state).map((connection) =>
-            connectionLine(state, connection),
-          ),
-          // Then render blocks on top
+          // Render blocks
           ...getCurrentBlocks(state).map(block(state)),
           // Render selection bounding box above blocks
           selectionBoundingBox(state),

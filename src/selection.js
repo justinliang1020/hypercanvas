@@ -78,7 +78,6 @@ export function selectBlock(state, blockId) {
   return updateCurrentPage(state, {
     selectedIds: [blockId],
     editingId: null, // Exit edit mode when selecting
-    connectingId: null, // Exit connect mode when selecting
   });
 }
 
@@ -91,7 +90,6 @@ export function deselectAllBlocks(state) {
   return updateCurrentPage(state, {
     selectedIds: [],
     editingId: null,
-    connectingId: null,
   });
 }
 
@@ -133,7 +131,6 @@ export function addBlockToSelection(state, blockId) {
   return updateCurrentPage(state, {
     selectedIds: [...currentSelectedIds, blockId],
     editingId: null, // Exit edit mode when selecting
-    connectingId: null, // Exit connect mode when selecting
   });
 }
 
@@ -153,7 +150,6 @@ export function removeBlockFromSelection(state, blockId) {
   return updateCurrentPage(state, {
     selectedIds: newSelectedIds,
     editingId: null, // Exit edit mode when deselecting
-    connectingId: null, // Exit connect mode when deselecting
   });
 }
 
