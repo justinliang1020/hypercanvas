@@ -16,6 +16,20 @@ export const TestProgram = {
 };
 
 /**
+ * Effect that handles pasting content from clipboard (images or text)
+ * @param {import("hyperapp").Dispatch<ProgramState>} dispatch
+ * @param {ProgramState} state
+ */
+export const testEffect = (dispatch, state) => {
+  console.log(state);
+  // This now works - dispatch operates on program state only
+  dispatch((state) => ({
+    ...state,
+    n: 10,
+  }));
+};
+
+/**
  * @param {ProgramState} state
  * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
  */
@@ -25,7 +39,6 @@ function counter(state) {
       "button",
       {
         onclick: (state) => {
-          console.log(state);
           return { ...state, n: state.n - 1 };
         },
       },
@@ -35,11 +48,19 @@ function counter(state) {
       "button",
       {
         onclick: (state) => {
-          console.log(state);
           return { ...state, n: state.n + 1 };
         },
       },
       text("+"),
+    ),
+    h(
+      "button",
+      {
+        onclick: (state) => {
+          return [state, [testEffect, state]];
+        },
+      },
+      text("test"),
     ),
     h("p", {}, text(state.n)),
   ]);

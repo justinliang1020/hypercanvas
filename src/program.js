@@ -4,6 +4,34 @@ import { TestProgram } from "./programs/testProgram.js";
 import { TestProgram2 } from "./programs/testProgram2.js";
 
 /**
+ * Wraps a program effect to work with page state instead of app state
+ * @param {Array} effect - Effect array [effectFunction, ...args]
+ * @param {Page} currentPage - Current page context
+ * @returns {Array} Wrapped effect array
+ */
+function wrapProgramEffect(effect, currentPage) {
+  if (!Array.isArray(effect) || effect.length === 0) {
+    return effect;
+  }
+
+  const [effectFunction, ...args] = effect;
+
+  // Create a wrapped effect function
+  const wrappedEffectFunction = (dispatch, ...effectArgs) => {
+    // Create a wrapped dispatch that transforms program state to app state
+    const wrappedDispatch = (programAction) => {
+      const appAction = createPageAction(currentPage, programAction);
+      return dispatch(appAction);
+    };
+
+    // Call the original effect with the wrapped dispatch
+    return effectFunction(wrappedDispatch, ...effectArgs);
+  };
+
+  return [wrappedEffectFunction, ...args];
+}
+
+/**
  * Creates a higher-order action that transforms between app state and page state
  * @param {Page} currentPage - Current page context
  * @param {Function} pageAction - Action function that works with page state
@@ -19,9 +47,15 @@ function createPageAction(currentPage, pageAction) {
       // If result is another action, wrap it recursively
       return createPageAction(currentPage, result);
     } else if (Array.isArray(result)) {
-      // If result is [state, ...effects], transform the state part
+      // If result is [state, ...effects], transform the state part and wrap effects
       const [newPageState, ...effects] = result;
-      return [updateCurrentPage(appState, { state: newPageState }), ...effects];
+      const wrappedEffects = effects.map((effect) =>
+        wrapProgramEffect(effect, currentPage),
+      );
+      return [
+        updateCurrentPage(appState, { state: newPageState }),
+        ...wrappedEffects,
+      ];
     } else if (result && typeof result === "object") {
       // If result is a state object, update the page state
       return updateCurrentPage(appState, { state: result });
