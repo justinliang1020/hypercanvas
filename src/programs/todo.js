@@ -3,8 +3,14 @@ import { stateVisualizer } from "./utils.js";
 
 /**
  * @typedef ProgramState
- * @property {String[]} todos
+ * @property {Todo[]} todos
  * @property {String} inputValue
+ */
+
+/**
+ * @typedef Todo
+ * @property {String} value
+ * @property {Boolean} checked
  */
 
 /** @type {Program<ProgramState>} */
@@ -15,8 +21,12 @@ export const TodoProgram = {
     inputValue: "",
   },
   // want to have specific control over what views get rendered. generic API that still gives control
-  views: [stateVisualizer, addTodoView, todosView],
+  views: [stateVisualizer, addTodoView, todosView, reset, todoPreview],
 };
+
+// ----------------
+// Actions
+// ----------------
 
 /**
  * @param {ProgramState} state
@@ -25,7 +35,7 @@ export const TodoProgram = {
 function addTodo(state) {
   return {
     ...state,
-    todos: state.todos.concat(state.inputValue),
+    todos: state.todos.concat({ value: state.inputValue, checked: false }),
     inputValue: "",
   };
 }
@@ -41,6 +51,10 @@ function newInputValue(state, event) {
     inputValue: /** @type {HTMLInputElement} */ (event.target).value,
   };
 }
+
+// ----------------
+// Views
+// ----------------
 
 /**
  * @param {ProgramState} state
@@ -62,9 +76,53 @@ function addTodoView(state) {
  * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
  */
 function todosView(state) {
-  return h(
-    "ul",
-    {},
-    state.todos.map((todo) => h("li", {}, text(todo))),
-  );
+  return h("div", {}, [
+    h("h2", {}, text("todos")),
+    h(
+      "ul",
+      {},
+      state.todos.map((t) => todo(t)),
+    ),
+  ]);
+}
+
+/**
+ * @param {ProgramState} state
+ * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
+ */
+function todoPreview(state) {
+  if (state.todos.length > 0) {
+    return todo(state.todos[0]);
+  }
+  return todo({ value: "todos is empty, this is a preview", checked: false });
+}
+
+/**
+ * @param {ProgramState} state
+ * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
+ */
+function reset(state) {
+  /**
+   * @param {ProgramState} state
+   * @returns {ProgramState}
+   */
+  function resetState(state) {
+    return TodoProgram.initialState;
+  }
+  return h("button", { onclick: resetState }, text("reset"));
+}
+
+// ----------------
+// Components
+// ----------------
+
+/**
+ * @param {Todo} todo
+ * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
+ */
+function todo(todo) {
+  return h("li", { style: { display: "flex" } }, [
+    h("input", { type: "checkbox" }),
+    h("p", {}, text(todo.value)),
+  ]);
 }
