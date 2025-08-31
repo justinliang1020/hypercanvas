@@ -30,7 +30,7 @@ export function table(obj) {
       },
       [
         h("thead", {}, [
-          h("tr", { style: { backgroundColor: "#f5f5f5" } }, [
+          h("tr", {}, [
             h(
               "th",
               {

@@ -21,7 +21,7 @@ export const TodoProgram = {
     inputValue: "",
   },
   // want to have specific control over what views get rendered. generic API that still gives control
-  views: [stateVisualizer, addTodoView, todosView, reset, todoPreview],
+  views: [stateVisualizer, addTodoView, todosView, reset, todoPreview, stats],
 };
 
 // ----------------
@@ -118,7 +118,10 @@ function todosView(state) {
  */
 function todoPreview(state) {
   if (state.todos.length > 0) {
-    return todo(state.todos[0], 0);
+    return h("div", {}, [
+      h("h2", {}, text("first todo")),
+      todo(state.todos[0], 0),
+    ]);
   }
   return h("p", {}, text("no todos"));
 }
@@ -136,6 +139,26 @@ function reset(state) {
     return TodoProgram.initialState;
   }
   return h("button", { onclick: resetState }, text("reset"));
+}
+
+/**
+ * @param {ProgramState} state
+ * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
+ */
+function stats(state) {
+  return h("div", {}, [
+    h("p", {}, text(`${state.todos.length} todos`)),
+    h(
+      "p",
+      {},
+      text(`${state.todos.filter((t) => t.checked).length} checked todos`),
+    ),
+    h(
+      "p",
+      {},
+      text(`${state.todos.filter((t) => !t.checked).length} unchecked todos`),
+    ),
+  ]);
 }
 
 // ----------------
