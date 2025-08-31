@@ -136,6 +136,38 @@ function wrapProgramActions(element, currentPage) {
 }
 
 /**
+ * Program subscription manager that handles all program subscriptions
+ * @param {import("hyperapp").Dispatch<State>} dispatch - App-level dispatch function
+ * @param {{state: State}} props - Props containing app state
+ * @returns {() => void} Cleanup function
+ */
+function programSubscriptionManager(dispatch, props) {
+  const { state } = props;
+  const cleanupFunctions = [];
+
+  // For each page, start its program subscriptions
+  for (const page of state.pages) {
+    const program = programRegistry[page.programName];
+    if (program.subscriptions) {
+      const programSubs = program.subscriptions(page.state);
+      
+      for (const sub of programSubs) {
+        const [subFn, ...args] = sub;
+        const wrappedDispatch = (action) => dispatch(createPageAction(page, action));
+        const cleanup = subFn(wrappedDispatch, ...args);
+        if (cleanup) cleanupFunctions.push(cleanup);
+      }
+    }
+  }
+
+  return () => {
+    cleanupFunctions.forEach(fn => fn());
+  };
+}
+
+export { programSubscriptionManager };
+
+/**
  * @type {Record<String, Program<any>>}
  */
 export const programRegistry = {

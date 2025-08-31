@@ -5,6 +5,25 @@ import { h, text } from "../packages/hyperapp/index.js";
  * @property {number} n
  */
 
+/**
+ * Test subscription that increments the counter every second
+ * @param {import("hyperapp").Dispatch<ProgramState>} dispatch
+ * @param {{}} props
+ * @returns {() => void} Cleanup function
+ */
+function timerSubscription(dispatch, props) {
+  const interval = setInterval(() => {
+    dispatch((state) => ({
+      ...state,
+      n: state.n + 1,
+    }));
+  }, 200);
+
+  return () => {
+    clearInterval(interval);
+  };
+}
+
 /** @type {Program<ProgramState>} */
 export const TestProgram = {
   // initial state that can be reset to in event of catastrophe
@@ -13,6 +32,8 @@ export const TestProgram = {
   },
   // want to have specific control over what views get rendered. generic API that still gives control
   views: [counter, hello, count],
+  // subscriptions for this program
+  subscriptions: (state) => [[timerSubscription, {}]],
 };
 
 /**

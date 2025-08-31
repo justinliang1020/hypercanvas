@@ -5,7 +5,7 @@ import { viewport } from "./viewport.js";
 import { panelsContainer } from "./panels.js";
 import { notification, saveApplication } from "./utils.js";
 import { defaultPage } from "./pages.js";
-import { programRegistry } from "./program.js";
+import { programRegistry, programSubscriptionManager } from "./program.js";
 
 initialize();
 
@@ -177,7 +177,10 @@ async function initialize() {
     init: state,
     view: (state) => main(state),
     node: /** @type {Node} */ (document.getElementById("app")),
-    subscriptions: (state) => [[subscription, { state: state }]],
+    subscriptions: (state) => [
+      [subscription, { state: state }],
+      [programSubscriptionManager, { state: state }]
+    ],
     dispatch: dispatchMiddleware,
   });
 }
