@@ -104,9 +104,11 @@ function handleObjectResult(appState, currentPage, resultObject) {
 function createPageAction(currentPage, pageAction) {
   return (appState, props) => {
     // Get the current page state from app state, not the stale currentPage.state
-    const freshCurrentPage = appState.pages.find(p => p.id === currentPage.id);
+    const freshCurrentPage = appState.pages.find(
+      (p) => p.id === currentPage.id,
+    );
     if (!freshCurrentPage) return appState;
-    
+
     const result = pageAction(freshCurrentPage.state, props);
 
     if (typeof result === "function") {
@@ -132,11 +134,7 @@ function wrapEventHandlers(props, currentPage) {
 
   for (const propName in props) {
     if (propName.startsWith("on") && typeof props[propName] === "function") {
-      wrappedProps[propName] = createPageAction(
-        currentPage,
-        //@ts-ignore  TODO: investigate
-        props[propName],
-      );
+      wrappedProps[propName] = createPageAction(currentPage, props[propName]);
     }
   }
 
@@ -185,7 +183,9 @@ function createPageSubscriptions(page, dispatch) {
   const program = programRegistry[page.programName];
   const cleanupFunctions = [];
 
-  console.log(`Creating subscriptions for page ${page.id} with program ${page.programName}`);
+  console.log(
+    `Creating subscriptions for page ${page.id} with program ${page.programName}`,
+  );
 
   if (program.subscriptions) {
     const programSubs = program.subscriptions(page.state);
@@ -214,22 +214,26 @@ let globalCleanups = [];
  * @returns {() => void} Cleanup function
  */
 export function programSubscriptionManager(dispatch, props) {
-  console.log('programSubscriptionManager called with stable props');
-  
+  console.log("programSubscriptionManager called with stable props");
+
   // Clean up any existing subscriptions first
-  globalCleanups.forEach(cleanup => cleanup());
+  globalCleanups.forEach((cleanup) => cleanup());
   globalCleanups = [];
-  
+
   // Get current state
+  /** @type {State | null} */
   let currentState = null;
-  dispatch(state => {
+  dispatch((state) => {
     currentState = state;
     return state;
   });
 
   if (!currentState) return () => {};
 
-  const currentPage = currentState.pages.find(p => p.id === currentState.currentPageId);
+  //@ts-ignore
+  const currentPage = currentState.pages.find(
+    /** @param {Page} p */ (p) => p.id === currentState?.currentPageId,
+  );
   if (!currentPage) return () => {};
 
   console.log(`Creating subscriptions for page: ${currentPage.programName}`);
@@ -237,8 +241,8 @@ export function programSubscriptionManager(dispatch, props) {
   globalCleanups = pageCleanups;
 
   return () => {
-    console.log('Cleaning up all program subscriptions');
-    globalCleanups.forEach(cleanup => cleanup());
+    console.log("Cleaning up all program subscriptions");
+    globalCleanups.forEach((cleanup) => cleanup());
     globalCleanups = [];
   };
 }
