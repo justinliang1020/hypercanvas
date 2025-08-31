@@ -5,9 +5,9 @@ import { TestProgram2 } from "./programs/testProgram2.js";
 
 /**
  * Wraps a program effect to work with page state instead of app state
- * @param {Array} effect - Effect array [effectFunction, ...args]
+ * @param {import("hyperapp").MaybeEffect<any, any>} effect - Effect array [effectFunction, ...args]
  * @param {Page} currentPage - Current page context
- * @returns {Array} Wrapped effect array
+ * @returns {import("hyperapp").MaybeEffect<State, any>} Wrapped effect array
  */
 function wrapProgramEffect(effect, currentPage) {
   if (!Array.isArray(effect) || effect.length === 0) {
@@ -17,8 +17,10 @@ function wrapProgramEffect(effect, currentPage) {
   const [effectFunction, ...args] = effect;
 
   // Create a wrapped effect function
+  /** @type {import("hyperapp").Effecter<State, any>} */
   const wrappedEffectFunction = (dispatch, ...effectArgs) => {
     // Create a wrapped dispatch that transforms program state to app state
+    /** @type {import("hyperapp").Dispatch<any>} */
     const wrappedDispatch = (programAction) => {
       const appAction = createPageAction(currentPage, programAction);
       return dispatch(appAction);
@@ -28,14 +30,17 @@ function wrapProgramEffect(effect, currentPage) {
     return effectFunction(wrappedDispatch, ...effectArgs);
   };
 
-  return [wrappedEffectFunction, ...args];
+  // Type assertion to match Hyperapp's Effect type
+  /** @type {import("hyperapp").Effect<State, any>} */
+  const wrappedEffect = /** @type {any} */ ([wrappedEffectFunction, ...args]);
+  return wrappedEffect;
 }
 
 /**
  * Creates a higher-order action that transforms between app state and page state
  * @param {Page} currentPage - Current page context
- * @param {Function} pageAction - Action function that works with page state
- * @returns {import("hyperapp").Action<State>} Action function that works with app state
+ * @param {import("hyperapp").Action<any, any>} pageAction - Action function that works with page state
+ * @returns {import("hyperapp").Action<State, any>} Action function that works with app state
  */
 function createPageAction(currentPage, pageAction) {
   return (appState, props) => {
@@ -49,6 +54,7 @@ function createPageAction(currentPage, pageAction) {
     } else if (Array.isArray(result)) {
       // If result is [state, ...effects], transform the state part and wrap effects
       const [newPageState, ...effects] = result;
+      /** @type {import("hyperapp").MaybeEffect<State, any>[]} */
       const wrappedEffects = effects.map((effect) =>
         wrapProgramEffect(effect, currentPage),
       );
