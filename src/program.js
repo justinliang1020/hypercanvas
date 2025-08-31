@@ -1,4 +1,5 @@
 import { h, text } from "./packages/hyperapp/index.js";
+import { AppVisualizerProgram } from "./programs/appVisualizer.js";
 import { TestProgram } from "./programs/testProgram.js";
 import { TestProgram2 } from "./programs/testProgram2.js";
 
@@ -237,14 +238,6 @@ export function programSubscriptionManager(dispatch, props) {
 }
 
 /**
- * @type {Record<String, Program<any>>}
- */
-export const programRegistry = {
-  testProgram: TestProgram,
-  testProgram2: TestProgram2,
-};
-
-/**
  * @param {Page} currentPage
  * @param {String} viewName
  * @returns {import("hyperapp").ElementVNode<State>} Block renderer function
@@ -264,3 +257,12 @@ export function view(currentPage, viewName) {
     return h("p", {}, text("error"));
   }
 }
+
+/**
+ * @type {Record<String, Program<any>>}
+ */
+export const programRegistry = {
+  testProgram: TestProgram,
+  testProgram2: TestProgram2,
+  appVisualizerProgram: AppVisualizerProgram,
+};
