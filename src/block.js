@@ -190,7 +190,16 @@ export function block(state) {
         ondblclick,
       },
       [
-        view(currentPage, block.viewName),
+        h(
+          "div",
+          {
+            style: {
+              pointerEvents:
+                isEditing || currentPage.isAltPressed ? null : "none",
+            },
+          },
+          view(currentPage, block.viewName),
+        ),
         ...(isSelected && !isEditing && !isMultiSelect
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>
               ResizeHandle({
