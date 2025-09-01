@@ -336,6 +336,7 @@ function blockToolbar(block) {
         },
         text("send to front"),
       ),
+      h("p", {}, text(block.viewName)),
     ],
   );
 }
