@@ -10,89 +10,78 @@ export function table(obj) {
     value: /** @type {any} */ (obj)[key],
   }));
   return h(
-    "div",
+    "table",
     {
-      // required for containing the table contents within the block
       style: {
-        width: "100%",
-        height: "100%",
-        overflow: "auto",
+        borderCollapse: "collapse",
+        border: "1px solid #ccc",
+        fontSize: "12px",
       },
     },
-    h(
-      "table",
-      {
-        style: {
-          borderCollapse: "collapse",
-          border: "1px solid #ccc",
-          fontSize: "12px",
-        },
-      },
-      [
-        h("thead", {}, [
-          h("tr", {}, [
+    [
+      h("thead", {}, [
+        h("tr", {}, [
+          h(
+            "th",
+            {
+              style: {
+                border: "1px solid #ccc",
+                padding: "8px",
+                textAlign: "left",
+                fontWeight: "bold",
+                width: "1%",
+                whiteSpace: "nowrap",
+              },
+            },
+            text("Property"),
+          ),
+          h(
+            "th",
+            {
+              style: {
+                border: "1px solid #ccc",
+                padding: "8px",
+                textAlign: "left",
+                fontWeight: "bold",
+              },
+            },
+            text("Value"),
+          ),
+        ]),
+      ]),
+      h(
+        "tbody",
+        {},
+        properties.map((prop) =>
+          h("tr", { key: prop.name }, [
             h(
-              "th",
+              "td",
               {
                 style: {
                   border: "1px solid #ccc",
                   padding: "8px",
                   textAlign: "left",
-                  fontWeight: "bold",
                   width: "1%",
                   whiteSpace: "nowrap",
                 },
               },
-              text("Property"),
+              text(prop.name),
             ),
             h(
-              "th",
+              "td",
               {
                 style: {
                   border: "1px solid #ccc",
                   padding: "8px",
                   textAlign: "left",
-                  fontWeight: "bold",
                 },
               },
-              text("Value"),
+              text(JSON.stringify(prop.value)),
             ),
           ]),
-        ]),
-        h(
-          "tbody",
-          {},
-          properties.map((prop) =>
-            h("tr", { key: prop.name }, [
-              h(
-                "td",
-                {
-                  style: {
-                    border: "1px solid #ccc",
-                    padding: "8px",
-                    textAlign: "left",
-                    width: "1%",
-                    whiteSpace: "nowrap",
-                  },
-                },
-                text(prop.name),
-              ),
-              h(
-                "td",
-                {
-                  style: {
-                    border: "1px solid #ccc",
-                    padding: "8px",
-                    textAlign: "left",
-                  },
-                },
-                text(JSON.stringify(prop.value)),
-              ),
-            ]),
-          ),
         ),
-      ],
-    ),
+      ),
+    ],
   );
 }
 

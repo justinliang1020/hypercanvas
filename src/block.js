@@ -196,6 +196,9 @@ export function block(state) {
             style: {
               pointerEvents:
                 isEditing || currentPage.isAltPressed ? null : "none",
+              width: "100%",
+              height: "100%",
+              overflow: "auto",
             },
           },
           view(currentPage, block.viewName),
