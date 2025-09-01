@@ -1,5 +1,5 @@
 import { h, text } from "../packages/hyperapp/index.js";
-import { stateVisualizer } from "./utils.js";
+import { stateVisualizer, table } from "./utils.js";
 
 /**
  * @typedef ProgramState
@@ -135,28 +135,11 @@ function responseDisplay(state) {
   }
 
   if (state.response) {
-    children.push(
-      h("div", {}, [
-        h("h3", {}, text("Response:")),
-        h(
-          "pre",
-          {
-            style: {
-              backgroundColor: "#f8f9fa",
-              padding: "15px",
-              borderRadius: "4px",
-              border: "1px solid #e9ecef",
-              whiteSpace: "pre-wrap",
-              wordWrap: "break-word",
-              maxHeight: "400px",
-              overflow: "auto",
-            },
-          },
-          text(state.response),
-        ),
-      ]),
-    );
+    children.push(table(JSON.parse(state.response)));
   }
 
-  return h("div", { style: { padding: "20px" } }, children);
+  return h("div", { style: { padding: "20px" } }, [
+    h("h3", {}, text("response")),
+    ...children,
+  ]);
 }
