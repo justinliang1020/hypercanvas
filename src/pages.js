@@ -73,11 +73,13 @@ export const defaultPage = {
 /**
  * Creates a new page
  * @param {State} state - Current application state
- * @param {string} programName - Name for the new page
- * @param {string} name - Name for the new page
+ * @param {string} programName - program for the new page
+ * @param {string} [name] - Name for the new page
  * @returns {State} Updated state with new page
  */
-export function createPage(state, programName, name = "New Page") {
+export function createPage(state, programName, name) {
+  if (!name) name = `new ${programName}`;
+
   /** @type {Page} */
   const newPage = {
     ...defaultPage,
