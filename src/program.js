@@ -4,6 +4,7 @@ import { TestProgram } from "./programs/testProgram.js";
 import { TestProgram2 } from "./programs/testProgram2.js";
 import { TodoProgram } from "./programs/todo.js";
 import { UrlQueryProgram } from "./programs/urlQueryProgram.js";
+import { BoidsSimulation } from "./programs/boidsSimulation.js";
 
 /**
  * Creates a wrapped dispatch that transforms program actions to app actions
@@ -270,4 +271,5 @@ export const programRegistry = {
   appVisualizerProgram: AppVisualizerProgram,
   todoProgram: TodoProgram,
   urlQueryProgram: UrlQueryProgram,
+  boidsSimulation: BoidsSimulation,
 };
