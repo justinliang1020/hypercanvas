@@ -7,6 +7,7 @@ import { stateVisualizer, table } from "./utils.js";
  * @property {string} response
  * @property {boolean} loading
  * @property {string} error
+ * @property {string} parseQuery
  */
 
 /** @type {Program<ProgramState>} */
@@ -17,9 +18,10 @@ export const UrlQueryProgram = {
     response: "",
     loading: false,
     error: "",
+    parseQuery: ".",
   },
   // want to have specific control over what views get rendered. generic API that still gives control
-  views: [urlInput, responseDisplay, stateVisualizer],
+  views: [urlInput, responseDisplay, parseQuery, stateVisualizer],
 };
 
 /**
@@ -142,4 +144,80 @@ function responseDisplay(state) {
     h("h3", {}, text("response")),
     ...children,
   ]);
+}
+
+/**
+ * @param {ProgramState} state
+ * @returns {import("hyperapp").ElementVNode<ProgramState>} Parse query interface
+ */
+function parseQuery(state) {
+  const parseResult =
+    state.response && state.parseQuery
+      ? tryParseQuery(state.response, state.parseQuery)
+      : null;
+
+  return h("div", { style: { padding: "20px" } }, [
+    h("h3", {}, text("Parse Response")),
+    h("div", { style: { marginBottom: "10px" } }, [
+      h("label", {}, text("Query: ")),
+      h("input", {
+        type: "text",
+        value: state.parseQuery,
+        placeholder: "Enter property path (e.g., data.title, contents[0].name)",
+        style: {
+          width: "400px",
+          padding: "5px",
+          marginLeft: "10px",
+        },
+        oninput: (state, event) => ({
+          ...state,
+          parseQuery: /** @type {HTMLInputElement} */ (event.target).value,
+        }),
+      }),
+    ]),
+    parseResult &&
+      h(
+        "div",
+        {
+          style: {
+            padding: "10px",
+            backgroundColor: "#f8f9fa",
+            borderRadius: "4px",
+            marginTop: "10px",
+          },
+        },
+        [
+          h("strong", {}, text("Result: ")),
+          h(
+            "pre",
+            { style: { margin: "5px 0" } },
+            text(JSON.stringify(parseResult, null, 2)),
+          ),
+        ],
+      ),
+  ]);
+}
+
+/**
+ * Simple property path parser
+ * @param {string} jsonString
+ * @param {string} query
+ */
+function tryParseQuery(jsonString, query) {
+  try {
+    const data = JSON.parse(jsonString);
+    const path = query
+      .trim()
+      .split(/[.\[\]]/)
+      .filter(Boolean);
+
+    let result = data;
+    for (const key of path) {
+      if (result == null) return null;
+      result = result[key];
+    }
+    return result;
+  } catch (error) {
+    return `Error: ${/** @type {Error} */ (error).message}`;
+  }
 }
