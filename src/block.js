@@ -212,7 +212,7 @@ export function block(state) {
               }),
             )
           : []),
-        isSelected && !isEditing && !isMultiSelect && blockToolbar(),
+        isSelected && !isEditing && !isMultiSelect && blockToolbar(block),
       ],
     );
   };
@@ -301,10 +301,11 @@ function getBlockOutline(blockState, state) {
 
 /**
  * Creates a toolbar for selected blocks with action buttons
+ * @param {Block} block
  * @returns {import("hyperapp").ElementVNode<State>} Block toolbar element
  */
 
-function blockToolbar() {
+function blockToolbar(block) {
   return h(
     "div",
     {
@@ -320,9 +321,7 @@ function blockToolbar() {
         {
           onclick: (state, event) => {
             event.stopPropagation();
-            const selectedBlockId = getFirstSelectedBlockId(state);
-            if (selectedBlockId === null) return state;
-            return sendToBack(state, selectedBlockId);
+            return sendToBack(state, block.id);
           },
         },
         text("send to back"),
@@ -332,9 +331,7 @@ function blockToolbar() {
         {
           onclick: (state, event) => {
             event.stopPropagation();
-            const selectedBlockId = getFirstSelectedBlockId(state);
-            if (selectedBlockId === null) return state;
-            return sendToFront(state, selectedBlockId);
+            return sendToFront(state, block.id);
           },
         },
         text("send to front"),
