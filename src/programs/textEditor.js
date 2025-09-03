@@ -13,7 +13,7 @@ export const TextEditorProgram = {
     value: "",
   },
   // want to have specific control over what views get rendered. generic API that still gives control
-  views: [textBox, stateVisualizer],
+  views: [textBox, stateVisualizer, reset],
   // subscriptions for this program
   subscriptions: (state) => [],
 };
@@ -25,9 +25,34 @@ export const TextEditorProgram = {
 function textBox(state) {
   return h("textarea", {
     value: state.value,
+    style: {
+      backgroundColor: "transparent",
+      border: "none",
+      color: "inherit",
+      resize: "none",
+      width: "100%",
+      height: "100%",
+      overflow: null,
+    },
     oninput: (state, event) => ({
       ...state,
       value: /** @type {HTMLInputElement} */ (event.target).value,
     }),
   });
+}
+
+/**
+ * @param {ProgramState} state
+ * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
+ */
+//TODO: make this generic in utils.js
+function reset(state) {
+  /**
+   * @param {ProgramState} state
+   * @returns {ProgramState}
+   */
+  function resetState(state) {
+    return TextEditorProgram.initialState;
+  }
+  return h("button", { onclick: resetState }, text("reset"));
 }
