@@ -198,7 +198,7 @@ export function block(state) {
                 isEditing || currentPage.isAltPressed ? null : "none",
               width: "100%",
               height: "100%",
-              overflow: "auto",
+              overflow: "hidden",
             },
           },
           view(currentPage, block.viewName),
