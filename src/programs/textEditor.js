@@ -31,6 +31,7 @@ function textBox(state) {
       backgroundColor: "transparent",
       border: "none",
       resize: "none",
+      outline: "none",
       width: "100%",
       height: "100%",
       overflow: null,
@@ -85,7 +86,40 @@ function editor(state) {
         fontSize: Number(/** @type {HTMLInputElement} */ (event.target).value),
       }),
     }),
+    fontSizeSelect(state),
   ]);
+}
+
+/**
+ * @param {ProgramState} state
+ * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
+ */
+function fontSizeSelect(state) {
+  const options = [8, 12, 14, 18, 22, 24, 36];
+  return h(
+    "select",
+    {
+      value: state.fontSize,
+      onchange: (state, event) => {
+        //@ts-ignore TODO: fix
+        return {
+          ...state,
+          fontSize: Number(
+            /** @type {HTMLInputElement} */ (event.target).value,
+          ),
+        };
+      },
+    },
+    options.map((o) =>
+      h(
+        "option",
+        {
+          value: o,
+        },
+        text(o),
+      ),
+    ),
+  );
 }
 
 /**
