@@ -5,6 +5,7 @@ import { stateVisualizer } from "./utils.js";
  * @typedef ProgramState
  * @property {String} value
  * @property {String} color
+ * @property {Number} fontSize
  */
 
 /** @type {Program<ProgramState>} */
@@ -13,6 +14,7 @@ export const TextEditorProgram = {
   initialState: {
     value: "hello world",
     color: "inherit",
+    fontSize: 12,
   },
   // want to have specific control over what views get rendered. generic API that still gives control
   views: [textBox, stateVisualizer, reset, editor],
@@ -28,17 +30,28 @@ function textBox(state) {
     style: {
       backgroundColor: "transparent",
       border: "none",
-      color: state.color,
       resize: "none",
       width: "100%",
       height: "100%",
       overflow: null,
+      color: state.color,
+      fontSize: `${state.fontSize}px`,
     },
     oninput: (state, event) => ({
       ...state,
       value: /** @type {HTMLInputElement} */ (event.target).value,
     }),
   });
+}
+
+/**
+ * returns whether a string is like "#rrggbb"
+ * @param {String} s
+ * @returns {Boolean}
+ */
+function isHex(s) {
+  //this is kinda a dumb check, a more accurate check would verify if characters are actually 0-f
+  return s[0] === "#" && s.length === 7;
 }
 
 /**
@@ -57,13 +70,21 @@ function editor(state) {
     }),
     h("input", {
       type: "color",
-      value: state.color,
+      value: isHex(state.color) ? state.color : "#000000",
       oninput: (state, event) => ({
         ...state,
         color: /** @type{HTMLInputElement}*/ (event.target).value,
       }),
     }),
     h("hr", {}),
+    h("input", {
+      type: "text",
+      value: state.fontSize,
+      oninput: (state, event) => ({
+        ...state,
+        fontSize: Number(/** @type {HTMLInputElement} */ (event.target).value),
+      }),
+    }),
   ]);
 }
 
