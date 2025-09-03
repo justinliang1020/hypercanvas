@@ -5,6 +5,7 @@ import { stateVisualizer } from "./utils.js";
  * @typedef ProgramState
  * @property {String} value
  * @property {String} color
+ * @property {String} backgroundColor
  * @property {Number} fontSize
  */
 
@@ -14,6 +15,7 @@ export const TextEditorProgram = {
   initialState: {
     value: "hello world",
     color: "inherit",
+    backgroundColor: "transparent",
     fontSize: 12,
   },
   // want to have specific control over what views get rendered. generic API that still gives control
@@ -28,7 +30,7 @@ function textBox(state) {
   return h("textarea", {
     value: state.value,
     style: {
-      backgroundColor: "transparent",
+      backgroundColor: state.backgroundColor,
       border: "none",
       resize: "none",
       outline: "none",
@@ -52,7 +54,11 @@ function textBox(state) {
  */
 function isHex(s) {
   //this is kinda a dumb check, a more accurate check would verify if characters are actually 0-f
-  return s[0] === "#" && s.length === 7;
+  try {
+    return s[0] === "#" && s.length === 7;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -61,6 +67,7 @@ function isHex(s) {
  */
 function editor(state) {
   return h("div", {}, [
+    h("p", {}, text("color")),
     h("input", {
       type: "text",
       value: state.color,
@@ -78,6 +85,25 @@ function editor(state) {
       }),
     }),
     h("hr", {}),
+    h("p", {}, text("backgroundColor")),
+    h("input", {
+      type: "text",
+      value: state.backgroundColor,
+      oninput: (state, event) => ({
+        ...state,
+        backgroundColor: /** @type {HTMLInputElement} */ (event.target).value,
+      }),
+    }),
+    h("input", {
+      type: "color",
+      value: isHex(state.backgroundColor) ? state.backgroundColor : "#000000",
+      oninput: (state, event) => ({
+        ...state,
+        backgroundColor: /** @type{HTMLInputElement}*/ (event.target).value,
+      }),
+    }),
+    h("hr", {}),
+    h("p", {}, text("fontSize")),
     h("input", {
       type: "text",
       value: state.fontSize,
