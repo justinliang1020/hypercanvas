@@ -4,18 +4,18 @@ import { stateVisualizer } from "./utils.js";
 /**
  * @typedef ProgramState
  * @property {String} value
+ * @property {String} color
  */
 
 /** @type {Program<ProgramState>} */
 export const TextEditorProgram = {
   // initial state that can be reset to in event of catastrophe
   initialState: {
-    value: "",
+    value: "hello world",
+    color: "inherit",
   },
   // want to have specific control over what views get rendered. generic API that still gives control
-  views: [textBox, stateVisualizer, reset],
-  // subscriptions for this program
-  subscriptions: (state) => [],
+  views: [textBox, stateVisualizer, reset, editor],
 };
 
 /**
@@ -28,7 +28,7 @@ function textBox(state) {
     style: {
       backgroundColor: "transparent",
       border: "none",
-      color: "inherit",
+      color: state.color,
       resize: "none",
       width: "100%",
       height: "100%",
@@ -39,6 +39,32 @@ function textBox(state) {
       value: /** @type {HTMLInputElement} */ (event.target).value,
     }),
   });
+}
+
+/**
+ * @param {ProgramState} state
+ * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
+ */
+function editor(state) {
+  return h("div", {}, [
+    h("input", {
+      type: "text",
+      value: state.color,
+      oninput: (state, event) => ({
+        ...state,
+        color: /** @type {HTMLInputElement} */ (event.target).value,
+      }),
+    }),
+    h("input", {
+      type: "color",
+      value: state.color,
+      oninput: (state, event) => ({
+        ...state,
+        color: /** @type{HTMLInputElement}*/ (event.target).value,
+      }),
+    }),
+    h("hr", {}),
+  ]);
 }
 
 /**
