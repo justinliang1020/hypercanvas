@@ -7,6 +7,7 @@ import { UrlQueryProgram } from "./programs/urlQueryProgram.js";
 import { BoidsSimulation } from "./programs/boidsSimulation.js";
 import { TextEditorProgram } from "./programs/textEditor.js";
 import { MemeEditorProgram } from "./programs/memeEditor.js";
+import { TextProgram } from "./programs/text.js";
 
 /**
  * Creates a wrapped dispatch that transforms program actions to app actions
@@ -251,10 +252,9 @@ export function programSubscriptionManager(dispatch, props) {
 export function view(currentPage, viewName) {
   // Get the program view with page state
   const program = programRegistry[currentPage.programName];
-  const viewFunction = program.views.find((v) => v.name === viewName);
-  if (viewFunction === undefined)
-    return h("p", {}, text("error: no view function"));
-  const programElement = viewFunction(currentPage.state);
+  const view = program.views.find((v) => v.name === viewName);
+  if (view === undefined) return h("p", {}, text("error: no view function"));
+  const programElement = view.node(currentPage.state);
   const wrappedElement = wrapProgramActions(programElement, currentPage);
 
   try {
@@ -276,4 +276,5 @@ export const programRegistry = {
   boidsSimulation: BoidsSimulation,
   textEditor: TextEditorProgram,
   memeEditor: MemeEditorProgram,
+  text: TextProgram,
 };

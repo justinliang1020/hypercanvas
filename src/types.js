@@ -118,6 +118,16 @@
  * @template S
  * @typedef Program
  * @property {S} initialState
- * @property {((state: S) => import("hyperapp").ElementVNode<S>)[]} views
+ * @property {View<S, any>[]} views
  * @property {((state: S) => import("hyperapp").Subscription<S>[])} [subscriptions]
+ */
+
+/**
+ * @template ProgramState
+ * @template Props
+ * @typedef View
+ * @property {String} name
+ * @property {((state: ProgramState) => import("hyperapp").ElementVNode<ProgramState>)} node - view doesn't need props technically
+ * @property {Props} [props] - if editor does not exist, give default UI to edit props
+ * @property {((state: Props) => import("hyperapp").ElementVNode<Props>)} [editor] - editor can only exist if props exists. if editor exsits, use that to modify props
  */
