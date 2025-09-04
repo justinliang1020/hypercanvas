@@ -119,3 +119,86 @@ function textBox(state, text) {
     },
   });
 }
+
+// ---------
+// Below contains pseudo-code for what props may look like
+// ---------
+
+/**
+ * @typedef EditorProps
+ * @property {String} title
+ */
+
+/** @type {EditorProps} */
+const initialEditorProps = { title: "hello world" };
+
+/**
+ * @param {ProgramState} state
+ * @param {EditorProps} props
+ * @param {any} editor
+ * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
+ */
+function topTextEditor2(state, props, editor) {
+  return h("div", {}, [
+    h("p", {}, text(props.title)),
+    textBox(state, "topText"),
+  ]);
+}
+
+/**
+ * @param {ProgramState} state
+ * @returns {any} Block renderer function
+ */
+function topTextEditor3(state) {
+  /** @type {EditorProps} */
+  const props = { title: "hello world" };
+  const view = h("div", {}, [
+    h("p", {}, text(props.title)),
+    textBox(state, "topText"),
+  ]);
+  const editor = topTextEditor2PropsEditor;
+  return {
+    view,
+    props,
+    editor,
+  };
+}
+
+/**
+ * @param {{title: String}} props
+ * @returns {import("hyperapp").ElementVNode<EditorProps>} Block renderer function
+ */
+function topTextEditor2PropsEditor(props) {
+  return h("textarea", {
+    value: props.title,
+    style: {
+      border: "none",
+      resize: "none",
+      outline: "none",
+      width: "100%",
+      height: "100%",
+      overflow: null,
+      color: "black",
+    },
+    oninput: (props, event) => {
+      const newProps = props;
+      const newTitle = /** @type {HTMLInputElement} */ (event.target).value;
+      props.title = newTitle;
+      return newProps;
+    },
+  });
+}
+
+const views = [
+  {
+    view: topTextEditor2,
+    initialProps: initialEditorProps,
+    editor: topTextEditor2PropsEditor,
+  },
+];
+
+/** @typedef View
+ * @property {any} view - view doesn't need props technically
+ * @property {any} [props] - if editor does not exist, give default UI to edit props
+ * @property {any} [editor] - editor can only exist if props exists. if editor exsits, use that to modify props
+ */
