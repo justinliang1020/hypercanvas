@@ -337,6 +337,17 @@ function blockToolbar(block) {
         },
         text("send to front"),
       ),
+      h(
+        "button",
+        {
+          onclick: (state, event) => {
+            event.stopPropagation();
+            //FIX: add functionality to create editor block
+            return state;
+          },
+        },
+        text("editor"),
+      ),
       h("p", {}, text(block.viewName)),
     ],
   );

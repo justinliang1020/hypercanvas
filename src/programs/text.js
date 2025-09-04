@@ -77,7 +77,7 @@ export const TextProgram = {
   views: [
     {
       name: "Text", //TODO: name has to be unique, how do we communicate this to user
-      node: textNode,
+      node: textNode, //TODO: rename "node" to something better
       props: textProps,
     },
     {

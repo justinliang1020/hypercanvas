@@ -271,6 +271,47 @@ export function renderView(currentPage, block) {
 }
 
 /**
+ * @param {Page} currentPage
+ * @param {Block} block
+ * @returns {import("hyperapp").ElementVNode<State>} Block renderer function
+ */
+export function renderEditor(currentPage, block) {
+  const program = programRegistry[currentPage.programName];
+  const view = program.views.find((v) => v.name === block.viewName);
+  //TODO: fix this kinda ugly error handling
+  if (view === undefined) {
+    return h(
+      "p",
+      { style: { color: "red" } },
+      text(`error: no view. could not find ${block.viewName}`),
+    );
+  }
+  if (!view.props) {
+    return h(
+      "p",
+      { style: { color: "red" } },
+      text(`error: no view props. could not find props for ${view}`),
+    );
+  }
+  if (!view.editor) {
+    return h(
+      "p",
+      { style: { color: "red" } },
+      text(`error: no view editor. could not find editor for ${view}`),
+    );
+  }
+  const programElement = view.editor(view.props);
+  // FIX: rewrite this so this wraps the editor view with the block props as the state
+  const wrappedElement = wrapProgramActions(programElement, currentPage);
+
+  try {
+    return wrappedElement;
+  } catch {
+    return h("p", {}, text("error"));
+  }
+}
+
+/**
  * @type {Record<String, Program<any>>}
  */
 export const programRegistry = {

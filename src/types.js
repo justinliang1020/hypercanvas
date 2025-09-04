@@ -8,6 +8,7 @@
  * @property {number} zIndex - Stacking order (higher = front)
  * @property {string} viewName - Program name
  * @property {Object} props - Props of the block
+ * //FIX: add arg for whether the block is a node or editor
  */
 
 /**
