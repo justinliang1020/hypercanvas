@@ -253,7 +253,12 @@ export function renderView(currentPage, block) {
   // Get the program view with page state
   const program = programRegistry[currentPage.programName];
   const view = program.views.find((v) => v.name === block.viewName);
-  if (view === undefined) return h("p", {}, text("error: no view function"));
+  if (view === undefined)
+    return h(
+      "p",
+      { style: { color: "red" } },
+      text(`error: no view function. could not find ${block.viewName}`),
+    );
   const programElement = view.node(currentPage.state, view.props);
   const wrappedElement = wrapProgramActions(programElement, currentPage);
 
