@@ -213,6 +213,7 @@ let globalCleanups = [];
  * @param {{}} props - Empty props (must stay stable)
  * @returns {() => void} Cleanup function
  *
+ * TODO: get this toa actually run on adding new programs that have subscriptions, not just restarting the app
  * NOTE: props must remain an empty object {} to prevent subscription restarts.
  * Hyperapp's patchSubs compares subscription arguments and restarts when they change.
  * Passing state as props would cause restarts on every state change (mouse moves, etc.),
