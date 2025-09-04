@@ -24,6 +24,7 @@ import {
   toggleBlockSelection,
 } from "./selection.js";
 import { renderView } from "./program.js";
+import { programRegistry } from "./program.js";
 
 /**
  * Creates a block component renderer
@@ -433,7 +434,12 @@ export function addBlock(
     x = x ?? viewportCenter.x - width / 2; // Center the block
     y = y ?? viewportCenter.y - height / 2; // Center the block
   }
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return state;
+  const program = programRegistry[currentPage.programName];
+  const view = program.views.find((v) => v.name === viewName);
   const globalBlocks = getGlobalBlocks(state);
+
   /** @type {Block} */
   const newBlock = {
     id: Math.max(...globalBlocks.map((block) => block.id), 0) + 1,
@@ -443,6 +449,7 @@ export function addBlock(
     y: y,
     zIndex: Math.max(...globalBlocks.map((block) => block.zIndex), 0) + 1,
     viewName: viewName,
+    props: view?.props,
   };
 
   const currentBlocks = getCurrentBlocks(state);

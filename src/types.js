@@ -7,6 +7,7 @@
  * @property {number} y - Y position on canvas
  * @property {number} zIndex - Stacking order (higher = front)
  * @property {string} viewName - Program name
+ * @property {Object} props - Props of the block
  */
 
 /**
