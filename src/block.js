@@ -23,7 +23,7 @@ import {
   getSelectedBlocks,
   toggleBlockSelection,
 } from "./selection.js";
-import { view } from "./program.js";
+import { renderView } from "./program.js";
 
 /**
  * Creates a block component renderer
@@ -201,7 +201,7 @@ export function block(state) {
               overflow: "hidden",
             },
           },
-          view(currentPage, block.viewName),
+          renderView(currentPage, block),
         ),
         ...(isSelected && !isEditing && !isMultiSelect
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>

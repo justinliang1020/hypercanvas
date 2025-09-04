@@ -246,13 +246,13 @@ export function programSubscriptionManager(dispatch, props) {
 
 /**
  * @param {Page} currentPage
- * @param {String} viewName
+ * @param {Block} block
  * @returns {import("hyperapp").ElementVNode<State>} Block renderer function
  */
-export function view(currentPage, viewName) {
+export function renderView(currentPage, block) {
   // Get the program view with page state
   const program = programRegistry[currentPage.programName];
-  const view = program.views.find((v) => v.name === viewName);
+  const view = program.views.find((v) => v.name === block.viewName);
   if (view === undefined) return h("p", {}, text("error: no view function"));
   const programElement = view.node(currentPage.state, view.props);
   const wrappedElement = wrapProgramActions(programElement, currentPage);
