@@ -114,6 +114,25 @@
  * @property {State} prevState - doesn't include program states
  */
 
+//TODO:  write some better typescript type for program, shouldn't use {View<S, any>[]}, i.e. the following should be invalid but is valid
+//views: [
+//    {
+//      name: "Text Box",
+//      node: textBoxNode,
+//      props: textProps,
+//    },
+//    {
+//      name: "Text Box",
+//      node: textBoxNodeNoProps,
+//      props: textProps,
+//    },
+//    {
+//      name: "Text Box",
+//      node: textBoxNode,
+//      props: fakeTextProps,
+//    },
+//  ]
+
 /**
  * @template S
  * @typedef Program
@@ -127,7 +146,7 @@
  * @template Props
  * @typedef View
  * @property {String} name
- * @property {((state: ProgramState) => import("hyperapp").ElementVNode<ProgramState>)} node - view doesn't need props technically
+ * @property {((state: ProgramState, props: !Props) => import("hyperapp").ElementVNode<ProgramState>)} node - view doesn't need props technically
  * @property {Props} [props] - if editor does not exist, give default UI to edit props
  * @property {((state: Props) => import("hyperapp").ElementVNode<Props>)} [editor] - editor can only exist if props exists. if editor exsits, use that to modify props
  */

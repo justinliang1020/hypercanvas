@@ -254,7 +254,7 @@ export function view(currentPage, viewName) {
   const program = programRegistry[currentPage.programName];
   const view = program.views.find((v) => v.name === viewName);
   if (view === undefined) return h("p", {}, text("error: no view function"));
-  const programElement = view.node(currentPage.state);
+  const programElement = view.node(currentPage.state, view.props);
   const wrappedElement = wrapProgramActions(programElement, currentPage);
 
   try {

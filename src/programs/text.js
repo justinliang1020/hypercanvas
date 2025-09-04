@@ -3,29 +3,28 @@ import { stateVisualizer } from "./utils.js";
 
 /**
  * @typedef ProgramState
- * @property {String} value
  * @property {String} color
  * @property {String} backgroundColor
  * @property {Number} fontSize
  */
 
 /**
- * @typedef TextBoxProps
+ * @typedef TextProps
  * @property {String} textValue
  */
 
-/** @type {TextBoxProps} */
-const props = { textValue: "hello world" };
+/** @type {TextProps} */
+const textProps = { textValue: "hello world" };
 
 /**
  * @param {ProgramState} state
+ * @param {TextProps} props
  * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
  */
-function textBoxNode(state) {
+function textBoxNode(state, props) {
   return h(
     "p",
     {
-      value: state.value,
       style: {
         backgroundColor: state.backgroundColor,
         border: "none",
@@ -42,137 +41,20 @@ function textBoxNode(state) {
   );
 }
 
-/**
- * returns whether a string is like "#rrggbb"
- * @param {String} s
- * @returns {Boolean}
- */
-function isHex(s) {
-  //this is kinda a dumb check, a more accurate check would verify if characters are actually 0-f
-  try {
-    return s[0] === "#" && s.length === 7;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * @param {ProgramState} state
- * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
- */
-function editor(state) {
-  return h("div", {}, [
-    h("p", {}, text("color")),
-    h("input", {
-      type: "text",
-      value: state.color,
-      oninput: (state, event) => ({
-        ...state,
-        color: /** @type {HTMLInputElement} */ (event.target).value,
-      }),
-    }),
-    h("input", {
-      type: "color",
-      value: isHex(state.color) ? state.color : "#000000",
-      oninput: (state, event) => ({
-        ...state,
-        color: /** @type{HTMLInputElement}*/ (event.target).value,
-      }),
-    }),
-    h("hr", {}),
-    h("p", {}, text("backgroundColor")),
-    h("input", {
-      type: "text",
-      value: state.backgroundColor,
-      oninput: (state, event) => ({
-        ...state,
-        backgroundColor: /** @type {HTMLInputElement} */ (event.target).value,
-      }),
-    }),
-    h("input", {
-      type: "color",
-      value: isHex(state.backgroundColor) ? state.backgroundColor : "#000000",
-      oninput: (state, event) => ({
-        ...state,
-        backgroundColor: /** @type{HTMLInputElement}*/ (event.target).value,
-      }),
-    }),
-    h("hr", {}),
-    h("p", {}, text("fontSize")),
-    h("input", {
-      type: "text",
-      value: state.fontSize,
-      oninput: (state, event) => ({
-        ...state,
-        fontSize: Number(/** @type {HTMLInputElement} */ (event.target).value),
-      }),
-    }),
-    fontSizeSelect(state),
-  ]);
-}
-
-/**
- * @param {ProgramState} state
- * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
- */
-function fontSizeSelect(state) {
-  const options = [8, 12, 14, 18, 22, 24, 36];
-  return h(
-    "select",
-    {
-      value: state.fontSize,
-      onchange: (state, event) => {
-        //@ts-ignore TODO: fix
-        return {
-          ...state,
-          fontSize: Number(
-            /** @type {HTMLInputElement} */ (event.target).value,
-          ),
-        };
-      },
-    },
-    options.map((o) =>
-      h(
-        "option",
-        {
-          value: o,
-        },
-        text(o),
-      ),
-    ),
-  );
-}
-
-/**
- * @param {ProgramState} state
- * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
- */
-//TODO: make this generic in utils.js
-function reset(state) {
-  /**
-   * @param {ProgramState} state
-   * @returns {ProgramState}
-   */
-  function resetState(state) {
-    return TextProgram.initialState;
-  }
-  return h("button", { onclick: resetState }, text("reset"));
-}
-
-const textBox = {
-  name: "Text Box",
-  node: textBoxNode,
-};
-
 /** @type {Program<ProgramState>} */
 export const TextProgram = {
   // initial state that can be reset to in event of catastrophe
   initialState: {
-    value: "hello world",
     color: "inherit",
     backgroundColor: "transparent",
     fontSize: 12,
   },
   // want to have specific control over what views get rendered. generic API that still gives control
-  views: [textBox],
+  views: [
+    {
+      name: "Text Box",
+      node: textBoxNode,
+      props: textProps,
+    },
+  ],
 };
