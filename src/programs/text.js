@@ -21,7 +21,7 @@ const textProps = { textValue: "hello world" };
  * @param {TextProps} props
  * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
  */
-function textBoxNode(state, props) {
+function textNode(state, props) {
   return h(
     "p",
     {
@@ -41,6 +41,30 @@ function textBoxNode(state, props) {
   );
 }
 
+/**
+ * @param {ProgramState} state
+ * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
+ */
+function textNodeWithoutProps(state) {
+  return h(
+    "p",
+    {
+      style: {
+        backgroundColor: state.backgroundColor,
+        border: "none",
+        resize: "none",
+        outline: "none",
+        width: "100%",
+        height: "100%",
+        overflow: null,
+        color: state.color,
+        fontSize: `${state.fontSize}px`,
+      },
+    },
+    text("no props"),
+  );
+}
+
 /** @type {Program<ProgramState>} */
 export const TextProgram = {
   // initial state that can be reset to in event of catastrophe
@@ -52,9 +76,13 @@ export const TextProgram = {
   // want to have specific control over what views get rendered. generic API that still gives control
   views: [
     {
-      name: "Text Box",
-      node: textBoxNode,
+      name: "Text", //TODO: name has to be unique, how do we communicate this to user
+      node: textNode,
       props: textProps,
+    },
+    {
+      name: "Text without props", //TODO: name has to be unique, how do we communicate this to user
+      node: textNodeWithoutProps,
     },
   ],
 };
