@@ -23,7 +23,7 @@ import {
   getSelectedBlocks,
   toggleBlockSelection,
 } from "./selection.js";
-import { renderView } from "./program.js";
+import { renderEditor, renderView } from "./program.js";
 import { programRegistry } from "./program.js";
 
 /**
@@ -170,6 +170,17 @@ export function block(state) {
       });
     }
 
+    const contents = (() => {
+      switch (block.type) {
+        case "View":
+          return renderView(currentPage, block);
+        case "Editor":
+          return renderEditor(currentPage, block);
+        default:
+          return h("p", {}, text("oopsie wrong thing"));
+      }
+    })();
+
     return h(
       "div",
       {
@@ -202,7 +213,7 @@ export function block(state) {
               overflow: "hidden",
             },
           },
-          renderView(currentPage, block),
+          contents,
         ),
         ...(isSelected && !isEditing && !isMultiSelect
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>
@@ -342,8 +353,8 @@ function blockToolbar(block) {
         {
           onclick: (state, event) => {
             event.stopPropagation();
-            //FIX: add functionality to create editor block
-            return state;
+            const newState = addEditorBlock(state, block.viewName, block.id);
+            return newState;
           },
         },
         text("editor"),
@@ -425,13 +436,13 @@ export function deleteSelectedBlocks(state) {
 /**
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
- * @param {string} viewName - Name of program to instantiate
+ * @param {string} viewName - Name of view to instantiate
  * @param {number | null} x - X position on canvas. If null, uses viewport's center X coordinate
  * @param {number | null} y - Y position on canvas. If null, uses viewport's center X coordinate
  * @param {number} width - Block width in pixels
  * @param {number} height - Block height in pixels
  * @returns {State} Updated state with new block */
-export function addBlock(
+export function addViewBlock(
   state,
   viewName,
   x = null,
@@ -461,6 +472,64 @@ export function addBlock(
     zIndex: Math.max(...globalBlocks.map((block) => block.zIndex), 0) + 1,
     viewName: viewName,
     props: view?.props,
+    type: "View",
+  };
+
+  const currentBlocks = getCurrentBlocks(state);
+  const newState = updateCurrentPage(state, {
+    blocks: [...currentBlocks, newBlock],
+  });
+
+  const selectedState = selectBlock(newState, newBlock.id);
+
+  return saveMementoAndReturn(state, selectedState);
+}
+
+/**
+ * Adds a new block to the state and renders its program
+ * @param {State} state - Current application state
+ * @param {String} viewName - Name of view to instantiate
+ * @param {Number} editingBlockId - Name of view to instantiate
+ * @param {Number | null} x - X position on canvas. If null, uses viewport's center X coordinate
+ * @param {Number | null} y - Y position on canvas. If null, uses viewport's center X coordinate
+ * @param {Number} width - Block width in pixels
+ * @param {Number} height - Block height in pixels
+ * @returns {State} Updated state with new block
+ * TODO: reduce code duplication between this and addViewBlock
+ */
+export function addEditorBlock(
+  state,
+  viewName,
+  editingBlockId,
+  x = null,
+  y = null,
+  width = 200,
+  height = 200,
+) {
+  // If no coordinates provided, use viewport center
+  if (x === null || y === null) {
+    const viewportCenter = getViewportCenterCoordinates(state);
+    x = x ?? viewportCenter.x - width / 2; // Center the block
+    y = y ?? viewportCenter.y - height / 2; // Center the block
+  }
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return state;
+  const program = programRegistry[currentPage.programName];
+  const view = program.views.find((v) => v.name === viewName);
+  const globalBlocks = getGlobalBlocks(state);
+
+  /** @type {Block} */
+  const newBlock = {
+    id: Math.max(...globalBlocks.map((block) => block.id), 0) + 1,
+    width: width,
+    height: height,
+    x: x,
+    y: y,
+    zIndex: Math.max(...globalBlocks.map((block) => block.zIndex), 0) + 1,
+    viewName: viewName,
+    props: view?.props,
+    type: "Editor",
+    editingBlockId,
   };
 
   const currentBlocks = getCurrentBlocks(state);
@@ -491,7 +560,7 @@ function addBlocks(state, blockConfigs) {
   for (const config of blockConfigs) {
     const { programName, x = null, y = null, width = 200 } = config;
 
-    currentState = addBlock(currentState, programName, x, y, width);
+    currentState = addViewBlock(currentState, programName, x, y, width);
 
     // Get the ID of the newly added block
     const currentBlocks = getCurrentBlocks(currentState);

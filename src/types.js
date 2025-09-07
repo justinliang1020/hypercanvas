@@ -6,9 +6,11 @@
  * @property {number} x - X position on canvas
  * @property {number} y - Y position on canvas
  * @property {number} zIndex - Stacking order (higher = front)
- * @property {string} viewName - Program name
+ * @property {string} viewName - View name
  * @property {Object} props - Props of the block
- * //FIX: add arg for whether the block is a node or editor
+ * @property {"View"|"Editor"} type - Type of rendered contents of block
+ * @property {Number} [editingBlockId] - ID of the associated block, only applicable if this block is an editor
+ * TODO: possibly spilit this out into separate "ViewBlock" and "EditorBlock" types
  */
 
 /**

@@ -46,7 +46,7 @@ function textNode(state, props) {
  * @returns {import("hyperapp").ElementVNode<TextProps>} Block renderer function
  */
 function textEditor(props) {
-  return h("p", {}, text("hello world"));
+  return h("p", {}, text("editor block hello world"));
   // return h("p", {}, text(`text value: ${props.textValue}`));
 }
 
