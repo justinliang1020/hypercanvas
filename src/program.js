@@ -278,6 +278,7 @@ export function renderView(currentPage, block) {
 export function renderEditor(currentPage, block) {
   const program = programRegistry[currentPage.programName];
   const view = program.views.find((v) => v.name === block.viewName);
+  const editingBlockId = block.editingBlockId;
   //TODO: fix this kinda ugly error handling
   if (view === undefined) {
     return h(
@@ -300,9 +301,26 @@ export function renderEditor(currentPage, block) {
       text(`error: no view editor. could not find editor for ${view}`),
     );
   }
+  if (!editingBlockId) {
+    return h(
+      "p",
+      { style: { color: "red" } },
+      text(`error: no editing block id. could not find editor for ${view}`),
+    );
+  }
+  const editingBlock = currentPage.blocks.find((b) => b.id === editingBlockId);
+  if (!editingBlock) {
+    return h(
+      "p",
+      { style: { color: "red" } },
+      text(`error: no editing block. could not find editor for ${view}`),
+    );
+  }
   const programElement = view.editor(view.props);
-  // FIX: rewrite this so this wraps the editor view with the block props as the state
-  const wrappedElement = wrapProgramActions(programElement, currentPage);
+  // FIX: rewrite this so this wraps the editor view with the block props as the state.
+  // currently it almost works, where it can read scoped state but not write scoped state
+  // @ts-ignore
+  const wrappedElement = wrapProgramActions(programElement, editingBlock.props);
 
   try {
     return wrappedElement;

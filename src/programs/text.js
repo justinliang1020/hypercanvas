@@ -42,12 +42,18 @@ function textNode(state, props) {
 }
 
 /**
- * @param {TextProps} props
+ * @param {TextProps} state
  * @returns {import("hyperapp").ElementVNode<TextProps>} Block renderer function
  */
-function textEditor(props) {
-  return h("p", {}, text("editor block hello world"));
+function textEditor(state) {
   // return h("p", {}, text(`text value: ${props.textValue}`));
+  return h("input", {
+    value: state.textValue,
+    oninput: (state, event) => ({
+      ...state,
+      textValue: /** @type {HTMLInputElement} */ (event.target).value,
+    }),
+  });
 }
 
 /**
