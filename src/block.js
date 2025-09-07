@@ -514,8 +514,6 @@ export function addEditorBlock(
   }
   const currentPage = getCurrentPage(state);
   if (!currentPage) return state;
-  const program = programRegistry[currentPage.programName];
-  const view = program.views.find((v) => v.name === viewName);
   const globalBlocks = getGlobalBlocks(state);
 
   /** @type {Block} */
@@ -527,7 +525,7 @@ export function addEditorBlock(
     y: y,
     zIndex: Math.max(...globalBlocks.map((block) => block.zIndex), 0) + 1,
     viewName: viewName,
-    props: view?.props,
+    props: {}, // editor block does not use props
     type: "Editor",
     editingBlockId,
   };
