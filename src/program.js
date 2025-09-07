@@ -11,16 +11,16 @@ import { TextProgram } from "./programs/text.js";
 
 /**
  * Creates a generic scoped action that transforms between outer and inner state
- * @template OuterState
- * @template InnerState
- * @param {(outerState: OuterState) => InnerState} getter - Extracts inner state from outer state
- * @param {(outerState: OuterState, innerState: InnerState) => OuterState} setter - Updates outer state with new inner state
- * @param {import("hyperapp").Action<InnerState, any>} innerAction - Action that works with inner state
- * @returns {import("hyperapp").Action<OuterState, any>} Action that works with outer state
+ * @param {(outerState: any) => any} getter - Extracts inner state from outer state
+ * @param {(outerState: any, innerState: any) => any} setter - Updates outer state with new inner state
+ * @param {import("hyperapp").Action<any, any>} innerAction - Action that works with inner state
+ * @returns {import("hyperapp").Action<any, any>} Action that works with outer state
  */
 function createScopedAction(getter, setter, innerAction) {
   return (outerState, props) => {
     const innerState = getter(outerState);
+    if (!innerState) return outerState;
+
     const result = innerAction(innerState, props);
 
     if (typeof result === "function") {
@@ -45,20 +45,6 @@ function createScopedAction(getter, setter, innerAction) {
 function createWrappedDispatch(dispatch, currentPage) {
   return (programAction) => {
     const appAction = createPageAction(currentPage, programAction);
-    return dispatch(appAction);
-  };
-}
-
-/**
- * Creates a wrapped dispatch for block props actions
- * @param {import("hyperapp").Dispatch<State>} dispatch - App-level dispatch
- * @param {Page} currentPage - Current page context
- * @param {number} blockId - ID of the block whose props to update
- * @returns {import("hyperapp").Dispatch<any>} Wrapped dispatch
- */
-function createBlockPropsDispatch(dispatch, currentPage, blockId) {
-  return (propsAction) => {
-    const appAction = createBlockPropsAction(currentPage, blockId, propsAction);
     return dispatch(appAction);
   };
 }
@@ -135,13 +121,15 @@ function updateBlockProps(appState, currentPage, blockId, newProps) {
  * @returns {import("hyperapp").Action<State, any>} Action function that works with app state
  */
 function createPageAction(currentPage, pageAction) {
+  /** @type {(appState: State) => any} */
   const getter = (appState) => {
     const freshCurrentPage = appState.pages.find(
-      (p) => p.id === currentPage.id,
+      (/** @type {Page} */ p) => p.id === currentPage.id,
     );
     return freshCurrentPage ? freshCurrentPage.state : null;
   };
 
+  /** @type {(appState: State, newPageState: any) => State} */
   const setter = (appState, newPageState) => {
     return updatePageState(appState, currentPage, newPageState);
   };
@@ -157,16 +145,20 @@ function createPageAction(currentPage, pageAction) {
  * @returns {import("hyperapp").Action<State, any>} Action function that works with app state
  */
 function createBlockPropsAction(currentPage, blockId, propsAction) {
+  /** @type {(appState: State) => any} */
   const getter = (appState) => {
     const freshCurrentPage = appState.pages.find(
-      (p) => p.id === currentPage.id,
+      (/** @type {Page} */ p) => p.id === currentPage.id,
     );
     if (!freshCurrentPage) return null;
 
-    const block = freshCurrentPage.blocks.find((b) => b.id === blockId);
+    const block = freshCurrentPage.blocks.find(
+      (/** @type {Block} */ b) => b.id === blockId,
+    );
     return block ? block.props : null;
   };
 
+  /** @type {(appState: State, newProps: any) => State} */
   const setter = (appState, newProps) => {
     return updateBlockProps(appState, currentPage, blockId, newProps);
   };
@@ -278,16 +270,15 @@ let globalCleanups = [];
 /**
  * Program subscription manager that handles all program subscriptions
  * @param {import("hyperapp").Dispatch<State>} dispatch - App-level dispatch function
- * @param {{}} props - Empty props (must stay stable)
+ * @param {{}} _props - Empty props (must stay stable)
  * @returns {() => void} Cleanup function
  *
- * TODO: get this toa actually run on adding new programs that have subscriptions, not just restarting the app
  * NOTE: props must remain an empty object {} to prevent subscription restarts.
  * Hyperapp's patchSubs compares subscription arguments and restarts when they change.
  * Passing state as props would cause restarts on every state change (mouse moves, etc.),
  * delaying effects. Instead, we get current state internally via dispatch.
  */
-export function programSubscriptionManager(dispatch, props) {
+export function programSubscriptionManager(dispatch, _props) {
   // Clean up any existing subscriptions first
   globalCleanups.forEach((cleanup) => cleanup());
   globalCleanups = [];
@@ -333,6 +324,7 @@ export function renderView(currentPage, block) {
     block.props = view.props;
   }
   const viewNode = view.viewNode(currentPage.state, block.props);
+  /** @type {StateContext} */
   const pageContext = { type: "page", currentPage };
   const wrappedViewNode = wrapProgramActions(viewNode, pageContext);
 
@@ -394,6 +386,7 @@ export function renderEditor(currentPage, block) {
   const programElement = view.editor(editingBlock.props);
 
   // Create props context for the editing block
+  /** @type {PropsContext} */
   const propsContext = {
     type: "props",
     currentPage,
