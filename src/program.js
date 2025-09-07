@@ -260,11 +260,11 @@ export function renderView(currentPage, block) {
       { style: { color: "red" } },
       text(`error: no view function. could not find ${block.viewName}`),
     );
-  const programElement = view.node(currentPage.state, view.props);
-  const wrappedElement = wrapProgramActions(programElement, currentPage);
+  const viewNode = view.viewNode(currentPage.state, view.props);
+  const wrappedViewNode = wrapProgramActions(viewNode, currentPage);
 
   try {
-    return wrappedElement;
+    return wrappedViewNode;
   } catch {
     return h("p", {}, text("error"));
   }

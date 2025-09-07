@@ -87,13 +87,13 @@ export const TextProgram = {
     /** @type {View<ProgramState, TextProps>} */
     ({
       name: "Text", //TODO: name has to be unique, how do we communicate this to user
-      node: textNode, //TODO: rename "node" to something better
+      viewNode: textNode,
       props: textProps,
       editor: textEditor,
     }),
     {
       name: "Text without props", //TODO: name has to be unique, how do we communicate this to user
-      node: textNodeWithoutProps,
+      viewNode: textNodeWithoutProps,
     },
   ],
 };
