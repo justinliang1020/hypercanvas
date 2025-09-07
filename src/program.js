@@ -10,14 +10,55 @@ import { MemeEditorProgram } from "./programs/memeEditor.js";
 import { TextProgram } from "./programs/text.js";
 
 /**
+ * Creates a generic scoped action that transforms between outer and inner state
+ * @template OuterState
+ * @template InnerState
+ * @param {(outerState: OuterState) => InnerState} getter - Extracts inner state from outer state
+ * @param {(outerState: OuterState, innerState: InnerState) => OuterState} setter - Updates outer state with new inner state
+ * @param {import("hyperapp").Action<InnerState, any>} innerAction - Action that works with inner state
+ * @returns {import("hyperapp").Action<OuterState, any>} Action that works with outer state
+ */
+function createScopedAction(getter, setter, innerAction) {
+  return (outerState, props) => {
+    const innerState = getter(outerState);
+    const result = innerAction(innerState, props);
+
+    if (typeof result === "function") {
+      return createScopedAction(getter, setter, result);
+    } else if (Array.isArray(result)) {
+      const [newInnerState, ...effects] = result;
+      return [setter(outerState, newInnerState), ...effects];
+    } else if (result && typeof result === "object") {
+      return setter(outerState, result);
+    } else {
+      return outerState;
+    }
+  };
+}
+
+/**
  * Creates a wrapped dispatch that transforms program actions to app actions
  * @param {import("hyperapp").Dispatch<State>} dispatch - App-level dispatch
  * @param {Page} currentPage - Current page context
  * @returns {import("hyperapp").Dispatch<any>} Wrapped dispatch
  */
-export function createWrappedDispatch(dispatch, currentPage) {
+function createWrappedDispatch(dispatch, currentPage) {
   return (programAction) => {
     const appAction = createPageAction(currentPage, programAction);
+    return dispatch(appAction);
+  };
+}
+
+/**
+ * Creates a wrapped dispatch for block props actions
+ * @param {import("hyperapp").Dispatch<State>} dispatch - App-level dispatch
+ * @param {Page} currentPage - Current page context
+ * @param {number} blockId - ID of the block whose props to update
+ * @returns {import("hyperapp").Dispatch<any>} Wrapped dispatch
+ */
+function createBlockPropsDispatch(dispatch, currentPage, blockId) {
+  return (propsAction) => {
+    const appAction = createBlockPropsAction(currentPage, blockId, propsAction);
     return dispatch(appAction);
   };
 }
@@ -63,43 +104,28 @@ function updatePageState(appState, currentPage, newPageState) {
 }
 
 /**
- * Handles action result that returns another function (chained action)
- * @param {Page} currentPage - Current page context
- * @param {import("hyperapp").Action<any, any>} resultFunction - The returned function
- * @returns {import("hyperapp").Action<State, any>} Wrapped action
- */
-function handleFunctionResult(currentPage, resultFunction) {
-  return createPageAction(currentPage, resultFunction);
-}
-
-/**
- * Handles action result that returns [state, ...effects]
+ * Updates block props within app state
  * @param {State} appState - Current app state
- * @param {Page} currentPage - Current page context
- * @param {any[]} resultArray - The [state, ...effects] array
- * @returns {[State, ...import("hyperapp").MaybeEffect<State, any>[]]} Updated state and wrapped effects
- */
-function handleArrayResult(appState, currentPage, resultArray) {
-  const [newPageState, ...effects] = resultArray;
-  /** @type {import("hyperapp").MaybeEffect<State, any>[]} */
-  const wrappedEffects = effects.map((effect) =>
-    wrapProgramEffect(effect, currentPage),
-  );
-  return [
-    updatePageState(appState, currentPage, newPageState),
-    ...wrappedEffects,
-  ];
-}
-
-/**
- * Handles action result that returns a state object
- * @param {State} appState - Current app state
- * @param {Page} currentPage - Current page context
- * @param {any} resultObject - The state object
+ * @param {Page} currentPage - Current page
+ * @param {number} blockId - Block ID to update
+ * @param {any} newProps - New block props
  * @returns {State} Updated app state
  */
-function handleObjectResult(appState, currentPage, resultObject) {
-  return updatePageState(appState, currentPage, resultObject);
+function updateBlockProps(appState, currentPage, blockId, newProps) {
+  const newState = {
+    ...appState,
+    pages: appState.pages.map((page) =>
+      page.id === currentPage.id
+        ? {
+            ...page,
+            blocks: page.blocks.map((block) =>
+              block.id === blockId ? { ...block, props: newProps } : block,
+            ),
+          }
+        : page,
+    ),
+  };
+  return newState;
 }
 
 /**
@@ -109,39 +135,81 @@ function handleObjectResult(appState, currentPage, resultObject) {
  * @returns {import("hyperapp").Action<State, any>} Action function that works with app state
  */
 function createPageAction(currentPage, pageAction) {
-  return (appState, props) => {
-    // Get the current page state from app state, not the stale currentPage.state
+  const getter = (appState) => {
     const freshCurrentPage = appState.pages.find(
       (p) => p.id === currentPage.id,
     );
-    if (!freshCurrentPage) return appState;
-
-    const result = pageAction(freshCurrentPage.state, props);
-
-    if (typeof result === "function") {
-      return handleFunctionResult(freshCurrentPage, result);
-    } else if (Array.isArray(result)) {
-      return handleArrayResult(appState, freshCurrentPage, result);
-    } else if (result && typeof result === "object") {
-      return handleObjectResult(appState, freshCurrentPage, result);
-    } else {
-      return appState;
-    }
+    return freshCurrentPage ? freshCurrentPage.state : null;
   };
+
+  const setter = (appState, newPageState) => {
+    return updatePageState(appState, currentPage, newPageState);
+  };
+
+  return createScopedAction(getter, setter, pageAction);
 }
+
+/**
+ * Creates a higher-order action that transforms between app state and block props
+ * @param {Page} currentPage - Current page context
+ * @param {number} blockId - Block ID whose props to update
+ * @param {import("hyperapp").Action<any, any>} propsAction - Action function that works with block props
+ * @returns {import("hyperapp").Action<State, any>} Action function that works with app state
+ */
+function createBlockPropsAction(currentPage, blockId, propsAction) {
+  const getter = (appState) => {
+    const freshCurrentPage = appState.pages.find(
+      (p) => p.id === currentPage.id,
+    );
+    if (!freshCurrentPage) return null;
+
+    const block = freshCurrentPage.blocks.find((b) => b.id === blockId);
+    return block ? block.props : null;
+  };
+
+  const setter = (appState, newProps) => {
+    return updateBlockProps(appState, currentPage, blockId, newProps);
+  };
+
+  return createScopedAction(getter, setter, propsAction);
+}
+
+/**
+ * @typedef {Object} StateContext
+ * @property {"page"} type - Type of state context
+ * @property {Page} currentPage - Current page context
+ */
+
+/**
+ * @typedef {Object} PropsContext
+ * @property {"props"} type - Type of state context
+ * @property {Page} currentPage - Current page context
+ * @property {number} blockId - Block ID for props context
+ */
 
 /**
  * Wraps event handler properties in element props
  * @param {any} props - Original element props
- * @param {Page} currentPage - Current page context
+ * @param {StateContext | PropsContext} context - State context for wrapping
  * @returns {any} Props with wrapped event handlers
  */
-function wrapEventHandlers(props, currentPage) {
+function wrapEventHandlers(props, context) {
   const wrappedProps = { ...props };
 
   for (const propName in props) {
     if (propName.startsWith("on") && typeof props[propName] === "function") {
-      wrappedProps[propName] = createPageAction(currentPage, props[propName]);
+      if (context.type === "page") {
+        wrappedProps[propName] = createPageAction(
+          context.currentPage,
+          props[propName],
+        );
+      } else if (context.type === "props") {
+        wrappedProps[propName] = createBlockPropsAction(
+          context.currentPage,
+          context.blockId,
+          props[propName],
+        );
+      }
     }
   }
 
@@ -151,32 +219,32 @@ function wrapEventHandlers(props, currentPage) {
 /**
  * Recursively wraps children elements
  * @param {any} children - Element children
- * @param {Page} currentPage - Current page context
+ * @param {StateContext | PropsContext} context - State context for wrapping
  * @returns {any} Wrapped children
  */
-function wrapElementChildren(children, currentPage) {
+function wrapElementChildren(children, context) {
   if (!Array.isArray(children)) {
     return children;
   }
 
-  return children.map((child) => wrapProgramActions(child, currentPage));
+  return children.map((child) => wrapProgramActions(child, context));
 }
 
 /**
- * Recursively wraps actions in program elements to transform between app and page state
+ * Recursively wraps actions in program elements to transform between app and scoped state
  * @param {import("hyperapp").ElementVNode<any>} element - Program element
- * @param {Page} currentPage - Current page
+ * @param {StateContext | PropsContext} context - State context for wrapping
  * @returns {import("hyperapp").ElementVNode<State>} Wrapped element
  */
-function wrapProgramActions(element, currentPage) {
+function wrapProgramActions(element, context) {
   if (!element || typeof element !== "object" || !element.props) {
     return element;
   }
 
   return {
     ...element,
-    props: wrapEventHandlers(element.props, currentPage),
-    children: wrapElementChildren(element.children, currentPage),
+    props: wrapEventHandlers(element.props, context),
+    children: wrapElementChildren(element.children, context),
   };
 }
 
@@ -254,14 +322,19 @@ export function renderView(currentPage, block) {
   // Get the program view with page state
   const program = programRegistry[currentPage.programName];
   const view = program.views.find((v) => v.name === block.viewName);
-  if (view === undefined)
+  if (view === undefined) {
     return h(
       "p",
       { style: { color: "red" } },
       text(`error: no view function. could not find ${block.viewName}`),
     );
-  const viewNode = view.viewNode(currentPage.state, view.props);
-  const wrappedViewNode = wrapProgramActions(viewNode, currentPage);
+  }
+  if (Object.keys(block.props).length === 0) {
+    block.props = view.props;
+  }
+  const viewNode = view.viewNode(currentPage.state, block.props);
+  const pageContext = { type: "page", currentPage };
+  const wrappedViewNode = wrapProgramActions(viewNode, pageContext);
 
   try {
     return wrappedViewNode;
@@ -316,11 +389,19 @@ export function renderEditor(currentPage, block) {
       text(`error: no editing block. could not find editor for ${view}`),
     );
   }
-  const programElement = view.editor(view.props);
-  // FIX: rewrite this so this wraps the editor view with the block props as the state.
-  // currently it almost works, where it can read scoped state but not write scoped state
-  // @ts-ignore
-  const wrappedElement = wrapProgramActions(programElement, editingBlock.props);
+
+  // Create editor element with current block props as the state
+  const programElement = view.editor(editingBlock.props);
+
+  // Create props context for the editing block
+  const propsContext = {
+    type: "props",
+    currentPage,
+    blockId: editingBlockId,
+  };
+
+  // Wrap the editor with block props as scoped state
+  const wrappedElement = wrapProgramActions(programElement, propsContext);
 
   try {
     return wrappedElement;
