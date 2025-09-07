@@ -150,5 +150,5 @@
  * @property {String} name
  * @property {((state: ProgramState, props: !Props) => import("hyperapp").ElementVNode<ProgramState>)} node - view doesn't need props technically
  * @property {Props} [props] - if editor does not exist, give default UI to edit props
- * @property {((state: Props) => import("hyperapp").ElementVNode<Props>)} [editor] - editor can only exist if props exists. if editor exsits, use that to modify props
+ * @property {((props: Props) => import("hyperapp").ElementVNode<Props>)} [editor] - editor can only exist if props exists. if editor exsits, use that to modify props
  */

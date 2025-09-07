@@ -42,6 +42,15 @@ function textNode(state, props) {
 }
 
 /**
+ * @param {TextProps} props
+ * @returns {import("hyperapp").ElementVNode<TextProps>} Block renderer function
+ */
+function textEditor(props) {
+  return h("p", {}, text("hello world"));
+  // return h("p", {}, text(`text value: ${props.textValue}`));
+}
+
+/**
  * @param {ProgramState} state
  * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
  */
@@ -75,11 +84,13 @@ export const TextProgram = {
   },
   // want to have specific control over what views get rendered. generic API that still gives control
   views: [
-    {
+    /** @type {View<ProgramState, TextProps>} */
+    ({
       name: "Text", //TODO: name has to be unique, how do we communicate this to user
       node: textNode, //TODO: rename "node" to something better
       props: textProps,
-    },
+      editor: textEditor,
+    }),
     {
       name: "Text without props", //TODO: name has to be unique, how do we communicate this to user
       node: textNodeWithoutProps,
