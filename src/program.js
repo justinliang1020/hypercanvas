@@ -321,7 +321,7 @@ export function renderView(currentPage, block) {
       text(`error: no view function. could not find ${block.viewName}`),
     );
   }
-  if (Object.keys(block.props).length === 0) {
+  if (!block.props || Object.keys(block.props).length === 0) {
     block.props = view.props;
   }
   const viewNode = view.viewNode(currentPage.state, block.props);

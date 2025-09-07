@@ -101,5 +101,9 @@ export const TextProgram = {
       name: "Text without props", //TODO: name has to be unique, how do we communicate this to user
       viewNode: textNodeWithoutProps,
     },
+    {
+      name: "State Visualizer",
+      viewNode: stateVisualizer,
+    },
   ],
 };
