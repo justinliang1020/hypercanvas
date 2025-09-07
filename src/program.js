@@ -81,11 +81,14 @@ function wrapProgramEffect(effect, currentPage) {
  * @returns {State} Updated app state
  */
 function updatePageState(appState, currentPage, newPageState) {
+  const updatedPages = appState.pages.map((page) => {
+    if (page.id !== currentPage.id) return page;
+
+    return { ...page, state: newPageState };
+  });
   return {
     ...appState,
-    pages: appState.pages.map((page) =>
-      page.id === currentPage.id ? { ...page, state: newPageState } : page,
-    ),
+    pages: updatedPages,
   };
 }
 
@@ -98,20 +101,18 @@ function updatePageState(appState, currentPage, newPageState) {
  * @returns {State} Updated app state
  */
 function updateBlockProps(appState, currentPage, blockId, newProps) {
-  const newState = {
-    ...appState,
-    pages: appState.pages.map((page) =>
-      page.id === currentPage.id
-        ? {
-            ...page,
-            blocks: page.blocks.map((block) =>
-              block.id === blockId ? { ...block, props: newProps } : block,
-            ),
-          }
-        : page,
-    ),
-  };
-  return newState;
+  const updatedPages = appState.pages.map((page) => {
+    if (page.id !== currentPage.id) return page;
+
+    const updatedBlocks = page.blocks.map((block) => {
+      if (block.id !== blockId) return block;
+      return { ...block, props: newProps };
+    });
+
+    return { ...page, blocks: updatedBlocks };
+  });
+
+  return { ...appState, pages: updatedPages };
 }
 
 /**
