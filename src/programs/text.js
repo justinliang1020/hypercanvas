@@ -11,10 +11,18 @@ import { stateVisualizer } from "./utils.js";
 /**
  * @typedef TextProps
  * @property {String} textValue
+ * @property {String} color
+ * @property {String} backgroundColor
+ * @property {Number} fontSize
  */
 
 /** @type {TextProps} */
-const textProps = { textValue: "hello world" };
+const textProps = {
+  textValue: "hello world",
+  color: "inherit",
+  backgroundColor: "transparent",
+  fontSize: 12,
+};
 
 /**
  * @param {ProgramState} state
@@ -26,15 +34,15 @@ function textNode(state, props) {
     "p",
     {
       style: {
-        backgroundColor: state.backgroundColor,
+        backgroundColor: props.backgroundColor,
         border: "none",
         resize: "none",
         outline: "none",
         width: "100%",
         height: "100%",
         overflow: null,
-        color: state.color,
-        fontSize: `${state.fontSize}px`,
+        color: props.color,
+        fontSize: `${props.fontSize}px`,
       },
     },
     text(props.textValue),
@@ -46,14 +54,86 @@ function textNode(state, props) {
  * @returns {import("hyperapp").ElementVNode<TextProps>} Block renderer function
  */
 function textEditor(state) {
-  // return h("p", {}, text(`text value: ${props.textValue}`));
-  return h("input", {
-    value: state.textValue,
-    oninput: (state, event) => ({
-      ...state,
-      textValue: /** @type {HTMLInputElement} */ (event.target).value,
+  return h("div", {}, [
+    h("p", {}, text("color")),
+    h("input", {
+      type: "text",
+      value: state.color,
+      oninput: (state, event) => ({
+        ...state,
+        color: /** @type {HTMLInputElement} */ (event.target).value,
+      }),
     }),
-  });
+    h("input", {
+      type: "color",
+      value: isHex(state.color) ? state.color : "#000000",
+      oninput: (state, event) => ({
+        ...state,
+        color: /** @type{HTMLInputElement}*/ (event.target).value,
+      }),
+    }),
+    h("hr", {}),
+    h("p", {}, text("backgroundColor")),
+    h("input", {
+      type: "text",
+      value: state.backgroundColor,
+      oninput: (state, event) => ({
+        ...state,
+        backgroundColor: /** @type {HTMLInputElement} */ (event.target).value,
+      }),
+    }),
+    h("input", {
+      type: "color",
+      value: isHex(state.backgroundColor) ? state.backgroundColor : "#000000",
+      oninput: (state, event) => ({
+        ...state,
+        backgroundColor: /** @type{HTMLInputElement}*/ (event.target).value,
+      }),
+    }),
+    h("hr", {}),
+    h("p", {}, text("fontSize")),
+    h("input", {
+      type: "text",
+      value: state.fontSize,
+      oninput: (state, event) => ({
+        ...state,
+        fontSize: Number(/** @type {HTMLInputElement} */ (event.target).value),
+      }),
+    }),
+    fontSizeSelect(state),
+  ]);
+}
+
+/**
+ * @param {TextProps} state
+ * @returns {import("hyperapp").ElementVNode<TextProps>} Block renderer function
+ */
+function fontSizeSelect(state) {
+  const options = [8, 12, 14, 18, 22, 24, 36];
+  return h(
+    "select",
+    {
+      value: state.fontSize,
+      onchange: (state, event) => {
+        //@ts-ignore TODO: fix
+        return {
+          ...state,
+          fontSize: Number(
+            /** @type {HTMLInputElement} */ (event.target).value,
+          ),
+        };
+      },
+    },
+    options.map((o) =>
+      h(
+        "option",
+        {
+          value: o,
+        },
+        text(o),
+      ),
+    ),
+  );
 }
 
 /**
@@ -78,6 +158,20 @@ function textNodeWithoutProps(state) {
     },
     text("no props"),
   );
+}
+
+/**
+ * returns whether a string is like "#rrggbb"
+ * @param {String} s
+ * @returns {Boolean}
+ */
+function isHex(s) {
+  //this is kinda a dumb check, a more accurate check would verify if characters are actually 0-f
+  try {
+    return s[0] === "#" && s.length === 7;
+  } catch {
+    return false;
+  }
 }
 
 /** @type {Program<ProgramState>} */
