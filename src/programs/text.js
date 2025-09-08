@@ -50,15 +50,15 @@ function textNode(state, props) {
 }
 
 /**
- * @param {TextProps} state
+ * @param {TextProps} props
  * @returns {import("hyperapp").ElementVNode<TextProps>} Block renderer function
  */
-function textEditor(state) {
+function textEditor(props) {
   return h("div", {}, [
     h("p", {}, text("color")),
     h("input", {
       type: "text",
-      value: state.color,
+      value: props.color,
       oninput: (state, event) => ({
         ...state,
         color: /** @type {HTMLInputElement} */ (event.target).value,
@@ -66,7 +66,7 @@ function textEditor(state) {
     }),
     h("input", {
       type: "color",
-      value: isHex(state.color) ? state.color : "#000000",
+      value: isHex(props.color) ? props.color : "#000000",
       oninput: (state, event) => ({
         ...state,
         color: /** @type{HTMLInputElement}*/ (event.target).value,
@@ -76,7 +76,7 @@ function textEditor(state) {
     h("p", {}, text("backgroundColor")),
     h("input", {
       type: "text",
-      value: state.backgroundColor,
+      value: props.backgroundColor,
       oninput: (state, event) => ({
         ...state,
         backgroundColor: /** @type {HTMLInputElement} */ (event.target).value,
@@ -84,7 +84,7 @@ function textEditor(state) {
     }),
     h("input", {
       type: "color",
-      value: isHex(state.backgroundColor) ? state.backgroundColor : "#000000",
+      value: isHex(props.backgroundColor) ? props.backgroundColor : "#000000",
       oninput: (state, event) => ({
         ...state,
         backgroundColor: /** @type{HTMLInputElement}*/ (event.target).value,
@@ -94,26 +94,26 @@ function textEditor(state) {
     h("p", {}, text("fontSize")),
     h("input", {
       type: "text",
-      value: state.fontSize,
+      value: props.fontSize,
       oninput: (state, event) => ({
         ...state,
         fontSize: Number(/** @type {HTMLInputElement} */ (event.target).value),
       }),
     }),
-    fontSizeSelect(state),
+    fontSizeSelect(props),
   ]);
 }
 
 /**
- * @param {TextProps} state
+ * @param {TextProps} props
  * @returns {import("hyperapp").ElementVNode<TextProps>} Block renderer function
  */
-function fontSizeSelect(state) {
+function fontSizeSelect(props) {
   const options = [8, 12, 14, 18, 22, 24, 36];
   return h(
     "select",
     {
-      value: state.fontSize,
+      value: props.fontSize,
       onchange: (state, event) => {
         //@ts-ignore TODO: fix
         return {
