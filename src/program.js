@@ -8,6 +8,7 @@ import { BoidsSimulation } from "./programs/boidsSimulation.js";
 import { TextEditorProgram } from "./programs/textEditor.js";
 import { MemeEditorProgram } from "./programs/memeEditor.js";
 import { TextProgram } from "./programs/text.js";
+import { CalculatorProgram } from "./programs/calculator.js";
 
 /**
  * Creates a generic scoped action that transforms between outer and inner state
@@ -417,4 +418,5 @@ export const programRegistry = {
   textEditor: TextEditorProgram,
   memeEditor: MemeEditorProgram,
   text: TextProgram,
+  calculator: CalculatorProgram,
 };
