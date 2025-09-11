@@ -40,6 +40,7 @@ function textNode(state, props) {
         outline: "none",
         width: "100%",
         height: "100%",
+        margin: "0",
         overflow: null,
         color: props.color,
         fontSize: `${props.fontSize}px`,
