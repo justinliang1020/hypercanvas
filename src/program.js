@@ -1,14 +1,8 @@
 import { h, text } from "./packages/hyperapp/index.js";
 import { AppVisualizerProgram } from "./programs/appVisualizer.js";
-import { TestProgram } from "./programs/testProgram.js";
-import { TestProgram2 } from "./programs/testProgram2.js";
-import { TodoProgram } from "./programs/todo.js";
-import { UrlQueryProgram } from "./programs/urlQueryProgram.js";
-import { BoidsSimulation } from "./programs/boidsSimulation.js";
-import { TextEditorProgram } from "./programs/textEditor.js";
-import { MemeEditorProgram } from "./programs/memeEditor.js";
 import { TextProgram } from "./programs/text.js";
 import { CalculatorProgram } from "./programs/calculator.js";
+import { TestSubscriptions } from "./programs/clock.js";
 
 /**
  * Creates a generic scoped action that transforms between outer and inner state
@@ -409,14 +403,8 @@ export function renderEditor(currentPage, block) {
  * @type {Record<String, Program<any>>}
  */
 export const programRegistry = {
-  testProgram: TestProgram,
-  testProgram2: TestProgram2,
   appVisualizerProgram: AppVisualizerProgram,
-  todoProgram: TodoProgram,
-  urlQueryProgram: UrlQueryProgram,
-  boidsSimulation: BoidsSimulation,
-  textEditor: TextEditorProgram,
-  memeEditor: MemeEditorProgram,
   text: TextProgram,
   calculator: CalculatorProgram,
+  testSubscriptions: TestSubscriptions,
 };
