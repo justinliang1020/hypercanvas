@@ -8,6 +8,7 @@ import {
   deletePage,
   renamePage,
   getCurrentPage,
+  resetPageState,
 } from "./pages.js";
 import { getFirstSelectedBlockId } from "./selection.js";
 import { programRegistry } from "./program.js";
@@ -234,6 +235,13 @@ function programsPanel(state) {
           ],
         },
         text("save"),
+      ),
+      h(
+        "button",
+        {
+          onclick: (state) => resetPageState(state, state.currentPageId),
+        },
+        text("reset page state"),
       ),
       h("hr", {}),
       editor(state),
