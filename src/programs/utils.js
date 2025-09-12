@@ -92,3 +92,127 @@ export function table(obj) {
 export function stateVisualizer(state) {
   return table(state);
 }
+
+/**
+ * @template {Record<string, any>} T
+ * @param {T} props
+ * @returns {import("hyperapp").ElementVNode<T>} Generic props editor
+ */
+export function genericPropsEditor(props) {
+  return h(
+    "table",
+    {
+      style: {
+        width: "100%",
+        borderCollapse: "collapse",
+      },
+    },
+    [
+      h("thead", {}, [
+        h("tr", {}, [
+          h(
+            "th",
+            {
+              style: {
+                border: "1px solid #ccc",
+                padding: "8px",
+                textAlign: "left",
+              },
+            },
+            text("Property"),
+          ),
+          h(
+            "th",
+            {
+              style: {
+                border: "1px solid #ccc",
+                padding: "8px",
+                textAlign: "left",
+              },
+            },
+            text("Value"),
+          ),
+        ]),
+      ]),
+      h(
+        "tbody",
+        {},
+        Object.keys(/** @type {Record<string, any>} */ (props)).map((key) =>
+          h("tr", { key }, [
+            h(
+              "td",
+              { style: { border: "1px solid #ccc", padding: "8px" } },
+              text(key),
+            ),
+            h(
+              "td",
+              { style: { border: "1px solid #ccc", padding: "8px" } },
+              renderValueEditor(
+                key,
+                /** @type {Record<string, any>} */ (props)[key],
+              ),
+            ),
+          ]),
+        ),
+      ),
+    ],
+  );
+}
+
+/**
+ * @param {string} key
+ * @param {any} value
+ * @returns {import("hyperapp").ElementVNode<any>}
+ */
+function renderValueEditor(key, value) {
+  const inputType = typeof value === "number" ? "number" : "text";
+  const isColorProp = key.toLowerCase().includes("color");
+
+  if (isColorProp && typeof value === "string") {
+    return h("div", { style: { display: "flex", gap: "4px" } }, [
+      h("input", {
+        type: "text",
+        value: value,
+        style: { flex: "1" },
+        oninput: (state, event) => ({
+          ...state,
+          [key]: /** @type {HTMLInputElement} */ (event.target).value,
+        }),
+      }),
+      h("input", {
+        type: "color",
+        value: isHex(value) ? value : "#000000",
+        oninput: (state, event) => ({
+          ...state,
+          [key]: /** @type {HTMLInputElement} */ (event.target).value,
+        }),
+      }),
+    ]);
+  }
+
+  return h("input", {
+    type: inputType,
+    value: value,
+    oninput: (state, event) => ({
+      ...state,
+      [key]:
+        inputType === "number"
+          ? Number(/** @type {HTMLInputElement} */ (event.target).value)
+          : /** @type {HTMLInputElement} */ (event.target).value,
+    }),
+  });
+}
+
+/**
+ * returns whether a string is like "#rrggbb"
+ * @param {String} s
+ * @returns {Boolean}
+ */
+function isHex(s) {
+  //this is kinda a dumb check, a more accurate check would verify if characters are actually 0-f
+  try {
+    return s[0] === "#" && s.length === 7;
+  } catch {
+    return false;
+  }
+}

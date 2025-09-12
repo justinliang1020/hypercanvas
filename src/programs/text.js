@@ -1,5 +1,5 @@
 import { h, text } from "../packages/hyperapp/index.js";
-import { stateVisualizer } from "./utils.js";
+import { stateVisualizer, genericPropsEditor } from "./utils.js";
 
 /**
  * @typedef ProgramState
@@ -48,61 +48,6 @@ function textNode(state, props) {
     },
     text(props.textValue),
   );
-}
-
-/**
- * @param {TextProps} props
- * @returns {import("hyperapp").ElementVNode<TextProps>} Block renderer function
- */
-function textEditor(props) {
-  return h("div", {}, [
-    h("p", {}, text("color")),
-    h("input", {
-      type: "text",
-      value: props.color,
-      oninput: (state, event) => ({
-        ...state,
-        color: /** @type {HTMLInputElement} */ (event.target).value,
-      }),
-    }),
-    h("input", {
-      type: "color",
-      value: isHex(props.color) ? props.color : "#000000",
-      oninput: (state, event) => ({
-        ...state,
-        color: /** @type{HTMLInputElement}*/ (event.target).value,
-      }),
-    }),
-    h("hr", {}),
-    h("p", {}, text("backgroundColor")),
-    h("input", {
-      type: "text",
-      value: props.backgroundColor,
-      oninput: (state, event) => ({
-        ...state,
-        backgroundColor: /** @type {HTMLInputElement} */ (event.target).value,
-      }),
-    }),
-    h("input", {
-      type: "color",
-      value: isHex(props.backgroundColor) ? props.backgroundColor : "#000000",
-      oninput: (state, event) => ({
-        ...state,
-        backgroundColor: /** @type{HTMLInputElement}*/ (event.target).value,
-      }),
-    }),
-    h("hr", {}),
-    h("p", {}, text("fontSize")),
-    h("input", {
-      type: "text",
-      value: props.fontSize,
-      oninput: (state, event) => ({
-        ...state,
-        fontSize: Number(/** @type {HTMLInputElement} */ (event.target).value),
-      }),
-    }),
-    fontSizeSelect(props),
-  ]);
 }
 
 /**
@@ -190,7 +135,7 @@ export const TextProgram = {
       name: "Text", //TODO: name has to be unique, how do we communicate this to user
       viewNode: textNode,
       props: textProps,
-      editor: textEditor,
+      editor: genericPropsEditor,
     }),
     {
       name: "Text without props", //TODO: name has to be unique, how do we communicate this to user

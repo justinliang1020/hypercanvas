@@ -1,5 +1,5 @@
 import { h, text } from "../packages/hyperapp/index.js";
-import { stateVisualizer } from "./utils.js";
+import { genericPropsEditor, stateVisualizer } from "./utils.js";
 
 /**
  * @typedef ProgramState
@@ -27,6 +27,9 @@ function label(state, props) {
         width: "100%",
         height: "100%",
         overflow: null,
+        margin: "0",
+        color: props.color,
+        backgroundColor: props.backgroundColor,
       },
     },
     text(state.value),
@@ -115,7 +118,9 @@ export const CalculatorProgram = {
       viewNode: label,
       props: {
         color: "#000000",
+        backgroundColor: "#FFFFFF",
       },
+      editor: genericPropsEditor,
     }),
     {
       name: "State Visualizer",
@@ -128,6 +133,7 @@ export const CalculatorProgram = {
       props: {
         value: "1",
       },
+      editor: genericPropsEditor,
     }),
     {
       name: "numpad",
