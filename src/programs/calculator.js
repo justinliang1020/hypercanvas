@@ -3,7 +3,7 @@ import { genericPropsEditor, stateVisualizer } from "./utils.js";
 
 /**
  * @typedef ProgramState
- * @property {Number} value
+ * @property {String} value
  */
 
 /**
@@ -41,11 +41,28 @@ function label(state, props) {
  * @returns {import("hyperapp").ElementVNode<ProgramState>} Block renderer function
  */
 function numpad(state) {
-  const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "X"];
+  const buttonValues = [
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "+",
+    "-",
+    "*",
+    "/",
+    "=",
+    "X",
+  ];
   return h(
     "div",
     {},
-    numbers.map((n) => numberButton(state, { value: String(n) })),
+    buttonValues.map((n) => numberButton(state, { value: String(n) })),
   );
 }
 
@@ -54,11 +71,16 @@ function numpad(state) {
  * @param {String} n
  * @returns {ProgramState}
  */
-function appendNumber(state, n) {
-  const newValue = Number(`${state.value}${n}`);
+function appendToValue(state, n) {
+  if (state.value === "0") {
+    return {
+      ...state,
+      value: `${n}`,
+    };
+  }
   return {
     ...state,
-    value: newValue,
+    value: `${state.value}${n}`,
   };
 }
 
@@ -69,7 +91,18 @@ function appendNumber(state, n) {
 function clear(state) {
   return {
     ...state,
-    value: 0,
+    value: "0",
+  };
+}
+
+/**
+ * @param {ProgramState} state
+ * @returns {ProgramState}
+ */
+function evaluate(state) {
+  return {
+    ...state,
+    value: eval(state.value),
   };
 }
 
@@ -88,12 +121,13 @@ function numberButton(state, props) {
    * @returns {ProgramState}
    */
   function onclick(state) {
-    if (Number.isInteger(Number(props.value))) {
-      return appendNumber(state, props.value);
-    } else if (props.value === "X") {
+    if (props.value === "X") {
       return clear(state);
+    } else if (props.value === "=") {
+      return evaluate(state);
+    } else {
+      return appendToValue(state, props.value);
     }
-    return state;
   }
   return h(
     "button",
@@ -108,7 +142,7 @@ function numberButton(state, props) {
 export const CalculatorProgram = {
   // initial state that can be reset to in event of catastrophe
   initialState: {
-    value: 12,
+    value: "0",
   },
   // want to have specific control over what views get rendered. generic API that still gives control
   views: [
