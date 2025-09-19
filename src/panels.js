@@ -243,7 +243,7 @@ function stateVisualizer(state) {
       fontFamily: "monospace",
       fontSize: "12px",
     },
-    value: JSON.stringify(currentPage.state),
+    value: JSON.stringify(currentPage.state, null, "\t"),
     oninput: (state, event) => {
       event.stopPropagation();
       const currentPage = getCurrentPage(state);
