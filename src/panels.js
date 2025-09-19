@@ -1,6 +1,6 @@
 import { h, text } from "./packages/hyperapp/index.js";
 import { saveApplicationAndNotify } from "./utils.js";
-import { addViewBlock } from "./block.js";
+import { addBlock } from "./block.js";
 import { MEDIA_SAVE_PATH } from "./constants.js";
 import {
   createPage,
@@ -295,7 +295,7 @@ function viewButtons(state) {
       h(
         "button",
         {
-          onclick: (state) => addViewBlock(state, viewName),
+          onclick: (state) => addBlock(state, viewName),
         },
         text(viewName),
       ),

@@ -353,13 +353,42 @@ function blockToolbar(block) {
         {
           onclick: (state, event) => {
             event.stopPropagation();
-            const newState = addEditorBlock(state, block.viewName, block.id);
+            const newState = addEditorBlock(state, block.program, block.id);
             return newState;
           },
         },
         text("editor"),
       ),
-      h("p", {}, text(block.viewName)),
+      h(
+        "textarea",
+        {
+          style: {
+            width: "200px",
+            height: "100px",
+            fontFamily: "monospace",
+            fontSize: "12px",
+            resize: "vertical",
+          },
+          value: block.program,
+          oninput: (state, event) => {
+            event.stopPropagation();
+            const currentPage = getCurrentPage(state);
+            if (!currentPage) return state;
+
+            const target = /** @type {HTMLTextAreaElement} */ (event.target);
+            return updateCurrentPage(state, {
+              blocks: currentPage.blocks.map((b) =>
+                b.id === block.id ? { ...b, program: target.value } : b,
+              ),
+            });
+          },
+          onpointerdown: (state, event) => {
+            event.stopPropagation();
+            return state;
+          },
+        },
+        text(block.program),
+      ),
     ],
   );
 }
@@ -436,15 +465,15 @@ export function deleteSelectedBlocks(state) {
 /**
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
- * @param {string} viewName - Name of view to instantiate
+ * @param {string} program - Name of view to instantiate
  * @param {number | null} x - X position on canvas. If null, uses viewport's center X coordinate
  * @param {number | null} y - Y position on canvas. If null, uses viewport's center X coordinate
  * @param {number} width - Block width in pixels
  * @param {number} height - Block height in pixels
  * @returns {State} Updated state with new block */
-export function addViewBlock(
+export function addBlock(
   state,
-  viewName,
+  program,
   x = null,
   y = null,
   width = 200,
@@ -458,8 +487,6 @@ export function addViewBlock(
   }
   const currentPage = getCurrentPage(state);
   if (!currentPage) return state;
-  const program = programRegistry[currentPage.programName];
-  const view = program.views.find((v) => v.name === viewName);
   const globalBlocks = getGlobalBlocks(state);
 
   /** @type {Block} */
@@ -470,14 +497,8 @@ export function addViewBlock(
     x: x,
     y: y,
     zIndex: Math.max(...globalBlocks.map((block) => block.zIndex), 0) + 1,
-    viewName: viewName,
-    props: view?.props,
     type: "View",
-    program: `
-  function view(state) {
-    return h("p", {}, text("hello world"))
-  }
-`,
+    program: program,
   };
 
   const currentBlocks = getCurrentBlocks(state);
@@ -553,7 +574,7 @@ export function addEditorBlock(
 /**
  * Adds multiple blocks to the state
  * @param {State} state - Current application state
- * @param {Array<{programName: string, programState?: Object|null, x?: number|null, y?: number|null, width?: number, height?: number}>} blockConfigs - Array of block configurations
+ * @param {Array<{program: string, programState?: Object|null, x?: number|null, y?: number|null, width?: number, height?: number}>} blockConfigs - Array of block configurations
  * @returns {{state: State, blockIds: number[]}} Updated state with new blocks and array of new block IDs
  */
 function addBlocks(state, blockConfigs) {
@@ -566,9 +587,9 @@ function addBlocks(state, blockConfigs) {
 
   // Add each block sequentially
   for (const config of blockConfigs) {
-    const { programName, x = null, y = null, width = 200 } = config;
+    const { program, x = null, y = null, width = 200 } = config;
 
-    currentState = addViewBlock(currentState, programName, x, y, width);
+    currentState = addBlock(currentState, program, x, y, width);
 
     // Get the ID of the newly added block
     const currentBlocks = getCurrentBlocks(currentState);
@@ -594,11 +615,11 @@ export function pasteBlocks(state) {
 
   // Transform clipboard data into block configurations for addBlocks
   const blockConfigs = clipboardData.map((blockData) => ({
-    programName: blockData.viewName,
     x: blockData.x + PASTE_OFFSET_X,
     y: blockData.y + PASTE_OFFSET_Y,
     width: blockData.width,
     height: blockData.height,
+    program: blockData.program,
   }));
 
   const { state: newState, blockIds } = addBlocks(state, blockConfigs);
