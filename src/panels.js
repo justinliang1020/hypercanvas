@@ -19,8 +19,7 @@ import {
  */
 export function panelsContainer(state) {
   return [
-    layersPanel(state),
-    programsPanel(state),
+    rightPanel(state),
     // Only show floating toggle button when panels are hidden
     ...(state.panelsVisible ? [] : [panelsToggle(state)]),
   ];
@@ -31,14 +30,11 @@ export function panelsContainer(state) {
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State>} Layers panel element
  */
-function layersPanel(state) {
+function pages(state) {
   return h(
     "div",
     {
       id: "layers-panel",
-      class: {
-        hidden: !state.panelsVisible,
-      },
       onpointerdown: (state, event) => {
         event.stopPropagation();
         return state;
@@ -142,13 +138,11 @@ function pageLabels(state) {
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State>} Programs panel element
  */
-function programsPanel(state) {
-  const currentPage = getCurrentPage(state);
-  if (!currentPage) return h("div", {}, text("no current page"));
+function rightPanel(state) {
   return h(
     "div",
     {
-      id: "programs-panel",
+      id: "right-panel",
       class: {
         hidden: !state.panelsVisible,
       },
@@ -174,29 +168,29 @@ function programsPanel(state) {
         },
         text("◀"),
       ),
-      h(
-        "button",
-        {
-          onclick: (state) => [
-            state,
-            async (dispatch) => {
-              try {
-                const result =
-                  // @ts-ignore
-                  await window.fileAPI.uploadImageFromDialog(MEDIA_SAVE_PATH);
-                if (!result.canceled && result.success) {
-                  //TODO: should i delete image uploading
-                  console.log(`Would upload image: ${result.filename}`);
-                }
-              } catch (error) {
-                console.error("Failed to upload image:", error);
-                dispatch((state) => state);
-              }
-            },
-          ],
-        },
-        text("upload image"),
-      ),
+      // h(
+      //   "button",
+      //   {
+      //     onclick: (state) => [
+      //       state,
+      //       async (dispatch) => {
+      //         try {
+      //           const result =
+      //             // @ts-ignore
+      //             await window.fileAPI.uploadImageFromDialog(MEDIA_SAVE_PATH);
+      //           if (!result.canceled && result.success) {
+      //             //TODO: should i delete image uploading
+      //             console.log(`Would upload image: ${result.filename}`);
+      //           }
+      //         } catch (error) {
+      //           console.error("Failed to upload image:", error);
+      //           dispatch((state) => state);
+      //         }
+      //       },
+      //     ],
+      //   },
+      //   text("upload image"),
+      // ),
       h(
         "button",
         {
@@ -208,16 +202,16 @@ function programsPanel(state) {
         },
         text(state.isDarkMode ? "☀️ Light" : "🌙 Dark"),
       ),
-      h(
-        "button",
-        {
-          onclick: (state) => [
-            state,
-            (dispatch) => saveApplicationAndNotify(dispatch, state),
-          ],
-        },
-        text("save"),
-      ),
+      // h(
+      //   "button",
+      //   {
+      //     onclick: (state) => [
+      //       state,
+      //       (dispatch) => saveApplicationAndNotify(dispatch, state),
+      //     ],
+      //   },
+      //   text("save"),
+      // ),
       h(
         "button",
         {
@@ -226,39 +220,52 @@ function programsPanel(state) {
         text("reset page state"),
       ),
       h("hr", {}),
-      h("textarea", {
-        cols: "100",
-        rows: "50",
-        style: {
-          fontFamily: "monospace",
-          fontSize: "12px",
-        },
-        value: JSON.stringify(currentPage.state),
-        oninput: (state, event) => {
-          event.stopPropagation();
-          const currentPage = getCurrentPage(state);
-          if (!currentPage) return state;
-
-          const target = /** @type {HTMLTextAreaElement} */ (event.target);
-          //FIX: this doesn't work
-          return updateCurrentPage(state, {
-            state: JSON.parse(target.value),
-          });
-        },
-        onfocus: (state, event) => {
-          return updateCurrentPage(state, { isTextEditorFocused: true });
-        },
-        onfocusout: (state, event) => {
-          return updateCurrentPage(state, { isTextEditorFocused: false });
-        },
-        onpointerdown: (state, event) => {
-          event.stopPropagation();
-          return state;
-        },
-      }),
+      pages(state),
+      h("hr", {}),
       viewButtons(state),
+      stateVisualizer(state),
     ],
   );
+}
+
+/**
+ * Creates a program buttons component with filter functionality
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
+ */
+function stateVisualizer(state) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return h("div", {}, text("no current page"));
+  return h("textarea", {
+    cols: "100",
+    rows: "50",
+    style: {
+      fontFamily: "monospace",
+      fontSize: "12px",
+    },
+    value: JSON.stringify(currentPage.state),
+    oninput: (state, event) => {
+      event.stopPropagation();
+      const currentPage = getCurrentPage(state);
+      if (!currentPage) return state;
+
+      const target = /** @type {HTMLTextAreaElement} */ (event.target);
+      //FIX: this doesn't work
+      return updateCurrentPage(state, {
+        state: JSON.parse(target.value),
+      });
+    },
+    onfocus: (state, event) => {
+      return updateCurrentPage(state, { isTextEditorFocused: true });
+    },
+    onfocusout: (state, event) => {
+      return updateCurrentPage(state, { isTextEditorFocused: false });
+    },
+    onpointerdown: (state, event) => {
+      event.stopPropagation();
+      return state;
+    },
+  });
 }
 
 /**
