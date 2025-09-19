@@ -5,7 +5,7 @@ import { viewport } from "./viewport.js";
 import { panelsContainer } from "./panels.js";
 import { notification, saveApplication } from "./utils.js";
 import { defaultPage } from "./pages.js";
-import { programRegistry, programSubscriptionManager } from "./program.js";
+import { programSubscriptionManager } from "./program.js";
 
 initialize();
 
@@ -44,7 +44,6 @@ function initialState() {
     notification: null,
     notificationVisible: false,
     editingPageId: null,
-    selectedProgramName: Object.keys(programRegistry)[0],
   };
 
   // Set currentPageId to the first page

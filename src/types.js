@@ -7,7 +7,6 @@
  * @property {number} y - Y position on canvas
  * @property {number} zIndex - Stacking order (higher = front)
  * @property {string} program - Program code
- * TODO: possibly spilit this out into separate "ViewBlock" and "EditorBlock" types
  */
 
 /**
@@ -96,7 +95,6 @@
  * @property {string|null} notification - Current notification message
  * @property {boolean} notificationVisible - Whether notification is visible
  * @property {string|null} editingPageId - ID of page currently being renamed
- * @property {String} selectedProgramName - Selected program name of page to be created
  */
 
 /**
@@ -113,41 +111,4 @@
  * @property {import("hyperapp").Action<State>} action
  * @property {any} payload
  * @property {State} prevState - doesn't include program states
- */
-
-//TODO:  write some better typescript type for program, shouldn't use {View<S, any>[]}, i.e. the following should be invalid but is valid
-//views: [
-//    {
-//      name: "Text Box",
-//      node: textBoxNode,
-//      props: textProps,
-//    },
-//    {
-//      name: "Text Box",
-//      node: textBoxNodeNoProps,
-//      props: textProps,
-//    },
-//    {
-//      name: "Text Box",
-//      node: textBoxNode,
-//      props: fakeTextProps,
-//    },
-//  ]
-
-/**
- * @template S
- * @typedef Program
- * @property {S} initialState
- * @property {View<S, any>[]} views
- * @property {((state: S) => import("hyperapp").Subscription<S>[])} [subscriptions]
- */
-
-/**
- * @template ProgramState
- * @template Props
- * @typedef View
- * @property {String} name
- * @property {((state: ProgramState, props: Props) => import("hyperapp").ElementVNode<ProgramState>)} viewNode - view doesn't need props technically
- * @property {Props} [props] - if editor does not exist, give default UI to edit props
- * @property {((props: Props) => import("hyperapp").ElementVNode<Props>)} [editor] - editor can only exist if props exists. if editor exsits, use that to modify props
  */

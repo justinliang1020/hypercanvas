@@ -7,11 +7,8 @@ import {
   switchPage,
   deletePage,
   renamePage,
-  getCurrentPage,
   resetPageState,
 } from "./pages.js";
-import { getFirstSelectedBlockId } from "./selection.js";
-import { programRegistry } from "./program.js";
 
 /**
  * Creates the panels container with both layers panel, programs panel and floating toggle button
@@ -48,29 +45,10 @@ function layersPanel(state) {
     [
       h("h2", {}, text("Pages")),
       h(
-        "select",
-        {
-          value: state.selectedProgramName,
-          onchange: (state, event) => {
-            //@ts-ignore TODO: fix
-            const programName = event.target.value;
-            return {
-              ...state,
-              selectedProgramName: programName,
-            };
-          },
-        },
-        [
-          ...Object.keys(programRegistry).map((programName) =>
-            h("option", { value: programName }, text(programName)),
-          ),
-        ],
-      ),
-      h(
         "button",
         {
           class: "layers-panel-button",
-          onclick: (state) => createPage(state, state.selectedProgramName),
+          onclick: (state) => createPage(state),
         },
         text("+ New Page"),
       ),

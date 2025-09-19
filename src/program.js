@@ -1,8 +1,4 @@
 import { h, text } from "./packages/hyperapp/index.js";
-import { AppVisualizerProgram } from "./programs/appVisualizer.js";
-import { TextProgram } from "./programs/text.js";
-import { CalculatorProgram } from "./programs/calculator.js";
-import { TestSubscriptions } from "./programs/clock.js";
 
 /**
  * Creates a generic scoped action that transforms between outer and inner state
@@ -171,30 +167,30 @@ function wrapProgramActions(element, context) {
   };
 }
 
-/**
- * Creates subscription cleanup functions for a single page
- * @param {Page} page - Page to create subscriptions for
- * @param {import("hyperapp").Dispatch<State>} dispatch - App-level dispatch
- * @returns {(() => void)[]} Array of cleanup functions
- */
-function createPageSubscriptions(page, dispatch) {
-  //FIX: refactor this just take in a list of subscriptions since we will be deprecating program registry
-  const program = programRegistry[page.programName];
-  const cleanupFunctions = [];
-
-  if (program.subscriptions) {
-    const programSubs = program.subscriptions(page.state);
-
-    for (const sub of programSubs) {
-      const [subFn, ...args] = sub;
-      const wrappedDispatch = createWrappedDispatch(dispatch, page);
-      const cleanup = subFn(wrappedDispatch, ...args);
-      if (cleanup) cleanupFunctions.push(cleanup);
-    }
-  }
-
-  return cleanupFunctions;
-}
+///**
+// * Creates subscription cleanup functions for a single page
+// * @param {Page} page - Page to create subscriptions for
+// * @param {import("hyperapp").Dispatch<State>} dispatch - App-level dispatch
+// * @returns {(() => void)[]} Array of cleanup functions
+// */
+//function createPageSubscriptions(page, dispatch) {
+//  //FIX: refactor this just take in a list of subscriptions since we will be deprecating program registry
+//  const program = programRegistry[page.programName];
+//  const cleanupFunctions = [];
+//
+//  if (program.subscriptions) {
+//    const programSubs = program.subscriptions(page.state);
+//
+//    for (const sub of programSubs) {
+//      const [subFn, ...args] = sub;
+//      const wrappedDispatch = createWrappedDispatch(dispatch, page);
+//      const cleanup = subFn(wrappedDispatch, ...args);
+//      if (cleanup) cleanupFunctions.push(cleanup);
+//    }
+//  }
+//
+//  return cleanupFunctions;
+//}
 
 /** @type {(() => void)[]} */
 let globalCleanups = [];
@@ -223,11 +219,13 @@ export function programSubscriptionManager(dispatch, _props) {
   });
 
   if (!currentState) return () => {};
-  const pageCleanups = currentState.pages.map((/** @type {Page}*/ page) =>
-    createPageSubscriptions(page, dispatch),
-  );
+  //FIX: add back program subscription manager later
+  //
+  // const pageCleanups = currentState.pages.map((/** @type {Page}*/ page) =>
+  //   createPageSubscriptions(page, dispatch),
+  // );
 
-  globalCleanups = pageCleanups;
+  // globalCleanups = pageCleanups;
 
   // TODO: investigate. cleanups don't actually run becaue susbscription manager only runs once
   return () => {
@@ -257,13 +255,3 @@ export function renderView(currentPage, block) {
     return h("p", {}, text("error"));
   }
 }
-
-/**
- * @type {Record<String, Program<any>>}
- */
-export const programRegistry = {
-  appVisualizerProgram: AppVisualizerProgram,
-  text: TextProgram,
-  calculator: CalculatorProgram,
-  testSubscriptions: TestSubscriptions,
-};

@@ -1,5 +1,4 @@
 import { saveMementoAndReturn } from "./memento.js";
-import { programRegistry } from "./program.js";
 
 /**
  * Gets the current page from state
@@ -73,20 +72,18 @@ export const defaultPage = {
 /**
  * Creates a new page
  * @param {State} state - Current application state
- * @param {string} programName - program for the new page
  * @param {string} [name] - Name for the new page
  * @returns {State} Updated state with new page
  */
-export function createPage(state, programName, name) {
-  if (!name) name = `new ${programName}`;
+export function createPage(state, name) {
+  if (!name) name = `new page`;
 
   /** @type {Page} */
   const newPage = {
     ...defaultPage,
     id: crypto.randomUUID(),
     name,
-    programName,
-    state: programRegistry[programName].initialState,
+    state: {},
   };
 
   const newState = {
@@ -187,11 +184,11 @@ export function resetPageState(state, pageId) {
     (page) => page.id === pageId,
   )?.programName;
   if (!programName) return state;
-  const program = programRegistry[programName];
+  //FIX: fix this for default program state
   const newState = {
     ...state,
     pages: state.pages.map((page) =>
-      page.id === pageId ? { ...page, state: program.initialState } : page,
+      page.id === pageId ? { ...page, state: {} } : page,
     ),
   };
   return saveMementoAndReturn(state, newState);
