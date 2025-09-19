@@ -173,24 +173,3 @@ export function updateCurrentPage(state, pageData) {
     ),
   };
 }
-
-/**
- * Renames a page
- * @param {State} state - Current application state
- * @param {string} pageId - ID of page to rename
- * @returns {State} Updated state with renamed page
- */
-export function resetPageState(state, pageId) {
-  const programName = state.pages.find(
-    (page) => page.id === pageId,
-  )?.programName;
-  if (!programName) return state;
-  //FIX: fix this for default program state
-  const newState = {
-    ...state,
-    pages: state.pages.map((page) =>
-      page.id === pageId ? { ...page, state: { test: "meow" } } : page,
-    ),
-  };
-  return saveMementoAndReturn(state, newState);
-}

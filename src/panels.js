@@ -7,7 +7,6 @@ import {
   switchPage,
   deletePage,
   renamePage,
-  resetPageState,
   getCurrentPage,
   updateCurrentPage,
 } from "./pages.js";
@@ -212,13 +211,6 @@ function rightPanel(state) {
       //   },
       //   text("save"),
       // ),
-      h(
-        "button",
-        {
-          onclick: (state) => resetPageState(state, state.currentPageId),
-        },
-        text("reset page state"),
-      ),
       h("hr", {}),
       pages(state),
       h("hr", {}),
@@ -250,10 +242,13 @@ function stateVisualizer(state) {
       if (!currentPage) return state;
 
       const target = /** @type {HTMLTextAreaElement} */ (event.target);
-      //FIX: this doesn't work
-      return updateCurrentPage(state, {
-        state: JSON.parse(target.value),
-      });
+      try {
+        return updateCurrentPage(state, {
+          state: JSON.parse(target.value),
+        });
+      } catch {
+        return state;
+      }
     },
     onfocus: (state, event) => {
       return updateCurrentPage(state, { isTextEditorFocused: true });
