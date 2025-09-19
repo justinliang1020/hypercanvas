@@ -157,7 +157,7 @@ export function block(state) {
 
       const currentPage = getCurrentPage(state);
       if (!currentPage) return state;
-      if (currentPage.isAltPressed) {
+      if (currentPage.isAltPressed || currentPage.isEditorFocused) {
         return state;
       }
 
@@ -316,35 +316,36 @@ function blockToolbar(block) {
       },
     },
     [
-      h(
-        "button",
-        {
-          onclick: (state, event) => {
-            event.stopPropagation();
-            return sendToBack(state, block.id);
+      h("div", {}, [
+        h(
+          "button",
+          {
+            onclick: (state, event) => {
+              event.stopPropagation();
+              return sendToBack(state, block.id);
+            },
           },
-        },
-        text("send to back"),
-      ),
-      h(
-        "button",
-        {
-          onclick: (state, event) => {
-            event.stopPropagation();
-            return sendToFront(state, block.id);
+          text("send to back"),
+        ),
+        h(
+          "button",
+          {
+            onclick: (state, event) => {
+              event.stopPropagation();
+              return sendToFront(state, block.id);
+            },
           },
-        },
-        text("send to front"),
-      ),
+          text("send to front"),
+        ),
+      ]),
       h(
         "textarea",
         {
+          cols: "100",
+          rows: "50",
           style: {
-            width: "200px",
-            height: "100px",
             fontFamily: "monospace",
             fontSize: "12px",
-            resize: "vertical",
           },
           value: block.program,
           oninput: (state, event) => {
