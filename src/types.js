@@ -7,6 +7,7 @@
  * @property {number} y - Y position on canvas
  * @property {number} zIndex - Stacking order (higher = front)
  * @property {string} viewName - View name
+ * @property {string} program - Program code
  * @property {Object} props - Props of the block
  * @property {"View"|"Editor"} type - Type of rendered contents of block
  * @property {Number} [editingBlockId] - ID of the associated block, only applicable if this block is an editor

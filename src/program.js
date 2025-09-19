@@ -306,25 +306,16 @@ export function programSubscriptionManager(dispatch, _props) {
  * @returns {import("hyperapp").ElementVNode<State>} Block renderer function
  */
 export function renderView(currentPage, block) {
-  // Get the program view with page state
-  const program = programRegistry[currentPage.programName];
-  const view = program.views.find((v) => v.name === block.viewName);
-  if (view === undefined) {
-    return h(
-      "p",
-      { style: { color: "red" } },
-      text(`error: no view function. could not find ${block.viewName}`),
-    );
-  }
-  if (!block.props || Object.keys(block.props).length === 0) {
-    block.props = view.props;
-  }
-  const viewNode = view.viewNode(currentPage.state, block.props);
-  /** @type {StateContext} */
-  const pageContext = { type: "page", currentPage };
-  const wrappedViewNode = wrapProgramActions(viewNode, pageContext);
-
   try {
+    const viewFunction = new Function(
+      "h",
+      "text",
+      `${block.program}; return view;`,
+    )(h, text);
+    const viewNode = viewFunction(currentPage.state);
+    /** @type {StateContext} */
+    const pageContext = { type: "page", currentPage };
+    const wrappedViewNode = wrapProgramActions(viewNode, pageContext);
     return wrappedViewNode;
   } catch {
     return h("p", {}, text("error"));

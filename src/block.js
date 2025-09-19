@@ -473,6 +473,11 @@ export function addViewBlock(
     viewName: viewName,
     props: view?.props,
     type: "View",
+    program: `
+  function view(state) {
+    return h("p", {}, text("hello world"))
+  }
+`,
   };
 
   const currentBlocks = getCurrentBlocks(state);
@@ -528,6 +533,11 @@ export function addEditorBlock(
     props: {}, // editor block does not use props
     type: "Editor",
     editingBlockId,
+    program: `
+  function view(state) {
+    return h("p", {}, text("hello world"))
+  }
+`,
   };
 
   const currentBlocks = getCurrentBlocks(state);
