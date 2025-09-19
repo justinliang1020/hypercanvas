@@ -269,10 +269,9 @@ function stateVisualizer(state) {
  * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
  */
 function viewButtons(state) {
-  const defaultProgram = `
-  function view(state) {
-    return h("p", {}, text("hello world"))
-  }
+  const defaultProgram = `function view(state) {
+  return h("p", {}, text("hello world"))
+}
 `;
 
   return h("div", {}, [
