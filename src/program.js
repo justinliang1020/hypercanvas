@@ -247,6 +247,9 @@ export function renderView(currentPage, block) {
       `${block.program}; return view;`,
     )(h, text);
     const viewNode = viewFunction(currentPage.state);
+    if (viewNode.tag === "") {
+      return h("p", {}, text("error"));
+    }
     /** @type {StateContext} */
     const pageContext = { type: "page", currentPage };
     const wrappedViewNode = wrapProgramActions(viewNode, pageContext);
