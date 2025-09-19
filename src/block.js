@@ -488,60 +488,6 @@ export function addBlock(
 }
 
 /**
- * Adds a new block to the state and renders its program
- * @param {State} state - Current application state
- * @param {String} viewName - Name of view to instantiate
- * @param {Number | null} x - X position on canvas. If null, uses viewport's center X coordinate
- * @param {Number | null} y - Y position on canvas. If null, uses viewport's center X coordinate
- * @param {Number} width - Block width in pixels
- * @param {Number} height - Block height in pixels
- * @returns {State} Updated state with new block
- * TODO: reduce code duplication between this and addViewBlock
- */
-export function addEditorBlock(
-  state,
-  viewName,
-  x = null,
-  y = null,
-  width = 200,
-  height = 200,
-) {
-  // If no coordinates provided, use viewport center
-  if (x === null || y === null) {
-    const viewportCenter = getViewportCenterCoordinates(state);
-    x = x ?? viewportCenter.x - width / 2; // Center the block
-    y = y ?? viewportCenter.y - height / 2; // Center the block
-  }
-  const currentPage = getCurrentPage(state);
-  if (!currentPage) return state;
-  const globalBlocks = getGlobalBlocks(state);
-
-  /** @type {Block} */
-  const newBlock = {
-    id: Math.max(...globalBlocks.map((block) => block.id), 0) + 1,
-    width: width,
-    height: height,
-    x: x,
-    y: y,
-    zIndex: Math.max(...globalBlocks.map((block) => block.zIndex), 0) + 1,
-    program: `
-  function view(state) {
-    return h("p", {}, text("hello world"))
-  }
-`,
-  };
-
-  const currentBlocks = getCurrentBlocks(state);
-  const newState = updateCurrentPage(state, {
-    blocks: [...currentBlocks, newBlock],
-  });
-
-  const selectedState = selectBlock(newState, newBlock.id);
-
-  return saveMementoAndReturn(state, selectedState);
-}
-
-/**
  * Adds multiple blocks to the state
  * @param {State} state - Current application state
  * @param {Array<{program: string, programState?: Object|null, x?: number|null, y?: number|null, width?: number, height?: number}>} blockConfigs - Array of block configurations

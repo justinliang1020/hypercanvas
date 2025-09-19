@@ -244,7 +244,6 @@ function programsPanel(state) {
         text("reset page state"),
       ),
       h("hr", {}),
-      editor(state),
       viewButtons(state),
     ],
   );
@@ -255,50 +254,20 @@ function programsPanel(state) {
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
  */
-function editor(state) {
-  const firstSelectedBlockId = getFirstSelectedBlockId(state);
-  return h("program-component", {
-    "data-id": `editor-${firstSelectedBlockId}`,
-  });
-}
-
-/**
- * Creates a program buttons component with filter functionality
- * @param {State} state - Current application state
- * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
- */
 function viewButtons(state) {
-  const filterText = state.programFilter || "";
-  const currentPage = getCurrentPage(state);
-  if (!currentPage) return h("div", {}, text("error"));
-  const filteredViews = programRegistry[currentPage.programName].views.map(
-    (f) => f.name,
-  );
+  const defaultProgram = `
+  function view(state) {
+    return h("p", {}, text("hello world"))
+  }
+`;
 
   return h("div", {}, [
-    h("h2", {}, text(currentPage.programName)),
-    h("input", {
-      type: "text",
-      placeholder: "Filter views...",
-      value: filterText,
-      class: "program-filter-input",
-      oninput: (state, event) => ({
-        ...state,
-        programFilter: /** @type {HTMLInputElement} */ (event.target).value,
-      }),
-      onpointerdown: (state, event) => {
-        event.stopPropagation();
-        return state;
+    h(
+      "button",
+      {
+        onclick: (state) => addBlock(state, defaultProgram),
       },
-    }),
-    ...filteredViews.map((viewName) =>
-      h(
-        "button",
-        {
-          onclick: (state) => addBlock(state, viewName),
-        },
-        text(viewName),
-      ),
+      text("new program"),
     ),
   ]);
 }
