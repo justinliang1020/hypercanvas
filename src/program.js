@@ -88,29 +88,6 @@ function updatePageState(appState, currentPage, newPageState) {
 }
 
 /**
- * Updates block props within app state
- * @param {State} appState - Current app state
- * @param {Page} currentPage - Current page
- * @param {number} blockId - Block ID to update
- * @param {any} newProps - New block props
- * @returns {State} Updated app state
- */
-function updateBlockProps(appState, currentPage, blockId, newProps) {
-  const updatedPages = appState.pages.map((page) => {
-    if (page.id !== currentPage.id) return page;
-
-    const updatedBlocks = page.blocks.map((block) => {
-      if (block.id !== blockId) return block;
-      return { ...block, props: newProps };
-    });
-
-    return { ...page, blocks: updatedBlocks };
-  });
-
-  return { ...appState, pages: updatedPages };
-}
-
-/**
  * Creates a higher-order action that transforms between app state and page state
  * @param {Page} currentPage - Current page context
  * @param {import("hyperapp").Action<any, any>} pageAction - Action function that works with page state
@@ -134,51 +111,15 @@ function createPageAction(currentPage, pageAction) {
 }
 
 /**
- * Creates a higher-order action that transforms between app state and block props
- * @param {Page} currentPage - Current page context
- * @param {number} blockId - Block ID whose props to update
- * @param {import("hyperapp").Action<any, any>} propsAction - Action function that works with block props
- * @returns {import("hyperapp").Action<State, any>} Action function that works with app state
- */
-function createBlockPropsAction(currentPage, blockId, propsAction) {
-  /** @type {(appState: State) => any} */
-  const getter = (appState) => {
-    const freshCurrentPage = appState.pages.find(
-      (/** @type {Page} */ p) => p.id === currentPage.id,
-    );
-    if (!freshCurrentPage) return null;
-
-    const block = freshCurrentPage.blocks.find(
-      (/** @type {Block} */ b) => b.id === blockId,
-    );
-    return block ? block.props : null;
-  };
-
-  /** @type {(appState: State, newProps: any) => State} */
-  const setter = (appState, newProps) => {
-    return updateBlockProps(appState, currentPage, blockId, newProps);
-  };
-
-  return createScopedAction(getter, setter, propsAction);
-}
-
-/**
  * @typedef {Object} StateContext
  * @property {"page"} type - Type of state context
  * @property {Page} currentPage - Current page context
  */
 
 /**
- * @typedef {Object} PropsContext
- * @property {"props"} type - Type of state context
- * @property {Page} currentPage - Current page context
- * @property {number} blockId - Block ID for props context
- */
-
-/**
  * Wraps event handler properties in element props
  * @param {any} props - Original element props
- * @param {StateContext | PropsContext} context - State context for wrapping
+ * @param {StateContext} context - State context for wrapping
  * @returns {any} Props with wrapped event handlers
  */
 function wrapEventHandlers(props, context) {
@@ -191,12 +132,6 @@ function wrapEventHandlers(props, context) {
           context.currentPage,
           props[propName],
         );
-      } else if (context.type === "props") {
-        wrappedProps[propName] = createBlockPropsAction(
-          context.currentPage,
-          context.blockId,
-          props[propName],
-        );
       }
     }
   }
@@ -207,7 +142,7 @@ function wrapEventHandlers(props, context) {
 /**
  * Recursively wraps children elements
  * @param {any} children - Element children
- * @param {StateContext | PropsContext} context - State context for wrapping
+ * @param {StateContext} context - State context for wrapping
  * @returns {any} Wrapped children
  */
 function wrapElementChildren(children, context) {
@@ -221,7 +156,7 @@ function wrapElementChildren(children, context) {
 /**
  * Recursively wraps actions in program elements to transform between app and scoped state
  * @param {import("hyperapp").ElementVNode<any>} element - Program element
- * @param {StateContext | PropsContext} context - State context for wrapping
+ * @param {StateContext} context - State context for wrapping
  * @returns {import("hyperapp").ElementVNode<State>} Wrapped element
  */
 function wrapProgramActions(element, context) {
@@ -243,6 +178,7 @@ function wrapProgramActions(element, context) {
  * @returns {(() => void)[]} Array of cleanup functions
  */
 function createPageSubscriptions(page, dispatch) {
+  //FIX: refactor this just take in a list of subscriptions since we will be deprecating program registry
   const program = programRegistry[page.programName];
   const cleanupFunctions = [];
 
@@ -317,74 +253,6 @@ export function renderView(currentPage, block) {
     const pageContext = { type: "page", currentPage };
     const wrappedViewNode = wrapProgramActions(viewNode, pageContext);
     return wrappedViewNode;
-  } catch {
-    return h("p", {}, text("error"));
-  }
-}
-
-/**
- * @param {Page} currentPage
- * @param {Block} block
- * @returns {import("hyperapp").ElementVNode<State>} Block renderer function
- */
-export function renderEditor(currentPage, block) {
-  const program = programRegistry[currentPage.programName];
-  const view = program.views.find((v) => v.name === block.viewName);
-  const editingBlockId = block.editingBlockId;
-  //TODO: fix this kinda ugly error handling
-  if (view === undefined) {
-    return h(
-      "p",
-      { style: { color: "red" } },
-      text(`error: no view. could not find ${block.viewName}`),
-    );
-  }
-  if (!view.props) {
-    return h(
-      "p",
-      { style: { color: "red" } },
-      text(`error: no view props. could not find props for ${view}`),
-    );
-  }
-  if (!view.editor) {
-    return h(
-      "p",
-      { style: { color: "red" } },
-      text(`error: no view editor. could not find editor for ${view}`),
-    );
-  }
-  if (!editingBlockId) {
-    return h(
-      "p",
-      { style: { color: "red" } },
-      text(`error: no editing block id. could not find editor for ${view}`),
-    );
-  }
-  const editingBlock = currentPage.blocks.find((b) => b.id === editingBlockId);
-  if (!editingBlock) {
-    return h(
-      "p",
-      { style: { color: "red" } },
-      text(`error: no editing block. could not find editor for ${view}`),
-    );
-  }
-
-  // Create editor element with current block props as the state
-  const programElement = view.editor(editingBlock.props);
-
-  // Create props context for the editing block
-  /** @type {PropsContext} */
-  const propsContext = {
-    type: "props",
-    currentPage,
-    blockId: editingBlockId,
-  };
-
-  // Wrap the editor with block props as scoped state
-  const wrappedElement = wrapProgramActions(programElement, propsContext);
-
-  try {
-    return wrappedElement;
   } catch {
     return h("p", {}, text("error"));
   }

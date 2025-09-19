@@ -23,8 +23,7 @@ import {
   getSelectedBlocks,
   toggleBlockSelection,
 } from "./selection.js";
-import { renderEditor, renderView } from "./program.js";
-import { programRegistry } from "./program.js";
+import { renderView } from "./program.js";
 
 /**
  * Creates a block component renderer
@@ -170,17 +169,6 @@ export function block(state) {
       });
     }
 
-    const contents = (() => {
-      switch (block.type) {
-        case "View":
-          return renderView(currentPage, block);
-        case "Editor":
-          return renderEditor(currentPage, block);
-        default:
-          return h("p", {}, text("oopsie wrong thing"));
-      }
-    })();
-
     return h(
       "div",
       {
@@ -213,7 +201,7 @@ export function block(state) {
               overflow: "hidden",
             },
           },
-          contents,
+          renderView(currentPage, block),
         ),
         ...(isSelected && !isEditing && !isMultiSelect
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>
@@ -347,17 +335,6 @@ function blockToolbar(block) {
           },
         },
         text("send to front"),
-      ),
-      h(
-        "button",
-        {
-          onclick: (state, event) => {
-            event.stopPropagation();
-            const newState = addEditorBlock(state, block.program, block.id);
-            return newState;
-          },
-        },
-        text("editor"),
       ),
       h(
         "textarea",
@@ -497,7 +474,6 @@ export function addBlock(
     x: x,
     y: y,
     zIndex: Math.max(...globalBlocks.map((block) => block.zIndex), 0) + 1,
-    type: "View",
     program: program,
   };
 
@@ -515,7 +491,6 @@ export function addBlock(
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
  * @param {String} viewName - Name of view to instantiate
- * @param {Number} editingBlockId - Name of view to instantiate
  * @param {Number | null} x - X position on canvas. If null, uses viewport's center X coordinate
  * @param {Number | null} y - Y position on canvas. If null, uses viewport's center X coordinate
  * @param {Number} width - Block width in pixels
@@ -526,7 +501,6 @@ export function addBlock(
 export function addEditorBlock(
   state,
   viewName,
-  editingBlockId,
   x = null,
   y = null,
   width = 200,
@@ -550,10 +524,6 @@ export function addEditorBlock(
     x: x,
     y: y,
     zIndex: Math.max(...globalBlocks.map((block) => block.zIndex), 0) + 1,
-    viewName: viewName,
-    props: {}, // editor block does not use props
-    type: "Editor",
-    editingBlockId,
     program: `
   function view(state) {
     return h("p", {}, text("hello world"))
