@@ -359,6 +359,12 @@ function blockToolbar(block) {
               ),
             });
           },
+          onfocus: (state, event) => {
+            return updateCurrentPage(state, { isEditorFocused: true });
+          },
+          onfocusout: (state, event) => {
+            return updateCurrentPage(state, { isEditorFocused: false });
+          },
           onpointerdown: (state, event) => {
             event.stopPropagation();
             return state;
