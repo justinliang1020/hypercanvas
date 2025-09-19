@@ -157,7 +157,7 @@ export function block(state) {
 
       const currentPage = getCurrentPage(state);
       if (!currentPage) return state;
-      if (currentPage.isAltPressed || currentPage.isEditorFocused) {
+      if (currentPage.isAltPressed || currentPage.isTextEditorFocused) {
         return state;
       }
 
@@ -361,10 +361,10 @@ function blockToolbar(block) {
             });
           },
           onfocus: (state, event) => {
-            return updateCurrentPage(state, { isEditorFocused: true });
+            return updateCurrentPage(state, { isTextEditorFocused: true });
           },
           onfocusout: (state, event) => {
-            return updateCurrentPage(state, { isEditorFocused: false });
+            return updateCurrentPage(state, { isTextEditorFocused: false });
           },
           onpointerdown: (state, event) => {
             event.stopPropagation();

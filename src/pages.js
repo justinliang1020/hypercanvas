@@ -56,6 +56,7 @@ export const defaultPage = {
   mouseY: 0,
   cursorStyle: "pointer",
   isViewportDragging: false,
+  isTextEditorFocused: false,
   isShiftPressed: false,
   isAltPressed: false,
   selectedIds: [],
@@ -188,7 +189,7 @@ export function resetPageState(state, pageId) {
   const newState = {
     ...state,
     pages: state.pages.map((page) =>
-      page.id === pageId ? { ...page, state: {} } : page,
+      page.id === pageId ? { ...page, state: { test: "meow" } } : page,
     ),
   };
   return saveMementoAndReturn(state, newState);

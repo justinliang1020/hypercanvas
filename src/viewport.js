@@ -491,7 +491,7 @@ function onkeydown(state, event) {
       if (
         selectedBlockId !== null &&
         currentPage.editingId === null &&
-        !currentPage.isEditorFocused
+        !currentPage.isTextEditorFocused
       ) {
         event.preventDefault();
         return deleteSelectedBlocks(state);

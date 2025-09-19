@@ -8,6 +8,8 @@ import {
   deletePage,
   renamePage,
   resetPageState,
+  getCurrentPage,
+  updateCurrentPage,
 } from "./pages.js";
 
 /**
@@ -141,6 +143,8 @@ function pageLabels(state) {
  * @returns {import("hyperapp").ElementVNode<State>} Programs panel element
  */
 function programsPanel(state) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return h("div", {}, text("no current page"));
   return h(
     "div",
     {
@@ -222,6 +226,36 @@ function programsPanel(state) {
         text("reset page state"),
       ),
       h("hr", {}),
+      h("textarea", {
+        cols: "100",
+        rows: "50",
+        style: {
+          fontFamily: "monospace",
+          fontSize: "12px",
+        },
+        value: JSON.stringify(currentPage.state),
+        oninput: (state, event) => {
+          event.stopPropagation();
+          const currentPage = getCurrentPage(state);
+          if (!currentPage) return state;
+
+          const target = /** @type {HTMLTextAreaElement} */ (event.target);
+          //FIX: this doesn't work
+          return updateCurrentPage(state, {
+            state: JSON.parse(target.value),
+          });
+        },
+        onfocus: (state, event) => {
+          return updateCurrentPage(state, { isTextEditorFocused: true });
+        },
+        onfocusout: (state, event) => {
+          return updateCurrentPage(state, { isTextEditorFocused: false });
+        },
+        onpointerdown: (state, event) => {
+          event.stopPropagation();
+          return state;
+        },
+      }),
       viewButtons(state),
     ],
   );
