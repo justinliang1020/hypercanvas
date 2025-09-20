@@ -49,6 +49,22 @@ export function getSelectedBlocks(state) {
 }
 
 /**
+ * Gets all currently selected blocks
+ * @param {State} state - Current application state
+ * @returns {Block | null} Array of selected blocks
+ */
+export function getHoveredBlock(state) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) {
+    return null;
+  }
+
+  const blocks = getCurrentBlocks(state);
+  console.log(currentPage.hoveringId);
+  return blocks.find((block) => block.id === currentPage.hoveringId) ?? null;
+}
+
+/**
  * Gets the IDs of all currently selected blocks
  * @param {State} state - Current application state
  * @returns {number[]} Array of selected block IDs

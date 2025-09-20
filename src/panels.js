@@ -10,7 +10,7 @@ import {
   getCurrentPage,
   updateCurrentPage,
 } from "./pages.js";
-import { getSelectedBlocks } from "./selection.js";
+import { getHoveredBlock, getSelectedBlocks } from "./selection.js";
 
 /**
  * Creates the panels container with both layers panel, programs panel and floating toggle button
@@ -315,7 +315,9 @@ function panelsToggle(state) {
  */
 function programEditor(state) {
   const selectedBlock = getSelectedBlocks(state)[0];
-  if (!selectedBlock) return h("p", {}, text("no selected block"));
+  const hoveredBlock = getHoveredBlock(state);
+  const block = selectedBlock ? selectedBlock : hoveredBlock;
+  if (!block) return h("p", {}, text("no selected block"));
   return h(
     "textarea",
     {
@@ -325,7 +327,7 @@ function programEditor(state) {
         fontFamily: "monospace",
         fontSize: "12px",
       },
-      value: selectedBlock.program,
+      value: block.program,
       oninput: (state, event) => {
         event.stopPropagation();
         const currentPage = getCurrentPage(state);
@@ -334,7 +336,7 @@ function programEditor(state) {
         const target = /** @type {HTMLTextAreaElement} */ (event.target);
         return updateCurrentPage(state, {
           blocks: currentPage.blocks.map((b) =>
-            b.id === selectedBlock.id ? { ...b, program: target.value } : b,
+            b.id === block.id ? { ...b, program: target.value } : b,
           ),
         });
       },
@@ -349,6 +351,6 @@ function programEditor(state) {
         return state;
       },
     },
-    text(selectedBlock.program),
+    text(block.program),
   );
 }
