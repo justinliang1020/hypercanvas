@@ -10,6 +10,7 @@ import {
   getCurrentPage,
   updateCurrentPage,
 } from "./pages.js";
+import { getSelectedBlocks } from "./selection.js";
 
 /**
  * Creates the panels container with both layers panel, programs panel and floating toggle button
@@ -146,7 +147,7 @@ function rightPanel(state) {
         hidden: !state.panelsVisible,
       },
       style: {
-        width: `${state.programsPanelWidth}px`,
+        width: `40%`,
         overflowY: "auto",
       },
       onpointerdown: (state, event) => {
@@ -212,10 +213,12 @@ function rightPanel(state) {
       //   text("save"),
       // ),
       h("hr", {}),
-      pages(state),
+      programEditor(state),
       h("hr", {}),
       viewButtons(state),
       stateVisualizer(state),
+      h("hr", {}),
+      pages(state),
     ],
   );
 }
@@ -302,5 +305,50 @@ function panelsToggle(state) {
       title: "Show panels",
     },
     text("▶"),
+  );
+}
+
+/**
+ * Toggles visibility of panels
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function programEditor(state) {
+  const selectedBlock = getSelectedBlocks(state)[0];
+  if (!selectedBlock) return h("p", {}, text("no selected block"));
+  return h(
+    "textarea",
+    {
+      cols: "100",
+      rows: "50",
+      style: {
+        fontFamily: "monospace",
+        fontSize: "12px",
+      },
+      value: selectedBlock.program,
+      oninput: (state, event) => {
+        event.stopPropagation();
+        const currentPage = getCurrentPage(state);
+        if (!currentPage) return state;
+
+        const target = /** @type {HTMLTextAreaElement} */ (event.target);
+        return updateCurrentPage(state, {
+          blocks: currentPage.blocks.map((b) =>
+            b.id === selectedBlock.id ? { ...b, program: target.value } : b,
+          ),
+        });
+      },
+      onfocus: (state, event) => {
+        return updateCurrentPage(state, { isTextEditorFocused: true });
+      },
+      onfocusout: (state, event) => {
+        return updateCurrentPage(state, { isTextEditorFocused: false });
+      },
+      onpointerdown: (state, event) => {
+        event.stopPropagation();
+        return state;
+      },
+    },
+    text(selectedBlock.program),
   );
 }

@@ -338,41 +338,6 @@ function blockToolbar(block) {
           text("send to front"),
         ),
       ]),
-      h(
-        "textarea",
-        {
-          cols: "100",
-          rows: "50",
-          style: {
-            fontFamily: "monospace",
-            fontSize: "12px",
-          },
-          value: block.program,
-          oninput: (state, event) => {
-            event.stopPropagation();
-            const currentPage = getCurrentPage(state);
-            if (!currentPage) return state;
-
-            const target = /** @type {HTMLTextAreaElement} */ (event.target);
-            return updateCurrentPage(state, {
-              blocks: currentPage.blocks.map((b) =>
-                b.id === block.id ? { ...b, program: target.value } : b,
-              ),
-            });
-          },
-          onfocus: (state, event) => {
-            return updateCurrentPage(state, { isTextEditorFocused: true });
-          },
-          onfocusout: (state, event) => {
-            return updateCurrentPage(state, { isTextEditorFocused: false });
-          },
-          onpointerdown: (state, event) => {
-            event.stopPropagation();
-            return state;
-          },
-        },
-        text(block.program),
-      ),
     ],
   );
 }

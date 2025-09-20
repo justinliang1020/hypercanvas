@@ -463,6 +463,8 @@ function onkeydown(state, event) {
   // Check if user is interacting with an input field or has text selected
   const hasTextSelection = (window.getSelection()?.toString() ?? "").length > 0;
 
+  if (currentPage.isTextEditorFocused) return state;
+
   // Handle keyboard shortcuts
   switch (event.key) {
     case "Shift":
@@ -488,11 +490,7 @@ function onkeydown(state, event) {
     case "Backspace":
       // Only handle block deletion if not in input field, a block is selected, and not in edit mode
       const selectedBlockId = getFirstSelectedBlockId(state);
-      if (
-        selectedBlockId !== null &&
-        currentPage.editingId === null &&
-        !currentPage.isTextEditorFocused
-      ) {
+      if (selectedBlockId !== null && currentPage.editingId === null) {
         event.preventDefault();
         return deleteSelectedBlocks(state);
       }
