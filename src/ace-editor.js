@@ -3,6 +3,7 @@ import "./packages/ace/index.js";
 import "./packages/ace/mode-javascript.js";
 import "./packages/ace/keybinding-vim.js";
 import "./packages/ace/theme-twilight.js";
+import "./packages/ace/ext-beautify.js";
 
 class AceEditor extends HTMLElement {
   constructor() {
@@ -24,6 +25,7 @@ class AceEditor extends HTMLElement {
       </style>
       <div class="ace-editor-container"></div>
     `;
+
     const editorDiv = this.shadow.querySelector(".ace-editor-container");
     this.editor = ace.edit(editorDiv);
     this.editor.renderer.attachToShadowRoot();
@@ -32,6 +34,19 @@ class AceEditor extends HTMLElement {
       fontSize: "12px",
       showPrintMargin: false,
       useWorker: false, // https://github.com/ajaxorg/ace/issues/4060#issuecomment-1217133879
+    });
+    this.editor.session.setOptions({
+      tabSize: 2,
+      useSoftTabs: true,
+    });
+
+    this.editor.commands.addCommand({
+      name: "beautify",
+      bindKey: { win: "Ctrl-Alt-L", mac: "Cmd-Alt-L" },
+      exec: function (editor) {
+        const beautify = ace.require("ace/ext/beautify");
+        beautify.beautify(editor.session);
+      },
     });
 
     this.editor.session.setMode("ace/mode/javascript");
