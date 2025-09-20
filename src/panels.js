@@ -238,6 +238,9 @@ function stateVisualizer(state) {
     style: {
       fontFamily: "monospace",
       fontSize: "12px",
+      width: "100%",
+      minHeight: "200px",
+      resize: "vertical",
     },
     value: JSON.stringify(currentPage.state, null, "\t"),
     oninput: (state, event) => {
