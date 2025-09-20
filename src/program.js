@@ -248,13 +248,13 @@ export function renderView(currentPage, block) {
     )(h, text);
     const viewNode = viewFunction(currentPage.state);
     if (!viewNode.tag) {
-      return h("p", {}, text("error"));
+      return h("p", {}, text("error, invalid view node tag"));
     }
     /** @type {StateContext} */
     const pageContext = { type: "page", currentPage };
     const wrappedViewNode = wrapProgramActions(viewNode, pageContext);
     return wrappedViewNode;
-  } catch {
-    return h("p", {}, text("error"));
+  } catch (e) {
+    return h("p", {}, text(`error:\n${e}`));
   }
 }
