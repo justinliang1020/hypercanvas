@@ -475,9 +475,9 @@ function addBlocks(state, blockConfigs) {
 
   // Add each block sequentially
   for (const config of blockConfigs) {
-    const { program, x = null, y = null, width = 200 } = config;
+    const { program, x = null, y = null, width = 200, height = 200 } = config;
 
-    currentState = addBlock(currentState, program, x, y, width);
+    currentState = addBlock(currentState, program, x, y, width, height);
 
     // Get the ID of the newly added block
     const currentBlocks = getCurrentBlocks(currentState);
