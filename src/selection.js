@@ -60,7 +60,6 @@ export function getHoveredBlock(state) {
   }
 
   const blocks = getCurrentBlocks(state);
-  console.log(currentPage.hoveringId);
   return blocks.find((block) => block.id === currentPage.hoveringId) ?? null;
 }
 
