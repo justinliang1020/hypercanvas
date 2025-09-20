@@ -317,7 +317,15 @@ function programEditor(state) {
   const selectedBlock = getSelectedBlocks(state)[0];
   const hoveredBlock = getHoveredBlock(state);
   const block = selectedBlock ? selectedBlock : hoveredBlock;
-  if (!block) return h("p", {}, text("no selected block"));
+  if (!block)
+    return h("textarea", {
+      cols: "100",
+      rows: "50",
+      style: {
+        fontFamily: "monospace",
+        fontSize: "12px",
+      },
+    });
   return h(
     "textarea",
     {
