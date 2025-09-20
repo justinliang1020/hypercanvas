@@ -11,6 +11,7 @@ import {
   updateCurrentPage,
 } from "./pages.js";
 import { getHoveredBlock, getSelectedBlocks } from "./selection.js";
+import "./ace-editor.js";
 
 /**
  * Creates the panels container with both layers panel, programs panel and floating toggle button
@@ -318,47 +319,40 @@ function programEditor(state) {
   const hoveredBlock = getHoveredBlock(state);
   const block = selectedBlock ? selectedBlock : hoveredBlock;
   if (!block)
-    return h("textarea", {
-      cols: "100",
-      rows: "50",
-      style: {
-        fontFamily: "monospace",
-        fontSize: "12px",
-      },
+    return h("ace-editor", {
+      //@ts-ignore key to ensure proper state isolation between different blocks.
+      key: -1,
+      value: "no block selected",
     });
-  return h(
-    "textarea",
-    {
-      cols: "100",
-      rows: "50",
-      style: {
-        fontFamily: "monospace",
-        fontSize: "12px",
-      },
-      value: block.program,
-      oninput: (state, event) => {
-        event.stopPropagation();
-        const currentPage = getCurrentPage(state);
-        if (!currentPage) return state;
+  return h("ace-editor", {
+    //@ts-ignore key to ensure proper state isolation between different blocks.
+    key: block.id,
+    value: block.program,
+    /**
+     * @param {State} state
+     * @param {Event} event
+     */
+    onaceinput: (state, event) => {
+      event.stopPropagation();
+      const currentPage = getCurrentPage(state);
+      if (!currentPage) return state;
 
-        const target = /** @type {HTMLTextAreaElement} */ (event.target);
-        return updateCurrentPage(state, {
-          blocks: currentPage.blocks.map((b) =>
-            b.id === block.id ? { ...b, program: target.value } : b,
-          ),
-        });
-      },
-      onfocus: (state, event) => {
-        return updateCurrentPage(state, { isTextEditorFocused: true });
-      },
-      onfocusout: (state, event) => {
-        return updateCurrentPage(state, { isTextEditorFocused: false });
-      },
-      onpointerdown: (state, event) => {
-        event.stopPropagation();
-        return state;
-      },
+      return updateCurrentPage(state, {
+        blocks: currentPage.blocks.map((b) =>
+          //@ts-ignore uses custom `value` added to the event
+          b.id === block.id ? { ...b, program: event.value } : b,
+        ),
+      });
     },
-    text(block.program),
-  );
+    onfocus: (state, event) => {
+      return updateCurrentPage(state, { isTextEditorFocused: true });
+    },
+    onfocusout: (state, event) => {
+      return updateCurrentPage(state, { isTextEditorFocused: false });
+    },
+    onpointerdown: (state, event) => {
+      event.stopPropagation();
+      return state;
+    },
+  });
 }
