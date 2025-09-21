@@ -156,7 +156,14 @@ function wrapElementChildren(children, context) {
  * @returns {import("hyperapp").ElementVNode<State>} Wrapped element
  */
 function wrapProgramActions(element, context) {
-  if (!element || typeof element !== "object" || !element.props) {
+  if (!element) {
+    return element;
+  }
+  if (!element.tag) {
+    // Finding syntax errors in nested v nodes
+    return h("p", {}, text("syntax error"));
+  }
+  if (typeof element !== "object" || !element.props) {
     return element;
   }
 
