@@ -1,4 +1,4 @@
-import { addBlock, pasteBlocks } from "./block.js";
+import { addBlock, pasteClipboardBlocks } from "./block.js";
 import { MEDIA_SAVE_PATH, STATE_SAVE_PATH } from "./constants.js";
 import { h, text } from "./packages/hyperapp/index.js";
 
@@ -138,7 +138,7 @@ export const pasteEffect = async (dispatch, state) => {
 
     const text = await navigator.clipboard.readText();
     if (text.trim() === "") {
-      dispatch((state) => pasteBlocks(state));
+      dispatch((state) => pasteClipboardBlocks(state));
       return;
     } else {
       //TODO: should i remove text pasting

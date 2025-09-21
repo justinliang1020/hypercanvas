@@ -495,7 +495,7 @@ function addBlocks(state, blockConfigs) {
  * @param {State} state - Current application state
  * @returns {import("hyperapp").Dispatchable<State>} Updated state with pasted blocks
  */
-export function pasteBlocks(state) {
+export function pasteClipboardBlocks(state) {
   const clipboardData = state.clipboard;
   if (clipboardData === null) {
     return state;
@@ -533,10 +533,12 @@ export function copySelectedBlocks(state) {
 
   // Create copies of the block data for clipboard, capturing current state
   /** @type {Block[]} */
-  const blocksData = selectedBlocks.map((block) => ({
-    ...block,
-    id: -1, // not a "real" block
-  }));
+  const blocksData = selectedBlocks
+    .sort((a, b) => a.zIndex - b.zIndex)
+    .map((block) => ({
+      ...block,
+      id: -1, // not a "real" block
+    }));
 
   return [
     {
