@@ -1,6 +1,6 @@
 import { h, text } from "./packages/hyperapp/index.js";
 import { saveApplicationAndNotify } from "./utils.js";
-import { addBlock } from "./block.js";
+import { addBlock, sendToBack, sendToFront } from "./block.js";
 import { MEDIA_SAVE_PATH } from "./constants.js";
 import {
   createPage,
@@ -215,6 +215,7 @@ function rightPanel(state) {
       // ),
       h("hr", {}),
       programEditor(state),
+      orderButtons(state),
       viewButtons(state),
       h("p", {}, text("state visualizer")),
       stateVisualizer(state),
@@ -268,6 +269,46 @@ function stateVisualizer(state) {
       return state;
     },
   });
+}
+
+/**
+ * Creates a program buttons component with filter functionality
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
+ */
+function orderButtons(state) {
+  const defaultProgram = `function view(state) {
+  return h("p", {}, text("hello world"))
+}
+`;
+
+  const selectedBlock = getSelectedBlocks(state)[0];
+  if (!selectedBlock) return h("div", {});
+
+  return h("div", {}, [
+    h("div", {}, [
+      h(
+        "button",
+        {
+          onclick: (state, event) => {
+            event.stopPropagation();
+            return sendToBack(state, selectedBlock.id);
+          },
+        },
+        text("send to back"),
+      ),
+      h(
+        "button",
+        {
+          onclick: (state, event) => {
+            event.stopPropagation();
+            return sendToFront(state, selectedBlock.id);
+          },
+        },
+        text("send to front"),
+      ),
+    ]),
+  ]);
 }
 
 /**

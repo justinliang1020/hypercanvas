@@ -212,7 +212,6 @@ export function block(state) {
               }),
             )
           : []),
-        isSelected && !isEditing && !isMultiSelect && blockToolbar(block),
       ],
     );
   };
@@ -300,55 +299,12 @@ function getBlockOutline(blockState, state) {
 // -----------------------------
 
 /**
- * Creates a toolbar for selected blocks with action buttons
- * @param {Block} block
- * @returns {import("hyperapp").ElementVNode<State>} Block toolbar element
- */
-
-function blockToolbar(block) {
-  return h(
-    "div",
-    {
-      class: "block-toolbar",
-      onpointerdown: (state, event) => {
-        event.stopPropagation();
-        return state;
-      },
-    },
-    [
-      h("div", {}, [
-        h(
-          "button",
-          {
-            onclick: (state, event) => {
-              event.stopPropagation();
-              return sendToBack(state, block.id);
-            },
-          },
-          text("send to back"),
-        ),
-        h(
-          "button",
-          {
-            onclick: (state, event) => {
-              event.stopPropagation();
-              return sendToFront(state, block.id);
-            },
-          },
-          text("send to front"),
-        ),
-      ]),
-    ],
-  );
-}
-
-/**
  * Sends a block to the front (highest z-index)
  * @param {State} currentState - Current application state
  * @param {number} blockId - ID of block to bring to front
  * @returns {import("hyperapp").Dispatchable<State>} Updated state
  */
-function sendToFront(currentState, blockId) {
+export function sendToFront(currentState, blockId) {
   const blocks = getCurrentBlocks(currentState);
   const block = blocks.find((b) => b.id === blockId);
   if (!block) return currentState;
@@ -373,7 +329,7 @@ function sendToFront(currentState, blockId) {
  * @param {number} blockId - ID of block to send to back
  * @returns {import("hyperapp").Dispatchable<State>} Updated state
  */
-function sendToBack(currentState, blockId) {
+export function sendToBack(currentState, blockId) {
   const blocks = getCurrentBlocks(currentState);
   const block = blocks.find((b) => b.id === blockId);
   if (!block) return currentState;
