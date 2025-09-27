@@ -50,6 +50,7 @@ function createWrappedDispatch(dispatch, currentPage) {
  * @param {Page} currentPage - Current page context
  * @returns {import("hyperapp").MaybeEffect<State, any>} Wrapped effect array
  */
+//TODO: the way this function is used is not semantic, fix its usage so it doesn't use a generic wrap program effect thing
 function wrapProgramEffect(effect, currentPage) {
   if (!Array.isArray(effect) || effect.length === 0) {
     return effect;
