@@ -38,9 +38,9 @@ function createScopedAction(getter, setter, innerAction, effectWrapper) {
  * @returns {import("hyperapp").Dispatch<any>} Wrapped dispatch
  */
 function createWrappedDispatch(dispatch, currentPage) {
-  return (programAction) => {
+  return (programAction, payload) => {
     const appAction = createPageAction(currentPage, programAction);
-    return dispatch(appAction);
+    return dispatch(appAction, payload);
   };
 }
 
