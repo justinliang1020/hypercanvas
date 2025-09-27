@@ -5,9 +5,10 @@ import { h, text } from "./packages/hyperapp/index.js";
  * @param {(outerState: any) => any} getter - Extracts inner state from outer state
  * @param {(outerState: any, innerState: any) => any} setter - Updates outer state with new inner state
  * @param {import("hyperapp").Action<any, any>} innerAction - Action that works with inner state
+ * @param {((effect: import("hyperapp").MaybeEffect<any, any>) => import("hyperapp").MaybeEffect<any, any>)} effectWrapper
  * @returns {import("hyperapp").Action<any, any>} Action that works with outer state
  */
-function createScopedAction(getter, setter, innerAction) {
+function createScopedAction(getter, setter, innerAction, effectWrapper) {
   return (outerState, props) => {
     const innerState = getter(outerState);
     if (!innerState) return outerState;
@@ -15,10 +16,13 @@ function createScopedAction(getter, setter, innerAction) {
     const result = innerAction(innerState, props);
 
     if (typeof result === "function") {
-      return createScopedAction(getter, setter, result);
+      return createScopedAction(getter, setter, result, effectWrapper);
     } else if (Array.isArray(result)) {
       const [newInnerState, ...effects] = result;
-      return [setter(outerState, newInnerState), ...effects];
+      return [
+        setter(outerState, newInnerState),
+        ...effects.map((effect) => effectWrapper(effect)),
+      ];
     } else if (result && typeof result === "object") {
       return setter(outerState, result);
     } else {
@@ -54,9 +58,9 @@ function wrapProgramEffect(effect, currentPage) {
   const [effectFunction, ...args] = effect;
 
   /** @type {import("hyperapp").Effecter<State, any>} */
-  const wrappedEffectFunction = (dispatch, ...effectArgs) => {
+  const wrappedEffectFunction = (dispatch, payload) => {
     const wrappedDispatch = createWrappedDispatch(dispatch, currentPage);
-    return effectFunction(wrappedDispatch, ...effectArgs);
+    return effectFunction(wrappedDispatch, payload);
   };
 
   /** @type {import("hyperapp").Effect<State, any>} */
@@ -103,7 +107,10 @@ function createPageAction(currentPage, pageAction) {
     return updatePageState(appState, currentPage, newPageState);
   };
 
-  return createScopedAction(getter, setter, pageAction);
+  /** @type {(effect: import("hyperapp").MaybeEffect<any, any>) => import("hyperapp").MaybeEffect<State, any>} */
+  const effectWrapper = (effect) => wrapProgramEffect(effect, currentPage);
+
+  return createScopedAction(getter, setter, pageAction, effectWrapper);
 }
 
 /**
