@@ -14,43 +14,99 @@ import { programSubscriptionManager } from "./program.js";
 initialize();
 
 /**
- * Creates the main application component with keyboard handling
+ * @param {import("hyperapp").Action<State>} action
+ * @returns {import("hyperapp").Subscription<State>}
+ */
+const onKeyDown = (action) => {
+  /**
+   * @param {import("hyperapp").Dispatch<State>} dispatch
+   * @param {any} options
+   */
+  function keydownSubscriber(dispatch, options) {
+    /**
+     * @param {KeyboardEvent} event
+     */
+    function handler(event) {
+      dispatch(options.action, event);
+    }
+    addEventListener("keydown", handler);
+    return () => removeEventListener("keydown", handler);
+  }
+  return [keydownSubscriber, { action }];
+};
+
+/**
+ * @param {import("hyperapp").Action<State>} action
+ * @returns {import("hyperapp").Subscription<State>}
+ */
+const onKeyUp = (action) => {
+  /**
+   * @param {import("hyperapp").Dispatch<State>} dispatch
+   * @param {any} options
+   */
+  function keyupSubscriber(dispatch, options) {
+    /**
+     * @param {KeyboardEvent} event
+     */
+    function handler(event) {
+      dispatch(options.action, event);
+    }
+    addEventListener("keyup", handler);
+    return () => removeEventListener("keyup", handler);
+  }
+  return [keyupSubscriber, { action }];
+};
+
+/**
+ * @param {State} state
+ * @param {KeyboardEvent} event
+ * @returns {import("hyperapp").Dispatchable<State>}
+ */
+const KeyDown = (state, event) => {
+  switch (event.key) {
+    case "Shift":
+      return updateCurrentPage(state, {
+        isShiftPressed: true,
+      });
+    case "Alt":
+      return updateCurrentPage(state, {
+        isAltPressed: true,
+      });
+    case "s":
+      // Handle save shortcut (Ctrl+S or Cmd+S)
+      if (event.ctrlKey || event.metaKey) {
+        event.preventDefault();
+        return [state, (dispatch) => saveApplicationAndNotify(dispatch, state)];
+      }
+      return state;
+    default:
+      return state;
+  }
+};
+
+/**
+ * @param {State} state
+ * @param {KeyboardEvent} event
+ * @returns {import("hyperapp").Dispatchable<State>}
+ */
+const KeyUp = (state, event) => {
+  switch (event.key) {
+    case "Shift":
+      return updateCurrentPage(state, { isShiftPressed: false });
+    case "Alt":
+      return updateCurrentPage(state, { isAltPressed: false });
+    default:
+      return state;
+  }
+};
+
+/**
+ * Creates the main application component
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State>} Main application element
  */
 function main(state) {
   const currentPage = state.pages.find((p) => p.id === state.currentPageId);
-
-  //TODO: make this into a subscription
-  /**
-   * @param {State} state
-   * @param {KeyboardEvent} event
-   * @returns {import("hyperapp").Dispatchable<State>}
-   */
-  function onkeydown(state, event) {
-    switch (event.key) {
-      case "Shift":
-        return updateCurrentPage(state, {
-          isShiftPressed: true,
-        });
-      case "Alt":
-        return updateCurrentPage(state, {
-          isAltPressed: true,
-        });
-      case "s":
-        // Handle save shortcut (Ctrl+S or Cmd+S)
-        if (event.ctrlKey || event.metaKey) {
-          event.preventDefault();
-          return [
-            state,
-            (dispatch) => saveApplicationAndNotify(dispatch, state),
-          ];
-        }
-        return state;
-      default:
-        return state;
-    }
-  }
   return h(
     "main",
     {
@@ -60,7 +116,6 @@ function main(state) {
       class: {
         "dark-mode": state.isDarkMode,
       },
-      onkeydown,
     },
     [viewport(state), ...panelsContainer(state), notification(state)],
   );
@@ -212,6 +267,8 @@ async function initialize() {
     subscriptions: (state) => [
       [themeChangeSubscription, {}],
       [programSubscriptionManager, {}],
+      onKeyDown(KeyDown),
+      onKeyUp(KeyUp),
     ],
     dispatch: dispatchMiddleware,
   });

@@ -554,25 +554,6 @@ function onkeydown(state, event) {
 
 /**
  * @param {State} state
- * @param {KeyboardEvent} event
- * @returns {import("hyperapp").Dispatchable<State>}
- */
-function onkeyup(state, event) {
-  // Track shift key release
-  if (event.key === "Shift") {
-    return updateCurrentPage(state, {
-      isShiftPressed: false,
-    });
-  } else if (event.key === "Alt") {
-    return updateCurrentPage(state, {
-      isAltPressed: false,
-    });
-  }
-  return state;
-}
-
-/**
- * @param {State} state
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 export function viewport(state) {
@@ -596,7 +577,6 @@ export function viewport(state) {
       onpointerup,
       onwheel,
       onkeydown,
-      onkeyup,
     },
     [
       h(
