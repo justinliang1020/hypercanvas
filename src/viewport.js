@@ -563,6 +563,7 @@ export function viewport(state) {
       id: "viewport",
       class: {
         "panels-hidden": !state.panelsVisible,
+        "panels-visible": state.panelsVisible,
       },
       style: {
         paddingRight: state.panelsVisible

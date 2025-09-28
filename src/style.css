@@ -173,6 +173,7 @@ hr {
   gap: 8px;
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
+  transition: transform 0.3s ease;
 }
 
 #right-panel.hidden {
@@ -259,10 +260,15 @@ hr {
   background-color: #f8f9fa;
   overflow: hidden;
   box-sizing: border-box;
+  transition: width 0.3s ease;
+}
+
+#viewport.panels-visible {
+  width: 60%;
 }
 
 #viewport.panels-hidden {
-  padding-right: 0;
+  width: 100%;
 }
 
 #gallery {
