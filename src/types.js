@@ -21,7 +21,6 @@
  * @property {number} mouseY - Current mouse Y position
  * @property {string} cursorStyle - Current cursor style
  * @property {boolean} isViewportDragging - Whether viewport is being dragged
- * @property {boolean} isShiftPressed - Whether shift key is currently pressed
  * @property {boolean} isTextEditorFocused - Whether any text editor is currently focused
  * @property {boolean} isAltPressed - Whether alt key (option on Mac) is currently pressed
  * @property {number[]} selectedIds - IDs of selected blocks
@@ -96,6 +95,7 @@
  * @property {string|null} notification - Current notification message
  * @property {boolean} notificationVisible - Whether notification is visible
  * @property {string|null} editingPageId - ID of page currently being renamed
+ * @property {boolean} isShiftPressed - Whether shift key is currently pressed
  */
 
 /**

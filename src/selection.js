@@ -316,7 +316,7 @@ export function calculatePreviewSelection(state, selectionBox) {
   // Return preview selection based on current selection and shift key
   const currentSelectedIds = currentPage.selectedIds || [];
 
-  if (currentPage.isShiftPressed) {
+  if (state.isShiftPressed) {
     // Shift+drag: add to existing selection
     return [...new Set([...currentSelectedIds, ...intersectingBlockIds])];
   } else {

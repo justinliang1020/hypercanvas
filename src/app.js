@@ -65,9 +65,10 @@ const onKeyUp = (action) => {
 const KeyDown = (state, event) => {
   switch (event.key) {
     case "Shift":
-      return updateCurrentPage(state, {
+      return {
+        ...state,
         isShiftPressed: true,
-      });
+      };
     case "Alt":
       return updateCurrentPage(state, {
         isAltPressed: true,
@@ -92,7 +93,10 @@ const KeyDown = (state, event) => {
 const KeyUp = (state, event) => {
   switch (event.key) {
     case "Shift":
-      return updateCurrentPage(state, { isShiftPressed: false });
+      return {
+        ...state,
+        isShiftPressed: false,
+      };
     case "Alt":
       return updateCurrentPage(state, { isAltPressed: false });
     default:
@@ -135,6 +139,7 @@ function initialState() {
     notification: null,
     notificationVisible: false,
     editingPageId: null,
+    isShiftPressed: false,
   };
 
   // Set currentPageId to the first page
