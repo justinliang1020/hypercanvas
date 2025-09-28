@@ -31,7 +31,6 @@
  * @property {DragState|null} dragStart - Drag operation start state
  * @property {SelectionBoxState|null} selectionBox - Selection box drag state
  * @property {any} state - State of app inside this page
- * @property {string} programName - Program name, should have the same state type as the page state
  **/
 
 /**
