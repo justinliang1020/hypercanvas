@@ -323,6 +323,7 @@ function miscButtons(state) {
 `;
 
   const currentPage = getCurrentPage(state);
+  const isInteractMode = currentPage?.isInteractMode;
 
   return h("div", {}, [
     h(
@@ -335,16 +336,17 @@ function miscButtons(state) {
     h(
       "button",
       {
+        style: {
+          backgroundColor: isInteractMode ? "#007acc" : "#f0f0f0",
+          color: isInteractMode ? "white" : "black",
+          border: `2px solid ${isInteractMode ? "#005a9e" : "#ccc"}`,
+        },
         onclick: (state) =>
           updateCurrentPage(state, {
-            isInteractMode: !currentPage?.isInteractMode,
+            isInteractMode: !isInteractMode,
           }),
       },
-      text(
-        currentPage?.isInteractMode
-          ? "interact mode off (option)"
-          : "interact mode on (option)",
-      ),
+      text("interact mode (option)"),
     ),
   ]);
 }
