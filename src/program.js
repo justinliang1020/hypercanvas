@@ -280,7 +280,20 @@ class HypercanvasBlock extends HTMLElement {
     // Clear shadow DOM
     this.shadow.innerHTML = "";
 
-    this.shadow.appendChild(this.firstChild);
+    // Add custom CSS
+    const style = document.createElement("style");
+    style.textContent = `
+      * {
+        box-sizing: border-box;
+        color: black;
+      }
+    `;
+    this.shadow.appendChild(style);
+
+    // Move (not clone) all children to shadow DOM so Hyperapp can still update them
+    while (this.firstChild) {
+      this.shadow.appendChild(this.firstChild);
+    }
   }
 }
 
