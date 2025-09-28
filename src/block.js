@@ -86,7 +86,7 @@ export function block(state) {
         cursorStyle = "default";
       } else if (
         currentPage.editingId === block.id ||
-        currentPage.isAltPressed
+        currentPage.isInteractMode
       ) {
         // In edit mode, use default cursor
         cursorStyle = "default";
@@ -127,7 +127,7 @@ export function block(state) {
       event.stopPropagation();
 
       // If block is in edit mode, don't start dragging
-      if (currentPage.editingId === block.id || currentPage.isAltPressed) {
+      if (currentPage.editingId === block.id || currentPage.isInteractMode) {
         return state;
       }
 
@@ -157,7 +157,7 @@ export function block(state) {
 
       const currentPage = getCurrentPage(state);
       if (!currentPage) return state;
-      if (currentPage.isAltPressed || currentPage.isTextEditorFocused) {
+      if (currentPage.isInteractMode || currentPage.isTextEditorFocused) {
         return state;
       }
 
@@ -195,7 +195,7 @@ export function block(state) {
           {
             style: {
               pointerEvents:
-                isEditing || currentPage.isAltPressed ? null : "none",
+                isEditing || currentPage.isInteractMode ? null : "none",
               width: "100%",
               height: "100%",
               overflow: "hidden",
@@ -247,7 +247,7 @@ function getBlockOutline(blockState, state) {
   if (!currentPage) return null;
 
   // Priority order matters - most specific states first
-  if (currentPage.isAltPressed) {
+  if (currentPage.isInteractMode) {
     return createOutline(
       OUTLINE_WIDTHS.THICK,
       OUTLINE_COLORS.INTERACT_MODE,

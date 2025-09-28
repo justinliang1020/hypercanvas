@@ -22,7 +22,7 @@
  * @property {string} cursorStyle - Current cursor style
  * @property {boolean} isViewportDragging - Whether viewport is being dragged
  * @property {boolean} isTextEditorFocused - Whether any text editor is currently focused
- * @property {boolean} isAltPressed - Whether alt key (option on Mac) is currently pressed
+ * @property {boolean} isInteractMode - Whether alt key (option on Mac) is currently pressed
  * @property {number[]} selectedIds - IDs of selected blocks
  * @property {number[]} previewSelectedIds - IDs of blocks that would be selected (during selection box drag)
  * @property {number|null} editingId - ID of block in edit mode

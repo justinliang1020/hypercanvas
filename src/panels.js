@@ -322,6 +322,8 @@ function miscButtons(state) {
 }
 `;
 
+  const currentPage = getCurrentPage(state);
+
   return h("div", {}, [
     h(
       "button",
@@ -330,7 +332,20 @@ function miscButtons(state) {
       },
       text("new program"),
     ),
-    h("button", {}, text("interact mode")),
+    h(
+      "button",
+      {
+        onclick: (state) =>
+          updateCurrentPage(state, {
+            isInteractMode: !currentPage?.isInteractMode,
+          }),
+      },
+      text(
+        currentPage?.isInteractMode
+          ? "interact mode off (option)"
+          : "interact mode on (option)",
+      ),
+    ),
   ]);
 }
 

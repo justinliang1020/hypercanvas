@@ -71,7 +71,7 @@ const KeyDown = (state, event) => {
       };
     case "Alt":
       return updateCurrentPage(state, {
-        isAltPressed: true,
+        isInteractMode: true,
       });
     case "s":
       // Handle save shortcut (Ctrl+S or Cmd+S)
@@ -98,7 +98,7 @@ const KeyUp = (state, event) => {
         isShiftPressed: false,
       };
     case "Alt":
-      return updateCurrentPage(state, { isAltPressed: false });
+      return updateCurrentPage(state, { isInteractMode: false });
     default:
       return state;
   }
