@@ -246,15 +246,6 @@ function getBlockOutline(blockState, state) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return null;
 
-  // Priority order matters - most specific states first
-  if (currentPage.isInteractMode) {
-    return createOutline(
-      OUTLINE_WIDTHS.THICK,
-      OUTLINE_COLORS.INTERACT_MODE,
-      currentPage.zoom,
-    );
-  }
-
   if (isEditing) {
     return createOutline(
       OUTLINE_WIDTHS.THICK,
