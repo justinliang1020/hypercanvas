@@ -66,6 +66,12 @@ export const defaultPage = {
   previewSelectedIds: [],
   selectionBox: null,
   state: { n: 0 },
+  css: `
+      * {
+        box-sizing: border-box;
+        color: blue;
+      }
+    `,
 };
 
 /**

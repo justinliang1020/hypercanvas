@@ -31,6 +31,7 @@
  * @property {DragState|null} dragStart - Drag operation start state
  * @property {SelectionBoxState|null} selectionBox - Selection box drag state
  * @property {any} state - State of app inside this page
+ * @property {String} css - CSS string
  **/
 
 /**

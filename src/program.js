@@ -254,9 +254,27 @@ class HypercanvasBlock extends HTMLElement {
     super();
     this.editor = null;
     this.shadow = this.attachShadow({ mode: "open" });
+    this._css = "";
+  }
+
+  static get observedAttributes() {
+    return ["css"];
+  }
+
+  /**
+   * @param {string} name
+   * @param {string} oldValue
+   * @param {string} newValue
+   */
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === "css" && oldValue !== newValue) {
+      this._css = newValue || "";
+      this.renderChildren();
+    }
   }
 
   connectedCallback() {
+    this._css = this.getAttribute("css") || "";
     this.renderChildren();
 
     // Observe changes to children
@@ -282,12 +300,7 @@ class HypercanvasBlock extends HTMLElement {
 
     // Add custom CSS
     const style = document.createElement("style");
-    style.textContent = `
-      * {
-        box-sizing: border-box;
-        color: black;
-      }
-    `;
+    style.textContent = this._css;
     this.shadow.appendChild(style);
 
     // Move (not clone) all children to shadow DOM so Hyperapp can still update them
@@ -301,10 +314,11 @@ customElements.define("hypercanvas-block", HypercanvasBlock);
 
 /**
  * @param {import("hyperapp").ElementVNode<State>} el
+ * @param {string} css
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-function wrapCustomElement(el) {
-  return h("hypercanvas-block", {}, el);
+function wrapCustomElement(el, css) {
+  return h("hypercanvas-block", { css }, el);
 }
 
 /**
@@ -328,6 +342,7 @@ export function renderView(currentPage, block) {
     const wrappedScopedProgramNode = wrapProgramActions(viewNode, pageContext);
     const wrappedCustomElementNode = wrapCustomElement(
       wrappedScopedProgramNode,
+      currentPage.css || "",
     );
     return wrappedCustomElementNode;
   } catch (e) {
