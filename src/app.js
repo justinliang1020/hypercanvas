@@ -3,8 +3,12 @@ import { STATE_SAVE_PATH } from "./constants.js";
 import { createMementoManager } from "./memento.js";
 import { viewport } from "./viewport.js";
 import { panelsContainer } from "./panels.js";
-import { notification, saveApplication } from "./utils.js";
-import { defaultPage } from "./pages.js";
+import {
+  notification,
+  saveApplication,
+  saveApplicationAndNotify,
+} from "./utils.js";
+import { defaultPage, updateCurrentPage } from "./pages.js";
 import { programSubscriptionManager } from "./program.js";
 
 initialize();
@@ -16,6 +20,37 @@ initialize();
  */
 function main(state) {
   const currentPage = state.pages.find((p) => p.id === state.currentPageId);
+
+  //TODO: make this into a subscription
+  /**
+   * @param {State} state
+   * @param {KeyboardEvent} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function onkeydown(state, event) {
+    switch (event.key) {
+      case "Shift":
+        return updateCurrentPage(state, {
+          isShiftPressed: true,
+        });
+      case "Alt":
+        return updateCurrentPage(state, {
+          isAltPressed: true,
+        });
+      case "s":
+        // Handle save shortcut (Ctrl+S or Cmd+S)
+        if (event.ctrlKey || event.metaKey) {
+          event.preventDefault();
+          return [
+            state,
+            (dispatch) => saveApplicationAndNotify(dispatch, state),
+          ];
+        }
+        return state;
+      default:
+        return state;
+    }
+  }
   return h(
     "main",
     {
@@ -25,6 +60,7 @@ function main(state) {
       class: {
         "dark-mode": state.isDarkMode,
       },
+      onkeydown,
     },
     [viewport(state), ...panelsContainer(state), notification(state)],
   );

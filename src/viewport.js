@@ -467,14 +467,6 @@ function onkeydown(state, event) {
 
   // Handle keyboard shortcuts
   switch (event.key) {
-    case "Shift":
-      return updateCurrentPage(state, {
-        isShiftPressed: true,
-      });
-    case "Alt":
-      return updateCurrentPage(state, {
-        isAltPressed: true,
-      });
     case "Escape":
       if (currentPage.editingId !== null) {
         event.preventDefault();
@@ -555,13 +547,6 @@ function onkeydown(state, event) {
       }
       return state;
 
-    case "s":
-      // Handle save shortcut (Ctrl+S or Cmd+S)
-      if (event.ctrlKey || event.metaKey) {
-        event.preventDefault();
-        return [state, (dispatch) => saveApplicationAndNotify(dispatch, state)];
-      }
-      return state;
     default:
       return state;
   }
