@@ -216,7 +216,7 @@ function rightPanel(state) {
       h("hr", {}),
       programEditor(state),
       orderButtons(state),
-      viewButtons(state),
+      miscButtons(state),
       h("p", {}, text("state visualizer")),
       stateVisualizer(state),
       h("hr", {}),
@@ -312,11 +312,11 @@ function orderButtons(state) {
 }
 
 /**
- * Creates a program buttons component with filter functionality
+ * Collection of buttons
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
  */
-function viewButtons(state) {
+function miscButtons(state) {
   const defaultProgram = `function view(state) {
   return h("p", {}, text("hello world"))
 }
@@ -330,6 +330,7 @@ function viewButtons(state) {
       },
       text("new program"),
     ),
+    h("button", {}, text("interact mode")),
   ]);
 }
 
