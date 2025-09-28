@@ -249,6 +249,51 @@ export function programSubscriptionManager(dispatch, _props) {
   };
 }
 
+class HypercanvasBlock extends HTMLElement {
+  constructor() {
+    super();
+    this.editor = null;
+    this.shadow = this.attachShadow({ mode: "open" });
+  }
+
+  connectedCallback() {
+    this.renderChildren();
+
+    // Observe changes to children
+    this.observer = new MutationObserver(() => {
+      this.renderChildren();
+    });
+
+    this.observer.observe(this, {
+      childList: true,
+      subtree: true,
+    });
+  }
+
+  disconnectedCallback() {
+    if (this.observer) {
+      this.observer.disconnect();
+    }
+  }
+
+  renderChildren() {
+    // Clear shadow DOM
+    this.shadow.innerHTML = "";
+
+    this.shadow.appendChild(this.firstChild);
+  }
+}
+
+customElements.define("hypercanvas-block", HypercanvasBlock);
+
+/**
+ * @param {import("hyperapp").ElementVNode<State>} el
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function wrapCustomElement(el) {
+  return h("hypercanvas-block", {}, el);
+}
+
 /**
  * @param {Page} currentPage
  * @param {Block} block
@@ -267,8 +312,11 @@ export function renderView(currentPage, block) {
     }
     /** @type {StateContext} */
     const pageContext = { type: "page", currentPage };
-    const wrappedViewNode = wrapProgramActions(viewNode, pageContext);
-    return wrappedViewNode;
+    const wrappedScopedProgramNode = wrapProgramActions(viewNode, pageContext);
+    const wrappedCustomElementNode = wrapCustomElement(
+      wrappedScopedProgramNode,
+    );
+    return wrappedCustomElementNode;
   } catch (e) {
     return h("p", {}, text(`error:\n${e}`));
   }
