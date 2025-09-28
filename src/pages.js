@@ -67,8 +67,11 @@ export const defaultPage = {
   selectionBox: null,
   state: { n: 0 },
   css: `* {
-  box-sizing: border-box;
-  color: blue;
+  background: lightgrey;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 5px;
 }`,
 };
 
