@@ -317,38 +317,54 @@ function orderButtons(state) {
  * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
  */
 function miscButtons(state) {
-  const defaultProgram = `function view(state) {
+  /**
+   * Collection of buttons
+   * @param {State} state - Current application state
+   * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
+   */
+  const newProgramButton = (state) => {
+    const defaultProgram = `function view(state) {
   return h("p", {}, text("hello world"))
 }
 `;
 
-  const currentPage = getCurrentPage(state);
-  const isInteractMode = currentPage?.isInteractMode;
-
-  return h("div", {}, [
-    h(
+    return h(
       "button",
       {
         onclick: (state) => addBlock(state, defaultProgram),
       },
       text("new program"),
-    ),
-    h(
+    );
+  };
+
+  /**
+   * Collection of buttons
+   * @param {State} state - Current application state
+   * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
+   */
+  const interactButton = (state) => {
+    const currentPage = getCurrentPage(state);
+    const isInteractMode = currentPage?.isInteractMode;
+    const style = {
+      backgroundColor: isInteractMode ? "#007acc" : "#f0f0f0",
+      color: isInteractMode ? "white" : "black",
+      border: `2px solid ${isInteractMode ? "#005a9e" : "#ccc"}`,
+    };
+
+    return h(
       "button",
       {
-        style: {
-          backgroundColor: isInteractMode ? "#007acc" : "#f0f0f0",
-          color: isInteractMode ? "white" : "black",
-          border: `2px solid ${isInteractMode ? "#005a9e" : "#ccc"}`,
-        },
+        style,
         onclick: (state) =>
           updateCurrentPage(state, {
             isInteractMode: !isInteractMode,
           }),
       },
       text("interact mode (option)"),
-    ),
-  ]);
+    );
+  };
+
+  return h("div", {}, [newProgramButton(state), interactButton(state)]);
 }
 
 /**
