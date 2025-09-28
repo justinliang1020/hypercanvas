@@ -345,16 +345,13 @@ function miscButtons(state) {
   const interactButton = (state) => {
     const currentPage = getCurrentPage(state);
     const isInteractMode = currentPage?.isInteractMode;
-    const style = {
-      backgroundColor: isInteractMode ? "#007acc" : "#f0f0f0",
-      color: isInteractMode ? "white" : "black",
-      border: `2px solid ${isInteractMode ? "#005a9e" : "#ccc"}`,
-    };
 
     return h(
       "button",
       {
-        style,
+        class: {
+          active: isInteractMode,
+        },
         onclick: (state) =>
           updateCurrentPage(state, {
             isInteractMode: !isInteractMode,

@@ -208,6 +208,11 @@ hr {
   background: #f5f5f5;
 }
 
+#right-panel button.active {
+  background: #007acc;
+  color: white;
+}
+
 #right-panel button:disabled {
   background: #f8f8f8;
   color: #999;
