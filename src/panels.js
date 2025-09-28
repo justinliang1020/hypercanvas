@@ -220,6 +220,9 @@ function rightPanel(state) {
       h("p", {}, text("state visualizer")),
       stateVisualizer(state),
       h("hr", {}),
+      h("p", {}, text("css editor")),
+      cssEditor(state),
+      h("hr", {}),
       pages(state),
     ],
   );
@@ -418,6 +421,52 @@ function programEditor(state) {
           b.id === block.id ? { ...b, program: event.value } : b,
         ),
       });
+    },
+    onfocus: (state, event) => {
+      return updateCurrentPage(state, { isTextEditorFocused: true });
+    },
+    onfocusout: (state, event) => {
+      return updateCurrentPage(state, { isTextEditorFocused: false });
+    },
+    onpointerdown: (state, event) => {
+      event.stopPropagation();
+      return state;
+    },
+  });
+}
+
+/**
+ * Creates a program buttons component with filter functionality
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
+ */
+function cssEditor(state) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return h("div", {}, text("no current page"));
+  return h("textarea", {
+    cols: "100",
+    rows: "50",
+    style: {
+      fontFamily: "monospace",
+      fontSize: "12px",
+      width: "100%",
+      minHeight: "200px",
+      resize: "vertical",
+    },
+    value: currentPage.css,
+    oninput: (state, event) => {
+      event.stopPropagation();
+      const currentPage = getCurrentPage(state);
+      if (!currentPage) return state;
+
+      const target = /** @type {HTMLTextAreaElement} */ (event.target);
+      try {
+        return updateCurrentPage(state, {
+          css: target.value,
+        });
+      } catch {
+        return state;
+      }
     },
     onfocus: (state, event) => {
       return updateCurrentPage(state, { isTextEditorFocused: true });

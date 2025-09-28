@@ -295,6 +295,9 @@ class HypercanvasBlock extends HTMLElement {
   }
 
   renderChildren() {
+    // Preserve existing children from shadow DOM (skip first element which is our style tag)
+    const existingChildren = Array.from(this.shadow.children).slice(1);
+
     // Clear shadow DOM
     this.shadow.innerHTML = "";
 
@@ -303,10 +306,15 @@ class HypercanvasBlock extends HTMLElement {
     style.textContent = this._css;
     this.shadow.appendChild(style);
 
-    // Move (not clone) all children to shadow DOM so Hyperapp can still update them
+    // Move children from light DOM to shadow DOM (for initial render)
     while (this.firstChild) {
       this.shadow.appendChild(this.firstChild);
     }
+
+    // Re-append preserved children (for CSS updates)
+    existingChildren.forEach((child) => {
+      this.shadow.appendChild(child);
+    });
   }
 }
 
