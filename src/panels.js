@@ -218,7 +218,7 @@ function rightPanel(state) {
       orderButtons(state),
       miscButtons(state),
       h("p", {}, text("state visualizer")),
-      stateVisualizer(state),
+      stateEditor(state),
       h("hr", {}),
       h("p", {}, text("css editor")),
       cssEditor(state),
@@ -226,52 +226,6 @@ function rightPanel(state) {
       pages(state),
     ],
   );
-}
-
-/**
- * Creates a program buttons component with filter functionality
- * @param {State} state - Current application state
- * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
- */
-function stateVisualizer(state) {
-  const currentPage = getCurrentPage(state);
-  if (!currentPage) return h("div", {}, text("no current page"));
-  return h("textarea", {
-    cols: "100",
-    rows: "50",
-    style: {
-      fontFamily: "monospace",
-      fontSize: "12px",
-      width: "100%",
-      minHeight: "200px",
-      resize: "vertical",
-    },
-    value: JSON.stringify(currentPage.state, null, "\t"),
-    oninput: (state, event) => {
-      event.stopPropagation();
-      const currentPage = getCurrentPage(state);
-      if (!currentPage) return state;
-
-      const target = /** @type {HTMLTextAreaElement} */ (event.target);
-      try {
-        return updateCurrentPage(state, {
-          state: JSON.parse(target.value),
-        });
-      } catch {
-        return state;
-      }
-    },
-    onfocus: (state, event) => {
-      return updateCurrentPage(state, { isTextEditorFocused: true });
-    },
-    onfocusout: (state, event) => {
-      return updateCurrentPage(state, { isTextEditorFocused: false });
-    },
-    onpointerdown: (state, event) => {
-      event.stopPropagation();
-      return state;
-    },
-  });
 }
 
 /**
@@ -471,7 +425,7 @@ function cssEditor(state) {
   if (!currentPage) return h("div", {}, text("no current page"));
 
   return aceEditor(
-    currentPage.id,
+    `css-${currentPage.id}`,
     currentPage.css,
     "css",
     state.isDarkMode,
@@ -487,6 +441,41 @@ function cssEditor(state) {
       return updateCurrentPage(state, {
         css: event.target.value,
       });
+    },
+  );
+}
+
+/**
+ * Creates a program buttons component with filter functionality
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
+ */
+function stateEditor(state) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return h("div", {}, text("no current page"));
+
+  return aceEditor(
+    `state-${currentPage.id}`,
+    JSON.stringify(currentPage.state, null, 2),
+    "json",
+    state.isDarkMode,
+    /**
+     * @param {State} state
+     * @param {Event} event
+     */
+    (state, event) => {
+      event.stopPropagation();
+      const currentPage = getCurrentPage(state);
+      if (!currentPage) return state;
+
+      try {
+        return updateCurrentPage(state, {
+          //@ts-ignore uses custom `value` added to the event
+          state: JSON.parse(event.value),
+        });
+      } catch {
+        return state;
+      }
     },
   );
 }

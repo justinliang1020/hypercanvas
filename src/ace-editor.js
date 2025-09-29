@@ -1,6 +1,7 @@
 //@ts-nocheck
 import "./packages/ace/index.js";
 import "./packages/ace/mode-javascript.js";
+import "./packages/ace/mode-json.js";
 import "./packages/ace/mode-css.js";
 import "./packages/ace/keybinding-vim.js";
 import "./packages/ace/theme-twilight.js";
@@ -114,6 +115,10 @@ class AceEditor extends HTMLElement {
             beautify.beautify(editor.session);
           },
         });
+        break;
+      }
+      case "json": {
+        this.editor.session.setMode("ace/mode/json");
         break;
       }
       case null: {
