@@ -388,6 +388,35 @@ function panelsToggle(state) {
 }
 
 /**
+ * Shared ace editor component
+ * @param {Object} props - Editor props
+ * @param {string} props.key - Key for state isolation
+ * @param {string} props.value - Editor value
+ * @param {string} props.mode - Editor mode (js, css, etc.)
+ * @param {Function} props.onaceinput - Input change handler
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function aceEditor(props) {
+  return h("ace-editor", {
+    //@ts-ignore key to ensure proper state isolation between different blocks.
+    key: props.key,
+    value: props.value,
+    mode: props.mode,
+    onaceinput: props.onaceinput,
+    onfocus: (state, event) => {
+      return updateCurrentPage(state, { isTextEditorFocused: true });
+    },
+    onfocusout: (state, event) => {
+      return updateCurrentPage(state, { isTextEditorFocused: false });
+    },
+    onpointerdown: (state, event) => {
+      event.stopPropagation();
+      return state;
+    },
+  });
+}
+
+/**
  * Toggles visibility of panels
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State>}
@@ -396,14 +425,17 @@ function programEditor(state) {
   const selectedBlock = getSelectedBlocks(state)[0];
   const hoveredBlock = getHoveredBlock(state);
   const block = selectedBlock ? selectedBlock : hoveredBlock;
-  if (!block)
-    return h("ace-editor", {
-      //@ts-ignore key to ensure proper state isolation between different blocks.
+
+  if (!block) {
+    return aceEditor({
       key: -1,
       value: "no block selected",
+      mode: "js",
+      onaceinput: () => state,
     });
-  return h("ace-editor", {
-    //@ts-ignore key to ensure proper state isolation between different blocks.
+  }
+
+  return aceEditor({
     key: block.id,
     value: block.program,
     mode: "js",
@@ -423,16 +455,6 @@ function programEditor(state) {
         ),
       });
     },
-    onfocus: (state, event) => {
-      return updateCurrentPage(state, { isTextEditorFocused: true });
-    },
-    onfocusout: (state, event) => {
-      return updateCurrentPage(state, { isTextEditorFocused: false });
-    },
-    onpointerdown: (state, event) => {
-      event.stopPropagation();
-      return state;
-    },
   });
 }
 
@@ -444,8 +466,8 @@ function programEditor(state) {
 function cssEditor(state) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return h("div", {}, text("no current page"));
-  return h("ace-editor", {
-    //@ts-ignore key to ensure proper state isolation between different blocks.
+
+  return aceEditor({
     key: currentPage.id,
     value: currentPage.css,
     mode: "css",
@@ -461,16 +483,6 @@ function cssEditor(state) {
       return updateCurrentPage(state, {
         css: event.target.value,
       });
-    },
-    onfocus: (state, event) => {
-      return updateCurrentPage(state, { isTextEditorFocused: true });
-    },
-    onfocusout: (state, event) => {
-      return updateCurrentPage(state, { isTextEditorFocused: false });
-    },
-    onpointerdown: (state, event) => {
-      event.stopPropagation();
-      return state;
     },
   });
 }
