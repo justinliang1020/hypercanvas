@@ -4,6 +4,7 @@ import {
   PASTE_OFFSET_Y,
   OUTLINE_COLORS,
   OUTLINE_WIDTHS,
+  BLOCK_CONTENTS_CLASS_NAME,
 } from "./constants.js";
 import { saveMementoAndReturn } from "./memento.js";
 import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
@@ -200,6 +201,7 @@ export function block(state) {
               height: "100%",
               overflow: "hidden",
             },
+            class: BLOCK_CONTENTS_CLASS_NAME,
           },
           renderView(currentPage, block),
         ),

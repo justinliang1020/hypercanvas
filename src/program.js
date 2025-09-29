@@ -1,3 +1,4 @@
+import { BLOCK_CONTENTS_CLASS_NAME } from "./constants.js";
 import { h, text } from "./packages/hyperapp/index.js";
 
 /**
@@ -249,88 +250,33 @@ export function programSubscriptionManager(dispatch, _props) {
   };
 }
 
-class HypercanvasBlock extends HTMLElement {
-  constructor() {
-    super();
-    this.editor = null;
-    this.shadow = this.attachShadow({ mode: "open" });
-    this._css = "";
-  }
-
-  static get observedAttributes() {
-    return ["css"];
-  }
-
-  /**
-   * @param {string} name
-   * @param {string} oldValue
-   * @param {string} newValue
-   */
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (name === "css" && oldValue !== newValue) {
-      this._css = newValue || "";
-      this.renderChildren();
-    }
-  }
-
-  connectedCallback() {
-    this._css = this.getAttribute("css") || "";
-    this.renderChildren();
-
-    // Observe changes to children
-    this.observer = new MutationObserver(() => {
-      this.renderChildren();
-    });
-
-    this.observer.observe(this, {
-      childList: true,
-      subtree: true,
-    });
-  }
-
-  disconnectedCallback() {
-    if (this.observer) {
-      this.observer.disconnect();
-    }
-  }
-
-  renderChildren() {
-    // Clear shadow DOM first
-    this.shadow.innerHTML = "";
-    
-    // Add scoped styles to shadow DOM only
-    if (this._css) {
-      const style = document.createElement("style");
-      // Wrap all CSS rules with ::slotted() to target light DOM content
-      const scopedCSS = this._css
-        .replace(/(^|\})\s*([^{]+)\s*\{/g, (match, prefix, selector) => {
-          // Skip @rules like @media, @keyframes, etc.
-          if (selector.trim().startsWith('@')) {
-            return match;
-          }
-          // Wrap selector with ::slotted()
-          const trimmedSelector = selector.trim();
-          return `${prefix}::slotted(${trimmedSelector}) {`;
-        });
-      style.textContent = scopedCSS;
-      this.shadow.appendChild(style);
-    }
-    
-    // Add slot for content
-    const slot = document.createElement("slot");
-    this.shadow.appendChild(slot);
-  }
-}
-
-customElements.define("hypercanvas-block", HypercanvasBlock);
+/** @type {HTMLStyleElement | null} */
+let currentBlockStyleElement = null;
 
 /**
- * @param {import("hyperapp").ElementVNode<State>} el
- * @param {string} css
- * @returns {import("hyperapp").ElementVNode<State>}
+ * Injects shared CSS for all blocks, scoped to .block class
+ * @param {string} css - CSS to scope
  */
-function wrapCustomElement(el, css) {
-  return h("hypercanvas-block", { css }, el);
+function injectSharedBlockCSS(css) {
+  // Remove existing style if it exists
+  if (currentBlockStyleElement) {
+    currentBlockStyleElement.remove();
+    currentBlockStyleElement = null;
+  }
+
+  if (css && css.trim()) {
+    // Transform CSS to be scoped to .block class
+    const scopedCSS = css.replace(
+      /([^{}]+){/g,
+      `.${BLOCK_CONTENTS_CLASS_NAME} $1 {`,
+    );
+
+    // Inject into document head
+    currentBlockStyleElement = document.createElement("style");
+    currentBlockStyleElement.id = "block-styles";
+    currentBlockStyleElement.textContent = scopedCSS;
+    document.head.appendChild(currentBlockStyleElement);
+  }
 }
 
 /**
@@ -340,6 +286,9 @@ function wrapCustomElement(el, css) {
  */
 export function renderView(currentPage, block) {
   try {
+    // Inject CSS for current page (shared by all blocks)
+    injectSharedBlockCSS(currentPage.css || "");
+
     const viewFunction = new Function(
       "h",
       "text",
@@ -352,11 +301,7 @@ export function renderView(currentPage, block) {
     /** @type {StateContext} */
     const pageContext = { type: "page", currentPage };
     const wrappedScopedProgramNode = wrapProgramActions(viewNode, pageContext);
-    const wrappedCustomElementNode = wrapCustomElement(
-      wrappedScopedProgramNode,
-      currentPage.css || "",
-    );
-    return wrappedCustomElementNode;
+    return wrappedScopedProgramNode;
   } catch (e) {
     return h("p", {}, text(`error:\n${e}`));
   }

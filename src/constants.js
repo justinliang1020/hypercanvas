@@ -35,3 +35,5 @@ export const OUTLINE_WIDTHS = {
   MEDIUM: 3, // For secondary states
   THIN: 2, // For hover states
 };
+
+export const BLOCK_CONTENTS_CLASS_NAME = "block-contents";
