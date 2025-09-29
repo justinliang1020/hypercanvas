@@ -430,7 +430,6 @@ function programEditor(state) {
     return aceEditor({
       key: -1,
       value: "no block selected",
-      mode: "js",
       onaceinput: () => state,
     });
   }
@@ -438,7 +437,7 @@ function programEditor(state) {
   return aceEditor({
     key: block.id,
     value: block.program,
-    mode: "js",
+    mode: "javascript",
     /**
      * @param {State} state
      * @param {Event} event

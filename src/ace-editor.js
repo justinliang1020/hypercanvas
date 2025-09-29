@@ -41,16 +41,7 @@ class AceEditor extends HTMLElement {
       useSoftTabs: true,
     });
 
-    this.editor.commands.addCommand({
-      name: "beautify",
-      bindKey: { win: "Ctrl-Alt-L", mac: "Cmd-Alt-L" },
-      exec: function (editor) {
-        const beautify = ace.require("ace/ext/beautify");
-        beautify.beautify(editor.session);
-      },
-    });
-
-    this.setMode(this.getAttribute("mode") || "javascript");
+    this.setMode(this.getAttribute("mode"));
     this.updateTheme();
     // this.editor.setKeyboardHandler("ace/keyboard/vim");
     this.editor.setValue(this.initialContent, -1);
@@ -99,12 +90,37 @@ class AceEditor extends HTMLElement {
     }
   }
 
+  /**
+   * @param {String | null} mode
+   */
   setMode(mode) {
-    if (this.editor) {
-      if (mode === "css") {
+    if (!this.editor) {
+      return;
+    }
+    switch (mode) {
+      case "css": {
         this.editor.session.setMode("ace/mode/css");
-      } else {
+        break;
+      }
+      case "javascript": {
         this.editor.session.setMode("ace/mode/javascript");
+
+        // commands
+        this.editor.commands.addCommand({
+          name: "beautify",
+          bindKey: { win: "Ctrl-Alt-L", mac: "Cmd-Alt-L" },
+          exec: function (editor) {
+            const beautify = ace.require("ace/ext/beautify");
+            beautify.beautify(editor.session);
+          },
+        });
+        break;
+      }
+      case null: {
+        break;
+      }
+      default: {
+        console.error(`invalid ace editor mode: ${mode}`);
       }
     }
   }
