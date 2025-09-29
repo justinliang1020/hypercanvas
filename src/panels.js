@@ -389,20 +389,21 @@ function panelsToggle(state) {
 
 /**
  * Shared ace editor component
- * @param {Object} props - Editor props
- * @param {string} props.key - Key for state isolation
- * @param {string} props.value - Editor value
- * @param {string} props.mode - Editor mode (js, css, etc.)
- * @param {Function} props.onaceinput - Input change handler
+ * @param {string} key - Key for state isolation
+ * @param {string} value - Editor value
+ * @param {string} mode - Editor mode (js, css, etc.)
+ * @param {string} darkmode - Dark mode setting
+ * @param {Function} onaceinput - Input change handler
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-function aceEditor(props) {
+function aceEditor(key, value, mode, darkmode, onaceinput) {
   return h("ace-editor", {
     //@ts-ignore key to ensure proper state isolation between different blocks.
-    key: props.key,
-    value: props.value,
-    mode: props.mode,
-    onaceinput: props.onaceinput,
+    key: key,
+    value: value,
+    mode: mode,
+    darkmode: darkmode,
+    onaceinput: onaceinput,
     onfocus: (state, event) => {
       return updateCurrentPage(state, { isTextEditorFocused: true });
     },
@@ -427,22 +428,25 @@ function programEditor(state) {
   const block = selectedBlock ? selectedBlock : hoveredBlock;
 
   if (!block) {
-    return aceEditor({
-      key: -1,
-      value: "no block selected",
-      onaceinput: () => state,
-    });
+    return aceEditor(
+      -1,
+      "no block selected",
+      null,
+      state.isDarkMode,
+      () => state,
+    );
   }
 
-  return aceEditor({
-    key: block.id,
-    value: block.program,
-    mode: "javascript",
+  return aceEditor(
+    block.id,
+    block.program,
+    "javascript",
+    state.isDarkMode,
     /**
      * @param {State} state
      * @param {Event} event
      */
-    onaceinput: (state, event) => {
+    (state, event) => {
       event.stopPropagation();
       const currentPage = getCurrentPage(state);
       if (!currentPage) return state;
@@ -454,7 +458,7 @@ function programEditor(state) {
         ),
       });
     },
-  });
+  );
 }
 
 /**
@@ -466,15 +470,16 @@ function cssEditor(state) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return h("div", {}, text("no current page"));
 
-  return aceEditor({
-    key: currentPage.id,
-    value: currentPage.css,
-    mode: "css",
+  return aceEditor(
+    currentPage.id,
+    currentPage.css,
+    "css",
+    state.isDarkMode,
     /**
      * @param {State} state
      * @param {Event} event
      */
-    onaceinput: (state, event) => {
+    (state, event) => {
       event.stopPropagation();
       const currentPage = getCurrentPage(state);
       if (!currentPage) return state;
@@ -483,5 +488,5 @@ function cssEditor(state) {
         css: event.target.value,
       });
     },
-  });
+  );
 }

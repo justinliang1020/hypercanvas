@@ -79,8 +79,8 @@ class AceEditor extends HTMLElement {
   updateTheme() {
     if (this.editor) {
       const isDarkMode =
-        this.hasAttribute("dark-mode") &&
-        this.getAttribute("dark-mode") !== "false";
+        this.hasAttribute("darkmode") &&
+        this.getAttribute("darkmode") !== "false";
       if (isDarkMode) {
         this.editor.setTheme("ace/theme/twilight");
       } else {
@@ -126,11 +126,11 @@ class AceEditor extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ["dark-mode", "mode"];
+    return ["darkmode", "mode"];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (name === "dark-mode" && this.editor) {
+    if (name === "darkmode" && this.editor) {
       this.updateTheme();
     } else if (name === "mode" && this.editor) {
       this.setMode(newValue);
