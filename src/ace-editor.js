@@ -8,6 +8,21 @@ import "./packages/ace/theme-twilight.js";
 import "./packages/ace/ext-beautify.js";
 
 class AceEditor extends HTMLElement {
+  /**
+   * @type {ace.Ace.Editor | null}
+   */
+  editor;
+
+  /**
+   * @type {ShadowRoot}
+   */
+  shadow;
+
+  /**
+   * @type {String | undefined}
+   */
+  initialContent;
+
   constructor() {
     super();
     this.editor = null;
@@ -58,10 +73,16 @@ class AceEditor extends HTMLElement {
     });
   }
 
+  /**
+   * @returns {string}
+   */
   getValue() {
     return this.editor ? this.editor.getValue() : "";
   }
 
+  /**
+   * @param {string} value
+   */
   setValue(value) {
     if (this.editor) {
       this.editor.setValue(value, -1);
@@ -70,11 +91,16 @@ class AceEditor extends HTMLElement {
     }
   }
 
-  // Value property getter/setter
+  /**
+   * @returns {string}
+   */
   get value() {
     return this.getValue();
   }
 
+  /**
+   * @param {string} val
+   */
   set value(val) {
     this.setValue(val);
   }
@@ -94,7 +120,7 @@ class AceEditor extends HTMLElement {
   }
 
   /**
-   * @param {String | null} mode
+   * @param {string | null} mode
    */
   setMode(mode) {
     if (!this.editor) {
@@ -132,10 +158,18 @@ class AceEditor extends HTMLElement {
     }
   }
 
+  /**
+   * @returns {string[]}
+   */
   static get observedAttributes() {
     return ["darkmode", "mode"];
   }
 
+  /**
+   * @param {string} name
+   * @param {string | null} oldValue
+   * @param {string | null} newValue
+   */
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === "darkmode" && this.editor) {
       this.updateTheme();
