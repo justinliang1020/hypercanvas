@@ -354,7 +354,7 @@ function aceEditor(key, value, mode, darkmode, onaceinput) {
   return h("ace-editor", {
     //@ts-ignore key to ensure proper state isolation between different blocks.
     key: key,
-    value: value,
+    editorvalue: value,
     mode: mode,
     darkmode: darkmode,
     onaceinput: onaceinput,

@@ -8,20 +8,10 @@ import "./packages/ace/theme-twilight.js";
 import "./packages/ace/ext-beautify.js";
 
 class AceEditor extends HTMLElement {
-  /**
-   * @type {ace.Ace.Editor | null}
-   */
+  /** @type {any} */
   editor;
-
-  /**
-   * @type {ShadowRoot}
-   */
+  /** @type {ShadowRoot} */
   shadow;
-
-  /**
-   * @type {String | undefined}
-   */
-  initialContent;
 
   constructor() {
     super();
@@ -60,7 +50,7 @@ class AceEditor extends HTMLElement {
     this.setMode(this.getAttribute("mode"));
     this.updateTheme();
     // this.editor.setKeyboardHandler("ace/keyboard/vim");
-    this.editor.setValue(this.initialContent, -1);
+    this.editor.setValue(this.getAttribute("editorvalue"), -1);
 
     // Emit input event on change
     this.editor.on("change", () => {
@@ -74,20 +64,11 @@ class AceEditor extends HTMLElement {
   }
 
   /**
-   * @returns {string}
-   */
-  get value() {
-    return this.editor ? this.editor.getValue() : "";
-  }
-
-  /**
    * @param {string} v
    */
-  set value(v) {
+  setEditorValue(v) {
     if (this.editor) {
       this.editor.setValue(v, -1);
-    } else {
-      this.initialContent = v;
     }
   }
 
@@ -148,7 +129,7 @@ class AceEditor extends HTMLElement {
    * @returns {string[]}
    */
   static get observedAttributes() {
-    return ["darkmode", "mode"];
+    return ["darkmode", "mode", "editorvalue"];
   }
 
   /**
@@ -161,6 +142,8 @@ class AceEditor extends HTMLElement {
       this.updateTheme();
     } else if (name === "mode" && this.editor) {
       this.setMode(newValue);
+    } else if (name === "editorvalue" && this.editor) {
+      this.setEditorValue(newValue);
     }
   }
 }
