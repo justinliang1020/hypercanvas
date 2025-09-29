@@ -65,6 +65,8 @@ class AceEditor extends HTMLElement {
   setValue(value) {
     if (this.editor) {
       this.editor.setValue(value, -1);
+    } else {
+      this.initialContent = value;
     }
   }
 
