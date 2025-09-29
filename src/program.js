@@ -168,7 +168,7 @@ function wrapProgramActions(element, context) {
   if (!element) {
     return element;
   }
-  if (!element.tag) {
+  if (!element.tag && element.tag !== "") {
     // Finding syntax errors in nested v nodes
     return h("p", {}, text("syntax error"));
   }
