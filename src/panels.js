@@ -406,6 +406,7 @@ function programEditor(state) {
     //@ts-ignore key to ensure proper state isolation between different blocks.
     key: block.id,
     value: block.program,
+    mode: "js",
     /**
      * @param {State} state
      * @param {Event} event
@@ -443,30 +444,23 @@ function programEditor(state) {
 function cssEditor(state) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return h("div", {}, text("no current page"));
-  return h("textarea", {
-    cols: "100",
-    rows: "50",
-    style: {
-      fontFamily: "monospace",
-      fontSize: "12px",
-      width: "100%",
-      minHeight: "200px",
-      resize: "vertical",
-    },
+  return h("ace-editor", {
+    //@ts-ignore key to ensure proper state isolation between different blocks.
+    key: currentPage.id,
     value: currentPage.css,
-    oninput: (state, event) => {
+    mode: "css",
+    /**
+     * @param {State} state
+     * @param {Event} event
+     */
+    onaceinput: (state, event) => {
       event.stopPropagation();
       const currentPage = getCurrentPage(state);
       if (!currentPage) return state;
 
-      const target = /** @type {HTMLTextAreaElement} */ (event.target);
-      try {
-        return updateCurrentPage(state, {
-          css: target.value,
-        });
-      } catch {
-        return state;
-      }
+      return updateCurrentPage(state, {
+        css: event.target.value,
+      });
     },
     onfocus: (state, event) => {
       return updateCurrentPage(state, { isTextEditorFocused: true });

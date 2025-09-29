@@ -1,6 +1,7 @@
 //@ts-nocheck
 import "./packages/ace/index.js";
 import "./packages/ace/mode-javascript.js";
+import "./packages/ace/mode-css.js";
 import "./packages/ace/keybinding-vim.js";
 import "./packages/ace/theme-twilight.js";
 import "./packages/ace/ext-beautify.js";
@@ -49,7 +50,7 @@ class AceEditor extends HTMLElement {
       },
     });
 
-    this.editor.session.setMode("ace/mode/javascript");
+    this.setMode(this.getAttribute("mode") || "javascript");
     this.updateTheme();
     // this.editor.setKeyboardHandler("ace/keyboard/vim");
     this.editor.setValue(this.initialContent, -1);
@@ -98,13 +99,25 @@ class AceEditor extends HTMLElement {
     }
   }
 
+  setMode(mode) {
+    if (this.editor) {
+      if (mode === "css") {
+        this.editor.session.setMode("ace/mode/css");
+      } else {
+        this.editor.session.setMode("ace/mode/javascript");
+      }
+    }
+  }
+
   static get observedAttributes() {
-    return ["dark-mode"];
+    return ["dark-mode", "mode"];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === "dark-mode" && this.editor) {
       this.updateTheme();
+    } else if (name === "mode" && this.editor) {
+      this.setMode(newValue);
     }
   }
 }
