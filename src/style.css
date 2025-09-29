@@ -301,9 +301,6 @@ hr {
 
 /* Dark mode styles */
 main.dark-mode {
-  background-color: #1a1a1a;
-  color: #e0e0e0;
-
   #viewport {
     background-color: #2d2d2d;
   }
