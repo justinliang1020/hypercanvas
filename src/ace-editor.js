@@ -76,33 +76,19 @@ class AceEditor extends HTMLElement {
   /**
    * @returns {string}
    */
-  getValue() {
+  get value() {
     return this.editor ? this.editor.getValue() : "";
   }
 
   /**
-   * @param {string} value
+   * @param {string} v
    */
-  setValue(value) {
+  set value(v) {
     if (this.editor) {
-      this.editor.setValue(value, -1);
+      this.editor.setValue(v, -1);
     } else {
-      this.initialContent = value;
+      this.initialContent = v;
     }
-  }
-
-  /**
-   * @returns {string}
-   */
-  get value() {
-    return this.getValue();
-  }
-
-  /**
-   * @param {string} val
-   */
-  set value(val) {
-    this.setValue(val);
   }
 
   updateTheme() {
