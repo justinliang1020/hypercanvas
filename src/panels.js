@@ -439,7 +439,7 @@ function cssEditor(state) {
       if (!currentPage) return state;
 
       return updateCurrentPage(state, {
-        css: event.target.value,
+        css: event.value,
       });
     },
   );
