@@ -67,8 +67,8 @@ class AceEditor extends HTMLElement {
    * @param {string} v
    */
   setEditorValue(v) {
-    if (this.editor) {
-      this.editor.setValue(v, -1);
+    if (this.editor && this.editor.getValue() !== v) {
+      this.editor.session.setValue(v);
     }
   }
 
