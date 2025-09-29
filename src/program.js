@@ -295,22 +295,30 @@ class HypercanvasBlock extends HTMLElement {
   }
 
   renderChildren() {
-    // Only update styles, don't move DOM nodes that Hyperapp is managing
-    const existingStyle = this.shadow.querySelector("style");
-
-    if (!existingStyle) {
-      // Initial setup - add style and slot for content
+    // Clear shadow DOM first
+    this.shadow.innerHTML = "";
+    
+    // Add scoped styles to shadow DOM only
+    if (this._css) {
       const style = document.createElement("style");
-      style.textContent = this._css;
+      // Wrap all CSS rules with ::slotted() to target light DOM content
+      const scopedCSS = this._css
+        .replace(/(^|\})\s*([^{]+)\s*\{/g, (match, prefix, selector) => {
+          // Skip @rules like @media, @keyframes, etc.
+          if (selector.trim().startsWith('@')) {
+            return match;
+          }
+          // Wrap selector with ::slotted()
+          const trimmedSelector = selector.trim();
+          return `${prefix}::slotted(${trimmedSelector}) {`;
+        });
+      style.textContent = scopedCSS;
       this.shadow.appendChild(style);
-
-      // Add a slot to display light DOM content
-      const slot = document.createElement("slot");
-      this.shadow.appendChild(slot);
-    } else {
-      // Just update the CSS
-      existingStyle.textContent = this._css;
     }
+    
+    // Add slot for content
+    const slot = document.createElement("slot");
+    this.shadow.appendChild(slot);
   }
 }
 
