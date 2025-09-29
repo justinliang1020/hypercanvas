@@ -265,10 +265,13 @@ function injectSharedBlockCSS(css) {
   }
 
   if (css && css.trim()) {
-    // Transform CSS to be scoped to .block class
+    // Transform CSS to be scoped to .block-contents class with proper formatting
     const scopedCSS = css.replace(
-      /([^{}]+){/g,
-      `.${BLOCK_CONTENTS_CLASS_NAME} $1 {`,
+      /(^|\})\s*([^{]+)\s*\{/g,
+      (match, prefix, selector) => {
+        const trimmedSelector = selector.trim();
+        return `${prefix}\n.${BLOCK_CONTENTS_CLASS_NAME} ${trimmedSelector} {`;
+      },
     );
 
     // Inject into document head
