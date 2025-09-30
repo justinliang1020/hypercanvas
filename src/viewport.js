@@ -456,7 +456,7 @@ function onwheel(state, event) {
  * @param {KeyboardEvent} event
  * @returns {import("hyperapp").Dispatchable<State>}
  */
-function onkeydown(state, event) {
+export function onkeydown(state, event) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return state;
 
@@ -575,12 +575,12 @@ export function viewport(state) {
           ? "inset 0 0 0 3px limegreen"
           : "none", // Use inset box-shadow instead of border to prevent layout shift
       },
-      tabindex: -1, // Make the main element focusable for keyboard events
+
       onpointerdown,
       onpointermove,
       onpointerup,
       onwheel,
-      onkeydown,
+
     },
     [
       h(

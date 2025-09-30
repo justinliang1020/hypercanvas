@@ -1,7 +1,7 @@
 import { app, h } from "./packages/hyperapp/index.js";
 import { STATE_SAVE_PATH } from "./constants.js";
 import { createMementoManager } from "./memento.js";
-import { viewport } from "./viewport.js";
+import { viewport, onkeydown } from "./viewport.js";
 import { panelsContainer } from "./panels.js";
 import {
   notification,
@@ -63,6 +63,12 @@ const onKeyUp = (action) => {
  * @returns {import("hyperapp").Dispatchable<State>}
  */
 const KeyDown = (state, event) => {
+  // First try viewport keyboard handling
+  const viewportResult = onkeydown(state, event);
+  if (viewportResult !== state) {
+    return viewportResult;
+  }
+  
   switch (event.key) {
     case "Shift":
       return {
