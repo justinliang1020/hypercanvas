@@ -315,7 +315,7 @@ function miscButtons(state) {
             isInteractMode: !isInteractMode,
           }),
       },
-      text("interact mode (option)"),
+      text("interact mode"),
     );
   };
 
