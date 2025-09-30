@@ -12,6 +12,7 @@ import {
 } from "./pages.js";
 import { getHoveredBlock, getSelectedBlocks } from "./selection.js";
 import "./ace-editor.js";
+import { injectSharedBlockCSS } from "./program.js";
 
 /**
  * Creates the panels container with both layers panel, programs panel and floating toggle button
@@ -423,6 +424,9 @@ function programEditor(state) {
 function cssEditor(state) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return h("div", {}, text("no current page"));
+
+  // This could be arbitrarily put anywhere, but just put it here for semantic similarity to CSS
+  injectSharedBlockCSS(currentPage.css);
 
   return aceEditor(
     `css-${currentPage.id}`,

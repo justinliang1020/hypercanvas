@@ -258,7 +258,7 @@ let currentBlockStyleElement = null;
  * Injects shared CSS for all blocks, scoped to .block class
  * @param {string} css - CSS to scope
  */
-function injectSharedBlockCSS(css) {
+export function injectSharedBlockCSS(css) {
   if (css && css.trim()) {
     // Transform CSS to be scoped to .block-contents class with proper formatting
     const scopedCSS = css.replace(
@@ -295,9 +295,6 @@ function injectSharedBlockCSS(css) {
  */
 export function renderView(currentPage, block) {
   try {
-    // Inject CSS for current page (shared by all blocks)
-    injectSharedBlockCSS(currentPage.css || "");
-
     const viewFunction = new Function(
       "h",
       "text",
