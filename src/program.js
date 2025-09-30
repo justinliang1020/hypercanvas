@@ -168,6 +168,7 @@ function wrapProgramActions(element, context) {
   if (!element) {
     return element;
   }
+  //BUG: how to allow empty tag text("") to not throw syntax error, see: a20700a10e9b19e26cbb9313a13fb1e627669b10
   if (!element.tag) {
     // Finding syntax errors in nested v nodes
     return h("p", {}, text("syntax error"));
