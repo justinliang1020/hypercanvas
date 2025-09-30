@@ -259,12 +259,6 @@ let currentBlockStyleElement = null;
  * @param {string} css - CSS to scope
  */
 function injectSharedBlockCSS(css) {
-  // Remove existing style if it exists
-  if (currentBlockStyleElement) {
-    currentBlockStyleElement.remove();
-    currentBlockStyleElement = null;
-  }
-
   if (css && css.trim()) {
     // Transform CSS to be scoped to .block-contents class with proper formatting
     const scopedCSS = css.replace(
@@ -275,11 +269,22 @@ function injectSharedBlockCSS(css) {
       },
     );
 
-    // Inject into document head
-    currentBlockStyleElement = document.createElement("style");
-    currentBlockStyleElement.id = "block-styles";
-    currentBlockStyleElement.textContent = scopedCSS;
-    document.head.appendChild(currentBlockStyleElement);
+    // Remove existing style if it exists and is different
+    if (
+      currentBlockStyleElement &&
+      currentBlockStyleElement.textContent !== scopedCSS
+    ) {
+      currentBlockStyleElement.remove();
+      currentBlockStyleElement = null;
+    }
+
+    // Only inject if we don't already have this CSS
+    if (!currentBlockStyleElement) {
+      currentBlockStyleElement = document.createElement("style");
+      currentBlockStyleElement.id = "block-styles";
+      currentBlockStyleElement.textContent = scopedCSS;
+      document.head.appendChild(currentBlockStyleElement);
+    }
   }
 }
 
