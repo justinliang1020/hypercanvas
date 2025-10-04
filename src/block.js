@@ -24,7 +24,6 @@ import {
   getSelectedBlocks,
   toggleBlockSelection,
 } from "./selection.js";
-import { renderView } from "./program.js";
 
 /**
  * Creates a block component renderer
@@ -203,7 +202,7 @@ export function block(state) {
             },
             class: BLOCK_CONTENTS_CLASS_NAME,
           },
-          renderView(currentPage, block),
+          h("p", {}, text(block.imageSrc)),
         ),
         ...(isSelected && !isEditing && !isMultiSelect
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>
@@ -363,7 +362,8 @@ export function deleteSelectedBlocks(state) {
 /**
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
- * @param {string} program - Name of view to instantiate
+ * @param {string} imageSrc
+ * @param {string} pageSrc
  * @param {number | null} x - X position on canvas. If null, uses viewport's center X coordinate
  * @param {number | null} y - Y position on canvas. If null, uses viewport's center X coordinate
  * @param {number} width - Block width in pixels
@@ -371,7 +371,8 @@ export function deleteSelectedBlocks(state) {
  * @returns {State} Updated state with new block */
 export function addBlock(
   state,
-  program,
+  imageSrc,
+  pageSrc,
   x = null,
   y = null,
   width = 200,
@@ -395,7 +396,8 @@ export function addBlock(
     x: x,
     y: y,
     zIndex: Math.max(...globalBlocks.map((block) => block.zIndex), 0) + 1,
-    program: program,
+    imageSrc,
+    pageSrc,
   };
 
   const currentBlocks = getCurrentBlocks(state);
@@ -411,7 +413,7 @@ export function addBlock(
 /**
  * Adds multiple blocks to the state
  * @param {State} state - Current application state
- * @param {Array<{program: string, programState?: Object|null, x?: number|null, y?: number|null, width?: number, height?: number}>} blockConfigs - Array of block configurations
+ * @param {Array<{imageSrc: string, pageSrc: string, programState?: Object|null, x?: number|null, y?: number|null, width?: number, height?: number}>} blockConfigs - Array of block configurations
  * @returns {{state: State, blockIds: number[]}} Updated state with new blocks and array of new block IDs
  */
 function addBlocks(state, blockConfigs) {
@@ -424,9 +426,25 @@ function addBlocks(state, blockConfigs) {
 
   // Add each block sequentially
   for (const config of blockConfigs) {
-    const { program, x = null, y = null, width = 200, height = 200 } = config;
+    const {
+      imageSrc,
+      pageSrc,
+      x = null,
+      y = null,
+      width = 200,
+      height = 200,
+    } = config;
 
-    currentState = addBlock(currentState, program, x, y, width, height);
+    //BUG: fix
+    currentState = addBlock(
+      currentState,
+      imageSrc,
+      pageSrc,
+      x,
+      y,
+      width,
+      height,
+    );
 
     // Get the ID of the newly added block
     const currentBlocks = getCurrentBlocks(currentState);
@@ -456,7 +474,8 @@ export function pasteClipboardBlocks(state) {
     y: blockData.y + PASTE_OFFSET_Y,
     width: blockData.width,
     height: blockData.height,
-    program: blockData.program,
+    imageSrc: blockData.imageSrc,
+    pageSrc: blockData.pageSrc,
   }));
 
   const { state: newState, blockIds } = addBlocks(state, blockConfigs);

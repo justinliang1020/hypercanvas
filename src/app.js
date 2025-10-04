@@ -10,6 +10,7 @@ import {
 } from "./utils.js";
 import { defaultPage, updateCurrentPage } from "./pages.js";
 import { programSubscriptionManager } from "./program.js";
+import { addBlock } from "./block.js";
 
 initialize();
 
@@ -68,7 +69,7 @@ const KeyDown = (state, event) => {
   if (viewportResult !== state) {
     return viewportResult;
   }
-  
+
   switch (event.key) {
     case "Shift":
       return {
@@ -185,6 +186,62 @@ function safeToEmitState(state) {
   );
 }
 
+/**
+ * Clipboard monitoring subscription that checks for image changes
+ * @param {import("hyperapp").Dispatch<State>} dispatch Hyperapp dispatch function
+ * @returns {() => void} Cleanup function
+ */
+const ClipboardMonitor = (dispatch) => {
+  /** @type {string | null} */
+  let lastImage = null;
+
+  const checkClipboard = async () => {
+    try {
+      const clipboardItems = await navigator.clipboard.read();
+      const item = clipboardItems[0];
+      if (!item) return;
+      if (
+        item.types.includes("image/png") ||
+        item.types.includes("image/jpeg")
+      ) {
+        const imageType = item.types.find((type) => type.startsWith("image/"));
+        if (!imageType) return;
+
+        const blob = await item.getType(imageType);
+        const dataUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            if (e.target) {
+              resolve(/** @type {string} */ (e.target.result));
+            }
+          };
+          reader.readAsDataURL(blob);
+        });
+
+        if (dataUrl !== lastImage) {
+          lastImage = /** @type {string} */ (dataUrl);
+          console.log("Clipboard image changed:", Date.now());
+          dispatch((state) => {
+            const newState = addBlock(
+              state,
+              String(Date.now()),
+              String(Date.now()),
+            );
+            return newState;
+          });
+        }
+      } else {
+      }
+    } catch (err) {
+      // error happens if user loses focus on document
+      console.log("No clipboard access or no image in clipboard", err);
+    }
+  };
+
+  const interval = setInterval(checkClipboard, 200);
+  return () => clearInterval(interval);
+};
+
 /** @type{import("hyperapp").Action<State> | null} */
 let prevDispatchAction = null;
 /** @type{any} */
@@ -274,6 +331,7 @@ async function initialize() {
       [programSubscriptionManager, {}],
       onKeyDown(KeyDown),
       onKeyUp(KeyUp),
+      [ClipboardMonitor, {}],
     ],
     dispatch: dispatchMiddleware,
   });

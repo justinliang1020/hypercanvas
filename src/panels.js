@@ -173,37 +173,18 @@ function rightPanel(state) {
       // h(
       //   "button",
       //   {
-      //     onclick: (state) => [
-      //       state,
-      //       async (dispatch) => {
-      //         try {
-      //           const result =
-      //             // @ts-ignore
-      //             await window.fileAPI.uploadImageFromDialog(MEDIA_SAVE_PATH);
-      //           if (!result.canceled && result.success) {
-      //             //TODO: should i delete image uploading
-      //             console.log(`Would upload image: ${result.filename}`);
-      //           }
-      //         } catch (error) {
-      //           console.error("Failed to upload image:", error);
-      //           dispatch((state) => state);
-      //         }
-      //       },
-      //     ],
+      //     onclick: (state) => ({
+      //       ...state,
+      //       isDarkMode: !state.isDarkMode,
+      //     }),
+      //     title: "Toggle dark mode",
       //   },
-      //   text("upload image"),
+      //   text(state.isDarkMode ? "☀️ Light" : "🌙 Dark"),
       // ),
-      h(
-        "button",
-        {
-          onclick: (state) => ({
-            ...state,
-            isDarkMode: !state.isDarkMode,
-          }),
-          title: "Toggle dark mode",
-        },
-        text(state.isDarkMode ? "☀️ Light" : "🌙 Dark"),
-      ),
+      h("iframe", {
+        src: "https://en.wikipedia.org/",
+        style: { height: "100%" },
+      }),
       // h(
       //   "button",
       //   {
@@ -214,17 +195,8 @@ function rightPanel(state) {
       //   },
       //   text("save"),
       // ),
-      h("hr", {}),
-      programEditor(state),
-      orderButtons(state),
-      miscButtons(state),
-      h("p", {}, text("state visualizer")),
-      stateEditor(state),
-      h("hr", {}),
-      h("p", {}, text("css editor")),
-      cssEditor(state),
-      h("hr", {}),
       pages(state),
+      orderButtons(state),
     ],
   );
 }
@@ -235,11 +207,6 @@ function rightPanel(state) {
  * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
  */
 function orderButtons(state) {
-  const defaultProgram = `function view(state) {
-  return h("p", {}, text("hello world"))
-}
-`;
-
   const selectedBlock = getSelectedBlocks(state)[0];
   if (!selectedBlock) return h("div", {});
 
@@ -394,7 +361,7 @@ function programEditor(state) {
 
   return aceEditor(
     block.id,
-    block.program,
+    block.src,
     "javascript",
     state.isDarkMode,
     /**
@@ -478,6 +445,7 @@ function stateEditor(state) {
           state: JSON.parse(event.value),
         });
       } catch {
+        console.error("could not parse state", event.value);
         return state;
       }
     },

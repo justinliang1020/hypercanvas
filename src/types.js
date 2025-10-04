@@ -6,7 +6,8 @@
  * @property {number} x - X position on canvas
  * @property {number} y - Y position on canvas
  * @property {number} zIndex - Stacking order (higher = front)
- * @property {string} program - Program code
+ * @property {string} imageSrc - program image
+ * @property {string} pageSrc - wikipedia page source
  */
 
 /**
