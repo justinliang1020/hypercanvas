@@ -29,7 +29,7 @@ interface Page {
   dragStart: DragState | null;
   selectionBox: SelectionBoxState | null;
   state: any;
-  css: String;
+  css: string;
 }
 
 interface Memento {

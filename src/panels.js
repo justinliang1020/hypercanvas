@@ -347,7 +347,7 @@ function panelsToggle(state) {
  * @param {string} key - Key for state isolation
  * @param {string} value - Editor value
  * @param {string} mode - Editor mode (js, css, etc.)
- * @param {string} darkmode - Dark mode setting
+ * @param {boolean} darkmode - Dark mode setting
  * @param {Function} onaceinput - Input change handler
  * @returns {import("hyperapp").ElementVNode<State>}
  */
@@ -384,16 +384,16 @@ function programEditor(state) {
 
   if (!block) {
     return aceEditor(
-      -1,
+      "-1",
       "no block selected",
-      null,
+      "",
       state.isDarkMode,
       () => state,
     );
   }
 
   return aceEditor(
-    block.id,
+    String(block.id),
     block.program,
     "javascript",
     state.isDarkMode,
@@ -443,6 +443,7 @@ function cssEditor(state) {
       if (!currentPage) return state;
 
       return updateCurrentPage(state, {
+        //@ts-ignore custom webcomponent event value
         css: event.value,
       });
     },
