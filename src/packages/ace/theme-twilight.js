@@ -1,4 +1,5 @@
 //https://github.com/ajaxorg/ace-builds/blob/master/src/theme-twilight.js
+//@ts-nocheck
 define("ace/theme/twilight-css", ["require", "exports", "module"], function (
   require,
   exports,

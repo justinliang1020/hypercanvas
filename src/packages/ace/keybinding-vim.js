@@ -1,4 +1,5 @@
 //https://github.com/ajaxorg/ace-builds/blob/master/src/keybinding-vim.js
+//@ts-nocheck
 define("ace/ext/hardwrap", [
   "require",
   "exports",
