@@ -9,7 +9,6 @@
     "target": "ESNext",
     "strict": true,
     "baseUrl": ".",
-    "typeRoots": ["./src/packages/"]
   },
   "include": ["./**/*.js", "./**/*.ts", "./**/*.d.ts"],
   "exclude": ["./src/packages", "node_modules"]
