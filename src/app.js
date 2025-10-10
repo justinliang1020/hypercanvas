@@ -10,6 +10,7 @@ import {
 } from "./utils.js";
 import { defaultPage, updateCurrentPage } from "./pages.js";
 import { programSubscriptionManager } from "./program.js";
+import { safeReadFile } from "./electron-utils.js";
 
 initialize();
 
@@ -68,7 +69,7 @@ const KeyDown = (state, event) => {
   if (viewportResult !== state) {
     return viewportResult;
   }
-  
+
   switch (event.key) {
     case "Shift":
       return {
@@ -237,7 +238,7 @@ async function initialize() {
   let state;
   try {
     // @ts-ignore
-    state = await window.fileAPI.readFile(STATE_SAVE_PATH); // uncomment to have retained state
+    state = await safeReadFile(STATE_SAVE_PATH);
     if (!state) {
       state = initialState();
     }
