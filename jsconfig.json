@@ -8,7 +8,7 @@
     "moduleResolution": "bundler",
     "target": "ESNext",
     "strict": true,
-    "baseUrl": ".",
+    "baseUrl": "."
   },
   "include": ["./**/*.js", "./**/*.ts", "./**/*.d.ts"],
   "exclude": ["./src/packages", "node_modules"]

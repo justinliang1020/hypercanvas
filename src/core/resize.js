@@ -1,4 +1,4 @@
-import { h } from "../packages/hyperapp/index.js";
+import { h } from "hyperapp";
 import { MIN_SIZE, RESIZE_CURSORS } from "./constants.js";
 import {
   getCurrentBlocks,
@@ -159,7 +159,7 @@ export function ResizeHandle({ handle, zoom, context }) {
   const isCorner = ["nw", "ne", "sw", "se"].includes(handle);
   const isEdge = ["n", "s", "e", "w"].includes(handle);
 
-  /** @type {import("../packages/hyperapp/index.js").StyleProp} */
+  /** @type {import("hyperapp").StyleProp} */
   const style = {
     position: "absolute",
     backgroundColor: isCorner ? "white" : "transparent",

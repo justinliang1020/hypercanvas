@@ -1,4 +1,4 @@
-import { h, text } from "../packages/hyperapp/index.js";
+import { h, text } from "hyperapp";
 import { saveApplicationAndNotify } from "./utils.js";
 import { addBlock, sendToBack, sendToFront } from "./block.js";
 import { MEDIA_SAVE_PATH } from "./constants.js";

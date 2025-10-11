@@ -1,4 +1,4 @@
-import { h } from "../packages/hyperapp/index.js";
+import { h } from "hyperapp";
 import { pasteEffect } from "./utils.js";
 import { saveApplicationAndNotify } from "./utils.js";
 import { copySelectedBlocks, deleteSelectedBlocks, block } from "./block.js";

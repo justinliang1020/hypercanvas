@@ -1,4 +1,4 @@
-import { app, h } from "../packages/hyperapp/index.js";
+import { app, h } from "hyperapp";
 import { STATE_SAVE_PATH } from "./constants.js";
 import { createMementoManager } from "./memento.js";
 import { viewport, onkeydown } from "./viewport.js";
