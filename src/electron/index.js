@@ -93,16 +93,17 @@ app.on("window-all-closed", () => {
   // }
 });
 
+const arg = process.argv[2];
+const cwd = process.cwd();
+const userPath = `${cwd}/${arg}`;
+
 // -----------------------------
 // ## File Processing
 // -----------------------------
 
-// Get the user data directory (AppData on Windows, equivalent on other platforms)
-const userDataPath = app.getPath("userData");
-
 // Helper function to get file path in user data directory
 function getFilePath(filename) {
-  return path.join(userDataPath, filename);
+  return path.join(userPath, filename);
 }
 
 // Helper function to ensure directory exists

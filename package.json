@@ -8,8 +8,7 @@
     "hypercanvas": "./src/cli/index.js"
   },
   "scripts": {
-    "start": "electron-forge start",
-    "cli": "node src/cli/index.js",
+    "start": "node src/cli/index.js local",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
