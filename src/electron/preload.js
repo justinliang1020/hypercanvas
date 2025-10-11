@@ -6,7 +6,7 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 // Expose file operations to renderer process
-/** @type {import('./electron.d.ts').FileAPI} */
+/** @type {import('./electron.js').FileAPI} */
 const fileAPI = {
   writeFile: (
     /** @type {string} */ filename,
@@ -15,7 +15,7 @@ const fileAPI = {
   readFile: (/** @type {string} */ filename) =>
     ipcRenderer.invoke("file:read", filename),
   showOpenDialog: (
-    /** @type {import('./electron.d.ts').DialogOptions} */ options,
+    /** @type {import('./electron.js').DialogOptions} */ options,
   ) => ipcRenderer.invoke("dialog:showOpenDialog", options),
   uploadImageFromDialog: (/** @type {string} */ mediaSavePath = "user/media") =>
     ipcRenderer.invoke("image:selectFromDialog", mediaSavePath),
@@ -39,7 +39,7 @@ const fileAPI = {
 
 contextBridge.exposeInMainWorld("fileAPI", fileAPI);
 
-/** @type {import('./electron.d.ts').ElectronAPI} */
+/** @type {import('./electron.js').ElectronAPI} */
 const electronAPI = {
   onAppWillQuit: (/** @type {() => void} */ callback) => {
     ipcRenderer.on("app-will-quit", callback);

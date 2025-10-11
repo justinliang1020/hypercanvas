@@ -10,7 +10,7 @@ import {
 } from "./utils.js";
 import { defaultPage, updateCurrentPage } from "./pages.js";
 import { programSubscriptionManager } from "./program.js";
-import { safeReadFile } from "./electron-utils.js";
+import { safeReadFile } from "./electron/electron-utils.js";
 
 initialize();
 
