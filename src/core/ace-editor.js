@@ -1,11 +1,12 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-nocheck
-import "../packages/ace/index.js";
-import "../packages/ace/mode-javascript.js";
-import "../packages/ace/mode-json.js";
-import "../packages/ace/mode-css.js";
-import "../packages/ace/keybinding-vim.js";
-import "../packages/ace/theme-twilight.js";
-import "../packages/ace/ext-beautify.js";
+import "ace-builds/src-noconflict/ace.js";
+import "ace-builds/src-noconflict/mode-javascript.js";
+import "ace-builds/src-noconflict/mode-json.js";
+import "ace-builds/src-noconflict/mode-css.js";
+import "ace-builds/src-noconflict/keybinding-vim.js";
+import "ace-builds/src-noconflict/theme-twilight.js";
+import "ace-builds/src-noconflict/ext-beautify.js";
 
 class AceEditor extends HTMLElement {
   /** @type {any} */
