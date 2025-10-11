@@ -1,4 +1,4 @@
-import { addBlock, pasteClipboardBlocks } from "./block.js";
+import { pasteClipboardBlocks } from "./block.js";
 import { MEDIA_SAVE_PATH, STATE_SAVE_PATH } from "./constants.js";
 import { h, text } from "hyperapp";
 

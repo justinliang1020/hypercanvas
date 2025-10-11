@@ -1,4 +1,4 @@
-import { h, text } from "hyperapp";
+import { h } from "hyperapp";
 import {
   PASTE_OFFSET_X,
   PASTE_OFFSET_Y,

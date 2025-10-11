@@ -8,7 +8,7 @@ import {
   saveApplication,
   saveApplicationAndNotify,
 } from "./utils.js";
-import { defaultPage, updateCurrentPage } from "./pages.js";
+import { defaultPage } from "./pages.js";
 import { programSubscriptionManager } from "./program.js";
 
 initialize();

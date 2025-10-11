@@ -1,6 +1,5 @@
 import { h } from "hyperapp";
 import { pasteEffect } from "./utils.js";
-import { saveApplicationAndNotify } from "./utils.js";
 import { copySelectedBlocks, deleteSelectedBlocks, block } from "./block.js";
 import { handleResizePointerMove } from "./resize.js";
 import { saveMementoAndReturn, redoState, undoState } from "./memento.js";

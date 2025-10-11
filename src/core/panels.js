@@ -1,7 +1,5 @@
 import { h, text } from "hyperapp";
-import { saveApplicationAndNotify } from "./utils.js";
 import { addBlock, sendToBack, sendToFront } from "./block.js";
-import { MEDIA_SAVE_PATH } from "./constants.js";
 import {
   createPage,
   switchPage,
@@ -235,11 +233,6 @@ function rightPanel(state) {
  * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
  */
 function orderButtons(state) {
-  const defaultProgram = `function view(state) {
-  return h("p", {}, text("hello world"))
-}
-`;
-
   const selectedBlock = getSelectedBlocks(state)[0];
   if (!selectedBlock) return h("div", {});
 
