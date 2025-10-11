@@ -1,11 +1,11 @@
 //@ts-nocheck
-import "./packages/ace/index.js";
-import "./packages/ace/mode-javascript.js";
-import "./packages/ace/mode-json.js";
-import "./packages/ace/mode-css.js";
-import "./packages/ace/keybinding-vim.js";
-import "./packages/ace/theme-twilight.js";
-import "./packages/ace/ext-beautify.js";
+import "../packages/ace/index.js";
+import "../packages/ace/mode-javascript.js";
+import "../packages/ace/mode-json.js";
+import "../packages/ace/mode-css.js";
+import "../packages/ace/keybinding-vim.js";
+import "../packages/ace/theme-twilight.js";
+import "../packages/ace/ext-beautify.js";
 
 class AceEditor extends HTMLElement {
   /** @type {any} */

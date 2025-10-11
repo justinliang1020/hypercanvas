@@ -1,4 +1,4 @@
-import { app, h } from "./packages/hyperapp/index.js";
+import { app, h } from "../packages/hyperapp/index.js";
 import { STATE_SAVE_PATH } from "./constants.js";
 import { createMementoManager } from "./memento.js";
 import { viewport, onkeydown } from "./viewport.js";
@@ -10,7 +10,7 @@ import {
 } from "./utils.js";
 import { defaultPage, updateCurrentPage } from "./pages.js";
 import { programSubscriptionManager } from "./program.js";
-import { safeReadFile } from "./electron/electron-utils.js";
+import { safeReadFile } from "../electron/electron-utils.js";
 
 initialize();
 

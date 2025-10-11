@@ -1,4 +1,4 @@
-import { h } from "./packages/hyperapp/index.js";
+import { h } from "../packages/hyperapp/index.js";
 import {
   getCurrentPage,
   getCurrentBlocks,

@@ -1,4 +1,4 @@
-import { h } from "./packages/hyperapp/index.js";
+import { h } from "../packages/hyperapp/index.js";
 import { pasteEffect } from "./utils.js";
 import { saveApplicationAndNotify } from "./utils.js";
 import { copySelectedBlocks, deleteSelectedBlocks, block } from "./block.js";
@@ -580,7 +580,6 @@ export function viewport(state) {
       onpointermove,
       onpointerup,
       onwheel,
-
     },
     [
       h(

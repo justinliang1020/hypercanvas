@@ -1,5 +1,5 @@
 import { BLOCK_CONTENTS_CLASS_NAME } from "./constants.js";
-import { h, text } from "./packages/hyperapp/index.js";
+import { h, text } from "../packages/hyperapp/index.js";
 
 /**
  * Creates a generic scoped action that transforms between outer and inner state

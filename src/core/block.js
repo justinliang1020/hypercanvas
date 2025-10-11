@@ -1,4 +1,4 @@
-import { h, text } from "./packages/hyperapp/index.js";
+import { h, text } from "../packages/hyperapp/index.js";
 import {
   PASTE_OFFSET_X,
   PASTE_OFFSET_Y,
@@ -59,7 +59,7 @@ export function block(state) {
     /**
      * @param {State} state
      * @param {PointerEvent} event
-     * @returns {import("./packages/hyperapp").Dispatchable<State>}
+     * @returns {import("../packages/hyperapp/index.js").Dispatchable<State>}
      */
     function onpointerover(state, event) {
       event.stopPropagation();
@@ -105,7 +105,7 @@ export function block(state) {
     /**
      * @param {State} state
      * @param {PointerEvent} event
-     * @returns {import("./packages/hyperapp").Dispatchable<State>}
+     * @returns {import("../packages/hyperapp/index.js").Dispatchable<State>}
      */
     function onpointerleave(state, event) {
       event.stopPropagation();
@@ -118,7 +118,7 @@ export function block(state) {
     /**
      * @param {State} state
      * @param {PointerEvent} event
-     * @returns {import("./packages/hyperapp").Dispatchable<State>}
+     * @returns {import("../packages/hyperapp/index.js").Dispatchable<State>}
      */
     function onpointerdown(state, event) {
       const currentPage = getCurrentPage(state);
@@ -151,7 +151,7 @@ export function block(state) {
     /**
      * @param {State} state
      * @param {MouseEvent} event
-     * @returns {import("./packages/hyperapp").Dispatchable<State>}
+     * @returns {import("../packages/hyperapp/index.js").Dispatchable<State>}
      */
     function ondblclick(state, event) {
       event.stopPropagation();
