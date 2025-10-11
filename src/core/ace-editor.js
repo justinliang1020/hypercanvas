@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-nocheck
 import "ace-builds/src-noconflict/ace.js";
 import "ace-builds/src-noconflict/mode-javascript.js";

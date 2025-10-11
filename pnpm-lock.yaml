@@ -51,9 +51,6 @@ importers:
       electron-reloader:
         specifier: ^1.2.3
         version: 1.2.3
-      eslint:
-        specifier: ^9.37.0
-        version: 9.37.0(jiti@2.4.2)
       globals:
         specifier: ^16.4.0
         version: 16.4.0
