@@ -4,8 +4,12 @@
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": "src/electron/index.js",
+  "bin": {
+    "hypercanvas": "./src/cli/index.js"
+  },
   "scripts": {
     "start": "electron-forge start",
+    "cli": "node src/cli/index.js",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
