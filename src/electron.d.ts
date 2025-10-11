@@ -44,29 +44,32 @@ export interface FileAPI {
    * @param data - Data to write (string, object, or Buffer)
    * @returns Promise with write result
    */
-  writeFile(filename: string, data: string | object | Buffer): Promise<FileWriteResult>;
-  
+  writeFile(
+    filename: string,
+    data: string | object | Buffer,
+  ): Promise<FileWriteResult>;
+
   /**
    * Read data from a file in the user data directory
    * @param filename - Relative path from user data directory
    * @returns Promise with file contents (parsed as JSON if possible, otherwise string)
    */
   readFile(filename: string): Promise<any>;
-  
+
   /**
    * Show native file open dialog
    * @param options - Dialog configuration options
    * @returns Promise with dialog result
    */
   showOpenDialog(options: DialogOptions): Promise<DialogResult>;
-  
+
   /**
    * Select and upload an image from dialog, saving to media directory
    * @param mediaSavePath - Relative path to save images (default: "user/media")
    * @returns Promise with image upload result
    */
   uploadImageFromDialog(mediaSavePath?: string): Promise<ImageSelectResult>;
-  
+
   /**
    * Save image from buffer data to media directory
    * @param imageBuffer - Image data as ArrayBuffer
@@ -77,22 +80,22 @@ export interface FileAPI {
   saveImageFromBuffer(
     imageBuffer: ArrayBuffer,
     mimeType: string,
-    mediaSavePath?: string
+    mediaSavePath?: string,
   ): Promise<ImageSelectResult>;
-  
+
   /**
    * Get dimensions of an image file
    * @param imagePath - Path to image file (absolute or relative to app directory)
    * @returns Promise with image dimensions
    */
   getImageDimensions(imagePath: string): Promise<ImageDimensionsResult>;
-  
+
   /**
    * Get system theme preference
    * @returns Promise with boolean indicating if dark theme is preferred
    */
   getSystemTheme(): Promise<boolean>;
-  
+
   /**
    * List contents of a directory
    * @param dirPath - Directory path (absolute or relative to app directory)
@@ -107,19 +110,21 @@ export interface ElectronAPI {
    * @param callback - Function to call when app is about to quit
    */
   onAppWillQuit(callback: () => void): void;
-  
+
   /**
    * Notify main process that state has been saved
    */
   stateSaved(): void;
-  
+
   /**
    * Listen for system theme changes
    * @param callback - Function to call when theme changes (receives isDark boolean)
    * @returns The listener function for removal
    */
-  onThemeChanged(callback: (isDark: boolean) => void): (event: any, isDark: boolean) => void;
-  
+  onThemeChanged(
+    callback: (isDark: boolean) => void,
+  ): (event: any, isDark: boolean) => void;
+
   /**
    * Remove theme change listener
    * @param listener - The listener function returned by onThemeChanged
@@ -133,3 +138,4 @@ declare global {
     electronAPI: ElectronAPI;
   }
 }
+

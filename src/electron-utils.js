@@ -9,9 +9,11 @@
  * @returns {boolean}
  */
 export function isFileAPIAvailable() {
-  return typeof window !== 'undefined' && 
-         window.fileAPI && 
-         typeof window.fileAPI === 'object';
+  return (
+    typeof window !== "undefined" &&
+    window.fileAPI &&
+    typeof window.fileAPI === "object"
+  );
 }
 
 /**
@@ -19,9 +21,11 @@ export function isFileAPIAvailable() {
  * @returns {boolean}
  */
 export function isElectronAPIAvailable() {
-  return typeof window !== 'undefined' && 
-         window.electronAPI && 
-         typeof window.electronAPI === 'object';
+  return (
+    typeof window !== "undefined" &&
+    window.electronAPI &&
+    typeof window.electronAPI === "object"
+  );
 }
 
 /**
@@ -34,7 +38,7 @@ export async function safeFileOperation(operation) {
   if (!isFileAPIAvailable()) {
     return {
       success: false,
-      error: 'File API not available - not running in Electron context'
+      error: "File API not available - not running in Electron context",
     };
   }
 
@@ -42,10 +46,10 @@ export async function safeFileOperation(operation) {
     const data = await operation();
     return { success: true, data };
   } catch (error) {
-    console.error('File operation failed:', error);
+    console.error("File operation failed:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
@@ -57,7 +61,9 @@ export async function safeFileOperation(operation) {
  * @returns {Promise<any>}
  */
 export async function safeReadFile(filename, fallback = null) {
-  const result = await safeFileOperation(() => window.fileAPI.readFile(filename));
+  const result = await safeFileOperation(() =>
+    window.fileAPI.readFile(filename),
+  );
   return result.success ? result.data : fallback;
 }
 
@@ -68,7 +74,9 @@ export async function safeReadFile(filename, fallback = null) {
  * @returns {Promise<{success: boolean, path?: string, error?: string}>}
  */
 export async function safeWriteFile(filename, data) {
-  const result = await safeFileOperation(() => window.fileAPI.writeFile(filename, data));
+  const result = await safeFileOperation(() =>
+    window.fileAPI.writeFile(filename, data),
+  );
   if (result.success && result.data) {
     return { success: true, path: result.data.path };
   }
@@ -81,20 +89,20 @@ export async function safeWriteFile(filename, data) {
  * @returns {Promise<{success: boolean, image?: import('./electron.d.ts').ImageSelectResult, error?: string}>}
  */
 export async function safeImageUpload(mediaSavePath) {
-  const result = await safeFileOperation(() => 
-    window.fileAPI.uploadImageFromDialog(mediaSavePath)
+  const result = await safeFileOperation(() =>
+    window.fileAPI.uploadImageFromDialog(mediaSavePath),
   );
-  
+
   if (result.success && result.data) {
     if (result.data.canceled) {
-      return { success: false, error: 'User canceled image selection' };
+      return { success: false, error: "User canceled image selection" };
     }
     if (!result.data.success) {
-      return { success: false, error: 'Image upload failed' };
+      return { success: false, error: "Image upload failed" };
     }
     return { success: true, image: result.data };
   }
-  
+
   return { success: false, error: result.error };
 }
 
@@ -104,14 +112,14 @@ export async function safeImageUpload(mediaSavePath) {
  * @returns {Promise<{width: number, height: number}>}
  */
 export async function safeGetImageDimensions(imagePath) {
-  const result = await safeFileOperation(() => 
-    window.fileAPI.getImageDimensions(imagePath)
+  const result = await safeFileOperation(() =>
+    window.fileAPI.getImageDimensions(imagePath),
   );
-  
+
   if (result.success && result.data?.success) {
     return { width: result.data.width, height: result.data.height };
   }
-  
+
   // Return fallback dimensions
   return { width: 200, height: 200 };
 }
@@ -123,12 +131,14 @@ export async function safeGetImageDimensions(imagePath) {
  */
 export function setupThemeListener(callback) {
   if (!isElectronAPIAvailable()) {
-    console.warn('Electron API not available - theme changes will not be detected');
+    console.warn(
+      "Electron API not available - theme changes will not be detected",
+    );
     return () => {};
   }
 
   const listener = window.electronAPI.onThemeChanged(callback);
-  
+
   return () => {
     window.electronAPI.removeThemeListener(listener);
   };
@@ -142,3 +152,4 @@ export async function getSystemTheme() {
   const result = await safeFileOperation(() => window.fileAPI.getSystemTheme());
   return result.success ? Boolean(result.data) : false;
 }
+
