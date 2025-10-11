@@ -10,7 +10,6 @@ import {
 } from "./utils.js";
 import { defaultPage, updateCurrentPage } from "./pages.js";
 import { programSubscriptionManager } from "./program.js";
-import { safeReadFile } from "../electron/electron-utils.js";
 
 initialize();
 
@@ -238,7 +237,7 @@ async function initialize() {
   let state;
   try {
     // @ts-ignore
-    state = await safeReadFile(STATE_SAVE_PATH);
+    state = await window.fileAPI.readFile(STATE_SAVE_PATH);
     if (!state) {
       state = initialState();
     }
