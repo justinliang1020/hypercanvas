@@ -116,6 +116,7 @@ class AceEditor extends HTMLElement {
         this.editor.session.setMode("ace/mode/json");
         break;
       }
+      case "":
       case null: {
         break;
       }
