@@ -8,6 +8,8 @@ interface Block {
   program: string;
 }
 
+type BlockConfig = Omit<Block, "id" | "zIndex">;
+
 interface Page {
   id: string;
   name: string;

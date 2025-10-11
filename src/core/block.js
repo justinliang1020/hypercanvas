@@ -411,7 +411,7 @@ export function addBlock(
 /**
  * Adds multiple blocks to the state
  * @param {State} state - Current application state
- * @param {Array<{program: string, programState?: Object|null, x?: number|null, y?: number|null, width?: number, height?: number}>} blockConfigs - Array of block configurations
+ * @param {BlockConfig[]} blockConfigs - Array of block configurations
  * @returns {{state: State, blockIds: number[]}} Updated state with new blocks and array of new block IDs
  */
 function addBlocks(state, blockConfigs) {
@@ -424,7 +424,7 @@ function addBlocks(state, blockConfigs) {
 
   // Add each block sequentially
   for (const config of blockConfigs) {
-    const { program, x = null, y = null, width = 200, height = 200 } = config;
+    const { program, x, y, width, height } = config;
 
     currentState = addBlock(currentState, program, x, y, width, height);
 
