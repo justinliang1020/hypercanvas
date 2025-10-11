@@ -8,10 +8,9 @@ const {
 } = require("electron");
 const path = require("node:path");
 const fs = require("fs").promises;
+const reloader = require("electron-reloader");
 
-try {
-  require("electron-reloader")(module);
-} catch {}
+reloader(module, { ignore: "**/local/**" });
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
