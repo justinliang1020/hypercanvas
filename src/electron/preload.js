@@ -26,8 +26,8 @@ const fileAPI = {
   getImageDimensions: (imagePath) =>
     ipcRenderer.invoke("image:getDimensions", imagePath),
   getSystemTheme: () => ipcRenderer.invoke("theme:getSystemTheme"),
-  listHtmlFilesUserPath: (dirPath) =>
-    ipcRenderer.invoke("file:listHtmlFilesUserPath", dirPath),
+  getHtmlFileRelativePaths: (dirPath) =>
+    ipcRenderer.invoke("file:getHtmlFileRelativePaths", dirPath),
 };
 
 contextBridge.exposeInMainWorld("fileAPI", fileAPI);

@@ -200,7 +200,6 @@ export function block(state) {
             border: "1px solid black",
           },
           class: BLOCK_CONTENTS_CLASS_NAME,
-
           src: `${state.userPath}/${block.filename}`,
         }),
         ...(isSelected && !isEditing && !isMultiSelect
@@ -395,8 +394,6 @@ export function addBlock(
     zIndex: Math.max(...globalBlocks.map((block) => block.zIndex), 0) + 1,
     filename: filename,
   };
-
-  window.fileAPI.writeFile(filename, "<p>hello world</p>");
 
   const currentBlocks = getCurrentBlocks(state);
   const newState = updateCurrentPage(state, {

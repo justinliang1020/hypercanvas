@@ -218,6 +218,7 @@ function rightPanel(state) {
       h("hr", {}),
       h("hr", {}),
       pages(state),
+      htmls(state),
     ],
   );
 }
@@ -402,4 +403,30 @@ function programEditor(state) {
       });
     },
   );
+}
+
+/**
+ * Toggles visibility of panels
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function htmls(state) {
+  /**
+   * @param {string} htmlPath
+   */
+  const htmlView = (htmlPath) =>
+    h(
+      "div",
+      {
+        onpointerdown: () => addBlock(state, htmlPath),
+      },
+      h("iframe", {
+        src: `${state.userPath}/${htmlPath}`,
+        style: {
+          pointerEvents: "none",
+          width: "100%",
+        },
+      }),
+    );
+  return h("div", {}, state.htmlPaths.map(htmlView));
 }

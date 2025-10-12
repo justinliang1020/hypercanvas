@@ -140,6 +140,7 @@ function initialState() {
     editingPageId: null,
     isShiftPressed: false,
     userPath: "",
+    htmlPaths: [],
   };
 
   // Set currentPageId to the first page
@@ -247,8 +248,8 @@ async function initialize() {
   }
 
   state.userPath = await window.fileAPI.getUserPath();
-  const htmlFiles = await window.fileAPI.listHtmlFilesUserPath(state.userPath);
-  console.log("files", htmlFiles);
+  state.htmlPaths = await window.fileAPI.getHtmlFileRelativePaths(state.userPath);
+  console.log("files", state.htmlPaths);
 
   // Initialize dark mode based on system theme
   try {

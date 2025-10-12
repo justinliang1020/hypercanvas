@@ -107,7 +107,7 @@ export interface FileAPI {
    * @param dirPath - Directory path (absolute or relative to app directory)
    * @returns Promise with array of file/directory names
    */
-  listHtmlFilesUserPath(dirPath: string): Promise<string[]>;
+  getHtmlFileRelativePaths(dirPath: string): Promise<string[]>;
 }
 
 export interface ElectronAPI {

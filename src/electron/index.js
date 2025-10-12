@@ -442,23 +442,23 @@ ipcMain.handle("theme:getSystemTheme", () => {
 
 /**
  * @param {String} dirPath - path to recursively search for files in directory. If this is a relative path, it assumes it is within userPath
- * @return {Promise<String[]>} - list of absolute paths of HTML files
+ * @return {Promise<String[]>} - list of relative paths of HTML files based on userPath
  */
-async function getHtmlFilePaths(dirPath) {
+async function getHtmlFileRelativePaths(dirPath) {
   try {
     // Resolve relative paths from the app directory
-    const fullPath = path.isAbsolute(dirPath)
-      ? dirPath
-      : path.join(userPath, dirPath);
+    const fullPath = path.join(userPath, dirPath);
     const items = await fs.readdir(fullPath, { withFileTypes: true });
 
     const htmlFilePaths = [];
     for (const item of items) {
+      const itemRelativePath = path.join(dirPath, item.name);
       if (item.isDirectory()) {
-        const itemHtmlFilePaths = await getHtmlFilePaths(item.name);
+        const itemHtmlFilePaths =
+          await getHtmlFileRelativePaths(itemRelativePath);
         htmlFilePaths.push(...itemHtmlFilePaths);
       } else if (item.isFile() && path.extname(item.name) === ".html") {
-        htmlFilePaths.push(path.join(item.parentPath, item.name));
+        htmlFilePaths.push(itemRelativePath);
       }
     }
     return htmlFilePaths;
@@ -469,6 +469,6 @@ async function getHtmlFilePaths(dirPath) {
 }
 
 // List directory contents handler
-ipcMain.handle("file:listHtmlFilesUserPath", async (event, dirPath) => {
-  return await getHtmlFilePaths(userPath);
+ipcMain.handle("file:getHtmlFileRelativePaths", async (event, dirPath) => {
+  return await getHtmlFileRelativePaths("");
 });

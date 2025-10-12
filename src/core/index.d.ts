@@ -90,6 +90,7 @@ interface State {
   editingPageId: string | null;
   isShiftPressed: boolean;
   userPath: string;
+  htmlPaths: string[];
 }
 
 type ResizeHandler = (
