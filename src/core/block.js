@@ -190,22 +190,19 @@ export function block(state) {
         ondblclick,
       },
       [
-        h(
-          "div",
-          {
-            style: {
-              pointerEvents:
-                isEditing || currentPage.isInteractMode ? null : "none",
-              width: "100%",
-              height: "100%",
-              overflow: "hidden",
-            },
-            class: BLOCK_CONTENTS_CLASS_NAME,
+        h("iframe", {
+          style: {
+            pointerEvents:
+              isEditing || currentPage.isInteractMode ? null : "none",
+            width: "100%",
+            height: "100%",
+            overflow: "hidden",
+            border: "1px solid black",
           },
-          h("iframe", {
-            src: `${state.userPath}/${block.filename}`,
-          }),
-        ),
+          class: BLOCK_CONTENTS_CLASS_NAME,
+
+          src: `${state.userPath}/${block.filename}`,
+        }),
         ...(isSelected && !isEditing && !isMultiSelect
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>
               ResizeHandle({
