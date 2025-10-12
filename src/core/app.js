@@ -184,6 +184,11 @@ function userFilesChangedSubscription(dispatch) {
    */
   const handleUserFilesChange = (chokidarEvent, path) => {
     console.log(chokidarEvent, path);
+    //TODO: optimize this later to only refresh iframes that have changed
+    const iframeEls = window.document.getElementsByTagName("iframe");
+    [...iframeEls].forEach((el) => {
+      el.contentWindow?.location.reload();
+    });
   };
   const listener = window.electronAPI.onUserFilesChanged(handleUserFilesChange);
 
