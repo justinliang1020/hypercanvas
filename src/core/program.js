@@ -298,7 +298,7 @@ export function renderView(currentPage, block) {
     const viewFunction = new Function(
       "h",
       "text",
-      `${block.program}; return view;`,
+      `${block.filename}; return view;`,
     )(h, text);
     const viewNode = viewFunction(currentPage.state);
     if (!viewNode.tag) {

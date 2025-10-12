@@ -274,15 +274,15 @@ function miscButtons(state) {
    * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
    */
   const newProgramButton = (state) => {
-    const defaultProgram = `function view(state) {
-  return h("p", {}, text("hello world"))
-}
-`;
+    const currentPage = getCurrentPage(state);
+    if (!currentPage) return h("p", {}, text("no current page"));
+
+    const filename = `${currentPage.blocks.length + 1}.html`;
 
     return h(
       "button",
       {
-        onclick: (state) => addBlock(state, defaultProgram),
+        onclick: (state) => addBlock(state, filename),
       },
       text("new program"),
     );
@@ -387,7 +387,7 @@ function programEditor(state) {
 
   return aceEditor(
     String(block.id),
-    block.program,
+    block.filename,
     "javascript",
     state.isDarkMode,
     /**
