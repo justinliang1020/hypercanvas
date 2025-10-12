@@ -257,8 +257,8 @@ async function initialize() {
 
   // Listen for quit signal from main process
   //@ts-ignore
-  window.electronAPI.onAppWillQuit(() => {
-    saveApplication(state);
+  window.electronAPI.onAppWillQuit(async () => {
+    await saveApplication(state);
 
     // Tell main process we're done
     //@ts-ignore
