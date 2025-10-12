@@ -9,7 +9,6 @@ import {
   saveApplicationAndNotify,
 } from "./utils.js";
 import { defaultPage } from "./pages.js";
-import { programSubscriptionManager } from "./program.js";
 
 initialize();
 
@@ -276,7 +275,6 @@ async function initialize() {
     node: /** @type {Node} */ (document.getElementById("app")),
     subscriptions: (state) => [
       [themeChangeSubscription, {}],
-      [programSubscriptionManager, {}],
       onKeyDown(KeyDown),
       onKeyUp(KeyUp),
     ],

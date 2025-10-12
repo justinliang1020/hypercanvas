@@ -10,7 +10,6 @@ import {
 } from "./pages.js";
 import { getHoveredBlock, getSelectedBlocks } from "./selection.js";
 import "./ace-editor.js";
-import { injectSharedBlockCSS } from "./program.js";
 
 /**
  * Creates the panels container with both layers panel, programs panel and floating toggle button
@@ -216,11 +215,7 @@ function rightPanel(state) {
       programEditor(state),
       orderButtons(state),
       miscButtons(state),
-      h("p", {}, text("state visualizer")),
-      stateEditor(state),
       h("hr", {}),
-      h("p", {}, text("css editor")),
-      cssEditor(state),
       h("hr", {}),
       pages(state),
     ],
@@ -405,75 +400,6 @@ function programEditor(state) {
           b.id === block.id ? { ...b, program: event.value } : b,
         ),
       });
-    },
-  );
-}
-
-/**
- * Creates a program buttons component with filter functionality
- * @param {State} state - Current application state
- * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
- */
-function cssEditor(state) {
-  const currentPage = getCurrentPage(state);
-  if (!currentPage) return h("div", {}, text("no current page"));
-
-  // This could be arbitrarily put anywhere, but just put it here for semantic similarity to CSS
-  injectSharedBlockCSS(currentPage.css);
-
-  return aceEditor(
-    `css-${currentPage.id}`,
-    currentPage.css,
-    "css",
-    state.isDarkMode,
-    /**
-     * @param {State} state
-     * @param {Event} event
-     */
-    (state, event) => {
-      event.stopPropagation();
-      const currentPage = getCurrentPage(state);
-      if (!currentPage) return state;
-
-      return updateCurrentPage(state, {
-        //@ts-ignore custom webcomponent event value
-        css: event.value,
-      });
-    },
-  );
-}
-
-/**
- * Creates a program buttons component with filter functionality
- * @param {State} state - Current application state
- * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
- */
-function stateEditor(state) {
-  const currentPage = getCurrentPage(state);
-  if (!currentPage) return h("div", {}, text("no current page"));
-
-  return aceEditor(
-    `state-${currentPage.id}`,
-    JSON.stringify(currentPage.state, null, 2),
-    "json",
-    state.isDarkMode,
-    /**
-     * @param {State} state
-     * @param {Event} event
-     */
-    (state, event) => {
-      event.stopPropagation();
-      const currentPage = getCurrentPage(state);
-      if (!currentPage) return state;
-
-      try {
-        return updateCurrentPage(state, {
-          //@ts-ignore uses custom `value` added to the event
-          state: JSON.parse(event.value),
-        });
-      } catch {
-        return state;
-      }
     },
   );
 }
