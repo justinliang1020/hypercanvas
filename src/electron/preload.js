@@ -8,33 +8,25 @@ const { contextBridge, ipcRenderer } = require("electron");
 // Expose file operations to renderer process
 /** @type {import('./electron.js').FileAPI} */
 const fileAPI = {
-  writeFile: (
-    /** @type {string} */ filename,
-    /** @type {string | object | Buffer} */ data,
-  ) => ipcRenderer.invoke("file:write", filename, data),
-  readFile: (/** @type {string} */ filename) =>
-    ipcRenderer.invoke("file:read", filename),
+  writeFile: (filename, data) =>
+    ipcRenderer.invoke("file:write", filename, data),
+  readFile: (filename) => ipcRenderer.invoke("file:read", filename),
   getUserPath: () => ipcRenderer.invoke("file:userPath"),
-  showOpenDialog: (
-    /** @type {import('./electron.js').DialogOptions} */ options,
-  ) => ipcRenderer.invoke("dialog:showOpenDialog", options),
-  uploadImageFromDialog: (/** @type {string} */ mediaSavePath = "user/media") =>
+  showOpenDialog: (options) =>
+    ipcRenderer.invoke("dialog:showOpenDialog", options),
+  uploadImageFromDialog: (mediaSavePath = "user/media") =>
     ipcRenderer.invoke("image:selectFromDialog", mediaSavePath),
-  saveImageFromBuffer: (
-    /** @type {ArrayBuffer} */ imageBuffer,
-    /** @type {string} */ mimeType,
-    /** @type {string} */ mediaSavePath = "user/media",
-  ) =>
+  saveImageFromBuffer: (imageBuffer, mimeType, mediaSavePath = "user/media") =>
     ipcRenderer.invoke(
       "image:saveFromBuffer",
       imageBuffer,
       mimeType,
       mediaSavePath,
     ),
-  getImageDimensions: (/** @type {string} */ imagePath) =>
+  getImageDimensions: (imagePath) =>
     ipcRenderer.invoke("image:getDimensions", imagePath),
   getSystemTheme: () => ipcRenderer.invoke("theme:getSystemTheme"),
-  listHtmlFilesUserPath: (/** @type {string} */ dirPath) =>
+  listHtmlFilesUserPath: (dirPath) =>
     ipcRenderer.invoke("file:listHtmlFilesUserPath", dirPath),
 };
 
@@ -42,13 +34,13 @@ contextBridge.exposeInMainWorld("fileAPI", fileAPI);
 
 /** @type {import('./electron.js').ElectronAPI} */
 const electronAPI = {
-  onAppWillQuit: (/** @type {() => void} */ callback) => {
+  onAppWillQuit: (callback) => {
     ipcRenderer.on("app-will-quit", callback);
   },
   stateSaved: () => {
     ipcRenderer.send("state-saved");
   },
-  onThemeChanged: (/** @type {(isDark: boolean) => void} */ callback) => {
+  onThemeChanged: (callback) => {
     const listener = (
       /** @type {any} */ _event,
       /** @type {boolean} */ isDark,
@@ -56,9 +48,7 @@ const electronAPI = {
     ipcRenderer.on("theme-changed", listener);
     return listener; // Return the listener so it can be removed later
   },
-  removeThemeListener: (
-    /** @type {(event: any, isDark: boolean) => void} */ listener,
-  ) => {
+  removeThemeListener: (listener) => {
     ipcRenderer.removeListener("theme-changed", listener);
   },
 };
