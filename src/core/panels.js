@@ -211,14 +211,14 @@ function rightPanel(state) {
       //   },
       //   text("save"),
       // ),
-      h("hr", {}),
-      programEditor(state),
       orderButtons(state),
-      miscButtons(state),
       h("hr", {}),
+      htmls(state),
       h("hr", {}),
       pages(state),
-      htmls(state),
+      h("hr", {}),
+      programEditor(state),
+      miscButtons(state),
     ],
   );
 }
@@ -269,26 +269,6 @@ function miscButtons(state) {
    * @param {State} state - Current application state
    * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
    */
-  const newProgramButton = (state) => {
-    const currentPage = getCurrentPage(state);
-    if (!currentPage) return h("p", {}, text("no current page"));
-
-    const filename = `${currentPage.blocks.length + 1}.html`;
-
-    return h(
-      "button",
-      {
-        onclick: (state) => addBlock(state, filename),
-      },
-      text("new program"),
-    );
-  };
-
-  /**
-   * Collection of buttons
-   * @param {State} state - Current application state
-   * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
-   */
   const interactButton = (state) => {
     const currentPage = getCurrentPage(state);
     const isInteractMode = currentPage?.isInteractMode;
@@ -308,7 +288,7 @@ function miscButtons(state) {
     );
   };
 
-  return h("div", {}, [newProgramButton(state), interactButton(state)]);
+  return h("div", {}, [interactButton(state)]);
 }
 
 /**
