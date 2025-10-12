@@ -392,22 +392,26 @@ function programEditor(state) {
  */
 function htmls(state) {
   /**
-   * @param {string} htmlPath
+   * @param {string} htmlRelativePath
    */
-  const htmlView = (htmlPath) =>
+  const htmlView = (htmlRelativePath) =>
     h(
       "div",
       {
-        onpointerdown: () => addBlock(state, htmlPath),
+        onpointerdown: () => addBlock(state, htmlRelativePath),
         id: "htmlPanelPreview",
       },
-      h("iframe", {
-        src: `${state.userPath}/${htmlPath}`,
-        style: {
-          pointerEvents: "none",
-          width: "100%",
-        },
-      }),
+      [
+        h("h4", {}, text(htmlRelativePath)),
+        h("iframe", {
+          src: `${state.userPath}/${htmlRelativePath}`,
+          style: {
+            pointerEvents: "none",
+            width: "100%",
+            border: "1px solid black",
+          },
+        }),
+      ],
     );
-  return h("div", {}, state.htmlPaths.map(htmlView));
+  return h("div", {}, state.htmlRelativePaths.map(htmlView));
 }
