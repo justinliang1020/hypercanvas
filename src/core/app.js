@@ -248,6 +248,8 @@ async function initialize() {
   }
 
   state.userPath = await window.fileAPI.getUserPath();
+  const htmlFiles = await window.fileAPI.listHtmlFilesUserPath(state.userPath);
+  console.log("files", htmlFiles);
 
   // Initialize dark mode based on system theme
   try {

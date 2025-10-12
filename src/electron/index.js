@@ -440,28 +440,35 @@ ipcMain.handle("theme:getSystemTheme", () => {
   return nativeTheme.shouldUseDarkColors;
 });
 
-// List directory contents handler
-ipcMain.handle("file:listDirectory", async (event, dirPath) => {
+/**
+ * @param {String} dirPath - path to recursively search for files in directory. If this is a relative path, it assumes it is within userPath
+ * @return {Promise<String[]>} - list of absolute paths of HTML files
+ */
+async function getHtmlFilePaths(dirPath) {
   try {
     // Resolve relative paths from the app directory
     const fullPath = path.isAbsolute(dirPath)
       ? dirPath
-      : path.join(__dirname, dirPath);
+      : path.join(userPath, dirPath);
     const items = await fs.readdir(fullPath, { withFileTypes: true });
 
-    // Return both files and directories
-    return items
-      .map((item) => {
-        if (item.isDirectory()) {
-          return item.name; // Return directory name
-        } else if (item.isFile() && item.name.endsWith(".js")) {
-          return item.name; // Return JS file name
-        }
-        return null;
-      })
-      .filter(Boolean); // Remove null entries
+    const htmlFilePaths = [];
+    for (const item of items) {
+      if (item.isDirectory()) {
+        const itemHtmlFilePaths = await getHtmlFilePaths(item.name);
+        htmlFilePaths.push(...itemHtmlFilePaths);
+      } else if (item.isFile() && path.extname(item.name) === ".html") {
+        htmlFilePaths.push(path.join(item.parentPath, item.name));
+      }
+    }
+    return htmlFilePaths;
   } catch (error) {
     console.error("Error listing directory:", error);
     return [];
   }
+}
+
+// List directory contents handler
+ipcMain.handle("file:listHtmlFilesUserPath", async (event, dirPath) => {
+  return await getHtmlFilePaths(userPath);
 });
