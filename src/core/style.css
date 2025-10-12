@@ -476,3 +476,7 @@ main.dark-mode #notification {
     opacity: 1;
   }
 }
+
+#htmlPanelPreview:hover {
+  background: #f5f5f5;
+}

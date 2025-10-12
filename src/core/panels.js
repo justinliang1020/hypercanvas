@@ -419,6 +419,7 @@ function htmls(state) {
       "div",
       {
         onpointerdown: () => addBlock(state, htmlPath),
+        id: "htmlPanelPreview",
       },
       h("iframe", {
         src: `${state.userPath}/${htmlPath}`,
