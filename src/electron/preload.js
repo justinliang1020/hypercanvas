@@ -42,14 +42,26 @@ const electronAPI = {
   },
   onThemeChanged: (callback) => {
     const listener = (
-      /** @type {any} */ _event,
+      /** @type {import("electron").IpcRendererEvent} */ _event,
       /** @type {boolean} */ isDark,
     ) => callback(isDark);
     ipcRenderer.on("theme-changed", listener);
     return listener; // Return the listener so it can be removed later
   },
+  onUserFilesChanged: (callback) => {
+    const listener = (
+      /** @type {import("electron").IpcRendererEvent} */ _event,
+      /** @type {import("chokidar/handler.js").EventName} */ chokidarEvent,
+      /** @type {string} */ path,
+    ) => callback(chokidarEvent, path);
+    ipcRenderer.on("file-changed", listener);
+    return listener;
+  },
   removeThemeListener: (listener) => {
     ipcRenderer.removeListener("theme-changed", listener);
+  },
+  removeUserFilesListener: (listener) => {
+    ipcRenderer.removeListener("file-changed", listener);
   },
 };
 

@@ -9,6 +9,7 @@ const {
 const path = require("node:path");
 const fs = require("fs").promises;
 const reloader = require("electron-reloader");
+const chokidar = require("chokidar");
 
 reloader(module, { ignore: "**/local/**" });
 
@@ -80,6 +81,10 @@ app.whenReady().then(() => {
       nativeTheme.shouldUseDarkColors,
     );
   });
+
+  chokidar.watch(userPath).on("all", (event, path) => {
+    mainWindow.webContents.send("file-changed", event, path);
+  });
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -95,6 +100,10 @@ app.on("window-all-closed", () => {
 const arg = process.argv[2];
 const cwd = process.cwd();
 const userPath = `${cwd}/${arg}`;
+
+chokidar.watch(userPath).on("all", (event, path) => {
+  console.log(event, path);
+});
 
 // -----------------------------
 // ## File Processing

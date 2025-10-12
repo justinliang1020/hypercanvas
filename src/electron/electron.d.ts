@@ -2,6 +2,8 @@
  * TypeScript declarations for Electron API exposed through preload script
  */
 
+import { IpcRendererEvent } from "electron";
+
 export interface FileWriteResult {
   success: boolean;
   path: string;
@@ -129,13 +131,43 @@ export interface ElectronAPI {
    */
   onThemeChanged(
     callback: (isDark: boolean) => void,
-  ): (event: any, isDark: boolean) => void;
+  ): (event: IpcRendererEvent, isDark: boolean) => void;
+
+  /**
+   * Listen for system theme changes
+   * @param callback - Function to call when theme changes (receives isDark boolean)
+   * @returns The listener function for removal
+   */
+  onUserFilesChanged(
+    callback: (
+      chokidarEvent: import("chokidar/handler.js").EventName,
+      path: string,
+    ) => void,
+  ): (
+    event: IpcRendererEvent,
+    chokidarEvent: import("chokidar/handler.js").EventName,
+    path: string,
+  ) => void;
 
   /**
    * Remove theme change listener
    * @param listener - The listener function returned by onThemeChanged
    */
-  removeThemeListener(listener: (event: any, isDark: boolean) => void): void;
+  removeThemeListener(
+    listener: (event: IpcRendererEvent, isDark: boolean) => void,
+  ): void;
+
+  /**
+   * Remove user files change listener
+   * @param listener - The listener function returned by onUserFilesChanged
+   */
+  removeUserFilesListener(
+    listener: (
+      event: IpcRendererEvent,
+      chokidarEvent: import("chokidar/handler.js").EventName,
+      path: string,
+    ) => void,
+  ): void;
 }
 
 declare global {

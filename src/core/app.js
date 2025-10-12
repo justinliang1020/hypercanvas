@@ -163,8 +163,29 @@ function themeChangeSubscription(dispatch) {
       isDarkMode: isDark,
     }));
   };
-  // @ts-ignore
   const listener = window.electronAPI.onThemeChanged(handleThemeChange);
+
+  // Return cleanup function (required for subscriptions)
+  return () => {
+    // @ts-ignore
+    window.electronAPI.removeThemeListener(listener);
+  };
+}
+
+/**
+ * Subscription that handles hyperapp
+ * @param {import("hyperapp").Dispatch<State>} dispatch - Function to dispatch actions
+ * @returns {() => void} Cleanup function
+ */
+function userFilesChangedSubscription(dispatch) {
+  /**
+   * @param {import("chokidar/handler.js").EventName} chokidarEvent,
+   * @param {string} path,
+   */
+  const handleUserFilesChange = (chokidarEvent, path) => {
+    console.log(chokidarEvent, path);
+  };
+  const listener = window.electronAPI.onUserFilesChanged(handleUserFilesChange);
 
   // Return cleanup function (required for subscriptions)
   return () => {
@@ -278,6 +299,7 @@ async function initialize() {
     node: /** @type {Node} */ (document.getElementById("app")),
     subscriptions: (state) => [
       [themeChangeSubscription, {}],
+      [userFilesChangedSubscription, {}],
       onKeyDown(KeyDown),
       onKeyUp(KeyUp),
     ],
