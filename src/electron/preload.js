@@ -14,6 +14,7 @@ const fileAPI = {
   ) => ipcRenderer.invoke("file:write", filename, data),
   readFile: (/** @type {string} */ filename) =>
     ipcRenderer.invoke("file:read", filename),
+  getUserPath: () => ipcRenderer.invoke("file:userPath"),
   showOpenDialog: (
     /** @type {import('./electron.js').DialogOptions} */ options,
   ) => ipcRenderer.invoke("dialog:showOpenDialog", options),

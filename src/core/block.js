@@ -202,9 +202,8 @@ export function block(state) {
             },
             class: BLOCK_CONTENTS_CLASS_NAME,
           },
-          //TODO: fix hardcoded url
           h("iframe", {
-            src: `/Users/justin/Documents/code/hypercanvas/local/${block.filename}`,
+            src: `${state.userPath}/${block.filename}`,
           }),
         ),
         ...(isSelected && !isEditing && !isMultiSelect

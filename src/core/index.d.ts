@@ -89,6 +89,7 @@ interface State {
   notificationVisible: boolean;
   editingPageId: string | null;
   isShiftPressed: boolean;
+  userPath: string;
 }
 
 type ResizeHandler = (

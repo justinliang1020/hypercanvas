@@ -57,6 +57,12 @@ export interface FileAPI {
   readFile(filename: string): Promise<any>;
 
   /**
+   * Get absolute path of a file in the user data directory
+   * @returns Promise with absolute file path
+   * */
+  getUserPath(): Promise<string>;
+
+  /**
    * Show native file open dialog
    * @param options - Dialog configuration options
    * @returns Promise with dialog result

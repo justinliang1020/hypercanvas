@@ -140,6 +140,7 @@ function initialState() {
     notificationVisible: false,
     editingPageId: null,
     isShiftPressed: false,
+    userPath: "",
   };
 
   // Set currentPageId to the first page
@@ -245,6 +246,8 @@ async function initialize() {
   } catch {
     state = initialState();
   }
+
+  state.userPath = await window.fileAPI.getUserPath();
 
   // Initialize dark mode based on system theme
   try {
