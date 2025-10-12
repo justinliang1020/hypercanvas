@@ -197,7 +197,7 @@ export function block(state) {
             width: "100%",
             height: "100%",
             overflow: "hidden",
-            border: "1px solid black",
+            border: "none",
           },
           class: BLOCK_CONTENTS_CLASS_NAME,
           src: `${state.userPath}/${block.filename}`,
