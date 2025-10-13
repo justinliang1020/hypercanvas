@@ -255,6 +255,13 @@ function hyperIframe(state, block) {
     ? block.content
     : `${state.userPath}/${block.content}`;
 
+  /** @type {import("hyperapp").StyleProp} */
+  const previewStyles = {
+    opacity: "0.6",
+    pointerEvents: "none",
+    outline: "2px dashed grey",
+  };
+
   return h("iframe", {
     style: {
       pointerEvents: isEditing || state.isInteractMode ? null : "none",
@@ -262,6 +269,7 @@ function hyperIframe(state, block) {
       height: "100%",
       overflow: "hidden",
       border: "none",
+      ...(block.type === "preview" ? previewStyles : {}),
     },
     class: BLOCK_CONTENTS_CLASS_NAME,
     src,
