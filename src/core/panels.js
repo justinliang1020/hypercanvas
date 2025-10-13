@@ -167,29 +167,6 @@ function rightPanel(state) {
         },
         text("◀"),
       ),
-      // h(
-      //   "button",
-      //   {
-      //     onclick: (state) => [
-      //       state,
-      //       async (dispatch) => {
-      //         try {
-      //           const result =
-      //             // @ts-ignore
-      //             await window.fileAPI.uploadImageFromDialog(MEDIA_SAVE_PATH);
-      //           if (!result.canceled && result.success) {
-      //             //TODO: should i delete image uploading
-      //             console.log(`Would upload image: ${result.filename}`);
-      //           }
-      //         } catch (error) {
-      //           console.error("Failed to upload image:", error);
-      //           dispatch((state) => state);
-      //         }
-      //       },
-      //     ],
-      //   },
-      //   text("upload image"),
-      // ),
       h(
         "button",
         {
@@ -201,16 +178,7 @@ function rightPanel(state) {
         },
         text(state.isDarkMode ? "☀️ Light" : "🌙 Dark"),
       ),
-      // h(
-      //   "button",
-      //   {
-      //     onclick: (state) => [
-      //       state,
-      //       (dispatch) => saveApplicationAndNotify(dispatch, state),
-      //     ],
-      //   },
-      //   text("save"),
-      // ),
+      miscButtons(state),
       orderButtons(state),
       h("hr", {}),
       htmls(state),
@@ -218,7 +186,6 @@ function rightPanel(state) {
       pages(state),
       h("hr", {}),
       programEditor(state),
-      miscButtons(state),
     ],
   );
 }
