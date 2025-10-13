@@ -16,6 +16,7 @@ interface Block {
 //TODO: removew zindex?
 type BlockConfig = Omit<Block, "id" | "zIndex">;
 
+//TODO: refactor into its own data structure, instead of property of block?
 type Link = {
   parentBlock: Block;
   childBlock: Block;
