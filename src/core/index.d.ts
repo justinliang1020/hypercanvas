@@ -40,8 +40,6 @@ interface Page {
   resizing: ResizeState | null;
   dragStart: DragState | null;
   selectionBox: SelectionBoxState | null;
-  state: any;
-  css: string;
 }
 
 interface Memento {

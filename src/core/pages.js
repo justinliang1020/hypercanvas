@@ -90,14 +90,6 @@ export const defaultPage = {
   dragStart: null,
   previewSelectedIds: [],
   selectionBox: null,
-  state: { n: 0 },
-  css: `* {
-  background: lightgrey;
-  height: 100%;
-  width: 100%;
-  margin: 0;
-  padding: 5px;
-}`,
 };
 
 /**
@@ -114,7 +106,6 @@ export function createPage(state, name) {
     ...defaultPage,
     id: crypto.randomUUID(),
     name,
-    state: {},
   };
 
   const newState = {
