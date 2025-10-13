@@ -266,15 +266,28 @@ function hyperIframe(state, block) {
       [...aEls].forEach((aEl) => {
         aEl.onpointerover = (event) => {
           const href = aEl.getAttribute("href");
-          if (href) {
-            // dispatch((state) => addBlockToViewportCenter(state, href, "real"));
-            dispatch((state) => {
-              let newState = state;
-              newState = removePreviewChildBlock(newState, block.id);
-              newState = addPreviewChildBlock(newState, block.id, href);
-              return newState;
-            });
+          if (!href) {
+            return;
           }
+          dispatch((state) => {
+            let newState = state;
+            newState = removePreviewChildBlock(newState, block.id);
+            newState = addChildBlock(newState, block.id, href, "preview");
+            return newState;
+          });
+        };
+        aEl.onclick = (event) => {
+          event.preventDefault();
+          const href = aEl.getAttribute("href");
+          if (!href) {
+            return;
+          }
+          dispatch((state) => {
+            let newState = state;
+            newState = removePreviewChildBlock(newState, block.id);
+            newState = addChildBlock(newState, block.id, href, "real");
+            return newState;
+          });
         };
       });
     }
@@ -484,10 +497,10 @@ export function addBlock(state, content, type, x, y, width, height) {
     blocks: [...currentBlocks, newBlock],
   });
 
-  const selectedState = selectBlock(newState, newBlock.id);
+  // const selectedState = selectBlock(newState, newBlock.id);
 
   return {
-    state: saveMementoAndReturn(state, selectedState),
+    state: saveMementoAndReturn(state, newState),
     newBlockId: newBlock.id,
   };
 }
@@ -520,9 +533,10 @@ export function addBlockToViewportCenter(
  * @param {State} state
  * @param {number} parentBlockId
  * @param {string} content
+ * @param {BlockType} type
  * @return {State}
  */
-function addPreviewChildBlock(state, parentBlockId, content) {
+function addChildBlock(state, parentBlockId, content, type) {
   const parentBlock = getCurrentBlocks(state).find(
     (b) => b.id === parentBlockId,
   );
@@ -536,18 +550,24 @@ function addPreviewChildBlock(state, parentBlockId, content) {
   let { state: newState, newBlockId } = addBlock(
     state,
     content,
-    "preview",
+    type,
     newX,
     newY,
     DEFAULT_BLOCK_WIDTH,
     DEFAULT_BLOCK_HEIGHT,
   );
 
-  newState = updateBlock(newState, parentBlock.id, {
-    previewChildId: newBlockId,
-  });
-  console.log(getCurrentBlocks(newState));
-  console.log("addPreviewChildBlock", newBlockId);
+  //TODO: fix kinda broken
+  if (type === "preview") {
+    newState = updateBlock(newState, parentBlock, {
+      previewChildId: newBlockId,
+    });
+  } else if (type === "real") {
+    console.log([...parentBlock.realChildrenIds, newBlockId]);
+    newState = updateBlock(newState, parentBlock, {
+      realChildrenIds: [...parentBlock.realChildrenIds, newBlockId],
+    });
+  }
   return newState;
 }
 
@@ -563,7 +583,6 @@ function removePreviewChildBlock(state, parentBlockId) {
   );
   if (!parentBlock) return state;
   const currentBlocks = getCurrentBlocks(state);
-  console.log("removePreviewChildBlock", parentBlock.previewChildId);
   const newBlocks = currentBlocks
     .filter((block) => block.id !== parentBlock.previewChildId)
     .map((block) =>
@@ -677,18 +696,18 @@ export function copySelectedBlocks(state) {
 
 /**
  * @param {State} state
- * @param {number} blockId
- * @param {Partial<Block>} blockConfig
+ * @param {Block} currentBlock
+ * @param {Partial<Block>} newBlockConfig
  */
-function updateBlock(state, blockId, blockConfig) {
-  if (blockConfig.id !== undefined && blockConfig.id !== blockId) {
+function updateBlock(state, currentBlock, newBlockConfig) {
+  if (newBlockConfig.id !== undefined) {
     throw Error("Illegal: cannot update block ID");
   }
   const currentBlocks = getCurrentBlocks(state);
 
   return updateCurrentPage(state, {
     blocks: currentBlocks.map((block) =>
-      block.id === blockId ? { ...block, ...blockConfig } : block,
+      block.id === currentBlock.id ? { ...block, ...newBlockConfig } : block,
     ),
   });
 }
