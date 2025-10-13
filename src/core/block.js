@@ -235,7 +235,13 @@ function hyperIframe(state, block) {
         aEl.onpointerover = (event) => {
           const href = aEl.getAttribute("href");
           if (href) {
-            dispatch((state) => addBlockToViewportCenter(state, href, "real"));
+            // dispatch((state) => addBlockToViewportCenter(state, href, "real"));
+            dispatch((state) => {
+              let newState = state;
+              newState = removePreviewChildBlock(newState, block.id);
+              newState = addPreviewChildBlock(newState, block.id, href);
+              return newState;
+            });
           }
         };
       });
@@ -259,6 +265,7 @@ function hyperIframe(state, block) {
     class: BLOCK_CONTENTS_CLASS_NAME,
     src,
     id: `block-${block.id}`,
+    key: `${block.id}-${src}`,
     onload,
   });
 }
@@ -413,7 +420,7 @@ export function deleteSelectedBlocks(state) {
  * @param {number} y - Y position on canvas. If null, uses viewport's center X coordinate
  * @param {number} width - Block width in pixels
  * @param {number} height - Block height in pixels
- * @returns {State} Updated state with new block
+ * @returns {{state: State, newBlockId: number}} Updated state with new block
  */
 export function addBlock(state, content, type, x, y, width, height) {
   const globalBlocks = getGlobalBlocks(state);
@@ -439,7 +446,10 @@ export function addBlock(state, content, type, x, y, width, height) {
 
   const selectedState = selectBlock(newState, newBlock.id);
 
-  return saveMementoAndReturn(state, selectedState);
+  return {
+    state: saveMementoAndReturn(state, selectedState),
+    newBlockId: newBlock.id,
+  };
 }
 
 /**
@@ -462,13 +472,66 @@ export function addBlockToViewportCenter(
   const x = viewportCenter.x - width / 2; // Center the block
   const y = viewportCenter.y - height / 2; // Center the block
 
-  return addBlock(state, content, type, x, y, width, height);
+  return addBlock(state, content, type, x, y, width, height).state;
 }
 
-// /**
-//  * Add a preview block adjacent to the original block
-//  */
-// function addPreviewChildBlock(state, parentBlock, content) {}
+/**
+ * Add a preview block adjacent to the original block
+ * @param {State} state
+ * @param {number} parentBlockId
+ * @param {string} content
+ * @return {State}
+ */
+function addPreviewChildBlock(state, parentBlockId, content) {
+  const parentBlock = getCurrentBlocks(state).find(
+    (b) => b.id === parentBlockId,
+  );
+  if (!parentBlock) {
+    throw Error(`no parent block found of id ${parentBlockId}`);
+  }
+  const offsetX = 300;
+  const newX = parentBlock.x + parentBlock.width + offsetX;
+  const newY = parentBlock.y;
+
+  let { state: newState, newBlockId } = addBlock(
+    state,
+    content,
+    "preview",
+    newX,
+    newY,
+    DEFAULT_BLOCK_WIDTH,
+    DEFAULT_BLOCK_HEIGHT,
+  );
+
+  newState = updateBlock(newState, parentBlock.id, {
+    previewChildId: newBlockId,
+  });
+  console.log(getCurrentBlocks(newState));
+  console.log("addPreviewChildBlock", newBlockId);
+  return newState;
+}
+
+/**
+ * Add a preview block adjacent to the original block
+ * @param {State} state
+ * @param {number} parentBlockId
+ * @return {State}
+ */
+function removePreviewChildBlock(state, parentBlockId) {
+  const parentBlock = getCurrentBlocks(state).find(
+    (b) => b.id === parentBlockId,
+  );
+  if (!parentBlock) return state;
+  const currentBlocks = getCurrentBlocks(state);
+  console.log("removePreviewChildBlock", parentBlock.previewChildId);
+  const newBlocks = currentBlocks
+    .filter((block) => block.id !== parentBlock.previewChildId)
+    .map((block) =>
+      block.id === parentBlock.id ? { ...block, previewChildId: null } : block,
+    );
+
+  return updateCurrentPage(state, { blocks: newBlocks });
+}
 //
 // function addRealChildBlock(state, parentBlock, content) {}
 //
@@ -512,7 +575,15 @@ function addBlocks(state, blockConfigs) {
   for (const config of blockConfigs) {
     const { content, x, y, width, height, type } = config;
 
-    currentState = addBlock(currentState, content, type, x, y, width, height);
+    currentState = addBlock(
+      currentState,
+      content,
+      type,
+      x,
+      y,
+      width,
+      height,
+    ).state;
 
     // Get the ID of the newly added block
     const currentBlocks = getCurrentBlocks(currentState);
@@ -586,4 +657,22 @@ export function copySelectedBlocks(state) {
     },
     clearUserClipboardEffect,
   ];
+}
+
+/**
+ * @param {State} state
+ * @param {number} blockId
+ * @param {Partial<Block>} blockConfig
+ */
+function updateBlock(state, blockId, blockConfig) {
+  if (blockConfig.id !== undefined && blockConfig.id !== blockId) {
+    throw Error("Illegal: cannot update block ID");
+  }
+  const currentBlocks = getCurrentBlocks(state);
+
+  return updateCurrentPage(state, {
+    blocks: currentBlocks.map((block) =>
+      block.id === blockId ? { ...block, ...blockConfig } : block,
+    ),
+  });
 }

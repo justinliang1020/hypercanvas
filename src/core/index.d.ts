@@ -13,6 +13,7 @@ interface Block {
   realChildrenId: number[];
 }
 
+//TODO: removew zindex?
 type BlockConfig = Omit<Block, "id" | "zIndex">;
 
 interface Page {
