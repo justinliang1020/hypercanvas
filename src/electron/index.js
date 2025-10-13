@@ -25,6 +25,7 @@ const createWindow = () => {
     height: 800,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
+      webviewTag: true, // for some reason, turning this on automatically makes iframes into webviews which are able to access cross-origin sites
     },
   });
 

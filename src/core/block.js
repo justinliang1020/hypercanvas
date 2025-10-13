@@ -242,6 +242,10 @@ function hyperIframe(state, block) {
     return [state, (dispatch) => injectATags(dispatch)];
   }
 
+  const src = block.content.startsWith("https://")
+    ? block.content
+    : `${state.userPath}/${block.content}`;
+
   return h("iframe", {
     style: {
       pointerEvents: isEditing || state.isInteractMode ? null : "none",
@@ -251,7 +255,7 @@ function hyperIframe(state, block) {
       border: "none",
     },
     class: BLOCK_CONTENTS_CLASS_NAME,
-    src: `${state.userPath}/${block.content}`,
+    src,
     id: `block-${block.id}`,
     onload,
   });
