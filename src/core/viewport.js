@@ -575,7 +575,6 @@ export function viewport(state) {
           ? `${state.programsPanelWidth}px`
           : "0",
         touchAction: "none", // Prevent default touch behaviors
-        boxShadow: state.isInteractMode ? "inset 0 0 0 3px limegreen" : "none", // Use inset box-shadow instead of border to prevent layout shift
       },
 
       onpointerdown,

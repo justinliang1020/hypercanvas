@@ -42,6 +42,7 @@ export function block(state) {
     const isMultiSelect = selectedBlocks.length > 1;
     const isEditing = currentPage.editingId === block.id;
     const isHovering = currentPage.hoveringId === block.id;
+    const isInteractMode = state.isInteractMode;
 
     // Having small borders, i.e. 1px, can cause rendering glitches to occur when CSS transform translations are applied such as zooming out
     // Scale outline thickness inversely with zoom to maintain consistent visual appearance
@@ -52,6 +53,7 @@ export function block(state) {
         isMultiSelect,
         isSelected,
         isPreviewSelected,
+        isInteractMode,
       },
       state,
     );
@@ -374,7 +376,7 @@ function createOutline(width, color, zoom) {
 
 /**
  * Determines the outline style for a block based on its current state
- * @param {{isHovering: boolean, isEditing: boolean, isMultiSelect: boolean, isSelected: boolean, isPreviewSelected: boolean}} blockState - Block state flags
+ * @param {{isHovering: boolean, isEditing: boolean, isMultiSelect: boolean, isSelected: boolean, isPreviewSelected: boolean, isInteractMode: boolean}} blockState - Block state flags
  * @param {State} state - Application state
  * @returns {string|null} CSS outline property value
  */
@@ -385,10 +387,19 @@ function getBlockOutline(blockState, state) {
     isMultiSelect,
     isSelected,
     isPreviewSelected,
+    isInteractMode,
   } = blockState;
 
   const currentPage = getCurrentPage(state);
   if (!currentPage) return null;
+
+  if (isInteractMode) {
+    return createOutline(
+      OUTLINE_WIDTHS.THICK,
+      OUTLINE_COLORS.INTERACT_MODE,
+      currentPage.zoom,
+    );
+  }
 
   if (isEditing) {
     return createOutline(
