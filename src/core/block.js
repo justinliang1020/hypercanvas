@@ -209,8 +209,30 @@ export function block(state) {
  * @return {import("hyperapp").ElementVNode<State>}
  */
 export function linkView(link) {
-  //TODO: finish
-  return h("div", {});
+  const parentCenterX = link.parentBlock.x + link.parentBlock.width / 2;
+  const parentCenterY = link.parentBlock.y + link.parentBlock.height / 2;
+  const childCenterX = link.childBlock.x + link.childBlock.width / 2;
+  const childCenterY = link.childBlock.y + link.childBlock.height / 2;
+
+  const dx = childCenterX - parentCenterX;
+  const dy = childCenterY - parentCenterY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+  return h("div", {
+    style: {
+      position: "absolute",
+      left: `${parentCenterX}px`,
+      top: `${parentCenterY}px`,
+      width: `${distance}px`,
+      height: "2px",
+      backgroundColor: "#888",
+      transformOrigin: "0 50%",
+      transform: `rotate(${angle}deg)`,
+      pointerEvents: "none",
+      zIndex: "0",
+    },
+  });
 }
 
 /**
