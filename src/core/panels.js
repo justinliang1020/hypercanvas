@@ -237,8 +237,7 @@ function miscButtons(state) {
    * @returns {import("hyperapp").ElementVNode<State>} Program buttons element
    */
   const interactButton = (state) => {
-    const currentPage = getCurrentPage(state);
-    const isInteractMode = currentPage?.isInteractMode;
+    const isInteractMode = state.isInteractMode;
 
     return h(
       "button",
@@ -246,10 +245,10 @@ function miscButtons(state) {
         class: {
           active: isInteractMode,
         },
-        onclick: (state) =>
-          updateCurrentPage(state, {
-            isInteractMode: !isInteractMode,
-          }),
+        onclick: (state) => ({
+          ...state,
+          isInteractMode: !state.isInteractMode,
+        }),
       },
       text("interact mode"),
     );

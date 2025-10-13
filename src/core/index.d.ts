@@ -22,7 +22,6 @@ interface Page {
   cursorStyle: string;
   isViewportDragging: boolean;
   isTextEditorFocused: boolean;
-  isInteractMode: boolean;
   selectedIds: number[];
   previewSelectedIds: number[];
   editingId: number | null;
@@ -91,6 +90,7 @@ interface State {
   isShiftPressed: boolean;
   userPath: string;
   htmlRelativePaths: string[];
+  isInteractMode: boolean;
 }
 
 type ResizeHandler = (

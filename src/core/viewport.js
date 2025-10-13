@@ -556,7 +556,6 @@ export function onkeydown(state, event) {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 export function viewport(state) {
-  const currentPage = getCurrentPage(state);
   return h(
     "div",
     {
@@ -570,9 +569,7 @@ export function viewport(state) {
           ? `${state.programsPanelWidth}px`
           : "0",
         touchAction: "none", // Prevent default touch behaviors
-        boxShadow: currentPage?.isInteractMode
-          ? "inset 0 0 0 3px limegreen"
-          : "none", // Use inset box-shadow instead of border to prevent layout shift
+        boxShadow: state.isInteractMode ? "inset 0 0 0 3px limegreen" : "none", // Use inset box-shadow instead of border to prevent layout shift
       },
 
       onpointerdown,

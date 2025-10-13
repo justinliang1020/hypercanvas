@@ -84,10 +84,7 @@ export function block(state) {
       let cursorStyle;
       if (isMultiSelect) {
         cursorStyle = "default";
-      } else if (
-        currentPage.editingId === block.id ||
-        currentPage.isInteractMode
-      ) {
+      } else if (currentPage.editingId === block.id || state.isInteractMode) {
         // In edit mode, use default cursor
         cursorStyle = "default";
       } else {
@@ -127,7 +124,7 @@ export function block(state) {
       event.stopPropagation();
 
       // If block is in edit mode, don't start dragging
-      if (currentPage.editingId === block.id || currentPage.isInteractMode) {
+      if (currentPage.editingId === block.id || state.isInteractMode) {
         return state;
       }
 
@@ -157,7 +154,7 @@ export function block(state) {
 
       const currentPage = getCurrentPage(state);
       if (!currentPage) return state;
-      if (currentPage.isInteractMode || currentPage.isTextEditorFocused) {
+      if (state.isInteractMode || currentPage.isTextEditorFocused) {
         return state;
       }
 
@@ -238,7 +235,7 @@ function hyperIframe(state, block) {
 
   return h("iframe", {
     style: {
-      pointerEvents: isEditing || currentPage.isInteractMode ? null : "none",
+      pointerEvents: isEditing || state.isInteractMode ? null : "none",
       width: "100%",
       height: "100%",
       overflow: "hidden",

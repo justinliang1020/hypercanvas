@@ -139,6 +139,7 @@ function initialState() {
     notificationVisible: false,
     editingPageId: null,
     isShiftPressed: false,
+    isInteractMode: false,
     userPath: "",
     htmlRelativePaths: [],
   };
