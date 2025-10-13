@@ -30,9 +30,10 @@ export function getCurrentLinks(state) {
     const previewChildBlock = blocks.find(
       (b) => b.id === parentBlock.previewChildId,
     );
-    const realChildrenBlocks = blocks.filter(
-      (b) => b.id in parentBlock.realChildrenIds,
+    const realChildrenBlocks = blocks.filter((b) =>
+      parentBlock.realChildrenIds.includes(b.id),
     );
+
     const childBlocks = [
       ...(previewChildBlock ? [previewChildBlock] : []),
       ...realChildrenBlocks,
