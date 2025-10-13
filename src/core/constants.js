@@ -38,5 +38,5 @@ export const OUTLINE_WIDTHS = {
 
 export const BLOCK_CONTENTS_CLASS_NAME = "block-contents";
 
-export const DEFAULT_BLOCK_WIDTH = 200;
-export const DEFAULT_BLOCK_HEIGHT = 200;
+export const DEFAULT_BLOCK_WIDTH = 400;
+export const DEFAULT_BLOCK_HEIGHT = 400;
