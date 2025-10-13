@@ -10,11 +10,16 @@ interface Block {
   content: string;
   type: BlockType;
   previewChildId: number | null;
-  realChildrenId: number[];
+  realChildrenIds: number[];
 }
 
 //TODO: removew zindex?
 type BlockConfig = Omit<Block, "id" | "zIndex">;
+
+type Link = {
+  parentBlock: Block;
+  childBlock: Block;
+};
 
 interface Page {
   id: string;

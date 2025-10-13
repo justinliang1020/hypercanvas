@@ -313,7 +313,7 @@ export function handleResizePointerMove(state, event) {
       content: "",
       type: "real",
       previewChildId: 0,
-      realChildrenId: [],
+      realChildrenIds: [],
     };
 
     let newBBox = handler(virtualBoundingBox, {

@@ -1,6 +1,11 @@
 import { h } from "hyperapp";
 import { pasteEffect } from "./utils.js";
-import { copySelectedBlocks, deleteSelectedBlocks, block } from "./block.js";
+import {
+  copySelectedBlocks,
+  deleteSelectedBlocks,
+  block,
+  linkView,
+} from "./block.js";
 import { handleResizePointerMove } from "./resize.js";
 import { saveMementoAndReturn, redoState, undoState } from "./memento.js";
 import {
@@ -8,6 +13,7 @@ import {
   getCurrentBlocks,
   getCurrentViewport,
   updateCurrentPage,
+  getCurrentLinks,
 } from "./pages.js";
 import {
   calculatePreviewSelection,
@@ -589,6 +595,8 @@ export function viewport(state) {
           },
         },
         [
+          // Render links
+          ...getCurrentLinks(state).map((link) => linkView(link)),
           // Render blocks
           ...getCurrentBlocks(state).map(block(state)),
           // Render selection bounding box above blocks

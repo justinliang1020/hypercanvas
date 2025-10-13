@@ -205,6 +205,15 @@ export function block(state) {
 }
 
 /**
+ * @param {Link} link
+ * @return {import("hyperapp").ElementVNode<State>}
+ */
+export function linkView(link) {
+  //TODO: finish
+  return h("div", {});
+}
+
+/**
  * @param {State} state
  * @param {Block} block
  * @return {import("hyperapp").ElementVNode<State>}
@@ -445,7 +454,7 @@ export function addBlock(state, content, type, x, y, width, height) {
     zIndex: Math.max(...globalBlocks.map((block) => block.zIndex), 0) + 1,
     content: content,
     previewChildId: null,
-    realChildrenId: [],
+    realChildrenIds: [],
   };
 
   const currentBlocks = getCurrentBlocks(state);
@@ -602,7 +611,7 @@ export function pasteClipboardBlocks(state) {
     type: blockData.type,
     //BUG: fix, actually implement this
     previewChildId: 0,
-    realChildrenId: [],
+    realChildrenIds: [],
   }));
 
   const { state: newState, blockIds } = addBlocks(state, blockConfigs);
