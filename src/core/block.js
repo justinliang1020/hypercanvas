@@ -251,7 +251,7 @@ function hyperIframe(state, block) {
       border: "none",
     },
     class: BLOCK_CONTENTS_CLASS_NAME,
-    src: `${state.userPath}/${block.filename}`,
+    src: `${state.userPath}/${block.content}`,
     id: `block-${block.id}`,
     onload,
   });
@@ -401,7 +401,7 @@ export function deleteSelectedBlocks(state) {
 /**
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
- * @param {string} filename - Name of view to instantiate
+ * @param {string} content - Name of view to instantiate
  * @param {number | null} x - X position on canvas. If null, uses viewport's center X coordinate
  * @param {number | null} y - Y position on canvas. If null, uses viewport's center X coordinate
  * @param {number} width - Block width in pixels
@@ -409,7 +409,7 @@ export function deleteSelectedBlocks(state) {
  * @returns {State} Updated state with new block */
 export function addBlock(
   state,
-  filename,
+  content,
   x = null,
   y = null,
   width = 200,
@@ -433,7 +433,7 @@ export function addBlock(
     x: x,
     y: y,
     zIndex: Math.max(...globalBlocks.map((block) => block.zIndex), 0) + 1,
-    filename: filename,
+    content: content,
   };
 
   const currentBlocks = getCurrentBlocks(state);
@@ -462,9 +462,9 @@ function addBlocks(state, blockConfigs) {
 
   // Add each block sequentially
   for (const config of blockConfigs) {
-    const { filename, x, y, width, height } = config;
+    const { content, x, y, width, height } = config;
 
-    currentState = addBlock(currentState, filename, x, y, width, height);
+    currentState = addBlock(currentState, content, x, y, width, height);
 
     // Get the ID of the newly added block
     const currentBlocks = getCurrentBlocks(currentState);
@@ -494,7 +494,7 @@ export function pasteClipboardBlocks(state) {
     y: blockData.y + PASTE_OFFSET_Y,
     width: blockData.width,
     height: blockData.height,
-    filename: blockData.filename,
+    content: blockData.content,
   }));
 
   const { state: newState, blockIds } = addBlocks(state, blockConfigs);

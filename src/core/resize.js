@@ -300,6 +300,7 @@ export function handleResizePointerMove(state, event) {
     const handler = RESIZE_HANDLERS[page.resizing.handle];
     if (!handler || !page.resizing.originalBlocks) return state;
 
+    /** @type {Block} */
     const virtualBoundingBox = {
       id: -1,
       x: page.resizing.startX,
@@ -307,7 +308,7 @@ export function handleResizePointerMove(state, event) {
       width: page.resizing.startWidth,
       height: page.resizing.startHeight,
       zIndex: 0,
-      filename: "",
+      content: "",
     };
 
     let newBBox = handler(virtualBoundingBox, {

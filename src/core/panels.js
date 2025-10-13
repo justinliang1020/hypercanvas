@@ -329,7 +329,7 @@ function programEditor(state) {
 
   return aceEditor(
     String(block.id),
-    block.filename,
+    block.content,
     "javascript",
     state.isDarkMode,
     /**

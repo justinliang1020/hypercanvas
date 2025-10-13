@@ -5,7 +5,7 @@ interface Block {
   x: number;
   y: number;
   zIndex: number;
-  filename: string;
+  content: string;
 }
 
 type BlockConfig = Omit<Block, "id" | "zIndex">;
