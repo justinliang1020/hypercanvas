@@ -190,18 +190,7 @@ export function block(state) {
         ondblclick,
       },
       [
-        h("iframe", {
-          style: {
-            pointerEvents:
-              isEditing || currentPage.isInteractMode ? null : "none",
-            width: "100%",
-            height: "100%",
-            overflow: "hidden",
-            border: "none",
-          },
-          class: BLOCK_CONTENTS_CLASS_NAME,
-          src: `${state.userPath}/${block.filename}`,
-        }),
+        hyperIframe(state, block),
         ...(isSelected && !isEditing && !isMultiSelect
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>
               ResizeHandle({
@@ -214,6 +203,52 @@ export function block(state) {
       ],
     );
   };
+}
+
+/**
+ * @param {State} state
+ * @param {Block} block
+ * @return {import("hyperapp").ElementVNode<State>}
+ */
+function hyperIframe(state, block) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return h("div", {});
+  const isEditing = currentPage.editingId === block.id;
+
+  /**
+   * @param {State} state
+   * @param {Event} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function onload(state, event) {
+    // TODO: fix typing
+    // @ts-ignore
+    const /** @type {HTMLIFrameElement}  */ el = document.getElementById(
+        `block-${block.id}`,
+      );
+    if (!el || !el.contentWindow) return state;
+    const aEls = el.contentWindow.document.getElementsByTagName("a");
+    [...aEls].forEach((el) => {
+      el.onpointerover = (event) => {
+        console.log("meow");
+      };
+    });
+    return state;
+  }
+
+  return h("iframe", {
+    style: {
+      pointerEvents: isEditing || currentPage.isInteractMode ? null : "none",
+      width: "100%",
+      height: "100%",
+      overflow: "hidden",
+      border: "none",
+    },
+    class: BLOCK_CONTENTS_CLASS_NAME,
+    src: `${state.userPath}/${block.filename}`,
+    id: `block-${block.id}`,
+    onload,
+  });
 }
 
 /**
