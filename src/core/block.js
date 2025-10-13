@@ -230,6 +230,7 @@ function hyperIframe(state, block) {
           `block-${block.id}`,
         );
       if (!el || !el.contentWindow) return;
+      //BUG: gracefully handle cross-origin sites which cannot access the element.contentWindow.document property
       const aEls = el.contentWindow.document.getElementsByTagName("a");
       [...aEls].forEach((aEl) => {
         aEl.onpointerover = (event) => {
