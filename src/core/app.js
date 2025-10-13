@@ -74,6 +74,11 @@ const KeyDown = (state, event) => {
         ...state,
         isShiftPressed: true,
       };
+    case "Alt": // option on mac
+      return {
+        ...state,
+        isInteractMode: true,
+      };
     case "s":
       // Handle save shortcut (Ctrl+S or Cmd+S)
       if (event.ctrlKey || event.metaKey) {
@@ -97,6 +102,11 @@ const KeyUp = (state, event) => {
       return {
         ...state,
         isShiftPressed: false,
+      };
+    case "Alt": // option on mac
+      return {
+        ...state,
+        isInteractMode: false,
       };
     default:
       return state;
