@@ -250,6 +250,42 @@ function hyperIframe(state, block) {
    */
   function onload(state) {
     /**
+     * @param {HTMLIFrameElement} el
+     * TODO: figure out a better hack than this to fix global events not firing after an iframe gets focus
+     */
+    function propogateEventListeners(el) {
+      if (!el || !el.contentWindow) return;
+      // Inject key event listeners to forward to parent window
+      el.contentWindow.document.addEventListener("keydown", (event) => {
+        window.dispatchEvent(
+          new KeyboardEvent("keydown", {
+            key: event.key,
+            code: event.code,
+            ctrlKey: event.ctrlKey,
+            metaKey: event.metaKey,
+            shiftKey: event.shiftKey,
+            altKey: event.altKey,
+            bubbles: true,
+          }),
+        );
+      });
+
+      el.contentWindow.document.addEventListener("keyup", (event) => {
+        window.dispatchEvent(
+          new KeyboardEvent("keyup", {
+            key: event.key,
+            code: event.code,
+            ctrlKey: event.ctrlKey,
+            metaKey: event.metaKey,
+            shiftKey: event.shiftKey,
+            altKey: event.altKey,
+            bubbles: true,
+          }),
+        );
+      });
+    }
+
+    /**
      * @param {import("hyperapp").Dispatch<State>} dispatch - Function to dispatch actions
      * @returns {void}
      */
@@ -261,6 +297,9 @@ function hyperIframe(state, block) {
         );
       if (!el || !el.contentWindow) return;
       //BUG: gracefully handle cross-origin sites which cannot access the element.contentWindow.document property
+
+      propogateEventListeners(el);
+
       const aEls = el.contentWindow.document.getElementsByTagName("a");
       [...aEls].forEach((aEl) => {
         aEl.onpointerover = (event) => {
