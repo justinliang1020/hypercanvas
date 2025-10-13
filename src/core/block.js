@@ -541,30 +541,6 @@ function removePreviewChildBlock(state, parentBlockId) {
 
   return updateCurrentPage(state, { blocks: newBlocks });
 }
-//
-// function addRealChildBlock(state, parentBlock, content) {}
-//
-// function removePreviewChildBlock(state, parentBlock, content) {}
-//
-// /**
-//  * @param {State} state
-//  * @param {Block} parentBlock
-//  * @param {string} content
-//  */
-// function onpointerover(state, parentBlock, content) {
-//   removePreviewChildBlock(state, parentBlock);
-//   addPreviewChildBlock(state, parentBlock, content);
-// }
-//
-// /**
-//  * @param {State} state
-//  * @param {Block} parentBlock
-//  * @param {string} content
-//  */
-// function onpointerdown(state, parentBlock, content) {
-//   removePreviewChildBlock(state, parentBlock);
-//   addRealChildBlock(state, parentBlock, content);
-// }
 
 /**
  * Adds multiple blocks to the state
