@@ -214,23 +214,32 @@ function hyperIframe(state, block) {
 
   /**
    * @param {State} state
-   * @param {Event} event
    * @returns {import("hyperapp").Dispatchable<State>}
    */
-  function onload(state, event) {
-    // TODO: fix typing
-    // @ts-ignore
-    const /** @type {HTMLIFrameElement}  */ el = document.getElementById(
-        `block-${block.id}`,
-      );
-    if (!el || !el.contentWindow) return state;
-    const aEls = el.contentWindow.document.getElementsByTagName("a");
-    [...aEls].forEach((el) => {
-      el.onpointerover = (event) => {
-        console.log("meow");
-      };
-    });
-    return state;
+  function onload(state) {
+    /**
+     * @param {import("hyperapp").Dispatch<State>} dispatch - Function to dispatch actions
+     * @returns {void}
+     */
+    function injectATags(dispatch) {
+      // TODO: fix typing
+      // @ts-ignore
+      const /** @type {HTMLIFrameElement}  */ el = document.getElementById(
+          `block-${block.id}`,
+        );
+      if (!el || !el.contentWindow) return;
+      const aEls = el.contentWindow.document.getElementsByTagName("a");
+      [...aEls].forEach((aEl) => {
+        aEl.onpointerover = (event) => {
+          const href = aEl.getAttribute("href");
+          if (href) {
+            dispatch((state) => addBlock(state, href));
+          }
+        };
+      });
+    }
+
+    return [state, (dispatch) => injectATags(dispatch)];
   }
 
   return h("iframe", {
