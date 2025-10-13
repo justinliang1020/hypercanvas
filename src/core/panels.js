@@ -1,5 +1,5 @@
 import { h, text } from "hyperapp";
-import { addBlock, sendToBack, sendToFront } from "./block.js";
+import { addBlockToViewportCenter, sendToBack, sendToFront } from "./block.js";
 import {
   createPage,
   switchPage,
@@ -364,7 +364,8 @@ function htmls(state) {
     h(
       "div",
       {
-        onpointerdown: () => addBlock(state, htmlRelativePath),
+        onpointerdown: () =>
+          addBlockToViewportCenter(state, htmlRelativePath, "real"),
         id: "htmlPanelPreview",
       },
       [

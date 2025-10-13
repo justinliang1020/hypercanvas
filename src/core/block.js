@@ -5,6 +5,8 @@ import {
   OUTLINE_COLORS,
   OUTLINE_WIDTHS,
   BLOCK_CONTENTS_CLASS_NAME,
+  DEFAULT_BLOCK_WIDTH,
+  DEFAULT_BLOCK_HEIGHT,
 } from "./constants.js";
 import { saveMementoAndReturn } from "./memento.js";
 import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
@@ -233,7 +235,7 @@ function hyperIframe(state, block) {
         aEl.onpointerover = (event) => {
           const href = aEl.getAttribute("href");
           if (href) {
-            dispatch((state) => addBlock(state, href));
+            dispatch((state) => addBlockToViewportCenter(state, href, "real"));
           }
         };
       });
@@ -406,27 +408,14 @@ export function deleteSelectedBlocks(state) {
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
  * @param {string} content - Name of view to instantiate
- * @param {number | null} x - X position on canvas. If null, uses viewport's center X coordinate
- * @param {number | null} y - Y position on canvas. If null, uses viewport's center X coordinate
+ * @param {BlockType} type - Name of view to instantiate
+ * @param {number} x - X position on canvas. If null, uses viewport's center X coordinate
+ * @param {number} y - Y position on canvas. If null, uses viewport's center X coordinate
  * @param {number} width - Block width in pixels
  * @param {number} height - Block height in pixels
- * @returns {State} Updated state with new block */
-export function addBlock(
-  state,
-  content,
-  x = null,
-  y = null,
-  width = 200,
-  height = 200,
-) {
-  // If no coordinates provided, use viewport center
-  if (x === null || y === null) {
-    const viewportCenter = getViewportCenterCoordinates(state);
-    x = x ?? viewportCenter.x - width / 2; // Center the block
-    y = y ?? viewportCenter.y - height / 2; // Center the block
-  }
-  const currentPage = getCurrentPage(state);
-  if (!currentPage) return state;
+ * @returns {State} Updated state with new block
+ */
+export function addBlock(state, content, type, x, y, width, height) {
   const globalBlocks = getGlobalBlocks(state);
 
   /** @type {Block} */
@@ -436,8 +425,11 @@ export function addBlock(
     height: height,
     x: x,
     y: y,
+    type: type,
     zIndex: Math.max(...globalBlocks.map((block) => block.zIndex), 0) + 1,
     content: content,
+    previewChildId: null,
+    realChildrenId: [],
   };
 
   const currentBlocks = getCurrentBlocks(state);
@@ -449,6 +441,58 @@ export function addBlock(
 
   return saveMementoAndReturn(state, selectedState);
 }
+
+/**
+ * Adds a new block to the state and renders its program
+ * @param {State} state - Current application state
+ * @param {string} content - Name of view to instantiate
+ * @param {BlockType} type - Name of view to instantiate
+ * @param {number} width - Block width in pixels
+ * @param {number} height - Block height in pixels
+ * @returns {State} Updated state with new block
+ **/
+export function addBlockToViewportCenter(
+  state,
+  content,
+  type,
+  width = DEFAULT_BLOCK_WIDTH,
+  height = DEFAULT_BLOCK_HEIGHT,
+) {
+  const viewportCenter = getViewportCenterCoordinates(state);
+  const x = viewportCenter.x - width / 2; // Center the block
+  const y = viewportCenter.y - height / 2; // Center the block
+
+  return addBlock(state, content, type, x, y, width, height);
+}
+
+// /**
+//  * Add a preview block adjacent to the original block
+//  */
+// function addPreviewChildBlock(state, parentBlock, content) {}
+//
+// function addRealChildBlock(state, parentBlock, content) {}
+//
+// function removePreviewChildBlock(state, parentBlock, content) {}
+//
+// /**
+//  * @param {State} state
+//  * @param {Block} parentBlock
+//  * @param {string} content
+//  */
+// function onpointerover(state, parentBlock, content) {
+//   removePreviewChildBlock(state, parentBlock);
+//   addPreviewChildBlock(state, parentBlock, content);
+// }
+//
+// /**
+//  * @param {State} state
+//  * @param {Block} parentBlock
+//  * @param {string} content
+//  */
+// function onpointerdown(state, parentBlock, content) {
+//   removePreviewChildBlock(state, parentBlock);
+//   addRealChildBlock(state, parentBlock, content);
+// }
 
 /**
  * Adds multiple blocks to the state
@@ -466,9 +510,9 @@ function addBlocks(state, blockConfigs) {
 
   // Add each block sequentially
   for (const config of blockConfigs) {
-    const { content, x, y, width, height } = config;
+    const { content, x, y, width, height, type } = config;
 
-    currentState = addBlock(currentState, content, x, y, width, height);
+    currentState = addBlock(currentState, content, type, x, y, width, height);
 
     // Get the ID of the newly added block
     const currentBlocks = getCurrentBlocks(currentState);
@@ -492,13 +536,17 @@ export function pasteClipboardBlocks(state) {
     return state;
   }
 
-  // Transform clipboard data into block configurations for addBlocks
+  /** @type {BlockConfig[]} */
   const blockConfigs = clipboardData.map((blockData) => ({
     x: blockData.x + PASTE_OFFSET_X,
     y: blockData.y + PASTE_OFFSET_Y,
     width: blockData.width,
     height: blockData.height,
     content: blockData.content,
+    type: blockData.type,
+    //BUG: fix, actually implement this
+    previewChildId: 0,
+    realChildrenId: [],
   }));
 
   const { state: newState, blockIds } = addBlocks(state, blockConfigs);

@@ -1,3 +1,5 @@
+type BlockType = "real" | "preview";
+
 interface Block {
   id: number;
   width: number;
@@ -6,6 +8,9 @@ interface Block {
   y: number;
   zIndex: number;
   content: string;
+  type: BlockType;
+  previewChildId: number | null;
+  realChildrenId: number[];
 }
 
 type BlockConfig = Omit<Block, "id" | "zIndex">;
