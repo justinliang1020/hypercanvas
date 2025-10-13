@@ -40,6 +40,7 @@ interface Page {
   resizing: ResizeState | null;
   dragStart: DragState | null;
   selectionBox: SelectionBoxState | null;
+  blockIdCounter: number;
 }
 
 interface Memento {

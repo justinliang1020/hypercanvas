@@ -90,6 +90,7 @@ export const defaultPage = {
   dragStart: null,
   previewSelectedIds: [],
   selectionBox: null,
+  blockIdCounter: 1,
 };
 
 /**

@@ -16,7 +16,6 @@ import {
   getCurrentBlocks,
   updateCurrentPage,
   getCurrentPage,
-  getGlobalBlocks,
 } from "./pages.js";
 import {
   isBlockSelected,
@@ -476,25 +475,28 @@ export function deleteSelectedBlocks(state) {
  * @returns {{state: State, newBlockId: number}} Updated state with new block
  */
 export function addBlock(state, content, type, x, y, width, height) {
-  const globalBlocks = getGlobalBlocks(state);
+  const currentBlocks = getCurrentBlocks(state);
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) {
+    throw Error("no current page");
+  }
 
   /** @type {Block} */
   const newBlock = {
-    id: Math.max(...globalBlocks.map((block) => block.id), 0) + 1,
+    id: currentPage.blockIdCounter,
     width: width,
     height: height,
     x: x,
     y: y,
     type: type,
-    zIndex: Math.max(...globalBlocks.map((block) => block.zIndex), 0) + 1,
+    zIndex: Math.max(...currentBlocks.map((block) => block.zIndex), 0) + 1,
     content: content,
     previewChildId: null,
     realChildrenIds: [],
   };
-
-  const currentBlocks = getCurrentBlocks(state);
   const newState = updateCurrentPage(state, {
     blocks: [...currentBlocks, newBlock],
+    blockIdCounter: currentPage.blockIdCounter + 1,
   });
 
   // const selectedState = selectBlock(newState, newBlock.id);
