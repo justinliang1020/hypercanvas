@@ -183,6 +183,7 @@ export function block(state) {
           height: `${block.height}px`,
           zIndex: `${block.zIndex}`,
         },
+        title: block.content,
         class: { block: true },
         onpointerover,
         onpointerleave,
