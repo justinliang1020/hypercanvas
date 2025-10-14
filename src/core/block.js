@@ -233,6 +233,7 @@ export function linkView(link) {
       pointerEvents: "none",
       zIndex: "0",
     },
+    key: `${link.parentBlock.id}-${link.childBlock.id}`,
   });
 }
 
