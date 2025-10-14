@@ -193,12 +193,26 @@ function userFilesChangedSubscription(dispatch) {
    * @param {import("chokidar/handler.js").EventName} chokidarEvent,
    * @param {string} path,
    */
-  const handleUserFilesChange = (chokidarEvent, path) => {
-    console.log(chokidarEvent, path);
+  const handleUserFilesChange = async (chokidarEvent, path) => {
     //TODO: optimize this later to only refresh iframes that have changed
     const iframeEls = window.document.getElementsByTagName("iframe");
     [...iframeEls].forEach((el) => {
       el.contentWindow?.location.reload();
+    });
+
+    // Hack to get userPath from state
+    let userPath = "";
+    dispatch((state) => {
+      userPath = state.userPath;
+      return state;
+    });
+    const htmlRelativePaths =
+      await window.fileAPI.getHtmlFileRelativePaths(userPath);
+    dispatch((state) => {
+      return {
+        ...state,
+        htmlRelativePaths,
+      };
     });
   };
   const listener = window.electronAPI.onUserFilesChanged(handleUserFilesChange);
