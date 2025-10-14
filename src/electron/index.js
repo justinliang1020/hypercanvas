@@ -83,9 +83,13 @@ app.whenReady().then(() => {
     );
   });
 
-  chokidar.watch(userPath).on("all", (event, path) => {
-    mainWindow.webContents.send("file-changed", event, path);
-  });
+  chokidar
+    .watch(userPath, {
+      ignored: (path) => path.includes("state.json"),
+    })
+    .on("all", (event, path) => {
+      mainWindow.webContents.send("file-changed", event, path);
+    });
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
