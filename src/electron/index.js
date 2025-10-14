@@ -102,10 +102,6 @@ const arg = process.argv[2];
 const cwd = process.cwd();
 const userPath = `${cwd}/${arg}`;
 
-chokidar.watch(userPath).on("all", (event, path) => {
-  console.log(event, path);
-});
-
 // -----------------------------
 // ## File Processing
 // -----------------------------
