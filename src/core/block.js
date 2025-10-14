@@ -298,8 +298,13 @@ function hyperIframe(state, block) {
       const /** @type {HTMLIFrameElement}  */ el = document.getElementById(
           `block-${block.id}`,
         );
-      if (!el || !el.contentWindow) return;
-      //BUG: gracefully handle cross-origin sites which cannot access the element.contentWindow.document property
+      if (
+        !el ||
+        !el.contentWindow ||
+        //gracefully handle cross-origin sites which cannot access the element.contentWindow.document property
+        el.getAttribute("src")?.startsWith("http")
+      )
+        return;
 
       propogateEventListeners(el);
 
