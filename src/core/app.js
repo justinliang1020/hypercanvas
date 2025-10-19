@@ -74,7 +74,7 @@ const KeyDown = (state, event) => {
         ...state,
         isShiftPressed: true,
       };
-    case "w": // option on mac
+    case " ":
       return {
         ...state,
         isInteractMode: true,
@@ -103,7 +103,7 @@ const KeyUp = (state, event) => {
         ...state,
         isShiftPressed: false,
       };
-    case "w": // option on mac
+    case " ":
       return {
         ...state,
         isInteractMode: false,
