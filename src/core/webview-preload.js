@@ -29,6 +29,29 @@ document.addEventListener("keyup", (event) => {
   });
 });
 
+// Helper function to get absolute href
+/**
+ * @param {string} href
+ * @returns {string}
+ */
+function getAbsoluteHref(href) {
+  // If it's already an absolute URL or local file, return as is
+  if (
+    href.startsWith("http://") ||
+    href.startsWith("https://") ||
+    href.startsWith("file://")
+  ) {
+    return href;
+  }
+
+  // If current location is not a local file, prepend the origin
+  if (!window.location.protocol.startsWith("file:")) {
+    return new URL(href, window.location.origin).href;
+  }
+
+  return href;
+}
+
 // Handle anchor tag interactions when DOM is ready
 function setupAnchorHandling() {
   const aEls = document.getElementsByTagName("a");
@@ -39,8 +62,9 @@ function setupAnchorHandling() {
       const href = aEl.getAttribute("href");
       if (!href) return;
 
-      console.log("Sending anchor-hover IPC:", href);
-      ipcRenderer.sendToHost("anchor-hover", { href });
+      const finalHref = getAbsoluteHref(href);
+      console.log("Sending anchor-hover IPC:", finalHref);
+      ipcRenderer.sendToHost("anchor-hover", { href: finalHref });
     });
 
     aEl.addEventListener("click", (event) => {
@@ -48,8 +72,9 @@ function setupAnchorHandling() {
       const href = aEl.getAttribute("href");
       if (!href) return;
 
-      console.log("Sending anchor-click IPC:", href);
-      ipcRenderer.sendToHost("anchor-click", { href });
+      const finalHref = getAbsoluteHref(href);
+      console.log("Sending anchor-click IPC:", finalHref);
+      ipcRenderer.sendToHost("anchor-click", { href: finalHref });
     });
   });
 }
