@@ -33,11 +33,13 @@ document.addEventListener("keyup", (event) => {
 function setupAnchorHandling() {
   const aEls = document.getElementsByTagName("a");
 
+  console.log(`Setting up ${aEls.length} anchor elements`);
   [...aEls].forEach((aEl) => {
     aEl.addEventListener("pointerover", () => {
       const href = aEl.getAttribute("href");
       if (!href) return;
 
+      console.log("Sending anchor-hover IPC:", href);
       ipcRenderer.sendToHost("anchor-hover", { href });
     });
 
@@ -46,6 +48,7 @@ function setupAnchorHandling() {
       const href = aEl.getAttribute("href");
       if (!href) return;
 
+      console.log("Sending anchor-click IPC:", href);
       ipcRenderer.sendToHost("anchor-click", { href });
     });
   });

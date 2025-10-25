@@ -270,51 +270,6 @@ function hyperIframe(state, block) {
   if (!currentPage) return h("div", {});
   const isEditing = currentPage.editingId === block.id;
 
-  /**
-   * Handle webview IPC messages
-   * @param {State} state
-   * @param {import("electron").IpcMessageEvent} event
-   * @returns {import("hyperapp").Dispatchable<State>}
-   */
-  function onIpcMessage(state, event) {
-    const { channel, args } = event;
-
-    switch (channel) {
-      case "keydown":
-      case "keyup":
-        // Forward keyboard events to main window
-        window.dispatchEvent(
-          new KeyboardEvent(channel, {
-            key: args[0].key,
-            code: args[0].code,
-            ctrlKey: args[0].ctrlKey,
-            metaKey: args[0].metaKey,
-            shiftKey: args[0].shiftKey,
-            altKey: args[0].altKey,
-            bubbles: true,
-          }),
-        );
-        return state;
-
-      case "anchor-hover":
-        const hoverHref = args[0].href;
-        if (!hoverHref) return state;
-        let newState = removePreviewChildBlock(state, block.id);
-        newState = addChildBlock(newState, block.id, hoverHref, "preview");
-        return newState;
-
-      case "anchor-click":
-        const clickHref = args[0].href;
-        if (!clickHref) return state;
-        let clickState = removePreviewChildBlock(state, block.id);
-        clickState = addChildBlock(clickState, block.id, clickHref, "real");
-        return clickState;
-
-      default:
-        return state;
-    }
-  }
-
   const src = block.content.startsWith("https://")
     ? block.content
     : `${state.userPath}/${block.content}`;
@@ -325,6 +280,88 @@ function hyperIframe(state, block) {
     pointerEvents: "none",
     outline: "2px dashed grey",
   };
+
+  // Set up IPC message handling using a global dispatch reference
+  // This approach works around Hyperapp's limitation with custom webview events
+  if (!/** @type {any} */ (window).hypercanvasDispatch) {
+    // We'll need to set this from the main app
+    console.warn("Global dispatch not available for webview IPC");
+  }
+
+  // Store the block ID and handler globally so we can access it from the webview
+  if (!/** @type {any} */ (window).hypercanvasWebviewHandlers) {
+    /** @type {any} */ (window).hypercanvasWebviewHandlers = {};
+  }
+
+  const blockKey = `block-${block.id}`;
+  /** @type {any} */ (window).hypercanvasWebviewHandlers[blockKey] = (/** @type {any} */ event) => {
+    console.log("IPC message received:", event.channel, event.args);
+    const channel = event.channel;
+    const args = event.args || [];
+
+    switch (channel) {
+      case "keydown":
+      case "keyup":
+        // Forward keyboard events to main window
+        if (args[0]) {
+          window.dispatchEvent(
+            new KeyboardEvent(channel, {
+              key: args[0].key,
+              code: args[0].code,
+              ctrlKey: args[0].ctrlKey,
+              metaKey: args[0].metaKey,
+              shiftKey: args[0].shiftKey,
+              altKey: args[0].altKey,
+              bubbles: true,
+            }),
+          );
+        }
+        break;
+
+      case "anchor-hover":
+        console.log("Processing anchor hover:", args[0]?.href);
+        const hoverHref = args[0]?.href;
+        if (hoverHref && /** @type {any} */ (window).hypercanvasDispatch) {
+          /** @type {any} */ (window).hypercanvasDispatch((/** @type {State} */ state) => {
+            let newState = removePreviewChildBlock(state, block.id);
+            newState = addChildBlock(newState, block.id, hoverHref, "preview");
+            return newState;
+          });
+        }
+        break;
+
+      case "anchor-click":
+        console.log("Processing anchor click:", args[0]?.href);
+        const clickHref = args[0]?.href;
+        if (clickHref && /** @type {any} */ (window).hypercanvasDispatch) {
+          /** @type {any} */ (window).hypercanvasDispatch((/** @type {State} */ state) => {
+            let newState = removePreviewChildBlock(state, block.id);
+            newState = addChildBlock(newState, block.id, clickHref, "real");
+            return newState;
+          });
+        }
+        break;
+
+      default:
+        console.log("Unknown IPC channel:", channel);
+        break;
+    }
+  };
+
+  // Set up the event listener after the DOM updates
+  setTimeout(() => {
+    const webview = document.getElementById(blockKey);
+    if (webview && !webview.dataset.hypercanvasIpcSetup) {
+      console.log(`Setting up IPC listener for ${blockKey}`);
+      
+      const handler = /** @type {any} */ (window).hypercanvasWebviewHandlers[blockKey];
+      if (handler) {
+        webview.addEventListener('ipc-message', handler);
+        webview.dataset.hypercanvasIpcSetup = 'true';
+        console.log(`IPC listener added for ${blockKey}`);
+      }
+    }
+  }, 0);
 
   return h("webview", {
     style: {
@@ -337,10 +374,9 @@ function hyperIframe(state, block) {
     },
     class: BLOCK_CONTENTS_CLASS_NAME,
     src,
-    id: `block-${block.id}`,
+    id: blockKey,
     key: `${block.id}-${src}`,
     preload: `./webview-preload.js`,
-    onIpcMessage,
   });
 }
 
