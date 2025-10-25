@@ -271,97 +271,48 @@ function hyperIframe(state, block) {
   const isEditing = currentPage.editingId === block.id;
 
   /**
+   * Handle webview IPC messages
    * @param {State} state
+   * @param {import("electron").IpcMessageEvent} event
    * @returns {import("hyperapp").Dispatchable<State>}
    */
-  function onload(state) {
-    /**
-     * @param {HTMLIFrameElement} el
-     * TODO: figure out a better hack than this to fix global events not firing after an iframe gets focus
-     */
-    function propogateEventListeners(el) {
-      if (!el || !el.contentWindow) return;
-      // Inject key event listeners to forward to parent window
-      el.contentWindow.document.addEventListener("keydown", (event) => {
+  function onIpcMessage(state, event) {
+    const { channel, args } = event;
+
+    switch (channel) {
+      case "keydown":
+      case "keyup":
+        // Forward keyboard events to main window
         window.dispatchEvent(
-          new KeyboardEvent("keydown", {
-            key: event.key,
-            code: event.code,
-            ctrlKey: event.ctrlKey,
-            metaKey: event.metaKey,
-            shiftKey: event.shiftKey,
-            altKey: event.altKey,
+          new KeyboardEvent(channel, {
+            key: args[0].key,
+            code: args[0].code,
+            ctrlKey: args[0].ctrlKey,
+            metaKey: args[0].metaKey,
+            shiftKey: args[0].shiftKey,
+            altKey: args[0].altKey,
             bubbles: true,
           }),
         );
-      });
+        return state;
 
-      el.contentWindow.document.addEventListener("keyup", (event) => {
-        window.dispatchEvent(
-          new KeyboardEvent("keyup", {
-            key: event.key,
-            code: event.code,
-            ctrlKey: event.ctrlKey,
-            metaKey: event.metaKey,
-            shiftKey: event.shiftKey,
-            altKey: event.altKey,
-            bubbles: true,
-          }),
-        );
-      });
+      case "anchor-hover":
+        const hoverHref = args[0].href;
+        if (!hoverHref) return state;
+        let newState = removePreviewChildBlock(state, block.id);
+        newState = addChildBlock(newState, block.id, hoverHref, "preview");
+        return newState;
+
+      case "anchor-click":
+        const clickHref = args[0].href;
+        if (!clickHref) return state;
+        let clickState = removePreviewChildBlock(state, block.id);
+        clickState = addChildBlock(clickState, block.id, clickHref, "real");
+        return clickState;
+
+      default:
+        return state;
     }
-
-    /**
-     * @param {import("hyperapp").Dispatch<State>} dispatch - Function to dispatch actions
-     * @returns {void}
-     */
-    function injectATags(dispatch) {
-      // TODO: fix typing
-      // @ts-ignore
-      const /** @type {HTMLIFrameElement}  */ el = document.getElementById(
-          `block-${block.id}`,
-        );
-      if (
-        !el ||
-        !el.contentWindow ||
-        //gracefully handle cross-origin sites which cannot access the element.contentWindow.document property
-        el.getAttribute("src")?.startsWith("http")
-      )
-        return;
-
-      propogateEventListeners(el);
-
-      const aEls = el.contentWindow.document.getElementsByTagName("a");
-      [...aEls].forEach((aEl) => {
-        aEl.onpointerover = (event) => {
-          const href = aEl.getAttribute("href");
-          if (!href) {
-            return;
-          }
-          dispatch((state) => {
-            let newState = state;
-            newState = removePreviewChildBlock(newState, block.id);
-            newState = addChildBlock(newState, block.id, href, "preview");
-            return newState;
-          });
-        };
-        aEl.onclick = (event) => {
-          event.preventDefault();
-          const href = aEl.getAttribute("href");
-          if (!href) {
-            return;
-          }
-          dispatch((state) => {
-            let newState = state;
-            newState = removePreviewChildBlock(newState, block.id);
-            newState = addChildBlock(newState, block.id, href, "real");
-            return newState;
-          });
-        };
-      });
-    }
-
-    return [state, (dispatch) => injectATags(dispatch)];
   }
 
   const src = block.content.startsWith("https://")
@@ -375,7 +326,7 @@ function hyperIframe(state, block) {
     outline: "2px dashed grey",
   };
 
-  return h("iframe", {
+  return h("webview", {
     style: {
       pointerEvents: isEditing || state.isInteractMode ? null : "none",
       width: "100%",
@@ -388,7 +339,8 @@ function hyperIframe(state, block) {
     src,
     id: `block-${block.id}`,
     key: `${block.id}-${src}`,
-    onload,
+    preload: `./webview-preload.js`,
+    onIpcMessage,
   });
 }
 
