@@ -5,11 +5,8 @@ import {
   switchPage,
   deletePage,
   renamePage,
-  getCurrentPage,
-  updateCurrentPage,
 } from "./pages.js";
-import { getHoveredBlock, getSelectedBlocks } from "./selection.js";
-import "./ace-editor.js";
+import {  getSelectedBlocks } from "./selection.js";
 
 /**
  * Creates the panels container with both layers panel, programs panel and floating toggle button
@@ -185,7 +182,6 @@ function rightPanel(state) {
       h("hr", {}),
       pages(state),
       h("hr", {}),
-      programEditor(state),
     ],
   );
 }
@@ -277,79 +273,7 @@ function panelsToggle(state) {
   );
 }
 
-/**
- * Shared ace editor component
- * @param {string} key - Key for state isolation
- * @param {string} value - Editor value
- * @param {string} mode - Editor mode (js, css, etc.)
- * @param {boolean} darkmode - Dark mode setting
- * @param {Function} onaceinput - Input change handler
- * @returns {import("hyperapp").ElementVNode<State>}
- */
-function aceEditor(key, value, mode, darkmode, onaceinput) {
-  return h("ace-editor", {
-    //@ts-ignore key to ensure proper state isolation between different blocks.
-    key: key,
-    editorvalue: value,
-    mode: mode,
-    darkmode: darkmode,
-    onaceinput: onaceinput,
-    onfocus: (state, event) => {
-      return updateCurrentPage(state, { isTextEditorFocused: true });
-    },
-    onfocusout: (state, event) => {
-      return updateCurrentPage(state, { isTextEditorFocused: false });
-    },
-    onpointerdown: (state, event) => {
-      event.stopPropagation();
-      return state;
-    },
-  });
-}
 
-/**
- * Toggles visibility of panels
- * @param {State} state - Current application state
- * @returns {import("hyperapp").ElementVNode<State>}
- */
-function programEditor(state) {
-  const selectedBlock = getSelectedBlocks(state)[0];
-  const hoveredBlock = getHoveredBlock(state);
-  const block = selectedBlock ? selectedBlock : hoveredBlock;
-
-  if (!block) {
-    return aceEditor(
-      "-1",
-      "no block selected",
-      "",
-      state.isDarkMode,
-      () => state,
-    );
-  }
-
-  return aceEditor(
-    String(block.id),
-    block.content,
-    "javascript",
-    state.isDarkMode,
-    /**
-     * @param {State} state
-     * @param {Event} event
-     */
-    (state, event) => {
-      event.stopPropagation();
-      const currentPage = getCurrentPage(state);
-      if (!currentPage) return state;
-
-      return updateCurrentPage(state, {
-        blocks: currentPage.blocks.map((b) =>
-          //@ts-ignore uses custom `value` added to the event
-          b.id === block.id ? { ...b, program: event.value } : b,
-        ),
-      });
-    },
-  );
-}
 
 /**
  * Toggles visibility of panels
