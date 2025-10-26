@@ -7,6 +7,7 @@ import {
   BLOCK_CONTENTS_CLASS_NAME,
   DEFAULT_BLOCK_WIDTH,
   DEFAULT_BLOCK_HEIGHT,
+  BLOCK_BORDER_RADIUS,
 } from "./constants.js";
 import { saveMementoAndReturn } from "./memento.js";
 import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
@@ -182,6 +183,7 @@ export function block(state) {
           width: `${block.width}px`,
           height: `${block.height}px`,
           zIndex: `${block.zIndex}`,
+          borderRadius: `${BLOCK_BORDER_RADIUS}px`
         },
         title: block.content,
         class: { block: true },
@@ -191,7 +193,7 @@ export function block(state) {
         ondblclick,
       },
       [
-        hyperIframe(state, block),
+        webcontents(state, block),
         ...(isSelected && !isEditing && !isMultiSelect
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>
               ResizeHandle({
@@ -265,7 +267,7 @@ export function linkView(link) {
  * @param {Block} block
  * @return {import("hyperapp").ElementVNode<State>}
  */
-function hyperIframe(state, block) {
+function webcontents(state, block) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return h("div", {});
   const isEditing = currentPage.editingId === block.id;
@@ -370,6 +372,7 @@ function hyperIframe(state, block) {
       height: "100%",
       overflow: "hidden",
       border: "none",
+      borderRadius: `${BLOCK_BORDER_RADIUS}px`,
       ...(block.type === "preview" ? previewStyles : {}),
     },
     class: BLOCK_CONTENTS_CLASS_NAME,

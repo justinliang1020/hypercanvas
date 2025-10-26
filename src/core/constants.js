@@ -40,3 +40,4 @@ export const BLOCK_CONTENTS_CLASS_NAME = "block-contents";
 
 export const DEFAULT_BLOCK_WIDTH = 400;
 export const DEFAULT_BLOCK_HEIGHT = 400;
+export const BLOCK_BORDER_RADIUS = 10; // px
