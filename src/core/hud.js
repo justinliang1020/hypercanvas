@@ -1,4 +1,5 @@
 import { h,text  } from "hyperapp";
+import { getHoveredBlock, getSelectedBlocks } from "./selection.js";
 
 /**
  * @param {State} state - Current application state
@@ -24,7 +25,20 @@ export function hud(state) {
  * @returns {import("hyperapp").ElementVNode<State>} 
  */
 function searchBar(state) {
-  return h("input", {type: "text", style: {width: "20em"}}, text("hi"))
+  let searchBarValue = "";
+  let isHoveredSearchBarValue = false;
+
+  const firstSelectedBlock = getSelectedBlocks(state)[0]
+  const hoveredBlock = getHoveredBlock(state)
+
+  if (firstSelectedBlock) {
+    searchBarValue = firstSelectedBlock.content
+  } else if (hoveredBlock) {
+    searchBarValue = hoveredBlock.content
+    isHoveredSearchBarValue = true
+  }
+
+  return h("input", {type: "text", style: {width: "20em"}, value: searchBarValue, disabled: isHoveredSearchBarValue})
 }
 
 
