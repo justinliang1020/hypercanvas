@@ -17,7 +17,7 @@ export function hud(state) {
     gap: "5px",
     alignItems: "center",
     justifyContent: "center"
-  }}, [searchBar(state), newBlockButton(state)])
+  }}, [searchBar(state), goButton(state), newBlockButton(state) ])
 }
 
 /**
@@ -39,6 +39,14 @@ function searchBar(state) {
   }
 
   return h("input", {type: "text", style: {width: "20em"}, value: searchBarValue, disabled: isHoveredSearchBarValue})
+}
+
+/**
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>} 
+ */
+function goButton(state) {
+  return h("button", {}, text("Go"))
 }
 
 
