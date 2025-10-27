@@ -9,6 +9,7 @@ import {
   saveApplicationAndNotify,
 } from "./utils.js";
 import { defaultPage } from "./pages.js";
+import { hud } from "./hud.js";
 
 initialize();
 
@@ -130,7 +131,7 @@ function main(state) {
         "dark-mode": state.isDarkMode,
       },
     },
-    [viewport(state), ...panelsContainer(state), notification(state)],
+    [viewport(state), ...panelsContainer(state), hud(state), notification(state)],
   );
 }
 
