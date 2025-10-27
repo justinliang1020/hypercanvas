@@ -2,7 +2,6 @@ import { app, h } from "hyperapp";
 import { STATE_SAVE_PATH } from "./constants.js";
 import { createMementoManager } from "./memento.js";
 import { viewport, onkeydown } from "./viewport.js";
-import { panelsContainer } from "./panels.js";
 import {
   notification,
   saveApplication,
@@ -131,7 +130,7 @@ function main(state) {
         "dark-mode": state.isDarkMode,
       },
     },
-    [viewport(state), ...panelsContainer(state), hud(state), notification(state)],
+    [viewport(state), hud(state), notification(state)],
   );
 }
 
