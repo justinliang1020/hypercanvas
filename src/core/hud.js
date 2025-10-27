@@ -52,7 +52,6 @@ function searchBar(state) {
     if (!firstSelectedBlock) return state;
     if (!event.target) return state;
     const value = /** @type {HTMLInputElement} */ (event.target).value;
-    console.log(value);
 
     return updateBlock(state, firstSelectedBlock, {
       content: value,

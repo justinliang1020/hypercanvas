@@ -183,7 +183,7 @@ export function block(state) {
           width: `${block.width}px`,
           height: `${block.height}px`,
           zIndex: `${block.zIndex}`,
-          borderRadius: `${BLOCK_BORDER_RADIUS}px`
+          borderRadius: `${BLOCK_BORDER_RADIUS}px`,
         },
         title: block.content,
         class: { block: true },
@@ -285,18 +285,20 @@ function webcontents(state, block) {
 
   // Set up IPC message handling using a global dispatch reference
   // This approach works around Hyperapp's limitation with custom webview events
-  if (!/** @type {any} */ (window).hypercanvasDispatch) {
+  if (!(/** @type {any} */ (window).hypercanvasDispatch)) {
     // We'll need to set this from the main app
     console.warn("Global dispatch not available for webview IPC");
   }
 
   // Store the block ID and handler globally so we can access it from the webview
-  if (!/** @type {any} */ (window).hypercanvasWebviewHandlers) {
+  if (!(/** @type {any} */ (window).hypercanvasWebviewHandlers)) {
     /** @type {any} */ (window).hypercanvasWebviewHandlers = {};
   }
 
   const blockKey = `block-${block.id}`;
-  /** @type {any} */ (window).hypercanvasWebviewHandlers[blockKey] = (/** @type {any} */ event) => {
+  /** @type {any} */ (window).hypercanvasWebviewHandlers[blockKey] = (
+    /** @type {any} */ event,
+  ) => {
     console.log("IPC message received:", event.channel, event.args);
     const channel = event.channel;
     const args = event.args || [];
@@ -324,11 +326,18 @@ function webcontents(state, block) {
         console.log("Processing anchor hover:", args[0]?.href);
         const hoverHref = args[0]?.href;
         if (hoverHref && /** @type {any} */ (window).hypercanvasDispatch) {
-          /** @type {any} */ (window).hypercanvasDispatch((/** @type {State} */ state) => {
-            let newState = removePreviewChildBlock(state, block.id);
-            newState = addChildBlock(newState, block.id, hoverHref, "preview");
-            return newState;
-          });
+          /** @type {any} */ (window).hypercanvasDispatch(
+            (/** @type {State} */ state) => {
+              let newState = removePreviewChildBlock(state, block.id);
+              newState = addChildBlock(
+                newState,
+                block.id,
+                hoverHref,
+                "preview",
+              );
+              return newState;
+            },
+          );
         }
         break;
 
@@ -336,11 +345,13 @@ function webcontents(state, block) {
         console.log("Processing anchor click:", args[0]?.href);
         const clickHref = args[0]?.href;
         if (clickHref && /** @type {any} */ (window).hypercanvasDispatch) {
-          /** @type {any} */ (window).hypercanvasDispatch((/** @type {State} */ state) => {
-            let newState = removePreviewChildBlock(state, block.id);
-            newState = addChildBlock(newState, block.id, clickHref, "real");
-            return newState;
-          });
+          /** @type {any} */ (window).hypercanvasDispatch(
+            (/** @type {State} */ state) => {
+              let newState = removePreviewChildBlock(state, block.id);
+              newState = addChildBlock(newState, block.id, clickHref, "real");
+              return newState;
+            },
+          );
         }
         break;
 
@@ -355,11 +366,13 @@ function webcontents(state, block) {
     const webview = document.getElementById(blockKey);
     if (webview && !webview.dataset.hypercanvasIpcSetup) {
       console.log(`Setting up IPC listener for ${blockKey}`);
-      
-      const handler = /** @type {any} */ (window).hypercanvasWebviewHandlers[blockKey];
+
+      const handler = /** @type {any} */ (window).hypercanvasWebviewHandlers[
+        blockKey
+      ];
       if (handler) {
-        webview.addEventListener('ipc-message', handler);
-        webview.dataset.hypercanvasIpcSetup = 'true';
+        webview.addEventListener("ipc-message", handler);
+        webview.dataset.hypercanvasIpcSetup = "true";
         console.log(`IPC listener added for ${blockKey}`);
       }
     }
@@ -771,7 +784,7 @@ export function copySelectedBlocks(state) {
  * @param {Block} currentBlock
  * @param {Partial<Block>} newBlockConfig
  */
-function updateBlock(state, currentBlock, newBlockConfig) {
+export function updateBlock(state, currentBlock, newBlockConfig) {
   if (newBlockConfig.id !== undefined) {
     throw Error("Illegal: cannot update block ID");
   }
