@@ -429,7 +429,7 @@ function onwheel(state, event) {
     });
   } else if (event.ctrlKey || event.metaKey) {
     // Zoom gesture (Ctrl/Cmd + scroll or trackpad pinch)
-    const zoomDelta = -event.deltaY * 0.01;
+    const zoomDelta = -event.deltaY * 0.01 * page.zoom;
     const newZoom = Math.max(0.1, Math.min(5, page.zoom + zoomDelta));
 
     // Get mouse position relative to viewport for zoom centering
