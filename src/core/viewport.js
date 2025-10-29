@@ -416,12 +416,11 @@ function onwheel(state, event) {
   // Prevent default scrolling behavior
   event.preventDefault();
 
-  // Check if this is a trackpad gesture (typically has smaller deltaY values and ctrlKey for zoom)
-  const isTrackpad = Math.abs(event.deltaY) < 50 && !event.ctrlKey;
+  const isPanGesture = !event.ctrlKey;
   const page = getCurrentPage(state);
   if (!page) return state;
 
-  if (isTrackpad) {
+  if (isPanGesture) {
     // Trackpad pan gesture - use deltaX and deltaY directly
     // Invert the delta values to match Figma-like behavior
     return updateCurrentPage(state, {
