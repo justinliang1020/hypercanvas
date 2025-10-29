@@ -58,7 +58,8 @@ function setupAnchorHandling() {
 
   console.log(`Setting up ${aEls.length} anchor elements`);
   [...aEls].forEach((aEl) => {
-    aEl.addEventListener("pointerover", () => {
+    aEl.addEventListener("pointerover", (event) => {
+      if (!event.metaKey) return;
       const href = aEl.getAttribute("href");
       if (!href) return;
 
@@ -68,11 +69,12 @@ function setupAnchorHandling() {
     });
 
     aEl.addEventListener("click", (event) => {
-      event.preventDefault();
+      if (!event.metaKey) return;
       const href = aEl.getAttribute("href");
       if (!href) return;
 
       const finalHref = getAbsoluteHref(href);
+      event.preventDefault();
       console.log("Sending anchor-click IPC:", finalHref);
       ipcRenderer.sendToHost("anchor-click", { href: finalHref });
     });
