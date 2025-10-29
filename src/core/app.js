@@ -225,65 +225,17 @@ function userFilesChangedSubscription(dispatch) {
 }
 
 /**
- * @param {any} state
- */
-function safeToEmitState(state) {
-  return JSON.parse(
-    JSON.stringify(state, (key, value) => {
-      // Skip the problematic properties
-      if (key === "state") return "<redacted>";
-      return value;
-    }),
-  );
-}
-
-/** @type{import("hyperapp").Action<State> | null} */
-let prevDispatchAction = null;
-/** @type{any} */
-let prevDispatchPayload = null;
-/** @type{State | null} */
-let prevState = null;
-
-/**
  * For now, i won't think about effects or manual dispatch. Only actions and state
  * @type {(dispatch: import("hyperapp").Dispatch<State>) => import("hyperapp").Dispatch<State>}
  */
 const dispatchMiddleware = (dispatch) => {
   // Store dispatch globally for webview IPC handlers
   /** @type {any} */ (window).hypercanvasDispatch = dispatch;
-  
+
   return (action, payload) => {
-    // Action<S, P>
-    if (typeof action === "function") {
-      prevDispatchAction = action;
-      prevDispatchPayload = payload;
-     }
-     if (Array.isArray(action) && typeof action[0] !== "function") {
-       // [state: S, ...effects: MaybeEffect<S, P>[]]
-     } else if (!Array.isArray(action) && typeof action !== "function") {
-       // state
-       const state = action;
-       if (prevDispatchAction !== null && prevDispatchAction.name) {
-         /** @type {AppDispatchEventDetail} */
-         const detail = {
-           state: safeToEmitState(state),
-           action: prevDispatchAction,
-           payload: prevDispatchPayload,
-           prevState: safeToEmitState(prevState),
-         };
-         const event = new CustomEvent("appDispatch", {
-           detail,
-         });
-         dispatchEvent(event);
-       }
-       prevDispatchAction = null;
-       prevDispatchPayload = null;
-       // @ts-ignore
-       prevState = state;
-     }
-     dispatch(action, payload);
-   };
- };
+    dispatch(action, payload);
+  };
+};
 
 /**
  * Initializes the application with saved state and starts the Hyperapp
