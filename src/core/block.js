@@ -185,7 +185,6 @@ export function block(state) {
           zIndex: `${block.zIndex}`,
           borderRadius: `${BLOCK_BORDER_RADIUS}px`,
         },
-        title: block.content,
         class: { block: true },
         onpointerover,
         onpointerleave,
