@@ -763,7 +763,9 @@ function webviewWrapper(state, block) {
 
   // Set up the event listener after the DOM updates
   setTimeout(() => {
-    const webview = document.getElementById(blockKey);
+    const webview = /** @type {import("electron").WebviewTag} */ (
+      document.getElementById(blockKey)
+    );
     if (webview && !webview.dataset.hypercanvasIpcSetup) {
       console.log(`Setting up IPC listener for ${blockKey}`);
 
@@ -775,6 +777,24 @@ function webviewWrapper(state, block) {
         webview.dataset.hypercanvasIpcSetup = "true";
         console.log(`IPC listener added for ${blockKey}`);
       }
+
+      /**
+       * @param {import("electron").DidNavigateEvent } event
+       */
+      function handleNavigationChange(event) {
+        console.log("Navigation detected:", event.url);
+        //@ts-ignore
+        if (window.hypercanvasDispatch) {
+          //@ts-ignore
+          window.hypercanvasDispatch((state) => {
+            // You'll need to implement updateBlockContent function
+            return updateBlock(state, block.id, { content: event.url });
+          });
+        }
+      }
+
+      webview.addEventListener("did-navigate", handleNavigationChange);
+      webview.addEventListener("did-navigate-in-page", handleNavigationChange);
     }
   }, 0);
 
