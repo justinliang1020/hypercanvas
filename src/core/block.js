@@ -672,9 +672,7 @@ function webviewWrapper(state, block) {
   if (!currentPage) return h("div", {});
   const isEditing = currentPage.editingId === block.id;
 
-  const src = block.content.startsWith("https://")
-    ? block.content
-    : `${state.userPath}/${block.content}`;
+  const src = block.content;
 
   /** @type {import("hyperapp").StyleProp} */
   const previewStyles = {
