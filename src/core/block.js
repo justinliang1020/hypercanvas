@@ -509,12 +509,12 @@ function addChildBlock(state, parentBlockId, content, type) {
 
   //TODO: fix kinda broken
   if (type === "preview") {
-    newState = updateBlock(newState, parentBlock, {
+    newState = updateBlock(newState, parentBlock.id, {
       previewChildId: newBlockId,
     });
   } else if (type === "real") {
     console.log([...parentBlock.realChildrenIds, newBlockId]);
-    newState = updateBlock(newState, parentBlock, {
+    newState = updateBlock(newState, parentBlock.id, {
       realChildrenIds: [...parentBlock.realChildrenIds, newBlockId],
     });
   }
@@ -646,10 +646,10 @@ export function copySelectedBlocks(state) {
 
 /**
  * @param {State} state
- * @param {Block} currentBlock
+ * @param {number} blockId
  * @param {Partial<Block>} newBlockConfig
  */
-export function updateBlock(state, currentBlock, newBlockConfig) {
+export function updateBlock(state, blockId, newBlockConfig) {
   if (newBlockConfig.id !== undefined) {
     throw Error("Illegal: cannot update block ID");
   }
@@ -657,7 +657,7 @@ export function updateBlock(state, currentBlock, newBlockConfig) {
 
   return updateCurrentPage(state, {
     blocks: currentBlocks.map((block) =>
-      block.id === currentBlock.id ? { ...block, ...newBlockConfig } : block,
+      block.id === blockId ? { ...block, ...newBlockConfig } : block,
     ),
   });
 }
