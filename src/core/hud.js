@@ -63,7 +63,6 @@ function searchBar(state) {
     style: { width: "20em" },
     value: searchBarValue,
     disabled: !firstSelectedBlock,
-    // stop keyboard shortcuts from triggering
     oninput,
     // stop keyboard shortcuts from triggering
     onkeydown: (state, event) => {
