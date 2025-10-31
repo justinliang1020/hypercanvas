@@ -98,10 +98,20 @@ function newBlockButton(state) {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 function backButton(state) {
+  return navigationButton(state, "back", "<-");
+}
+
+/**
+ * @param {State} state
+ * @param {"back" | "forward"} direction
+ * @param {string} display
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function navigationButton(state, direction, display) {
   const firstSelectedBlock = getSelectedBlocks(state)[0];
 
   const { enabled, webview } = (() => {
-    if (!firstSelectedBlock) {
+    if (!firstSelectedBlock || !firstSelectedBlock.domReady) {
       return { enabled: false, webview: undefined };
     }
 
@@ -110,11 +120,21 @@ function backButton(state) {
       document.getElementById(blockKey)
     );
 
+    if (!webviewElement) {
+      return { enabled: false, webview: undefined };
+    }
+
+    const enabled = (() => {
+      switch (direction) {
+        case "back":
+          return webviewElement.canGoBack();
+        case "forward":
+          return webviewElement.canGoForward();
+      }
+    })();
+
     return {
-      enabled:
-        firstSelectedBlock.domReady &&
-        webviewElement &&
-        webviewElement.canGoBack(),
+      enabled: enabled,
       webview: webviewElement,
     };
   })();
