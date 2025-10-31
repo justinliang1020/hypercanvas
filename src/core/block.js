@@ -806,7 +806,7 @@ function webviewWrapper(state, block) {
     class: BLOCK_CONTENTS_CLASS_NAME,
     src: block.content,
     id: blockKey,
-    key: `${block.id}-${block.content}`,
+    key: `${block.id}`,
     preload: `./webview-preload.js`,
   });
 }
