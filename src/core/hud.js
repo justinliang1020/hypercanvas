@@ -12,11 +12,11 @@ export function hud(state) {
     {
       style: {
         position: "fixed",
-        bottom: "0",
+        top: "0",
         left: "50%",
         transform: "translateX(-50%)",
         margin: "0",
-        paddingBottom: "10px",
+        paddingTop: "10px",
         display: "flex",
         gap: "5px",
         alignItems: "center",
