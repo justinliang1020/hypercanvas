@@ -28,6 +28,7 @@ export function hud(state) {
       goButton(state),
       newBlockButton(state),
       backButton(state),
+      forwardButton(state),
     ],
   );
 }
@@ -103,6 +104,14 @@ function backButton(state) {
 
 /**
  * @param {State} state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function forwardButton(state) {
+  return navigationButton(state, "forward", "->");
+}
+
+/**
+ * @param {State} state
  * @param {"back" | "forward"} direction
  * @param {string} display
  * @returns {import("hyperapp").ElementVNode<State>}
@@ -110,7 +119,7 @@ function backButton(state) {
 function navigationButton(state, direction, display) {
   const firstSelectedBlock = getSelectedBlocks(state)[0];
 
-  const { enabled, webview } = (() => {
+  const { enabled, webview: webviewElement } = (() => {
     if (!firstSelectedBlock || !firstSelectedBlock.domReady) {
       return { enabled: false, webview: undefined };
     }
@@ -141,15 +150,22 @@ function navigationButton(state, direction, display) {
 
   /**
    * @param {State} state
-   * @param {Event} event
    * @returns {import("hyperapp").Dispatchable<State>}
    */
-  function onclick(state, event) {
-    if (!webview) return state;
-    webview.goBack();
+  function onclick(state) {
+    if (!webviewElement) return state;
+
+    switch (direction) {
+      case "back":
+        webviewElement.goBack();
+        break;
+      case "forward":
+        webviewElement.goForward();
+        break;
+    }
 
     return state;
   }
 
-  return h("button", { disabled: !enabled, onclick }, text("<-"));
+  return h("button", { disabled: !enabled, onclick }, text(display));
 }
