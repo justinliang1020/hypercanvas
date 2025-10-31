@@ -672,8 +672,6 @@ function webviewWrapper(state, block) {
   if (!currentPage) return h("div", {});
   const isEditing = currentPage.editingId === block.id;
 
-  const src = block.content;
-
   /** @type {import("hyperapp").StyleProp} */
   const previewStyles = {
     opacity: "0.6",
@@ -785,7 +783,6 @@ function webviewWrapper(state, block) {
         if (window.hypercanvasDispatch) {
           //@ts-ignore
           window.hypercanvasDispatch((state) => {
-            // You'll need to implement updateBlockContent function
             return updateBlock(state, block.id, { content: event.url });
           });
         }
@@ -807,9 +804,9 @@ function webviewWrapper(state, block) {
       ...(block.type === "preview" ? previewStyles : {}),
     },
     class: BLOCK_CONTENTS_CLASS_NAME,
-    src,
+    src: block.content,
     id: blockKey,
-    key: `${block.id}-${src}`,
+    key: `${block.id}-${block.content}`,
     preload: `./webview-preload.js`,
   });
 }
