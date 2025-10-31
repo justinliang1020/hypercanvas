@@ -23,7 +23,12 @@ export function hud(state) {
         justifyContent: "center",
       },
     },
-    [searchBar(state), goButton(state), newBlockButton(state)],
+    [
+      searchBar(state),
+      goButton(state),
+      newBlockButton(state),
+      backButton(state),
+    ],
   );
 }
 
@@ -86,4 +91,38 @@ function goButton(state) {
  */
 function newBlockButton(state) {
   return h("button", {}, text("New block"));
+}
+
+/**
+ * @param {State} state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function backButton(state) {
+  let enabled = false;
+  /** @type {import("electron").WebviewTag | undefined} */
+  let webview;
+
+  const firstSelectedBlock = getSelectedBlocks(state)[0];
+  if (firstSelectedBlock) {
+    const blockKey = `block-${firstSelectedBlock.id}`;
+
+    webview = /** @type {import("electron").WebviewTag} */ (
+      document.getElementById(blockKey)
+    );
+    enabled = firstSelectedBlock.domReady && webview && webview.canGoBack();
+  }
+
+  /**
+   * @param {State} state
+   * @param {Event} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function onclick(state, event) {
+    if (!webview) return state;
+    webview.goBack();
+
+    return state;
+  }
+
+  return h("button", { disabled: !enabled, onclick }, text("<-"));
 }

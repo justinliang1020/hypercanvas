@@ -8,6 +8,7 @@ interface Block {
   y: number;
   zIndex: number;
   content: string;
+  domReady: boolean;
   type: BlockType;
   previewChildId: number | null;
   realChildrenIds: number[];

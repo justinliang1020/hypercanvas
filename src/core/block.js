@@ -441,6 +441,7 @@ export function addBlock(state, content, type, x, y, width, height) {
     content: content,
     previewChildId: null,
     realChildrenIds: [],
+    domReady: false,
   };
   const newState = updateCurrentPage(state, {
     blocks: [...currentBlocks, newBlock],
@@ -603,6 +604,7 @@ export function pasteClipboardBlocks(state) {
     //BUG: fix, actually implement this
     previewChildId: 0,
     realChildrenIds: [],
+    domReady: false,
   }));
 
   const { state: newState, blockIds } = addBlocks(state, blockConfigs);
@@ -788,6 +790,17 @@ function webviewWrapper(state, block) {
         }
       }
 
+      function handleDidLoad() {
+        //@ts-ignore
+        if (window.hypercanvasDispatch) {
+          //@ts-ignore
+          window.hypercanvasDispatch((state) => {
+            return updateBlock(state, block.id, { domReady: true });
+          });
+        }
+      }
+
+      webview.addEventListener("dom-ready", handleDidLoad);
       webview.addEventListener("did-navigate", handleNavigationChange);
       webview.addEventListener("did-navigate-in-page", handleNavigationChange);
     }
