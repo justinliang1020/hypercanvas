@@ -98,19 +98,26 @@ function newBlockButton(state) {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 function backButton(state) {
-  let enabled = false;
-  /** @type {import("electron").WebviewTag | undefined} */
-  let webview;
-
   const firstSelectedBlock = getSelectedBlocks(state)[0];
-  if (firstSelectedBlock) {
-    const blockKey = `block-${firstSelectedBlock.id}`;
 
-    webview = /** @type {import("electron").WebviewTag} */ (
+  const { enabled, webview } = (() => {
+    if (!firstSelectedBlock) {
+      return { enabled: false, webview: undefined };
+    }
+
+    const blockKey = `block-${firstSelectedBlock.id}`;
+    const webviewElement = /** @type {import("electron").WebviewTag} */ (
       document.getElementById(blockKey)
     );
-    enabled = firstSelectedBlock.domReady && webview && webview.canGoBack();
-  }
+
+    return {
+      enabled:
+        firstSelectedBlock.domReady &&
+        webviewElement &&
+        webviewElement.canGoBack(),
+      webview: webviewElement,
+    };
+  })();
 
   /**
    * @param {State} state
