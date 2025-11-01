@@ -544,45 +544,6 @@ function removePreviewChildBlock(state, parentBlockId) {
 }
 
 /**
- * Adds multiple blocks to the state
- * @param {State} state - Current application state
- * @param {BlockConfig[]} blockConfigs - Array of block configurations
- * @returns {{state: State, blockIds: number[]}} Updated state with new blocks and array of new block IDs
- */
-function addBlocks(state, blockConfigs) {
-  if (!Array.isArray(blockConfigs) || blockConfigs.length === 0) {
-    return { state, blockIds: [] };
-  }
-
-  let currentState = state;
-  const newBlockIds = [];
-
-  // Add each block sequentially
-  for (const config of blockConfigs) {
-    const { src: content, x, y, width, height, type } = config;
-
-    currentState = addBlock(
-      currentState,
-      content,
-      type,
-      x,
-      y,
-      width,
-      height,
-    ).state;
-
-    // Get the ID of the newly added block
-    const currentBlocks = getCurrentBlocks(currentState);
-    const lastBlock = currentBlocks[currentBlocks.length - 1];
-    if (lastBlock) {
-      newBlockIds.push(lastBlock.id);
-    }
-  }
-
-  return { state: currentState, blockIds: newBlockIds };
-}
-
-/**
  * Pastes blocks from clipboard into the state
  * @param {State} state - Current application state
  * @returns {import("hyperapp").Dispatchable<State>} Updated state with pasted blocks
@@ -595,28 +556,46 @@ export function pasteClipboardBlocks(state) {
 
   /** @type {BlockConfig[]} */
   const blockConfigs = clipboardData.map((blockData) => ({
+    ...blockData,
     x: blockData.x + PASTE_OFFSET_X,
     y: blockData.y + PASTE_OFFSET_Y,
-    width: blockData.width,
-    height: blockData.height,
-    src: blockData.src,
-    type: blockData.type,
-    //BUG: fix, actually implement this
-    previewChildId: 0,
-    realChildrenIds: [],
-    domReady: false,
   }));
 
-  const { state: newState, blockIds } = addBlocks(state, blockConfigs);
+  const { stateWithNewBlocks, newBlockIds } = (() => {
+    let stateWithNewBlocks = state;
+    const newBlockIds = [];
+
+    // Add each block sequentially
+    for (const config of blockConfigs) {
+      const { src: content, x, y, width, height, type } = config;
+
+      stateWithNewBlocks = addBlock(
+        stateWithNewBlocks,
+        content,
+        type,
+        x,
+        y,
+        width,
+        height,
+      ).state;
+
+      // Get the ID of the newly added block
+      const currentBlocks = getCurrentBlocks(stateWithNewBlocks);
+      const lastBlock = currentBlocks[currentBlocks.length - 1];
+      if (lastBlock) {
+        newBlockIds.push(lastBlock.id);
+      }
+    }
+    return {
+      stateWithNewBlocks,
+      newBlockIds,
+    };
+  })();
 
   // Select all pasted blocks
-  if (blockIds.length > 0) {
-    return updateCurrentPage(newState, {
-      selectedIds: blockIds,
-    });
-  }
-
-  return newState;
+  return updateCurrentPage(stateWithNewBlocks, {
+    selectedIds: newBlockIds,
+  });
 }
 
 /**
