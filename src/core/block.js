@@ -494,7 +494,7 @@ function addChildBlock(state, parentBlockId, content, type) {
   if (!parentBlock) {
     throw Error(`no parent block found of id ${parentBlockId}`);
   }
-  const offsetX = 300;
+  const offsetX = 150;
   const newX = parentBlock.x + parentBlock.width + offsetX;
   const newY = parentBlock.y;
 
