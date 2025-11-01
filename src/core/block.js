@@ -567,7 +567,7 @@ export function pasteClipboardBlocks(state) {
 
     // Add each block sequentially
     for (const config of blockConfigs) {
-      stateWithNewBlocks = addBlock(
+      const addBlockRes = addBlock(
         stateWithNewBlocks,
         config.src,
         config.type,
@@ -575,15 +575,11 @@ export function pasteClipboardBlocks(state) {
         config.y,
         config.width,
         config.height,
-      ).state;
-
-      // Get the ID of the newly added block
-      const currentBlocks = getCurrentBlocks(stateWithNewBlocks);
-      const lastBlock = currentBlocks[currentBlocks.length - 1];
-      if (lastBlock) {
-        newBlockIds.push(lastBlock.id);
-      }
+      );
+      stateWithNewBlocks = addBlockRes.state;
+      newBlockIds.push(addBlockRes.newBlockId);
     }
+
     return {
       stateWithNewBlocks,
       newBlockIds,
