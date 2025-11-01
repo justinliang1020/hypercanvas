@@ -109,7 +109,7 @@ interface State {
 }
 
 type ResizeHandler = (
-  block: WebviewBlock,
+  block: Block,
   e: { percentX: number; percentY: number },
 ) => { width: number; height: number; x: number; y: number };
 
