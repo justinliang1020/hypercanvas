@@ -567,16 +567,14 @@ export function pasteClipboardBlocks(state) {
 
     // Add each block sequentially
     for (const config of blockConfigs) {
-      const { src: content, x, y, width, height, type } = config;
-
       stateWithNewBlocks = addBlock(
         stateWithNewBlocks,
-        content,
-        type,
-        x,
-        y,
-        width,
-        height,
+        config.src,
+        config.type,
+        config.x,
+        config.y,
+        config.width,
+        config.height,
       ).state;
 
       // Get the ID of the newly added block
