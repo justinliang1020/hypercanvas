@@ -414,15 +414,15 @@ export function deleteSelectedBlocks(state) {
 /**
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
- * @param {string} content - Name of view to instantiate
- * @param {BlockType} type - Name of view to instantiate
+ * @param {string} src
+ * @param {BlockType} type
  * @param {number} x - X position on canvas. If null, uses viewport's center X coordinate
  * @param {number} y - Y position on canvas. If null, uses viewport's center X coordinate
  * @param {number} width - Block width in pixels
  * @param {number} height - Block height in pixels
  * @returns {{state: State, newBlockId: number}} Updated state with new block
  */
-export function addBlock(state, content, type, x, y, width, height) {
+export function addBlock(state, src, type, x, y, width, height) {
   const currentBlocks = getCurrentBlocks(state);
   const currentPage = getCurrentPage(state);
   if (!currentPage) {
@@ -438,7 +438,7 @@ export function addBlock(state, content, type, x, y, width, height) {
     y: y,
     type: type,
     zIndex: Math.max(...currentBlocks.map((block) => block.zIndex), 0) + 1,
-    content: content,
+    src: src,
     previewChildId: null,
     realChildrenIds: [],
     domReady: false,
@@ -459,7 +459,7 @@ export function addBlock(state, content, type, x, y, width, height) {
 /**
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
- * @param {string} content - Name of view to instantiate
+ * @param {string} src - Name of view to instantiate
  * @param {BlockType} type - Name of view to instantiate
  * @param {number} width - Block width in pixels
  * @param {number} height - Block height in pixels
@@ -467,7 +467,7 @@ export function addBlock(state, content, type, x, y, width, height) {
  **/
 export function addBlockToViewportCenter(
   state,
-  content,
+  src,
   type,
   width = DEFAULT_BLOCK_WIDTH,
   height = DEFAULT_BLOCK_HEIGHT,
@@ -476,7 +476,7 @@ export function addBlockToViewportCenter(
   const x = viewportCenter.x - width / 2; // Center the block
   const y = viewportCenter.y - height / 2; // Center the block
 
-  return addBlock(state, content, type, x, y, width, height).state;
+  return addBlock(state, src, type, x, y, width, height).state;
 }
 
 /**
@@ -559,7 +559,7 @@ function addBlocks(state, blockConfigs) {
 
   // Add each block sequentially
   for (const config of blockConfigs) {
-    const { content, x, y, width, height, type } = config;
+    const { src: content, x, y, width, height, type } = config;
 
     currentState = addBlock(
       currentState,
@@ -599,7 +599,7 @@ export function pasteClipboardBlocks(state) {
     y: blockData.y + PASTE_OFFSET_Y,
     width: blockData.width,
     height: blockData.height,
-    content: blockData.content,
+    src: blockData.src,
     type: blockData.type,
     //BUG: fix, actually implement this
     previewChildId: 0,
@@ -785,7 +785,7 @@ function webviewWrapper(state, block) {
         if (window.hypercanvasDispatch) {
           //@ts-ignore
           window.hypercanvasDispatch((state) => {
-            return updateBlock(state, block.id, { content: event.url });
+            return updateBlock(state, block.id, { src: event.url });
           });
         }
       }
@@ -817,7 +817,7 @@ function webviewWrapper(state, block) {
       ...(block.type === "preview" ? previewStyles : {}),
     },
     class: BLOCK_CONTENTS_CLASS_NAME,
-    src: block.content,
+    src: block.src,
     id: blockKey,
     key: `${block.id}`,
     preload: `./webview-preload.js`,

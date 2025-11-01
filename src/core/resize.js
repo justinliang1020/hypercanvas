@@ -310,7 +310,7 @@ export function handleResizePointerMove(state, event) {
       width: page.resizing.startWidth,
       height: page.resizing.startHeight,
       zIndex: 0,
-      content: "",
+      src: "",
       type: "real",
       previewChildId: 0,
       realChildrenIds: [],

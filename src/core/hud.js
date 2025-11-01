@@ -44,9 +44,9 @@ function searchBar(state) {
   const hoveredBlock = getHoveredBlock(state);
 
   if (firstSelectedBlock) {
-    searchBarValue = firstSelectedBlock.content;
+    searchBarValue = firstSelectedBlock.src;
   } else if (hoveredBlock) {
-    searchBarValue = hoveredBlock.content;
+    searchBarValue = hoveredBlock.src;
   }
 
   /**
@@ -60,7 +60,7 @@ function searchBar(state) {
     const value = /** @type {HTMLInputElement} */ (event.target).value;
 
     return updateBlock(state, firstSelectedBlock.id, {
-      content: value,
+      src: value,
     });
   }
 

@@ -7,7 +7,7 @@ interface Block {
   x: number;
   y: number;
   zIndex: number;
-  content: string;
+  src: string;
   domReady: boolean;
   type: BlockType;
   previewChildId: number | null;
