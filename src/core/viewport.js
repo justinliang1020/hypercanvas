@@ -30,17 +30,18 @@ import {
 
 /**
  * Calculates canvas coordinates from screen coordinates
- * @param {PointerEvent} event - Pointer event
+ * @param {number} clientX - Mouse clientX
+ * @param {number} clientY - Mouse clientY
  * @param {State} state - Application state
  * @returns {{canvasX: number, canvasY: number}} Canvas coordinates
  */
-function getCanvasCoordinates(event, state) {
+function getCanvasCoordinates(clientX, clientY, state) {
   const canvasRect = /** @type {HTMLElement} */ (
     document.getElementById("canvas")
   ).getBoundingClientRect();
   const viewport = getCurrentViewport(state);
-  const canvasX = (event.clientX - canvasRect.left) / viewport.zoom;
-  const canvasY = (event.clientY - canvasRect.top) / viewport.zoom;
+  const canvasX = (clientX - canvasRect.left) / viewport.zoom;
+  const canvasY = (clientY - canvasRect.top) / viewport.zoom;
   return { canvasX, canvasY };
 }
 
@@ -117,7 +118,11 @@ function onpointerdown(state, event) {
     return handleMiddleMouseDown(state);
   }
 
-  const { canvasX, canvasY } = getCanvasCoordinates(event, state);
+  const { canvasX, canvasY } = getCanvasCoordinates(
+    event.clientX,
+    event.clientY,
+    state,
+  );
 
   const isInSelectionBounds = isPointInSelectionBounds(state, canvasX, canvasY);
 
@@ -191,7 +196,11 @@ function handleSelectionBoxMove(state, event) {
   const currentPage = getCurrentPage(state);
   if (!currentPage?.selectionBox) return state;
 
-  const { canvasX, canvasY } = getCanvasCoordinates(event, state);
+  const { canvasX, canvasY } = getCanvasCoordinates(
+    event.clientX,
+    event.clientY,
+    state,
+  );
 
   const updatedSelectionBox = {
     ...currentPage.selectionBox,
