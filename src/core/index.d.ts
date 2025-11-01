@@ -7,6 +7,9 @@ interface Block {
   x: number;
   y: number;
   zIndex: number;
+}
+
+interface WebviewBlock extends Block {
   src: string;
   domReady: boolean;
   type: BlockType;
@@ -15,18 +18,18 @@ interface Block {
 }
 
 //TODO: removew zindex?
-type BlockConfig = Omit<Block, "id" | "zIndex">;
+type BlockConfig = Omit<WebviewBlock, "id" | "zIndex">;
 
 //TODO: refactor into its own data structure, instead of property of block?
 type Link = {
-  parentBlock: Block;
-  childBlock: Block;
+  parentBlock: WebviewBlock;
+  childBlock: WebviewBlock;
 };
 
 interface Page {
   id: string;
   name: string;
-  blocks: Block[];
+  blocks: WebviewBlock[];
   offsetX: number;
   offsetY: number;
   zoom: number;
@@ -94,7 +97,7 @@ interface State {
   isDarkMode: boolean;
   panelsVisible: boolean;
   programsPanelWidth: number;
-  clipboard: Block[] | null;
+  clipboard: WebviewBlock[] | null;
   programFilter: string;
   notification: string | null;
   notificationVisible: boolean;
@@ -106,7 +109,7 @@ interface State {
 }
 
 type ResizeHandler = (
-  block: Block,
+  block: WebviewBlock,
   e: { percentX: number; percentY: number },
 ) => { width: number; height: number; x: number; y: number };
 

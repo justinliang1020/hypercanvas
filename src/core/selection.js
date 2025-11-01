@@ -32,7 +32,7 @@ export function isBlockPreviewSelected(state, blockId) {
 /**
  * Gets all currently selected blocks
  * @param {State} state - Current application state
- * @returns {Block[]} Array of selected blocks
+ * @returns {WebviewBlock[]} Array of selected blocks
  */
 export function getSelectedBlocks(state) {
   const currentPage = getCurrentPage(state);
@@ -51,7 +51,7 @@ export function getSelectedBlocks(state) {
 /**
  * Gets all currently selected blocks
  * @param {State} state - Current application state
- * @returns {Block | null} Array of selected blocks
+ * @returns {WebviewBlock | null} Array of selected blocks
  */
 export function getHoveredBlock(state) {
   const currentPage = getCurrentPage(state);
@@ -111,7 +111,7 @@ export function deselectAllBlocks(state) {
 /**
  * Gets the first selected block (for single-selection compatibility)
  * @param {State} state - Current application state
- * @returns {Block|null} The selected block or null if none selected
+ * @returns {WebviewBlock|null} The selected block or null if none selected
  */
 export function getFirstSelectedBlock(state) {
   const selectedBlocks = getSelectedBlocks(state);

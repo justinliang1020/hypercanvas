@@ -72,7 +72,7 @@ export const RESIZE_HANDLERS = {
  * Maintains the original aspect ratio while respecting minimum size.
  *
  * @param {{width:number,height:number,x:number,y:number}} dimensions - Proposed dimensions from a resize handler
- * @param {Block} originalBlock - The original block used to derive the aspect ratio
+ * @param {WebviewBlock} originalBlock - The original block used to derive the aspect ratio
  * @param {"nw"|"ne"|"sw"|"se"|"n"|"s"|"e"|"w"} handle - Active resize handle
  * @returns {{width:number,height:number,x:number,y:number}} Constrained dimensions
  */
@@ -302,7 +302,7 @@ export function handleResizePointerMove(state, event) {
 
     //TODO: clean this up
     //
-    /** @type {Block} */
+    /** @type {WebviewBlock} */
     const virtualBoundingBox = {
       id: -1,
       x: page.resizing.startX,

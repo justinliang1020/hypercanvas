@@ -30,7 +30,7 @@ import {
 /**
  * Creates a block component renderer
  * @param {State} state - Current application state
- * @returns {(block: Block) => import("hyperapp").ElementVNode<State>} Block renderer function
+ * @returns {(block: WebviewBlock) => import("hyperapp").ElementVNode<State>} Block renderer function
  */
 export function block(state) {
   return (block) => {
@@ -429,7 +429,7 @@ export function addBlock(state, src, type, x, y, width, height) {
     throw Error("no current page");
   }
 
-  /** @type {Block} */
+  /** @type {WebviewBlock} */
   const newBlock = {
     id: currentPage.blockIdCounter,
     width: width,
@@ -629,7 +629,7 @@ export function copySelectedBlocks(state) {
   if (selectedBlocks.length === 0) return state;
 
   // Create copies of the block data for clipboard, capturing current state
-  /** @type {Block[]} */
+  /** @type {WebviewBlock[]} */
   const blocksData = selectedBlocks
     .sort((a, b) => a.zIndex - b.zIndex)
     .map((block) => ({
@@ -649,7 +649,7 @@ export function copySelectedBlocks(state) {
 /**
  * @param {State} state
  * @param {number} blockId
- * @param {Partial<Block>} newBlockConfig
+ * @param {Partial<WebviewBlock>} newBlockConfig
  */
 export function updateBlock(state, blockId, newBlockConfig) {
   if (newBlockConfig.id !== undefined) {
@@ -666,7 +666,7 @@ export function updateBlock(state, blockId, newBlockConfig) {
 
 /**
  * @param {State} state
- * @param {Block} block
+ * @param {WebviewBlock} block
  * @return {import("hyperapp").ElementVNode<State>}
  */
 function webviewWrapper(state, block) {
