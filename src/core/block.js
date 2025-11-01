@@ -554,7 +554,7 @@ export function pasteClipboardBlocks(state) {
     return state;
   }
 
-  /** @type {BlockConfig[]} */
+  /** @type {WebviewBlock[]} */
   const blockConfigs = clipboardData.map((blockData) => ({
     ...blockData,
     x: blockData.x + PASTE_OFFSET_X,
