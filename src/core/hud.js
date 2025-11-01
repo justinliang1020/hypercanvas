@@ -1,6 +1,6 @@
 import { h, text } from "hyperapp";
 import { getHoveredBlock, getSelectedBlocks } from "./selection.js";
-import { updateBlock } from "./block.js";
+import { addBlockToViewportCenter, updateBlock } from "./block.js";
 
 /**
  * @param {State} state - Current application state
@@ -91,7 +91,15 @@ function goButton(state) {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 function newBlockButton(state) {
-  return h("button", {}, text("New block"));
+  /**
+   * @param {State} state
+   * @param {Event} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function onclick(state, event) {
+    return addBlockToViewportCenter(state, "https://example.com", "real");
+  }
+  return h("button", { onclick }, text("New block"));
 }
 
 /**
