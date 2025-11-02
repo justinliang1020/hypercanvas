@@ -97,7 +97,7 @@ function newBlockButton(state) {
    * @returns {import("hyperapp").Dispatchable<State>}
    */
   function onclick(state, event) {
-    return addBlockToViewportCenter(state, "https://example.com", "real");
+    return addBlockToViewportCenter(state, "https://example.com", false);
   }
   return h("button", { onclick }, text("New block"));
 }

@@ -73,12 +73,7 @@ export function webviewBlockContents(state, block) {
           /** @type {any} */ (window).hypercanvasDispatch(
             (/** @type {State} */ state) => {
               let newState = removePreviewChildBlock(state, block.id);
-              newState = addChildBlock(
-                newState,
-                block.id,
-                hoverHref,
-                "preview",
-              );
+              newState = addChildBlock(newState, block.id, hoverHref, true);
               return newState;
             },
           );
@@ -92,7 +87,7 @@ export function webviewBlockContents(state, block) {
           /** @type {any} */ (window).hypercanvasDispatch(
             (/** @type {State} */ state) => {
               let newState = removePreviewChildBlock(state, block.id);
-              newState = addChildBlock(newState, block.id, clickHref, "real");
+              newState = addChildBlock(newState, block.id, clickHref, false);
               return newState;
             },
           );
@@ -160,7 +155,7 @@ export function webviewBlockContents(state, block) {
       overflow: "hidden",
       border: "none",
       borderRadius: `${BLOCK_BORDER_RADIUS}px`,
-      ...(block.type === "preview" ? previewStyles : {}),
+      ...(block.isPreview ? previewStyles : {}),
     },
     class: BLOCK_CONTENTS_CLASS_NAME,
     src: block.src,

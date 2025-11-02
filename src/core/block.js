@@ -415,14 +415,14 @@ export function deleteSelectedBlocks(state) {
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
  * @param {string} src
- * @param {BlockType} type
+ * @param {boolean} isPreview
  * @param {number} x - X position on canvas. If null, uses viewport's center X coordinate
  * @param {number} y - Y position on canvas. If null, uses viewport's center X coordinate
  * @param {number} width - Block width in pixels
  * @param {number} height - Block height in pixels
  * @returns {{state: State, newBlockId: number}} Updated state with new block
  */
-export function addBlock(state, src, type, x, y, width, height) {
+export function addBlock(state, src, isPreview, x, y, width, height) {
   const currentBlocks = getCurrentBlocks(state);
   const currentPage = getCurrentPage(state);
   if (!currentPage) {
@@ -436,7 +436,7 @@ export function addBlock(state, src, type, x, y, width, height) {
     height: height,
     x: x,
     y: y,
-    type: type,
+    isPreview: isPreview,
     zIndex: Math.max(...currentBlocks.map((block) => block.zIndex), 0) + 1,
     src: src,
     previewChildId: null,
@@ -460,7 +460,7 @@ export function addBlock(state, src, type, x, y, width, height) {
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
  * @param {string} src - Name of view to instantiate
- * @param {BlockType} type - Name of view to instantiate
+ * @param {boolean} isPreview - Name of view to instantiate
  * @param {number} width - Block width in pixels
  * @param {number} height - Block height in pixels
  * @returns {State} Updated state with new block
@@ -468,7 +468,7 @@ export function addBlock(state, src, type, x, y, width, height) {
 export function addBlockToViewportCenter(
   state,
   src,
-  type,
+  isPreview,
   width = DEFAULT_BLOCK_WIDTH,
   height = DEFAULT_BLOCK_HEIGHT,
 ) {
@@ -476,7 +476,7 @@ export function addBlockToViewportCenter(
   const x = viewportCenter.x - width / 2; // Center the block
   const y = viewportCenter.y - height / 2; // Center the block
 
-  return addBlock(state, src, type, x, y, width, height).state;
+  return addBlock(state, src, isPreview, x, y, width, height).state;
 }
 
 /**
@@ -484,10 +484,10 @@ export function addBlockToViewportCenter(
  * @param {State} state
  * @param {number} parentBlockId
  * @param {string} content
- * @param {BlockType} type
+ * @param {boolean} isPreview
  * @return {State}
  */
-export function addChildBlock(state, parentBlockId, content, type) {
+export function addChildBlock(state, parentBlockId, content, isPreview) {
   const parentBlock = getCurrentBlocks(state).find(
     (b) => b.id === parentBlockId,
   );
@@ -501,7 +501,7 @@ export function addChildBlock(state, parentBlockId, content, type) {
   let { state: newState, newBlockId } = addBlock(
     state,
     content,
-    type,
+    isPreview,
     newX,
     newY,
     DEFAULT_BLOCK_WIDTH,
@@ -509,11 +509,11 @@ export function addChildBlock(state, parentBlockId, content, type) {
   );
 
   //TODO: fix kinda broken
-  if (type === "preview") {
+  if (isPreview) {
     newState = updateBlock(newState, parentBlock.id, {
       previewChildId: newBlockId,
     });
-  } else if (type === "real") {
+  } else {
     console.log([...parentBlock.realChildrenIds, newBlockId]);
     newState = updateBlock(newState, parentBlock.id, {
       realChildrenIds: [...parentBlock.realChildrenIds, newBlockId],
@@ -570,7 +570,7 @@ export function pasteClipboardBlocks(state) {
       const addBlockRes = addBlock(
         stateWithNewBlocks,
         config.src,
-        config.type,
+        config.isPreview,
         config.x,
         config.y,
         config.width,

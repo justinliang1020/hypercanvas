@@ -12,7 +12,7 @@ interface Block {
 interface WebviewBlock extends Block {
   src: string;
   domReady: boolean;
-  type: BlockType;
+  isPreview: boolean;
   previewChildId: number | null;
   realChildrenIds: number[];
 }
