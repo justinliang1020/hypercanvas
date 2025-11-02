@@ -12,7 +12,7 @@ import { getCurrentPage } from "./pages.js";
  * @param {WebviewBlock} block
  * @return {import("hyperapp").ElementVNode<State>}
  */
-export function webviewWrapper(state, block) {
+export function webviewBlockContents(state, block) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return h("div", {});
   const isEditing = currentPage.editingId === block.id;

@@ -25,7 +25,7 @@ import {
   getSelectedBlocks,
   toggleBlockSelection,
 } from "./selection.js";
-import { webviewWrapper } from "./webviewBlock.js";
+import { webviewBlockContents } from "./webviewBlock.js";
 
 /**
  * Creates a block component renderer
@@ -192,7 +192,7 @@ export function block(state) {
         ondblclick,
       },
       [
-        webviewWrapper(state, block),
+        webviewBlockContents(state, block),
         ...(isSelected && !isEditing && !isMultiSelect
           ? Object.keys(RESIZE_HANDLERS).map((handle) =>
               ResizeHandle({
