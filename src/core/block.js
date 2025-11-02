@@ -4,7 +4,6 @@ import {
   PASTE_OFFSET_Y,
   OUTLINE_COLORS,
   OUTLINE_WIDTHS,
-  BLOCK_CONTENTS_CLASS_NAME,
   DEFAULT_BLOCK_WIDTH,
   DEFAULT_BLOCK_HEIGHT,
   BLOCK_BORDER_RADIUS,
@@ -26,6 +25,7 @@ import {
   getSelectedBlocks,
   toggleBlockSelection,
 } from "./selection.js";
+import { webviewWrapper } from "./webviewBlock.js";
 
 /**
  * Creates a block component renderer
@@ -487,7 +487,7 @@ export function addBlockToViewportCenter(
  * @param {BlockType} type
  * @return {State}
  */
-function addChildBlock(state, parentBlockId, content, type) {
+export function addChildBlock(state, parentBlockId, content, type) {
   const parentBlock = getCurrentBlocks(state).find(
     (b) => b.id === parentBlockId,
   );
@@ -528,7 +528,7 @@ function addChildBlock(state, parentBlockId, content, type) {
  * @param {number} parentBlockId
  * @return {State}
  */
-function removePreviewChildBlock(state, parentBlockId) {
+export function removePreviewChildBlock(state, parentBlockId) {
   const parentBlock = getCurrentBlocks(state).find(
     (b) => b.id === parentBlockId,
   );
@@ -634,165 +634,5 @@ export function updateBlock(state, blockId, newBlockConfig) {
     blocks: currentBlocks.map((block) =>
       block.id === blockId ? { ...block, ...newBlockConfig } : block,
     ),
-  });
-}
-
-/**
- * @param {State} state
- * @param {WebviewBlock} block
- * @return {import("hyperapp").ElementVNode<State>}
- */
-function webviewWrapper(state, block) {
-  const currentPage = getCurrentPage(state);
-  if (!currentPage) return h("div", {});
-  const isEditing = currentPage.editingId === block.id;
-
-  /** @type {import("hyperapp").StyleProp} */
-  const previewStyles = {
-    opacity: "0.6",
-    pointerEvents: "none",
-    outline: "2px dashed grey",
-  };
-
-  // Set up IPC message handling using a global dispatch reference
-  // This approach works around Hyperapp's limitation with custom webview events
-  if (!(/** @type {any} */ (window).hypercanvasDispatch)) {
-    // We'll need to set this from the main app
-    console.warn("Global dispatch not available for webview IPC");
-  }
-
-  // Store the block ID and handler globally so we can access it from the webview
-  if (!(/** @type {any} */ (window).hypercanvasWebviewHandlers)) {
-    /** @type {any} */ (window).hypercanvasWebviewHandlers = {};
-  }
-
-  const blockKey = `block-${block.id}`;
-  /** @type {any} */ (window).hypercanvasWebviewHandlers[blockKey] = (
-    /** @type {any} */ event,
-  ) => {
-    console.log("IPC message received:", event.channel, event.args);
-    const channel = event.channel;
-    const args = event.args || [];
-
-    switch (channel) {
-      case "keydown":
-      case "keyup":
-        // Forward keyboard events to main window
-        if (args[0]) {
-          window.dispatchEvent(
-            new KeyboardEvent(channel, {
-              key: args[0].key,
-              code: args[0].code,
-              ctrlKey: args[0].ctrlKey,
-              metaKey: args[0].metaKey,
-              shiftKey: args[0].shiftKey,
-              altKey: args[0].altKey,
-              bubbles: true,
-            }),
-          );
-        }
-        break;
-
-      case "anchor-hover":
-        console.log("Processing anchor hover:", args[0]?.href);
-        const hoverHref = args[0]?.href;
-        if (hoverHref && /** @type {any} */ (window).hypercanvasDispatch) {
-          /** @type {any} */ (window).hypercanvasDispatch(
-            (/** @type {State} */ state) => {
-              let newState = removePreviewChildBlock(state, block.id);
-              newState = addChildBlock(
-                newState,
-                block.id,
-                hoverHref,
-                "preview",
-              );
-              return newState;
-            },
-          );
-        }
-        break;
-
-      case "anchor-click":
-        console.log("Processing anchor click:", args[0]?.href);
-        const clickHref = args[0]?.href;
-        if (clickHref && /** @type {any} */ (window).hypercanvasDispatch) {
-          /** @type {any} */ (window).hypercanvasDispatch(
-            (/** @type {State} */ state) => {
-              let newState = removePreviewChildBlock(state, block.id);
-              newState = addChildBlock(newState, block.id, clickHref, "real");
-              return newState;
-            },
-          );
-        }
-        break;
-
-      default:
-        console.log("Unknown IPC channel:", channel);
-        break;
-    }
-  };
-
-  // Set up the event listener after the DOM updates
-  setTimeout(() => {
-    const webview = /** @type {import("electron").WebviewTag} */ (
-      document.getElementById(blockKey)
-    );
-    if (webview && !webview.dataset.hypercanvasIpcSetup) {
-      console.log(`Setting up IPC listener for ${blockKey}`);
-
-      const handler = /** @type {any} */ (window).hypercanvasWebviewHandlers[
-        blockKey
-      ];
-      if (handler) {
-        webview.addEventListener("ipc-message", handler);
-        webview.dataset.hypercanvasIpcSetup = "true";
-        console.log(`IPC listener added for ${blockKey}`);
-      }
-
-      /**
-       * @param {import("electron").DidNavigateEvent } event
-       */
-      function handleNavigationChange(event) {
-        console.log("Navigation detected:", event.url);
-        //@ts-ignore
-        if (window.hypercanvasDispatch) {
-          //@ts-ignore
-          window.hypercanvasDispatch((state) => {
-            return updateBlock(state, block.id, { src: event.url });
-          });
-        }
-      }
-
-      function handleDidLoad() {
-        //@ts-ignore
-        if (window.hypercanvasDispatch) {
-          //@ts-ignore
-          window.hypercanvasDispatch((state) => {
-            return updateBlock(state, block.id, { domReady: true });
-          });
-        }
-      }
-
-      webview.addEventListener("dom-ready", handleDidLoad);
-      webview.addEventListener("did-navigate", handleNavigationChange);
-      webview.addEventListener("did-navigate-in-page", handleNavigationChange);
-    }
-  }, 0);
-
-  return h("webview", {
-    style: {
-      pointerEvents: isEditing || state.isInteractMode ? null : "none",
-      width: "100%",
-      height: "100%",
-      overflow: "hidden",
-      border: "none",
-      borderRadius: `${BLOCK_BORDER_RADIUS}px`,
-      ...(block.type === "preview" ? previewStyles : {}),
-    },
-    class: BLOCK_CONTENTS_CLASS_NAME,
-    src: block.src,
-    id: blockKey,
-    key: `${block.id}`,
-    preload: `./webview-preload.js`,
   });
 }
