@@ -3,9 +3,12 @@ import {
   removePreviewChildBlock,
   addChildBlock,
   updateBlock,
-} from "./block.js";
-import { BLOCK_BORDER_RADIUS, BLOCK_CONTENTS_CLASS_NAME } from "./constants.js";
-import { getCurrentPage } from "./pages.js";
+} from "../block.js";
+import {
+  BLOCK_BORDER_RADIUS,
+  BLOCK_CONTENTS_CLASS_NAME,
+} from "../constants.js";
+import { getCurrentPage } from "../pages.js";
 
 /**
  * @param {State} state
@@ -163,6 +166,6 @@ export function webviewBlockContents(state, block) {
     src: block.src,
     id: blockKey,
     key: `${block.id}`,
-    preload: `./webview-preload.js`,
+    preload: `./blockContents/webview-preload.js`,
   });
 }

@@ -25,7 +25,7 @@ import {
   getSelectedBlocks,
   toggleBlockSelection,
 } from "./selection.js";
-import { webviewBlockContents } from "./webviewBlock.js";
+import { webviewBlockContents } from "./blockContents/webview.js";
 
 /**
  * Creates a block component renderer
