@@ -1,6 +1,6 @@
 type BlockType = "real" | "preview";
 
-interface Block {
+interface BaseBlock {
   id: number;
   width: number;
   height: number;
@@ -9,13 +9,15 @@ interface Block {
   zIndex: number;
 }
 
-interface WebviewBlock extends Block {
+interface WebviewBlock extends BaseBlock {
   src: string;
   domReady: boolean;
   isPreview: boolean;
   previewChildId: number | null;
   realChildrenIds: number[];
 }
+
+type Block = WebviewBlock;
 
 //TODO: refactor into its own data structure, instead of property of block?
 type Link = {
@@ -26,7 +28,7 @@ type Link = {
 interface Page {
   id: string;
   name: string;
-  blocks: WebviewBlock[];
+  blocks: Block[];
   offsetX: number;
   offsetY: number;
   zoom: number;
@@ -94,7 +96,7 @@ interface State {
   isDarkMode: boolean;
   panelsVisible: boolean;
   programsPanelWidth: number;
-  clipboard: WebviewBlock[] | null;
+  clipboard: Block[] | null;
   programFilter: string;
   notification: string | null;
   notificationVisible: boolean;
@@ -106,7 +108,7 @@ interface State {
 }
 
 type ResizeHandler = (
-  block: Block,
+  block: BaseBlock,
   e: { percentX: number; percentY: number },
 ) => { width: number; height: number; x: number; y: number };
 

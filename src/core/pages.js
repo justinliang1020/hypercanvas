@@ -12,7 +12,7 @@ export function getCurrentPage(state) {
 /**
  * Gets blocks for the current page
  * @param {State} state - Current application state
- * @returns {WebviewBlock[]} Blocks on current page
+ * @returns {Block[]} Blocks on current page
  */
 export function getCurrentBlocks(state) {
   const currentPage = getCurrentPage(state);
@@ -49,7 +49,7 @@ export function getCurrentLinks(state) {
 /**
  * Gets blocks for the current page
  * @param {State} state - Current application state
- * @returns {WebviewBlock[]} Blocks on current page
+ * @returns {Block[]} Blocks on current page
  */
 export function getGlobalBlocks(state) {
   return state.pages.flatMap((page) => page.blocks);

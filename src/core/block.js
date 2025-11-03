@@ -30,7 +30,7 @@ import { webviewBlockContents } from "./blockContents/webview.js";
 /**
  * Creates a block component renderer
  * @param {State} state - Current application state
- * @returns {(block: WebviewBlock) => import("hyperapp").ElementVNode<State>} Block renderer function
+ * @returns {(block: Block) => import("hyperapp").ElementVNode<State>} Block renderer function
  */
 export function block(state) {
   return (block) => {
@@ -429,7 +429,7 @@ export function addBlock(state, src, isPreview, x, y, width, height) {
     throw Error("no current page");
   }
 
-  /** @type {WebviewBlock} */
+  /** @type {Block} */
   const newBlock = {
     id: currentPage.blockIdCounter,
     width: width,
@@ -554,7 +554,7 @@ export function pasteClipboardBlocks(state) {
     return state;
   }
 
-  /** @type {WebviewBlock[]} */
+  /** @type {Block[]} */
   const blockConfigs = clipboardData.map((blockData) => ({
     ...blockData,
     x: blockData.x + PASTE_OFFSET_X,
@@ -602,7 +602,7 @@ export function copySelectedBlocks(state) {
   if (selectedBlocks.length === 0) return state;
 
   // Create copies of the block data for clipboard, capturing current state
-  /** @type {WebviewBlock[]} */
+  /** @type {Block[]} */
   const blocksData = selectedBlocks
     .sort((a, b) => a.zIndex - b.zIndex)
     .map((block) => ({
@@ -622,7 +622,7 @@ export function copySelectedBlocks(state) {
 /**
  * @param {State} state
  * @param {number} blockId
- * @param {Partial<WebviewBlock>} newBlockConfig
+ * @param {Partial<Block>} newBlockConfig
  */
 export function updateBlock(state, blockId, newBlockConfig) {
   if (newBlockConfig.id !== undefined) {
