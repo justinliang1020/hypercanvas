@@ -16,8 +16,6 @@ main {
 /* Draggable element styles */
 .block {
   position: absolute;
-  left: 0;
-  top: 0;
   user-select: none;
   box-sizing: border-box;
   touch-action: none;
@@ -46,14 +44,6 @@ main {
   overflow: hidden;
   box-sizing: border-box;
   transition: width 0.3s ease;
-}
-
-#viewport.panels-visible {
-  width: 60%;
-}
-
-#viewport.panels-hidden {
-  width: 100%;
 }
 
 /* Dark mode styles */
