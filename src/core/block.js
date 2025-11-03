@@ -642,7 +642,7 @@ export function updateBlock(state, blockId, newBlockConfig) {
   const currentBlocks = getCurrentBlocks(state);
 
   return updateCurrentPage(state, {
-    //@ts-ignore
+    //@ts-ignore: this is weird because the union types combind with partial cause unintended types to be returned
     blocks: currentBlocks.map((block) =>
       block.id === blockId ? { ...block, ...newBlockConfig } : block,
     ),
