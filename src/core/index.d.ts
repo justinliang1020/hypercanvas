@@ -1,5 +1,3 @@
-type BlockType = "real" | "preview";
-
 interface BaseBlock {
   id: number;
   width: number;
