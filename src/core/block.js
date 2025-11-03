@@ -170,6 +170,25 @@ export function block(state) {
       });
     }
 
+    // const contents = webviewBlockContents(state, block);
+    const contents = (() => {
+      switch (block.type) {
+        case "webview":
+          return webviewBlockContents(state, block);
+      }
+    })();
+
+    const resizeHandles =
+      isSelected && !isEditing && !isMultiSelect
+        ? Object.keys(RESIZE_HANDLERS).map((handle) =>
+            ResizeHandle({
+              handle: /** @type{ResizeString} */ (handle),
+              zoom: currentPage.zoom,
+              context: "block",
+            }),
+          )
+        : [];
+
     return h(
       "div",
       {
@@ -191,18 +210,7 @@ export function block(state) {
         onpointerdown,
         ondblclick,
       },
-      [
-        webviewBlockContents(state, block),
-        ...(isSelected && !isEditing && !isMultiSelect
-          ? Object.keys(RESIZE_HANDLERS).map((handle) =>
-              ResizeHandle({
-                handle: /** @type{ResizeString} */ (handle),
-                zoom: currentPage.zoom,
-                context: "block",
-              }),
-            )
-          : []),
-      ],
+      [contents, ...resizeHandles],
     );
   };
 }
@@ -437,6 +445,7 @@ export function addWebviewBlock(state, src, isPreview, x, y, width, height) {
     x: x,
     y: y,
     isPreview: isPreview,
+    type: "webview",
     zIndex: Math.max(...currentBlocks.map((block) => block.zIndex), 0) + 1,
     src: src,
     previewChildId: null,
@@ -491,7 +500,7 @@ export function addChildBlock(state, parentBlockId, content, isPreview) {
   const parentBlock = getCurrentBlocks(state).find(
     (b) => b.id === parentBlockId,
   );
-  if (!parentBlock) {
+  if (!parentBlock || parentBlock.type !== "webview") {
     throw Error(`no parent block found of id ${parentBlockId}`);
   }
   const offsetX = 150;
@@ -514,7 +523,6 @@ export function addChildBlock(state, parentBlockId, content, isPreview) {
       previewChildId: newBlockId,
     });
   } else {
-    console.log([...parentBlock.realChildrenIds, newBlockId]);
     newState = updateBlock(newState, parentBlock.id, {
       realChildrenIds: [...parentBlock.realChildrenIds, newBlockId],
     });
@@ -532,7 +540,7 @@ export function removePreviewChildBlock(state, parentBlockId) {
   const parentBlock = getCurrentBlocks(state).find(
     (b) => b.id === parentBlockId,
   );
-  if (!parentBlock) return state;
+  if (!parentBlock || parentBlock.type !== "webview") return state;
   const currentBlocks = getCurrentBlocks(state);
   const newBlocks = currentBlocks
     .filter((block) => block.id !== parentBlock.previewChildId)
@@ -566,18 +574,21 @@ export function pasteClipboardBlocks(state) {
     const newBlockIds = [];
 
     // Add each block sequentially
-    for (const config of blockConfigs) {
-      const addBlockRes = addWebviewBlock(
-        stateWithNewBlocks,
-        config.src,
-        config.isPreview,
-        config.x,
-        config.y,
-        config.width,
-        config.height,
-      );
-      stateWithNewBlocks = addBlockRes.state;
-      newBlockIds.push(addBlockRes.newBlockId);
+    for (const blockConfig of blockConfigs) {
+      //TODO: add other blocks
+      if (blockConfig.type === "webview") {
+        const addBlockRes = addWebviewBlock(
+          stateWithNewBlocks,
+          blockConfig.src,
+          blockConfig.isPreview,
+          blockConfig.x,
+          blockConfig.y,
+          blockConfig.width,
+          blockConfig.height,
+        );
+        stateWithNewBlocks = addBlockRes.state;
+        newBlockIds.push(addBlockRes.newBlockId);
+      }
     }
 
     return {
@@ -631,6 +642,7 @@ export function updateBlock(state, blockId, newBlockConfig) {
   const currentBlocks = getCurrentBlocks(state);
 
   return updateCurrentPage(state, {
+    //@ts-ignore
     blocks: currentBlocks.map((block) =>
       block.id === blockId ? { ...block, ...newBlockConfig } : block,
     ),

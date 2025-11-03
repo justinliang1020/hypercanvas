@@ -10,6 +10,7 @@ interface BaseBlock {
 }
 
 interface WebviewBlock extends BaseBlock {
+  type: "webview";
   src: string;
   domReady: boolean;
   isPreview: boolean;
@@ -17,7 +18,12 @@ interface WebviewBlock extends BaseBlock {
   realChildrenIds: number[];
 }
 
-type Block = WebviewBlock;
+interface TextBlock extends BaseBlock {
+  type: "text";
+  value: string;
+}
+
+type Block = WebviewBlock | TextBlock;
 
 //TODO: refactor into its own data structure, instead of property of block?
 type Link = {

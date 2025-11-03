@@ -27,12 +27,13 @@ export function getCurrentBlocks(state) {
 export function getCurrentLinks(state) {
   const blocks = getCurrentBlocks(state);
   const links = blocks.flatMap((parentBlock) => {
-    const previewChildBlock = blocks.find(
-      (b) => b.id === parentBlock.previewChildId,
-    );
-    const realChildrenBlocks = blocks.filter((b) =>
-      parentBlock.realChildrenIds.includes(b.id),
-    );
+    if (parentBlock.type !== "webview") return [];
+    const previewChildBlock = blocks
+      .filter((b) => b.type === "webview")
+      .find((b) => b.id === parentBlock.previewChildId);
+    const realChildrenBlocks = blocks
+      .filter((b) => b.type === "webview")
+      .filter((b) => parentBlock.realChildrenIds.includes(b.id));
 
     const childBlocks = [
       ...(previewChildBlock ? [previewChildBlock] : []),

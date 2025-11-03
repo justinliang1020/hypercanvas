@@ -12,7 +12,7 @@ import { getCurrentPage } from "../pages.js";
 
 /**
  * @param {State} state
- * @param {Block} block
+ * @param {WebviewBlock} block
  * @return {import("hyperapp").ElementVNode<State>}
  */
 export function webviewBlockContents(state, block) {

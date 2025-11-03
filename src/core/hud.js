@@ -43,9 +43,13 @@ function searchBar(state) {
   const firstSelectedBlock = getSelectedBlocks(state)[0];
   const hoveredBlock = getHoveredBlock(state);
 
-  if (firstSelectedBlock) {
+  if (
+    firstSelectedBlock &&
+    firstSelectedBlock.type === "webview" &&
+    firstSelectedBlock
+  ) {
     searchBarValue = firstSelectedBlock.src;
-  } else if (hoveredBlock) {
+  } else if (hoveredBlock && hoveredBlock.type === "webview") {
     searchBarValue = hoveredBlock.src;
   }
 
@@ -128,7 +132,11 @@ function navigationButton(state, direction, display) {
   const firstSelectedBlock = getSelectedBlocks(state)[0];
 
   const { enabled, webview: webviewElement } = (() => {
-    if (!firstSelectedBlock || !firstSelectedBlock.domReady) {
+    if (
+      !firstSelectedBlock ||
+      firstSelectedBlock.type !== "webview" ||
+      !firstSelectedBlock.domReady
+    ) {
       return { enabled: false, webview: undefined };
     }
 
