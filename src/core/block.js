@@ -422,14 +422,14 @@ export function deleteSelectedBlocks(state) {
  * @param {number} height - Block height in pixels
  * @returns {{state: State, newBlockId: number}} Updated state with new block
  */
-export function addBlock(state, src, isPreview, x, y, width, height) {
+export function addWebviewBlock(state, src, isPreview, x, y, width, height) {
   const currentBlocks = getCurrentBlocks(state);
   const currentPage = getCurrentPage(state);
   if (!currentPage) {
     throw Error("no current page");
   }
 
-  /** @type {Block} */
+  /** @type {WebviewBlock} */
   const newBlock = {
     id: currentPage.blockIdCounter,
     width: width,
@@ -476,7 +476,7 @@ export function addBlockToViewportCenter(
   const x = viewportCenter.x - width / 2; // Center the block
   const y = viewportCenter.y - height / 2; // Center the block
 
-  return addBlock(state, src, isPreview, x, y, width, height).state;
+  return addWebviewBlock(state, src, isPreview, x, y, width, height).state;
 }
 
 /**
@@ -498,7 +498,7 @@ export function addChildBlock(state, parentBlockId, content, isPreview) {
   const newX = parentBlock.x + parentBlock.width + offsetX;
   const newY = parentBlock.y;
 
-  let { state: newState, newBlockId } = addBlock(
+  let { state: newState, newBlockId } = addWebviewBlock(
     state,
     content,
     isPreview,
@@ -567,7 +567,7 @@ export function pasteClipboardBlocks(state) {
 
     // Add each block sequentially
     for (const config of blockConfigs) {
-      const addBlockRes = addBlock(
+      const addBlockRes = addWebviewBlock(
         stateWithNewBlocks,
         config.src,
         config.isPreview,
