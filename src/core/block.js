@@ -26,6 +26,7 @@ import {
   toggleBlockSelection,
 } from "./selection.js";
 import { webviewBlockContents } from "./blockContents/webview.js";
+import { textContent } from "./blockContents/text.js";
 
 /**
  * Creates a block component renderer
@@ -175,6 +176,8 @@ export function block(state) {
       switch (block.type) {
         case "webview":
           return webviewBlockContents(state, block);
+        case "text":
+          return textContent(state, block);
       }
     })();
 
@@ -451,6 +454,47 @@ export function addWebviewBlock(state, src, isPreview, x, y, width, height) {
     previewChildId: null,
     realChildrenIds: [],
     domReady: false,
+  };
+  const newState = updateCurrentPage(state, {
+    blocks: [...currentBlocks, newBlock],
+    blockIdCounter: currentPage.blockIdCounter + 1,
+  });
+
+  // const selectedState = selectBlock(newState, newBlock.id);
+
+  return {
+    state: saveMementoAndReturn(state, newState),
+    newBlockId: newBlock.id,
+  };
+}
+
+/**
+ * Adds a new block to the state and renders its program
+ * @param {State} state - Current application state
+ * @param {string} value
+ * @param {number} x - X position on canvas. If null, uses viewport's center X coordinate
+ * @param {number} y - Y position on canvas. If null, uses viewport's center X coordinate
+ * @param {number} width - Block width in pixels
+ * @param {number} height - Block height in pixels
+ * @returns {{state: State, newBlockId: number}} Updated state with new block
+ */
+export function addTextBlock(state, value, x, y, width, height) {
+  const currentBlocks = getCurrentBlocks(state);
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) {
+    throw Error("no current page");
+  }
+
+  /** @type {TextBlock} */
+  const newBlock = {
+    id: currentPage.blockIdCounter,
+    width: width,
+    height: height,
+    x: x,
+    y: y,
+    zIndex: Math.max(...currentBlocks.map((block) => block.zIndex), 0) + 1,
+    type: "text",
+    value: value,
   };
   const newState = updateCurrentPage(state, {
     blocks: [...currentBlocks, newBlock],

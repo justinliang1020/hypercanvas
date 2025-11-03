@@ -1,6 +1,12 @@
 import { h, text } from "hyperapp";
 import { getHoveredBlock, getSelectedBlocks } from "./selection.js";
-import { addBlockToViewportCenter, updateBlock } from "./block.js";
+import {
+  addBlockToViewportCenter,
+  addTextBlock,
+  updateBlock,
+} from "./block.js";
+import { DEFAULT_BLOCK_HEIGHT, DEFAULT_BLOCK_WIDTH } from "./constants.js";
+import { getViewportCenterCoordinates } from "./viewport.js";
 
 /**
  * @param {State} state - Current application state
@@ -25,8 +31,8 @@ export function hud(state) {
     },
     [
       searchBar(state),
-      goButton(state),
-      newBlockButton(state),
+      newTextBlock(state),
+      newWebviewButton(state),
       backButton(state),
       forwardButton(state),
     ],
@@ -86,15 +92,33 @@ function searchBar(state) {
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-function goButton(state) {
-  return h("button", {}, text("Go"));
+function newTextBlock(state) {
+  /**
+   * @param {State} state
+   * @param {Event} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function onclick(state, event) {
+    const viewportCenter = getViewportCenterCoordinates(state);
+    const x = viewportCenter.x - DEFAULT_BLOCK_WIDTH / 2; // Center the block
+    const y = viewportCenter.y - DEFAULT_BLOCK_HEIGHT / 2; // Center the block
+    return addTextBlock(
+      state,
+      "hello",
+      x,
+      y,
+      DEFAULT_BLOCK_WIDTH,
+      DEFAULT_BLOCK_HEIGHT,
+    ).state;
+  }
+  return h("button", { onclick }, text("New text block"));
 }
 
 /**
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-function newBlockButton(state) {
+function newWebviewButton(state) {
   /**
    * @param {State} state
    * @param {Event} event
@@ -103,7 +127,7 @@ function newBlockButton(state) {
   function onclick(state, event) {
     return addBlockToViewportCenter(state, "https://example.com", false);
   }
-  return h("button", { onclick }, text("New block"));
+  return h("button", { onclick }, text("New webview block"));
 }
 
 /**
