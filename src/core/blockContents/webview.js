@@ -3,6 +3,7 @@ import {
   removePreviewChildBlock,
   addChildBlock,
   updateBlock,
+  addBlockToViewportCenter,
 } from "../block.js";
 import {
   BLOCK_BORDER_RADIUS,
@@ -244,4 +245,20 @@ function navigationButton(state, direction, display) {
   }
 
   return h("button", { disabled: !enabled, onclick }, text(display));
+}
+
+/**
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+export function newWebviewButton(state) {
+  /**
+   * @param {State} state
+   * @param {Event} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function onclick(state, event) {
+    return addBlockToViewportCenter(state, "https://example.com", false);
+  }
+  return h("button", { onclick }, text("New webview block"));
 }

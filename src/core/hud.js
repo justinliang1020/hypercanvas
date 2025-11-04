@@ -1,13 +1,13 @@
 import { h, text } from "hyperapp";
 import { getHoveredBlock, getSelectedBlocks } from "./selection.js";
-import {
-  addBlockToViewportCenter,
-  addTextBlock,
-  updateBlock,
-} from "./block.js";
+import { addTextBlock, updateBlock } from "./block.js";
 import { DEFAULT_BLOCK_HEIGHT, DEFAULT_BLOCK_WIDTH } from "./constants.js";
 import { getViewportCenterCoordinates } from "./viewport.js";
-import { forwardButton, backButton } from "./blockContents/webview.js";
+import {
+  forwardButton,
+  backButton,
+  newWebviewButton,
+} from "./blockContents/webview.js";
 
 /**
  * @param {State} state - Current application state
@@ -128,20 +128,4 @@ function newTextBlock(state) {
     ).state;
   }
   return h("button", { onclick }, text("New text block"));
-}
-
-/**
- * @param {State} state - Current application state
- * @returns {import("hyperapp").ElementVNode<State>}
- */
-function newWebviewButton(state) {
-  /**
-   * @param {State} state
-   * @param {Event} event
-   * @returns {import("hyperapp").Dispatchable<State>}
-   */
-  function onclick(state, event) {
-    return addBlockToViewportCenter(state, "https://example.com", false);
-  }
-  return h("button", { onclick }, text("New webview block"));
 }
