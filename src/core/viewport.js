@@ -397,7 +397,6 @@ function onpointerup(state) {
     isViewportDragging: false,
     resizing: null,
     dragStart: null,
-    cursorStyle: "default",
   });
 
   if (currentPage.selectionBox) {

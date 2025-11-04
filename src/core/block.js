@@ -221,7 +221,7 @@ export function block(state) {
           "div",
           {
             style: {
-              pointerEvents: `${isSelected ? "" : "none"}`,
+              pointerEvents: `${isEditing ? "" : "none"}`,
               height: "100%",
             },
           },
