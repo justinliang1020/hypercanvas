@@ -5,5 +5,5 @@ import { h, text } from "hyperapp";
  * @return {import("hyperapp").ElementVNode<State>}
  */
 export function textContent(state, block) {
-  return h("div", {}, text(block.value));
+  return h("div", { style: { padding: "5px" } }, text(block.value));
 }
