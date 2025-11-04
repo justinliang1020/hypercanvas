@@ -119,11 +119,4 @@ type ResizeHandler = (
 
 type ResizeString = "nw" | "ne" | "sw" | "se" | "n" | "s" | "e" | "w";
 
-interface AppDispatchEventDetail {
-  state: State;
-  action: import("hyperapp").Action<State>;
-  payload: any;
-  prevState: State;
-}
-
 type BlockConfig<T> = Omit<T, keyof BaseBlock | "type">;
