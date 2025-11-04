@@ -104,6 +104,7 @@ export function fontSizeDropdown(state) {
     {
       disabled: !enabled,
       onchange,
+      //BUG: for some reason this doesn't render the correct initial font size. When clicking and holding down, this can be seen
       value: `${currentFontSize}`,
       style: {
         marginRight: "8px",

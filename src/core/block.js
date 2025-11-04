@@ -177,7 +177,6 @@ export function block(state) {
       });
     }
 
-    // const contents = webviewBlockContents(state, block);
     const contents = (() => {
       switch (block.type) {
         case "webview":
@@ -452,8 +451,8 @@ export function deleteSelectedBlocks(state) {
  * @param {string} type
  * @param {any} config
  * @param {any} defaultConfig
- * @param {number} x - X position on canvas. If null, uses viewport's center X coordinate
- * @param {number} y - Y position on canvas. If null, uses viewport's center X coordinate
+ * @param {number} x - X position on canvas
+ * @param {number} y - Y position on canvas
  * @param {number} width - Block width in pixels
  * @param {number} height - Block height in pixels
  * @returns {{state: State, newBlockId: number}} Updated state with new block
@@ -500,14 +499,13 @@ export function addBlock(
 }
 
 /**
- * Adds a new block to the state and renders its program
- * @param {State} state - Current application state
+ * @param {State} state
  * @param {Partial<BlockConfig<WebviewBlock>>} config
- * @param {number} x - X position on canvas. If null, uses viewport's center X coordinate
- * @param {number} y - Y position on canvas. If null, uses viewport's center X coordinate
+ * @param {number} x - X position on canvas
+ * @param {number} y - Y position on canvas
  * @param {number} width - Block width in pixels
  * @param {number} height - Block height in pixels
- * @returns {{state: State, newBlockId: number}} Updated state with new block
+ * @returns {{state: State, newBlockId: number}} Updated state and new block id
  */
 export function addWebviewBlock(state, config, x, y, width, height) {
   return addBlock(
@@ -523,14 +521,13 @@ export function addWebviewBlock(state, config, x, y, width, height) {
 }
 
 /**
- * Adds a new block to the state and renders its program
- * @param {State} state - Current application state
+ * @param {State} state
  * @param {Partial<BlockConfig<TextBlock>>} config
- * @param {number} x - X position on canvas. If null, uses viewport's center X coordinate
- * @param {number} y - Y position on canvas. If null, uses viewport's center X coordinate
+ * @param {number} x - X position on canvas
+ * @param {number} y - Y position on canvas
  * @param {number} width - Block width in pixels
  * @param {number} height - Block height in pixels
- * @returns {{state: State, newBlockId: number}} Updated state with new block
+ * @returns {{state: State, newBlockId: number}} Updated state and new block id
  */
 export function addTextBlock(state, config, x, y, width, height) {
   return addBlock(
