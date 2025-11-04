@@ -502,7 +502,7 @@ export function addBlock(
 /**
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
- * @param {Partial<Omit<WebviewBlock, keyof BaseBlock | "type">>} config
+ * @param {Partial<BlockConfig<WebviewBlock>>} config
  * @param {number} x - X position on canvas. If null, uses viewport's center X coordinate
  * @param {number} y - Y position on canvas. If null, uses viewport's center X coordinate
  * @param {number} width - Block width in pixels
@@ -525,7 +525,7 @@ export function addWebviewBlock(state, config, x, y, width, height) {
 /**
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
- * @param {Partial<Omit<TextBlock, keyof BaseBlock | "type">>} config
+ * @param {Partial<BlockConfig<TextBlock>>} config
  * @param {number} x - X position on canvas. If null, uses viewport's center X coordinate
  * @param {number} y - Y position on canvas. If null, uses viewport's center X coordinate
  * @param {number} width - Block width in pixels

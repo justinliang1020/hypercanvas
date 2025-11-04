@@ -125,3 +125,5 @@ interface AppDispatchEventDetail {
   payload: any;
   prevState: State;
 }
+
+type BlockConfig<T> = Omit<T, keyof BaseBlock | "type">;

@@ -124,7 +124,7 @@ export function fontSizeDropdown(state) {
   );
 }
 
-/** @type {Omit<TextBlock, keyof BaseBlock | "type">} */
+/** @type {BlockConfig<TextBlock>} */
 export const DEFAULT_TEXT_BLOCK_CONFIG = {
   value: "default text",
   fontSize: 14,
