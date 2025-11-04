@@ -5,5 +5,29 @@ import { h, text } from "hyperapp";
  * @return {import("hyperapp").ElementVNode<State>}
  */
 export function textContent(state, block) {
-  return h("div", { style: { padding: "5px" } }, text(block.value));
+  /**
+   * @param {State} state
+   * @param {Event} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function oninput(state, event) {
+    return state;
+  }
+  return h(
+    "textarea",
+    {
+      oninput,
+      style: {
+        outline: "none", // disable orange editing border
+        padding: "5px",
+        background: "transparent",
+        border: "none",
+        resize: "none", // disable resize handler
+        width: "100%",
+        height: "100%",
+        boxSizing: "border-box",
+      },
+    },
+    text(block.value),
+  );
 }

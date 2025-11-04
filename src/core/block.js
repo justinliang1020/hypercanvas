@@ -216,7 +216,19 @@ export function block(state) {
         onpointerdown,
         ondblclick,
       },
-      [contents, ...resizeHandles],
+      [
+        h(
+          "div",
+          {
+            style: {
+              pointerEvents: `${isSelected ? "" : "none"}`,
+              height: "100%",
+            },
+          },
+          contents,
+        ),
+        ...resizeHandles,
+      ],
     );
   };
 }
