@@ -192,6 +192,9 @@ export function block(state) {
           )
         : [];
 
+    const borderRadius =
+      block.type === "webview" ? `${BLOCK_BORDER_RADIUS}px` : "0px";
+
     return h(
       "div",
       {
@@ -205,7 +208,7 @@ export function block(state) {
           width: `${block.width}px`,
           height: `${block.height}px`,
           zIndex: `${block.zIndex}`,
-          borderRadius: `${BLOCK_BORDER_RADIUS}px`,
+          borderRadius: borderRadius,
         },
         class: { block: true },
         onpointerover,
