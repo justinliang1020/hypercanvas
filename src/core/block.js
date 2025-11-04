@@ -483,12 +483,17 @@ export function addBlock(state, type, config, x, y, width, height) {
     ...defaultConfig,
     ...config,
   };
+
+  // manual overrides
+  // i.e. when copying and pasting a block config we want some fields to always be set a certain value
+  if (newBlock.type === "webview") {
+    newBlock.domReady = false;
+  }
+
   const newState = updateCurrentPage(state, {
     blocks: [...currentBlocks, newBlock],
     blockIdCounter: currentPage.blockIdCounter + 1,
   });
-
-  // const selectedState = selectBlock(newState, newBlock.id);
 
   return {
     state: saveMementoAndReturn(state, newState),
@@ -634,22 +639,18 @@ export function pasteClipboardBlocks(state) {
 
     // Add each block sequentially
     for (const blockConfig of blockConfigs) {
-      //TODO: add other blocks
-      if (blockConfig.type === "webview") {
-        const addBlockRes = addWebviewBlock(
-          stateWithNewBlocks,
-          {
-            src: blockConfig.src,
-            isPreview: blockConfig.isPreview,
-          },
-          blockConfig.x,
-          blockConfig.y,
-          blockConfig.width,
-          blockConfig.height,
-        );
-        stateWithNewBlocks = addBlockRes.state;
-        newBlockIds.push(addBlockRes.newBlockId);
-      }
+      // NOTE: this is kinda jank
+      const addBlockRes = addBlock(
+        stateWithNewBlocks,
+        blockConfig.type,
+        blockConfig,
+        blockConfig.x,
+        blockConfig.y,
+        blockConfig.width,
+        blockConfig.height,
+      );
+      stateWithNewBlocks = addBlockRes.state;
+      newBlockIds.push(addBlockRes.newBlockId);
     }
 
     return {
