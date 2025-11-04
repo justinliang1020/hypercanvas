@@ -1,4 +1,5 @@
-import { h, text } from "hyperapp";
+import { h } from "hyperapp";
+import { updateBlock } from "../block.js";
 /**
  * @param {State} state
  * @param {TextBlock} block
@@ -11,23 +12,23 @@ export function textContent(state, block) {
    * @returns {import("hyperapp").Dispatchable<State>}
    */
   function oninput(state, event) {
-    return state;
+    return updateBlock(state, block.id, {
+      value: /** @type {HTMLInputElement} */ (event.target).value,
+    });
   }
-  return h(
-    "textarea",
-    {
-      oninput,
-      style: {
-        outline: "none", // disable orange editing border
-        padding: "5px",
-        background: "transparent",
-        border: "none",
-        resize: "none", // disable resize handler
-        width: "100%",
-        height: "100%",
-        boxSizing: "border-box",
-      },
+
+  return h("textarea", {
+    oninput,
+    style: {
+      outline: "none", // disable orange editing border
+      padding: "5px",
+      background: "transparent",
+      border: "none",
+      resize: "none", // disable resize handler
+      width: "100%",
+      height: "100%",
+      boxSizing: "border-box",
     },
-    text(block.value),
-  );
+    value: block.value,
+  });
 }
