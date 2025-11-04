@@ -41,3 +41,7 @@ export const BLOCK_CONTENTS_CLASS_NAME = "block-contents";
 export const DEFAULT_BLOCK_WIDTH = 600;
 export const DEFAULT_BLOCK_HEIGHT = 900;
 export const BLOCK_BORDER_RADIUS = 10; // px
+
+export const FONT_SIZES = [
+  8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 64, 72,
+]; // px

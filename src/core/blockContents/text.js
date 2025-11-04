@@ -1,7 +1,12 @@
 import { h, text } from "hyperapp";
 import { addTextBlock, updateBlock } from "../block.js";
-import { DEFAULT_BLOCK_WIDTH, DEFAULT_BLOCK_HEIGHT } from "../constants.js";
+import {
+  DEFAULT_BLOCK_WIDTH,
+  DEFAULT_BLOCK_HEIGHT,
+  FONT_SIZES,
+} from "../constants.js";
 import { getViewportCenterCoordinates } from "../viewport.js";
+import { getSelectedBlocks } from "../selection.js";
 /**
  * @param {State} state
  * @param {TextBlock} block
@@ -61,4 +66,59 @@ export function newTextBlock(state) {
     ).state;
   }
   return h("button", { onclick }, text("New text block"));
+}
+
+/**
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+export function fontSizeDropdown(state) {
+  const firstSelectedBlock = getSelectedBlocks(state)[0];
+
+  const enabled = firstSelectedBlock && firstSelectedBlock.type === "text";
+  const currentFontSize = enabled
+    ? /** @type {TextBlock} */ (firstSelectedBlock).fontSize
+    : 14;
+
+  /**
+   * @param {State} state
+   * @param {Event} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function onchange(state, event) {
+    if (!enabled) return state;
+
+    const selectedBlock = /** @type {TextBlock} */ (firstSelectedBlock);
+    const newFontSize = parseInt(
+      /** @type {HTMLSelectElement} */ (event.target).value,
+    );
+
+    return updateBlock(state, selectedBlock.id, {
+      fontSize: newFontSize,
+    });
+  }
+
+  return h(
+    "select",
+    {
+      disabled: !enabled,
+      onchange,
+      value: `${currentFontSize}`,
+      style: {
+        marginRight: "8px",
+      },
+    },
+    [
+      ...FONT_SIZES.map((size) =>
+        h(
+          "option",
+          {
+            value: size.toString(),
+            key: size.toString(),
+          },
+          text(`${size}px`),
+        ),
+      ),
+    ],
+  );
 }

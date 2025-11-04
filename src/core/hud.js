@@ -6,7 +6,7 @@ import {
   backButton,
   newWebviewButton,
 } from "./blockContents/webview.js";
-import { newTextBlock } from "./blockContents/text.js";
+import { fontSizeDropdown, newTextBlock } from "./blockContents/text.js";
 
 /**
  * @param {State} state - Current application state
@@ -49,6 +49,8 @@ function selectedBlockButtons(state) {
   switch (firstSelectedBlock.type) {
     case "webview":
       return [backButton(state), forwardButton(state)];
+    case "text":
+      return [fontSizeDropdown(state)];
     default:
       return [];
   }
