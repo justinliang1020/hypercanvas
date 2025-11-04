@@ -494,6 +494,7 @@ export function addBlock(state, type, config, x, y, width, height) {
   if (newBlock.type === "webview") {
     newBlock.domReady = false;
   }
+  newBlock.id = currentPage.blockIdCounter;
 
   const newState = updateCurrentPage(state, {
     blocks: [...currentBlocks, newBlock],
