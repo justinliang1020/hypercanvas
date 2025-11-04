@@ -448,30 +448,28 @@ export function deleteSelectedBlocks(state) {
 /**
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
- * @param {string} type
+ * @param {BlockType} type
  * @param {any} config
- * @param {any} defaultConfig
  * @param {number} x - X position on canvas
  * @param {number} y - Y position on canvas
  * @param {number} width - Block width in pixels
  * @param {number} height - Block height in pixels
  * @returns {{state: State, newBlockId: number}} Updated state with new block
  */
-export function addBlock(
-  state,
-  type,
-  config,
-  defaultConfig,
-  x,
-  y,
-  width,
-  height,
-) {
+export function addBlock(state, type, config, x, y, width, height) {
   const currentBlocks = getCurrentBlocks(state);
   const currentPage = getCurrentPage(state);
   if (!currentPage) {
     throw Error("no current page");
   }
+  const defaultConfig = (() => {
+    switch (type) {
+      case "webview":
+        return DEFAULT_WEBVIEW_BLOCK_CONFIG;
+      case "text":
+        return DEFAULT_TEXT_BLOCK_CONFIG;
+    }
+  })();
 
   /** @type {Block} */
   const newBlock = {
@@ -508,16 +506,7 @@ export function addBlock(
  * @returns {{state: State, newBlockId: number}} Updated state and new block id
  */
 export function addWebviewBlock(state, config, x, y, width, height) {
-  return addBlock(
-    state,
-    "webview",
-    config,
-    DEFAULT_WEBVIEW_BLOCK_CONFIG,
-    x,
-    y,
-    width,
-    height,
-  );
+  return addBlock(state, "webview", config, x, y, width, height);
 }
 
 /**
@@ -530,16 +519,7 @@ export function addWebviewBlock(state, config, x, y, width, height) {
  * @returns {{state: State, newBlockId: number}} Updated state and new block id
  */
 export function addTextBlock(state, config, x, y, width, height) {
-  return addBlock(
-    state,
-    "text",
-    config,
-    DEFAULT_TEXT_BLOCK_CONFIG,
-    x,
-    y,
-    width,
-    height,
-  );
+  return addBlock(state, "text", config, x, y, width, height);
 }
 
 /**

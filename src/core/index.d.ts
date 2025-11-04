@@ -23,6 +23,7 @@ interface TextBlock extends BaseBlock {
 }
 
 type Block = WebviewBlock | TextBlock;
+type BlockType = Block["type"];
 
 //TODO: refactor into its own data structure, instead of property of block?
 type Link = {
