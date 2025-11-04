@@ -103,13 +103,6 @@ export interface FileAPI {
    * @returns Promise with boolean indicating if dark theme is preferred
    */
   getSystemTheme(): Promise<boolean>;
-
-  /**
-   * List contents of a directory
-   * @param dirPath - Directory path (absolute or relative to app directory)
-   * @returns Promise with array of file/directory names
-   */
-  getHtmlFileRelativePaths(dirPath: string): Promise<string[]>;
 }
 
 export interface ElectronAPI {

@@ -108,7 +108,6 @@ interface State {
   editingPageId: string | null;
   isShiftPressed: boolean;
   userPath: string;
-  htmlRelativePaths: string[];
   isInteractMode: boolean;
 }
 

@@ -449,36 +449,3 @@ ipcMain.handle("image:getDimensions", async (event, imagePath) => {
 ipcMain.handle("theme:getSystemTheme", () => {
   return nativeTheme.shouldUseDarkColors;
 });
-
-/**
- * @param {String} dirPath - path to recursively search for files in directory. If this is a relative path, it assumes it is within userPath
- * @return {Promise<String[]>} - list of relative paths of HTML files based on userPath
- */
-async function getHtmlFileRelativePaths(dirPath) {
-  try {
-    // Resolve relative paths from the app directory
-    const fullPath = path.join(userPath, dirPath);
-    const items = await fs.readdir(fullPath, { withFileTypes: true });
-
-    const htmlFilePaths = [];
-    for (const item of items) {
-      const itemRelativePath = path.join(dirPath, item.name);
-      if (item.isDirectory()) {
-        const itemHtmlFilePaths =
-          await getHtmlFileRelativePaths(itemRelativePath);
-        htmlFilePaths.push(...itemHtmlFilePaths);
-      } else if (item.isFile() && path.extname(item.name) === ".html") {
-        htmlFilePaths.push(itemRelativePath);
-      }
-    }
-    return htmlFilePaths;
-  } catch (error) {
-    console.error("Error listing directory:", error);
-    return [];
-  }
-}
-
-// List directory contents handler
-ipcMain.handle("file:getHtmlFileRelativePaths", async (event, dirPath) => {
-  return await getHtmlFileRelativePaths("");
-});

@@ -151,7 +151,6 @@ function initialState() {
     isShiftPressed: false,
     isInteractMode: false,
     userPath: "",
-    htmlRelativePaths: [],
   };
 
   // Set currentPageId to the first page
@@ -175,47 +174,6 @@ function themeChangeSubscription(dispatch) {
     }));
   };
   const listener = window.electronAPI.onThemeChanged(handleThemeChange);
-
-  // Return cleanup function (required for subscriptions)
-  return () => {
-    // @ts-ignore
-    window.electronAPI.removeThemeListener(listener);
-  };
-}
-
-/**
- * Subscription that handles hyperapp
- * @param {import("hyperapp").Dispatch<State>} dispatch - Function to dispatch actions
- * @returns {() => void} Cleanup function
- */
-function userFilesChangedSubscription(dispatch) {
-  /**
-   * @param {import("chokidar/handler.js").EventName} chokidarEvent,
-   * @param {string} path,
-   */
-  const handleUserFilesChange = async (chokidarEvent, path) => {
-    //TODO: optimize this later to only refresh iframes that have changed
-    const iframeEls = window.document.getElementsByTagName("iframe");
-    [...iframeEls].forEach((el) => {
-      el.contentWindow?.location.reload();
-    });
-
-    // Hack to get userPath from state
-    let userPath = "";
-    dispatch((state) => {
-      userPath = state.userPath;
-      return state;
-    });
-    const htmlRelativePaths =
-      await window.fileAPI.getHtmlFileRelativePaths(userPath);
-    dispatch((state) => {
-      return {
-        ...state,
-        htmlRelativePaths,
-      };
-    });
-  };
-  const listener = window.electronAPI.onUserFilesChanged(handleUserFilesChange);
 
   // Return cleanup function (required for subscriptions)
   return () => {
@@ -256,10 +214,6 @@ async function initialize() {
   }
 
   state.userPath = await window.fileAPI.getUserPath();
-  state.htmlRelativePaths = await window.fileAPI.getHtmlFileRelativePaths(
-    state.userPath,
-  );
-  console.log("files", state.htmlRelativePaths);
 
   // Initialize dark mode based on system theme
   try {
@@ -286,7 +240,6 @@ async function initialize() {
     node: /** @type {Node} */ (document.getElementById("app")),
     subscriptions: (state) => [
       [themeChangeSubscription, {}],
-      [userFilesChangedSubscription, {}],
       onKeyDown(KeyDown),
       onKeyUp(KeyUp),
     ],
