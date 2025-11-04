@@ -1,13 +1,12 @@
 import { h, text } from "hyperapp";
 import { getHoveredBlock, getSelectedBlocks } from "./selection.js";
-import { addTextBlock, updateBlock } from "./block.js";
-import { DEFAULT_BLOCK_HEIGHT, DEFAULT_BLOCK_WIDTH } from "./constants.js";
-import { getViewportCenterCoordinates } from "./viewport.js";
+import { updateBlock } from "./block.js";
 import {
   forwardButton,
   backButton,
   newWebviewButton,
 } from "./blockContents/webview.js";
+import { newTextBlock } from "./blockContents/text.js";
 
 /**
  * @param {State} state - Current application state
@@ -102,30 +101,4 @@ function searchBar(state) {
       return state;
     },
   });
-}
-
-/**
- * @param {State} state - Current application state
- * @returns {import("hyperapp").ElementVNode<State>}
- */
-function newTextBlock(state) {
-  /**
-   * @param {State} state
-   * @param {Event} event
-   * @returns {import("hyperapp").Dispatchable<State>}
-   */
-  function onclick(state, event) {
-    const viewportCenter = getViewportCenterCoordinates(state);
-    const x = viewportCenter.x - DEFAULT_BLOCK_WIDTH / 2; // Center the block
-    const y = viewportCenter.y - DEFAULT_BLOCK_HEIGHT / 2; // Center the block
-    return addTextBlock(
-      state,
-      "hello",
-      x,
-      y,
-      DEFAULT_BLOCK_WIDTH,
-      DEFAULT_BLOCK_HEIGHT,
-    ).state;
-  }
-  return h("button", { onclick }, text("New text block"));
 }

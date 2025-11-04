@@ -1,5 +1,7 @@
-import { h } from "hyperapp";
-import { updateBlock } from "../block.js";
+import { h, text } from "hyperapp";
+import { addTextBlock, updateBlock } from "../block.js";
+import { DEFAULT_BLOCK_WIDTH, DEFAULT_BLOCK_HEIGHT } from "../constants.js";
+import { getViewportCenterCoordinates } from "../viewport.js";
 /**
  * @param {State} state
  * @param {TextBlock} block
@@ -31,4 +33,30 @@ export function textContent(state, block) {
     },
     value: block.value,
   });
+}
+
+/**
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+export function newTextBlock(state) {
+  /**
+   * @param {State} state
+   * @param {Event} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function onclick(state, event) {
+    const viewportCenter = getViewportCenterCoordinates(state);
+    const x = viewportCenter.x - DEFAULT_BLOCK_WIDTH / 2; // Center the block
+    const y = viewportCenter.y - DEFAULT_BLOCK_HEIGHT / 2; // Center the block
+    return addTextBlock(
+      state,
+      "hello",
+      x,
+      y,
+      DEFAULT_BLOCK_WIDTH,
+      DEFAULT_BLOCK_HEIGHT,
+    ).state;
+  }
+  return h("button", { onclick }, text("New text block"));
 }
