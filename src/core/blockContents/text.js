@@ -35,6 +35,7 @@ export function textContent(state, block) {
       width: "100%",
       height: "100%",
       boxSizing: "border-box",
+      overflow: "hidden",
       // config types
       fontSize: `${block.fontSize}px`,
     },
