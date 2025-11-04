@@ -58,6 +58,14 @@ function setupAnchorHandling() {
 
   console.log(`Setting up ${aEls.length} anchor elements`);
   [...aEls].forEach((aEl) => {
+    // Skip if this element already has handlers
+    if (aEl.hasAttribute("data-anchor-handlers-setup")) {
+      return;
+    }
+
+    // Mark this element as having handlers
+    aEl.setAttribute("data-anchor-handlers-setup", "true");
+
     aEl.addEventListener("pointerover", (event) => {
       if (!event.metaKey) return;
       const href = aEl.getAttribute("href");
