@@ -10,12 +10,12 @@ export interface FileWriteResult {
 }
 
 export interface ImageSelectResult {
-  success?: boolean;
-  canceled?: boolean;
-  filename?: string;
-  path?: string;
-  width?: number;
-  height?: number;
+  success: boolean;
+  canceled: boolean;
+  filename: string;
+  path: string;
+  width: number;
+  height: number;
 }
 
 export interface ImageDimensionsResult {

@@ -1,6 +1,7 @@
-import { pasteClipboardBlocks } from "./block.js";
+import { addImageBlock, pasteClipboardBlocks } from "./block.js";
 import { MEDIA_SAVE_PATH, STATE_SAVE_PATH } from "./constants.js";
 import { h, text } from "hyperapp";
+import { getViewportCenterCoordinates } from "./viewport.js";
 
 /**
  * Creates a notification component that displays in the top middle
@@ -116,15 +117,22 @@ export const pasteEffect = async (dispatch, state) => {
       const arrayBuffer = await blob.arrayBuffer();
 
       try {
-        // @ts-ignore
         const result = await window.fileAPI.saveImageFromBuffer(
           arrayBuffer,
           imageType,
           MEDIA_SAVE_PATH,
         );
         if (result.success) {
-          //TODO: should i remove image pasting
-          console.log("Would paste image");
+          const src = result.path;
+          const width = result.width;
+          const height = result.height;
+          const viewportCenter = getViewportCenterCoordinates(state);
+          const x = viewportCenter.x - width / 2; // Center the block
+          const y = viewportCenter.y - height / 2; // Center the block
+          dispatch(
+            (state) => addImageBlock(state, { src }, x, y, width, height).state,
+          );
+
           return;
         }
       } catch (error) {
