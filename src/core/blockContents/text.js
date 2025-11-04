@@ -7,6 +7,7 @@ import {
 } from "../constants.js";
 import { getViewportCenterCoordinates } from "../viewport.js";
 import { getSelectedBlocks } from "../selection.js";
+
 /**
  * @param {State} state
  * @param {TextBlock} block
