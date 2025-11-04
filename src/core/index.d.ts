@@ -19,6 +19,7 @@ interface WebviewBlock extends BaseBlock {
 interface TextBlock extends BaseBlock {
   type: "text";
   value: string;
+  fontSize: number; // px
 }
 
 type Block = WebviewBlock | TextBlock;

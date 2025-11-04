@@ -30,6 +30,8 @@ export function textContent(state, block) {
       width: "100%",
       height: "100%",
       boxSizing: "border-box",
+      // config types
+      fontSize: `${block.fontSize}px`,
     },
     value: block.value,
   });

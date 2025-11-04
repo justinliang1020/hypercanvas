@@ -486,7 +486,7 @@ export function addWebviewBlock(state, src, isPreview, x, y, width, height) {
 /**
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
- * @param {Omit<TextBlock, keyof BaseBlock | "type">} config
+ * @param {Partial<Omit<TextBlock, keyof BaseBlock | "type">>} config
  * @param {number} x - X position on canvas. If null, uses viewport's center X coordinate
  * @param {number} y - Y position on canvas. If null, uses viewport's center X coordinate
  * @param {number} width - Block width in pixels
@@ -494,6 +494,10 @@ export function addWebviewBlock(state, src, isPreview, x, y, width, height) {
  * @returns {{state: State, newBlockId: number}} Updated state with new block
  */
 export function addTextBlock(state, config, x, y, width, height) {
+  //TODO: move these to constants file, possibly under an object
+  const DEFAULT_TEXTBLOCK_VALUE = "hello world";
+  const DEFAULT_TEXTBLOCK_FONTSIZE = 14;
+
   const currentBlocks = getCurrentBlocks(state);
   const currentPage = getCurrentPage(state);
   if (!currentPage) {
@@ -509,7 +513,8 @@ export function addTextBlock(state, config, x, y, width, height) {
     y: y,
     zIndex: Math.max(...currentBlocks.map((block) => block.zIndex), 0) + 1,
     type: "text",
-    value: config.value,
+    value: config.value ?? DEFAULT_TEXTBLOCK_VALUE,
+    fontSize: config.fontSize ?? DEFAULT_TEXTBLOCK_FONTSIZE,
   };
   const newState = updateCurrentPage(state, {
     blocks: [...currentBlocks, newBlock],
