@@ -103,7 +103,6 @@ export const pasteEffect = async (dispatch, state) => {
     const clipboardItems = await navigator.clipboard.read();
 
     if (clipboardItems.length === 0) {
-      dispatch((state) => state);
       return;
     }
 
@@ -132,7 +131,6 @@ export const pasteEffect = async (dispatch, state) => {
         console.error("Failed to paste image:", error);
       }
 
-      dispatch((state) => state);
       return;
     }
 
@@ -147,7 +145,6 @@ export const pasteEffect = async (dispatch, state) => {
     }
   } catch (error) {
     console.error("Failed to read clipboard:", error);
-    dispatch((state) => state);
   }
 };
 
