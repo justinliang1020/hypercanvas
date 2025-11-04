@@ -51,7 +51,7 @@ export function newTextBlock(state) {
     const y = viewportCenter.y - DEFAULT_BLOCK_HEIGHT / 2; // Center the block
     return addTextBlock(
       state,
-      "hello",
+      { value: "hello" },
       x,
       y,
       DEFAULT_BLOCK_WIDTH,

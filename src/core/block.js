@@ -486,14 +486,14 @@ export function addWebviewBlock(state, src, isPreview, x, y, width, height) {
 /**
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
- * @param {string} value
+ * @param {Omit<TextBlock, keyof BaseBlock | "type">} config
  * @param {number} x - X position on canvas. If null, uses viewport's center X coordinate
  * @param {number} y - Y position on canvas. If null, uses viewport's center X coordinate
  * @param {number} width - Block width in pixels
  * @param {number} height - Block height in pixels
  * @returns {{state: State, newBlockId: number}} Updated state with new block
  */
-export function addTextBlock(state, value, x, y, width, height) {
+export function addTextBlock(state, config, x, y, width, height) {
   const currentBlocks = getCurrentBlocks(state);
   const currentPage = getCurrentPage(state);
   if (!currentPage) {
@@ -509,7 +509,7 @@ export function addTextBlock(state, value, x, y, width, height) {
     y: y,
     zIndex: Math.max(...currentBlocks.map((block) => block.zIndex), 0) + 1,
     type: "text",
-    value: value,
+    value: config.value,
   };
   const newState = updateCurrentPage(state, {
     blocks: [...currentBlocks, newBlock],
