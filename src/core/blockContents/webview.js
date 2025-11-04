@@ -1,4 +1,4 @@
-import { h } from "hyperapp";
+import { h, text } from "hyperapp";
 import {
   removePreviewChildBlock,
   addChildBlock,
@@ -9,6 +9,7 @@ import {
   BLOCK_CONTENTS_CLASS_NAME,
 } from "../constants.js";
 import { getCurrentPage } from "../pages.js";
+import { getSelectedBlocks } from "../selection.js";
 
 /**
  * @param {State} state
@@ -163,4 +164,84 @@ export function webviewBlockContents(state, block) {
     key: `${block.id}`,
     preload: `./blockContents/webview-preload.js`,
   });
+}
+
+/**
+ * @param {State} state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+export function backButton(state) {
+  return navigationButton(state, "back", "<-");
+}
+
+/**
+ * @param {State} state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+export function forwardButton(state) {
+  return navigationButton(state, "forward", "->");
+}
+
+/**
+ * @param {State} state
+ * @param {"back" | "forward"} direction
+ * @param {string} display
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function navigationButton(state, direction, display) {
+  const firstSelectedBlock = getSelectedBlocks(state)[0];
+
+  const { enabled, webview: webviewElement } = (() => {
+    if (
+      !firstSelectedBlock ||
+      firstSelectedBlock.type !== "webview" ||
+      !firstSelectedBlock.domReady
+    ) {
+      return { enabled: false, webview: undefined };
+    }
+
+    const blockKey = `block-${firstSelectedBlock.id}`;
+    const webviewElement = /** @type {import("electron").WebviewTag} */ (
+      document.getElementById(blockKey)
+    );
+
+    if (!webviewElement) {
+      return { enabled: false, webview: undefined };
+    }
+
+    const enabled = (() => {
+      switch (direction) {
+        case "back":
+          return webviewElement.canGoBack();
+        case "forward":
+          return webviewElement.canGoForward();
+      }
+    })();
+
+    return {
+      enabled: enabled,
+      webview: webviewElement,
+    };
+  })();
+
+  /**
+   * @param {State} state
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function onclick(state) {
+    if (!webviewElement) return state;
+
+    switch (direction) {
+      case "back":
+        webviewElement.goBack();
+        break;
+      case "forward":
+        webviewElement.goForward();
+        break;
+    }
+
+    return state;
+  }
+
+  return h("button", { disabled: !enabled, onclick }, text(display));
 }

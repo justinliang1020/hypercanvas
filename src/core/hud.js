@@ -7,6 +7,7 @@ import {
 } from "./block.js";
 import { DEFAULT_BLOCK_HEIGHT, DEFAULT_BLOCK_WIDTH } from "./constants.js";
 import { getViewportCenterCoordinates } from "./viewport.js";
+import { forwardButton, backButton } from "./blockContents/webview.js";
 
 /**
  * @param {State} state - Current application state
@@ -33,10 +34,25 @@ export function hud(state) {
       searchBar(state),
       newTextBlock(state),
       newWebviewButton(state),
-      backButton(state),
-      forwardButton(state),
+      text("---"),
+      ...selectedBlockButtons(state),
     ],
   );
+}
+
+/**
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>[]}
+ */
+function selectedBlockButtons(state) {
+  const firstSelectedBlock = getSelectedBlocks(state)[0];
+  if (!firstSelectedBlock) return [];
+  switch (firstSelectedBlock.type) {
+    case "webview":
+      return [backButton(state), forwardButton(state)];
+    default:
+      return [];
+  }
 }
 
 /**
@@ -128,84 +144,4 @@ function newWebviewButton(state) {
     return addBlockToViewportCenter(state, "https://example.com", false);
   }
   return h("button", { onclick }, text("New webview block"));
-}
-
-/**
- * @param {State} state
- * @returns {import("hyperapp").ElementVNode<State>}
- */
-function backButton(state) {
-  return navigationButton(state, "back", "<-");
-}
-
-/**
- * @param {State} state
- * @returns {import("hyperapp").ElementVNode<State>}
- */
-function forwardButton(state) {
-  return navigationButton(state, "forward", "->");
-}
-
-/**
- * @param {State} state
- * @param {"back" | "forward"} direction
- * @param {string} display
- * @returns {import("hyperapp").ElementVNode<State>}
- */
-function navigationButton(state, direction, display) {
-  const firstSelectedBlock = getSelectedBlocks(state)[0];
-
-  const { enabled, webview: webviewElement } = (() => {
-    if (
-      !firstSelectedBlock ||
-      firstSelectedBlock.type !== "webview" ||
-      !firstSelectedBlock.domReady
-    ) {
-      return { enabled: false, webview: undefined };
-    }
-
-    const blockKey = `block-${firstSelectedBlock.id}`;
-    const webviewElement = /** @type {import("electron").WebviewTag} */ (
-      document.getElementById(blockKey)
-    );
-
-    if (!webviewElement) {
-      return { enabled: false, webview: undefined };
-    }
-
-    const enabled = (() => {
-      switch (direction) {
-        case "back":
-          return webviewElement.canGoBack();
-        case "forward":
-          return webviewElement.canGoForward();
-      }
-    })();
-
-    return {
-      enabled: enabled,
-      webview: webviewElement,
-    };
-  })();
-
-  /**
-   * @param {State} state
-   * @returns {import("hyperapp").Dispatchable<State>}
-   */
-  function onclick(state) {
-    if (!webviewElement) return state;
-
-    switch (direction) {
-      case "back":
-        webviewElement.goBack();
-        break;
-      case "forward":
-        webviewElement.goForward();
-        break;
-    }
-
-    return state;
-  }
-
-  return h("button", { disabled: !enabled, onclick }, text(display));
 }
