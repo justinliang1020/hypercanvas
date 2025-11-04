@@ -262,3 +262,12 @@ export function newWebviewButton(state) {
   }
   return h("button", { onclick }, text("New webview block"));
 }
+
+/** @type {Omit<WebviewBlock, keyof BaseBlock | "type">} */
+export const DEFAULT_WEBVIEW_BLOCK_CONFIG = {
+  isPreview: false,
+  src: "https://example.com",
+  previewChildId: null,
+  realChildrenIds: [],
+  domReady: false,
+};

@@ -25,7 +25,10 @@ import {
   getSelectedBlocks,
   toggleBlockSelection,
 } from "./selection.js";
-import { webviewBlockContents } from "./blockContents/webview.js";
+import {
+  DEFAULT_WEBVIEW_BLOCK_CONFIG,
+  webviewBlockContents,
+} from "./blockContents/webview.js";
 import {
   DEFAULT_TEXT_BLOCK_CONFIG,
   textContent,
@@ -446,52 +449,6 @@ export function deleteSelectedBlocks(state) {
 /**
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
- * @param {string} src
- * @param {boolean} isPreview
- * @param {number} x - X position on canvas. If null, uses viewport's center X coordinate
- * @param {number} y - Y position on canvas. If null, uses viewport's center X coordinate
- * @param {number} width - Block width in pixels
- * @param {number} height - Block height in pixels
- * @returns {{state: State, newBlockId: number}} Updated state with new block
- */
-export function addWebviewBlock(state, src, isPreview, x, y, width, height) {
-  const currentBlocks = getCurrentBlocks(state);
-  const currentPage = getCurrentPage(state);
-  if (!currentPage) {
-    throw Error("no current page");
-  }
-
-  /** @type {WebviewBlock} */
-  const newBlock = {
-    id: currentPage.blockIdCounter,
-    width: width,
-    height: height,
-    x: x,
-    y: y,
-    isPreview: isPreview,
-    type: "webview",
-    zIndex: Math.max(...currentBlocks.map((block) => block.zIndex), 0) + 1,
-    src: src,
-    previewChildId: null,
-    realChildrenIds: [],
-    domReady: false,
-  };
-  const newState = updateCurrentPage(state, {
-    blocks: [...currentBlocks, newBlock],
-    blockIdCounter: currentPage.blockIdCounter + 1,
-  });
-
-  // const selectedState = selectBlock(newState, newBlock.id);
-
-  return {
-    state: saveMementoAndReturn(state, newState),
-    newBlockId: newBlock.id,
-  };
-}
-
-/**
- * Adds a new block to the state and renders its program
- * @param {State} state - Current application state
  * @param {string} type
  * @param {any} config
  * @param {any} defaultConfig
@@ -545,6 +502,29 @@ export function addBlock(
 /**
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
+ * @param {Partial<Omit<WebviewBlock, keyof BaseBlock | "type">>} config
+ * @param {number} x - X position on canvas. If null, uses viewport's center X coordinate
+ * @param {number} y - Y position on canvas. If null, uses viewport's center X coordinate
+ * @param {number} width - Block width in pixels
+ * @param {number} height - Block height in pixels
+ * @returns {{state: State, newBlockId: number}} Updated state with new block
+ */
+export function addWebviewBlock(state, config, x, y, width, height) {
+  return addBlock(
+    state,
+    "webview",
+    config,
+    DEFAULT_WEBVIEW_BLOCK_CONFIG,
+    x,
+    y,
+    width,
+    height,
+  );
+}
+
+/**
+ * Adds a new block to the state and renders its program
+ * @param {State} state - Current application state
  * @param {Partial<Omit<TextBlock, keyof BaseBlock | "type">>} config
  * @param {number} x - X position on canvas. If null, uses viewport's center X coordinate
  * @param {number} y - Y position on canvas. If null, uses viewport's center X coordinate
@@ -585,18 +565,18 @@ export function addBlockToViewportCenter(
   const x = viewportCenter.x - width / 2; // Center the block
   const y = viewportCenter.y - height / 2; // Center the block
 
-  return addWebviewBlock(state, src, isPreview, x, y, width, height).state;
+  return addWebviewBlock(state, { src, isPreview }, x, y, width, height).state;
 }
 
 /**
  * Add a preview block adjacent to the original block
  * @param {State} state
  * @param {number} parentBlockId
- * @param {string} content
+ * @param {string} src
  * @param {boolean} isPreview
  * @return {State}
  */
-export function addChildBlock(state, parentBlockId, content, isPreview) {
+export function addChildBlock(state, parentBlockId, src, isPreview) {
   const parentBlock = getCurrentBlocks(state).find(
     (b) => b.id === parentBlockId,
   );
@@ -609,8 +589,10 @@ export function addChildBlock(state, parentBlockId, content, isPreview) {
 
   let { state: newState, newBlockId } = addWebviewBlock(
     state,
-    content,
-    isPreview,
+    {
+      src,
+      isPreview,
+    },
     newX,
     newY,
     DEFAULT_BLOCK_WIDTH,
@@ -679,8 +661,10 @@ export function pasteClipboardBlocks(state) {
       if (blockConfig.type === "webview") {
         const addBlockRes = addWebviewBlock(
           stateWithNewBlocks,
-          blockConfig.src,
-          blockConfig.isPreview,
+          {
+            src: blockConfig.src,
+            isPreview: blockConfig.isPreview,
+          },
           blockConfig.x,
           blockConfig.y,
           blockConfig.width,
