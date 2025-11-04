@@ -432,6 +432,9 @@ export function deleteSelectedBlocks(state) {
       (block) => !currentPage.selectedIds.includes(block.id),
     ),
     selectedIds: [],
+    // deleting a block while hovered over it doesn't trigger the block's "onpointerleave" event,
+    // so we must manually change the cursor style
+    cursorStyle: "default",
   });
 
   return saveMementoAndReturn(state, newState);
