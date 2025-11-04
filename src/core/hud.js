@@ -7,6 +7,7 @@ import {
   newWebviewButton,
 } from "./blockContents/webview.js";
 import { fontSizeDropdown, newTextBlock } from "./blockContents/text.js";
+import { newImageBlock } from "./blockContents/image.js";
 
 /**
  * @param {State} state - Current application state
@@ -32,6 +33,7 @@ export function hud(state) {
     [
       searchBar(state),
       newTextBlock(state),
+      newImageBlock(state),
       newWebviewButton(state),
       text("---"),
       ...selectedBlockButtons(state),

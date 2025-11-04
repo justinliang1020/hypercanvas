@@ -22,7 +22,12 @@ interface TextBlock extends BaseBlock {
   fontSize: number; // px
 }
 
-type Block = WebviewBlock | TextBlock;
+interface ImageBlock extends BaseBlock {
+  type: "image";
+  src: string;
+}
+
+type Block = WebviewBlock | TextBlock | ImageBlock;
 type BlockType = Block["type"];
 
 //TODO: refactor into its own data structure, instead of property of block?

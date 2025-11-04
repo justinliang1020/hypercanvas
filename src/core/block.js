@@ -33,6 +33,7 @@ import {
   DEFAULT_TEXT_BLOCK_CONFIG,
   textContent,
 } from "./blockContents/text.js";
+import { imageContent } from "./blockContents/image.js";
 
 /**
  * Creates a block component renderer
@@ -183,6 +184,8 @@ export function block(state) {
           return webviewBlockContents(state, block);
         case "text":
           return textContent(state, block);
+        case "image":
+          return imageContent(state, block);
       }
     })();
 
@@ -468,6 +471,8 @@ export function addBlock(state, type, config, x, y, width, height) {
         return DEFAULT_WEBVIEW_BLOCK_CONFIG;
       case "text":
         return DEFAULT_TEXT_BLOCK_CONFIG;
+      default:
+        return {};
     }
   })();
 
@@ -525,6 +530,19 @@ export function addWebviewBlock(state, config, x, y, width, height) {
  */
 export function addTextBlock(state, config, x, y, width, height) {
   return addBlock(state, "text", config, x, y, width, height);
+}
+
+/**
+ * @param {State} state
+ * @param {Partial<BlockConfig<ImageBlock>>} config
+ * @param {number} x - X position on canvas
+ * @param {number} y - Y position on canvas
+ * @param {number} width - Block width in pixels
+ * @param {number} height - Block height in pixels
+ * @returns {{state: State, newBlockId: number}} Updated state and new block id
+ */
+export function addImageBlock(state, config, x, y, width, height) {
+  return addBlock(state, "image", config, x, y, width, height);
 }
 
 /**
