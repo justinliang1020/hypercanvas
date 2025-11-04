@@ -26,7 +26,10 @@ import {
   toggleBlockSelection,
 } from "./selection.js";
 import { webviewBlockContents } from "./blockContents/webview.js";
-import { textContent } from "./blockContents/text.js";
+import {
+  DEFAULT_TEXT_BLOCK_CONFIG,
+  textContent,
+} from "./blockContents/text.js";
 
 /**
  * Creates a block component renderer
@@ -489,25 +492,32 @@ export function addWebviewBlock(state, src, isPreview, x, y, width, height) {
 /**
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
- * @param {Partial<Omit<TextBlock, keyof BaseBlock | "type">>} config
+ * @param {string} type
+ * @param {any} config
+ * @param {any} defaultConfig
  * @param {number} x - X position on canvas. If null, uses viewport's center X coordinate
  * @param {number} y - Y position on canvas. If null, uses viewport's center X coordinate
  * @param {number} width - Block width in pixels
  * @param {number} height - Block height in pixels
  * @returns {{state: State, newBlockId: number}} Updated state with new block
  */
-export function addTextBlock(state, config, x, y, width, height) {
-  //TODO: move these to constants file, possibly under an object
-  const DEFAULT_TEXTBLOCK_VALUE = "hello world";
-  const DEFAULT_TEXTBLOCK_FONTSIZE = 14;
-
+export function addBlock(
+  state,
+  type,
+  config,
+  defaultConfig,
+  x,
+  y,
+  width,
+  height,
+) {
   const currentBlocks = getCurrentBlocks(state);
   const currentPage = getCurrentPage(state);
   if (!currentPage) {
     throw Error("no current page");
   }
 
-  /** @type {TextBlock} */
+  /** @type {Block} */
   const newBlock = {
     id: currentPage.blockIdCounter,
     width: width,
@@ -515,9 +525,9 @@ export function addTextBlock(state, config, x, y, width, height) {
     x: x,
     y: y,
     zIndex: Math.max(...currentBlocks.map((block) => block.zIndex), 0) + 1,
-    type: "text",
-    value: config.value ?? DEFAULT_TEXTBLOCK_VALUE,
-    fontSize: config.fontSize ?? DEFAULT_TEXTBLOCK_FONTSIZE,
+    type,
+    ...defaultConfig,
+    ...config,
   };
   const newState = updateCurrentPage(state, {
     blocks: [...currentBlocks, newBlock],
@@ -530,6 +540,29 @@ export function addTextBlock(state, config, x, y, width, height) {
     state: saveMementoAndReturn(state, newState),
     newBlockId: newBlock.id,
   };
+}
+
+/**
+ * Adds a new block to the state and renders its program
+ * @param {State} state - Current application state
+ * @param {Partial<Omit<TextBlock, keyof BaseBlock | "type">>} config
+ * @param {number} x - X position on canvas. If null, uses viewport's center X coordinate
+ * @param {number} y - Y position on canvas. If null, uses viewport's center X coordinate
+ * @param {number} width - Block width in pixels
+ * @param {number} height - Block height in pixels
+ * @returns {{state: State, newBlockId: number}} Updated state with new block
+ */
+export function addTextBlock(state, config, x, y, width, height) {
+  return addBlock(
+    state,
+    "text",
+    config,
+    DEFAULT_TEXT_BLOCK_CONFIG,
+    x,
+    y,
+    width,
+    height,
+  );
 }
 
 /**
