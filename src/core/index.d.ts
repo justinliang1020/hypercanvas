@@ -30,10 +30,9 @@ interface ImageBlock extends BaseBlock {
 type Block = WebviewBlock | TextBlock | ImageBlock;
 type BlockType = Block["type"];
 
-//TODO: refactor into its own data structure, instead of property of block?
 type Link = {
-  parentBlock: WebviewBlock;
-  childBlock: WebviewBlock;
+  parentBlockId: number;
+  childBlockId: number;
 };
 
 interface Page {

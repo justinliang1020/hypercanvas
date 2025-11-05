@@ -40,8 +40,8 @@ export function getCurrentLinks(state) {
       ...realChildrenBlocks,
     ];
     return childBlocks.map((childBlock) => ({
-      parentBlock,
-      childBlock,
+      parentBlockId: parentBlock.id,
+      childBlockId: childBlock.id,
     }));
   });
   return links;

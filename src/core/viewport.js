@@ -614,7 +614,7 @@ export function viewport(state) {
         },
         [
           // Render links
-          ...getCurrentLinks(state).map((link) => linkView(link)),
+          ...getCurrentLinks(state).map(linkView(state)),
           // Render blocks
           ...getCurrentBlocks(state).map(blockView(state)),
           // Render selection bounding box above blocks
