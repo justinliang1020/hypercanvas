@@ -70,12 +70,11 @@ export async function saveApplication(state) {
       mementoManager,
       notification,
       notificationVisible,
+      clipboard,
       ...serializableSaveState
     } = setBlocksDomReadyFalse(state);
     // Don't need to save session clipboard and notification state
-    serializableSaveState.clipboard = null;
 
-    // @ts-ignore
     await window.fileAPI.writeFile(STATE_SAVE_PATH, serializableSaveState);
   } catch (error) {
     console.error("Failed to save application state:", error);
