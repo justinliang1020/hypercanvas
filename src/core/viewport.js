@@ -3,7 +3,7 @@ import { pasteEffect } from "./utils.js";
 import {
   copySelectedBlocks,
   deleteSelectedBlocks,
-  block,
+  blockView,
   linkView,
 } from "./block.js";
 import { handleResizePointerMove } from "./resize.js";
@@ -616,7 +616,7 @@ export function viewport(state) {
           // Render links
           ...getCurrentLinks(state).map((link) => linkView(link)),
           // Render blocks
-          ...getCurrentBlocks(state).map(block(state)),
+          ...getCurrentBlocks(state).map(blockView(state)),
           // Render selection bounding box above blocks
           selectionBoundingBox(state),
           // Render selection box during drag

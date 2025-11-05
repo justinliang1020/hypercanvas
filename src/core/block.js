@@ -40,7 +40,7 @@ import { imageContent } from "./blockContents/image.js";
  * @param {State} state - Current application state
  * @returns {(block: Block) => import("hyperapp").ElementVNode<State>} Block renderer function
  */
-export function block(state) {
+export function blockView(state) {
   return (block) => {
     const currentPage = getCurrentPage(state);
     if (!currentPage) return h("div", {});
