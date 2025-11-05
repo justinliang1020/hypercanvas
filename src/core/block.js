@@ -571,7 +571,14 @@ export function addBlockToViewportCenter(
   const x = viewportCenter.x - width / 2; // Center the block
   const y = viewportCenter.y - height / 2; // Center the block
 
-  return addWebviewBlock(state, { src, isPreview }, x, y, width, height).state;
+  return addWebviewBlock(
+    state,
+    { initialSrc: src, isPreview },
+    x,
+    y,
+    width,
+    height,
+  ).state;
 }
 
 /**
@@ -596,7 +603,7 @@ export function addChildBlock(state, parentBlockId, src, isPreview) {
   let { state: newState, newBlockId } = addWebviewBlock(
     state,
     {
-      src,
+      initialSrc: src,
       isPreview,
     },
     newX,

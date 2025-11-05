@@ -79,7 +79,7 @@ export function webviewBlockContents(state, block) {
         if (
           previewChildBlock &&
           previewChildBlock.type === "webview" &&
-          previewChildBlock.src === hoverHref
+          previewChildBlock.initialSrc === hoverHref
           // for catching duplicate anchor hover previews, doesn't catch all due to website redirects
         ) {
           return state;
@@ -129,7 +129,7 @@ export function webviewBlockContents(state, block) {
    */
   function handleNavigationChange(state, event) {
     console.log("Navigation detected:", event.url);
-    return updateBlock(state, block.id, { src: event.url });
+    return updateBlock(state, block.id, { currentSrc: event.url });
   }
 
   return h("webview", {
@@ -145,7 +145,7 @@ export function webviewBlockContents(state, block) {
       ...(block.isPreview ? previewStyles : {}),
     },
     class: BLOCK_CONTENTS_CLASS_NAME,
-    src: block.src,
+    src: block.initialSrc,
     id: blockKey,
     key: `${block.id}`,
     preload: `./blockContents/webview-preload.js`,
@@ -263,7 +263,8 @@ export function newWebviewButton(state) {
 /** @type {BlockConfig<WebviewBlock>} */
 export const DEFAULT_WEBVIEW_BLOCK_CONFIG = {
   isPreview: false,
-  src: "https://example.com",
+  initialSrc: "https://example.com",
+  currentSrc: "https://example.com",
   previewChildId: null,
   realChildrenIds: [],
   domReady: false,

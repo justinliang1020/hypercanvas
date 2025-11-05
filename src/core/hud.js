@@ -73,9 +73,9 @@ function searchBar(state) {
     firstSelectedBlock.type === "webview" &&
     firstSelectedBlock
   ) {
-    searchBarValue = firstSelectedBlock.src;
+    searchBarValue = firstSelectedBlock.currentSrc;
   } else if (hoveredBlock && hoveredBlock.type === "webview") {
-    searchBarValue = hoveredBlock.src;
+    searchBarValue = hoveredBlock.currentSrc;
   }
 
   /**
@@ -89,7 +89,7 @@ function searchBar(state) {
     const value = /** @type {HTMLInputElement} */ (event.target).value;
 
     return updateBlock(state, firstSelectedBlock.id, {
-      src: value,
+      currentSrc: value,
     });
   }
 

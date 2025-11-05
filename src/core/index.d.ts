@@ -9,7 +9,12 @@ interface BaseBlock {
 
 interface WebviewBlock extends BaseBlock {
   type: "webview";
-  src: string;
+  // the initial src value loaded by the webview node
+  // the webview is reloaded whenever the value of initialSrc changes
+  initialSrc: string;
+  // the current src value kept track by navigation events
+  // when copying block or saving app state, the value of initialSrc must be manually synced to currentSrc
+  currentSrc: string;
   domReady: boolean;
   isPreview: boolean;
   previewChildId: number | null;
