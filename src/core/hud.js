@@ -32,6 +32,7 @@ export function hud(state) {
     },
     [
       searchBar(state),
+      goToUrlButton(state),
       newTextBlock(state),
       newImageBlock(state),
       newWebviewButton(state),
@@ -56,6 +57,28 @@ function selectedBlockButtons(state) {
     default:
       return [];
   }
+}
+
+/**
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function goToUrlButton(state) {
+  /**
+   * @param {State} state
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function onclick(state) {
+    const selectedBlock = getSelectedBlocks(state)[0];
+    if (selectedBlock && selectedBlock.type === "webview") {
+      return updateBlock(state, selectedBlock.id, {
+        initialSrc: selectedBlock.currentSrc,
+      });
+    }
+    return state;
+  }
+
+  return h("button", { onclick }, text("go"));
 }
 
 /**
