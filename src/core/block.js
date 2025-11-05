@@ -709,10 +709,19 @@ export function copySelectedBlocks(state) {
   /** @type {Block[]} */
   const blocksData = selectedBlocks
     .sort((a, b) => a.zIndex - b.zIndex)
-    .map((block) => ({
-      ...block,
-      id: -1, // not a "real" block
-    }));
+    .map((block) => {
+      if (block.type === "webview") {
+        return {
+          ...block,
+          id: -1, // not a "real" block
+          initialSrc: block.currentSrc,
+        };
+      }
+      return {
+        ...block,
+        id: -1, // not a "real" block
+      };
+    });
 
   return [
     {
