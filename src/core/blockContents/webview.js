@@ -1,6 +1,5 @@
 import { h, text } from "hyperapp";
 import {
-  removePreviewChildBlock,
   addChildBlock,
   updateBlock,
   addBlockToViewportCenter,
@@ -76,17 +75,13 @@ export function webviewBlockContents(state, block) {
         const previewChildBlock = getCurrentBlocks(state).find(
           (b) => b.id === block.previewChildId,
         );
-        if (
-          previewChildBlock &&
-          previewChildBlock.type === "webview" &&
-          previewChildBlock.initialSrc === hoverHref
-          // for catching duplicate anchor hover previews, doesn't catch all due to website redirects
-        ) {
-          return state;
+
+        if (previewChildBlock && previewChildBlock.type === "webview") {
+          return updateBlock(state, previewChildBlock.id, {
+            initialSrc: hoverHref,
+          });
         }
-        let newState = removePreviewChildBlock(state, block.id);
-        newState = addChildBlock(newState, block.id, hoverHref, true);
-        return newState;
+        return addChildBlock(state, block.id, hoverHref, true);
 
       case "anchor-click":
         console.log("Processing anchor click:", args[0]?.href);

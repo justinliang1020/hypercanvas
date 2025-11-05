@@ -566,27 +566,6 @@ export function addChildBlock(state, parentBlockId, src, isPreview) {
 }
 
 /**
- * Add a preview block adjacent to the original block
- * @param {State} state
- * @param {number} parentBlockId
- * @return {State}
- */
-export function removePreviewChildBlock(state, parentBlockId) {
-  const parentBlock = getCurrentBlocks(state).find(
-    (b) => b.id === parentBlockId,
-  );
-  if (!parentBlock || parentBlock.type !== "webview") return state;
-  const currentBlocks = getCurrentBlocks(state);
-  const newBlocks = currentBlocks
-    .filter((block) => block.id !== parentBlock.previewChildId)
-    .map((block) =>
-      block.id === parentBlock.id ? { ...block, previewChildId: null } : block,
-    );
-
-  return updateCurrentPage(state, { blocks: newBlocks });
-}
-
-/**
  * Pastes blocks from clipboard into the state
  * @param {State} state - Current application state
  * @returns {import("hyperapp").Dispatchable<State>} Updated state with pasted blocks
