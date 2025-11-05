@@ -110,6 +110,18 @@ function handleSelectionBoxStart(state, canvasX, canvasY, isShiftKey) {
 
 /**
  * @param {State} state
+ * @param {Event} event
+ * @returns {import("hyperapp").Dispatchable<State>}
+ */
+function onselectstart(state, event) {
+  // This is needed to prevent a bug where when a text block is on the screen,
+  // drag selecting any blocks causes the text in the text block to be selected
+  event.preventDefault();
+  return state;
+}
+
+/**
+ * @param {State} state
  * @param {PointerEvent} event
  * @returns {import("hyperapp").Dispatchable<State>}
  */
@@ -583,7 +595,7 @@ export function viewport(state) {
           : "0",
         touchAction: "none", // Prevent default touch behaviors
       },
-
+      onselectstart,
       onpointerdown,
       onpointermove,
       onpointerup,
