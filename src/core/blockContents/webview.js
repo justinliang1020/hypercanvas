@@ -38,7 +38,13 @@ export function webviewBlockContents(state, block) {
 
   const blockKey = `block-${block.id}`;
   const blockId = block.id;
-  const handler = (/** @type {any} */ event) => {
+
+  /**
+   * @param {State} state
+   * @param {Event} event
+   * @return {State}
+   */
+  function handleIpcMessage(state, /** @type {any} */ event) {
     console.log("IPC message received:", event.channel, event.args);
     const channel = event.channel;
     const args = event.args || [];
@@ -60,83 +66,51 @@ export function webviewBlockContents(state, block) {
             }),
           );
         }
-        break;
+        return state;
 
       case "anchor-hover":
         console.log("Processing anchor hover:", args[0]?.href);
         const hoverHref = args[0]?.href;
-        if (hoverHref && /** @type {any} */ (window).hypercanvasDispatch) {
-          /** @type {any} */ (window).hypercanvasDispatch(
-            (/** @type {State} */ state) => {
-              let newState = removePreviewChildBlock(state, block.id);
-              newState = addChildBlock(newState, block.id, hoverHref, true);
-              return newState;
-            },
-          );
+        if (hoverHref) {
+          let newState = removePreviewChildBlock(state, block.id);
+          newState = addChildBlock(newState, block.id, hoverHref, true);
+          return newState;
         }
-        break;
+        return state;
 
       case "anchor-click":
         console.log("Processing anchor click:", args[0]?.href);
         const clickHref = args[0]?.href;
-        if (clickHref && /** @type {any} */ (window).hypercanvasDispatch) {
-          /** @type {any} */ (window).hypercanvasDispatch(
-            (/** @type {State} */ state) => {
-              const block = getCurrentBlocks(state).find(
-                (b) => b.id === blockId,
-              );
-              if (block && block.type === "webview" && block.previewChildId) {
-                let newState = updateBlock(state, block.previewChildId, {
-                  isPreview: false,
-                });
-                newState = updateBlock(newState, block.id, {
-                  previewChildId: null,
-                  realChildrenIds: [
-                    ...block.realChildrenIds,
-                    block.previewChildId,
-                  ],
-                });
-                return newState;
-              }
-              return state;
-            },
-          );
+        if (clickHref) {
+          const block = getCurrentBlocks(state).find((b) => b.id === blockId);
+          if (block && block.type === "webview" && block.previewChildId) {
+            let newState = updateBlock(state, block.previewChildId, {
+              isPreview: false,
+            });
+            newState = updateBlock(newState, block.id, {
+              previewChildId: null,
+              realChildrenIds: [...block.realChildrenIds, block.previewChildId],
+            });
+            return newState;
+          }
+          return state;
         }
-        break;
+        return state;
 
       default:
         console.log("Unknown IPC channel:", channel);
-        break;
+        return state;
     }
-  };
+  }
 
-  // Set up the event listener after the DOM updates
-  setTimeout(() => {
-    const webview = /** @type {import("electron").WebviewTag} */ (
-      document.getElementById(blockKey)
-    );
-    if (webview && !webview.dataset.hypercanvasIpcSetup) {
-      console.log(`Setting up IPC listener for ${blockKey}`);
-
-      if (handler) {
-        webview.addEventListener("ipc-message", handler);
-        webview.dataset.hypercanvasIpcSetup = "true";
-        console.log(`IPC listener added for ${blockKey}`);
-      }
-
-      function handleDidLoad() {
-        //@ts-ignore
-        if (window.hypercanvasDispatch) {
-          //@ts-ignore
-          window.hypercanvasDispatch((state) => {
-            return updateBlock(state, block.id, { domReady: true });
-          });
-        }
-      }
-
-      webview.addEventListener("dom-ready", handleDidLoad);
-    }
-  }, 0);
+  /**
+   * @param {State} state
+   * @param {Event} event
+   * @return {State}
+   */
+  function handleDomReady(state, event) {
+    return updateBlock(state, block.id, { domReady: true });
+  }
 
   /**
    * @param {State} state
@@ -173,6 +147,10 @@ export function webviewBlockContents(state, block) {
       /** @type {State} */ state,
       /** @type {import("electron").DidNavigateEvent} */ event,
     ) => handleNavigationChange(state, event),
+    "ondom-ready": (/** @type {State} */ state, /** @type {Event} */ event) =>
+      handleDomReady(state, event),
+    "onipc-message": (/** @type {State} */ state, /** @type {Event} */ event) =>
+      handleIpcMessage(state, event),
   });
 }
 
