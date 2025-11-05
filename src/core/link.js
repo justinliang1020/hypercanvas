@@ -1,11 +1,14 @@
 import { h } from "hyperapp";
-import { getCurrentBlocks } from "./pages.js";
+import {
+  getCurrentBlocks,
+  getCurrentPage,
+  updateCurrentPage,
+} from "./pages.js";
 
 /**
  * @param {State} state
  * @return {(link: Link) => import("hyperapp").ElementVNode<State>}
  */
-
 export function linkView(state) {
   return (link) => {
     const currentBlocks = getCurrentBlocks(state);
@@ -60,4 +63,19 @@ export function linkView(state) {
       ],
     );
   };
+}
+
+/**
+ * @param {State} state
+ * @param {number} parentBlockId
+ * @param {number} childBlockId
+ * @returns {State}
+ */
+export function addLink(state, parentBlockId, childBlockId) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return state;
+
+  return updateCurrentPage(state, {
+    links: [...currentPage.links, { parentBlockId, childBlockId }],
+  });
 }

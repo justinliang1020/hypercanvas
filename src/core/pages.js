@@ -93,6 +93,7 @@ export const defaultPage = {
   previewSelectedIds: [],
   selectionBox: null,
   blockIdCounter: 1,
+  links: [],
 };
 
 /**

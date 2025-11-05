@@ -60,6 +60,7 @@ interface Page {
   dragStart: DragState | null;
   selectionBox: SelectionBoxState | null;
   blockIdCounter: number;
+  links: Link[];
 }
 
 interface Memento {
