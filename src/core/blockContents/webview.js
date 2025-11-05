@@ -71,12 +71,22 @@ export function webviewBlockContents(state, block) {
       case "anchor-hover":
         console.log("Processing anchor hover:", args[0]?.href);
         const hoverHref = args[0]?.href;
-        if (hoverHref) {
-          let newState = removePreviewChildBlock(state, block.id);
-          newState = addChildBlock(newState, block.id, hoverHref, true);
-          return newState;
+        const block = getCurrentBlocks(state).find((b) => b.id === blockId);
+        if (!block || block.type !== "webview" || !hoverHref) return state;
+        const previewChildBlock = getCurrentBlocks(state).find(
+          (b) => b.id === block.previewChildId,
+        );
+        if (
+          previewChildBlock &&
+          previewChildBlock.type === "webview" &&
+          previewChildBlock.src === hoverHref
+          // for catching duplicate anchor hover previews, doesn't catch all due to website redirects
+        ) {
+          return state;
         }
-        return state;
+        let newState = removePreviewChildBlock(state, block.id);
+        newState = addChildBlock(newState, block.id, hoverHref, true);
+        return newState;
 
       case "anchor-click":
         console.log("Processing anchor click:", args[0]?.href);
