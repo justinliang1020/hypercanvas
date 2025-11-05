@@ -36,16 +36,9 @@ export function webviewBlockContents(state, block) {
     console.warn("Global dispatch not available for webview IPC");
   }
 
-  // Store the block ID and handler globally so we can access it from the webview
-  if (!(/** @type {any} */ (window).hypercanvasWebviewHandlers)) {
-    /** @type {any} */ (window).hypercanvasWebviewHandlers = {};
-  }
-
   const blockKey = `block-${block.id}`;
   const blockId = block.id;
-  /** @type {any} */ (window).hypercanvasWebviewHandlers[blockKey] = (
-    /** @type {any} */ event,
-  ) => {
+  const handler = (/** @type {any} */ event) => {
     console.log("IPC message received:", event.channel, event.args);
     const channel = event.channel;
     const args = event.args || [];
@@ -125,9 +118,6 @@ export function webviewBlockContents(state, block) {
     if (webview && !webview.dataset.hypercanvasIpcSetup) {
       console.log(`Setting up IPC listener for ${blockKey}`);
 
-      const handler = /** @type {any} */ (window).hypercanvasWebviewHandlers[
-        blockKey
-      ];
       if (handler) {
         webview.addEventListener("ipc-message", handler);
         webview.dataset.hypercanvasIpcSetup = "true";
