@@ -114,6 +114,10 @@ function handleSelectionBoxStart(state, canvasX, canvasY, isShiftKey) {
  * @returns {import("hyperapp").Dispatchable<State>}
  */
 function onpointerdown(state, event) {
+  // This is needed to prevent a bug where when a text block is on the screen,
+  // drag selecting any blocks causes the text in the text block to be selected
+  event.preventDefault();
+
   if (event.button === 1) {
     return handleMiddleMouseDown(state);
   }
