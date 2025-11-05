@@ -42,6 +42,7 @@ export function webviewBlockContents(state, block) {
   }
 
   const blockKey = `block-${block.id}`;
+  const blockId = block.id;
   /** @type {any} */ (window).hypercanvasWebviewHandlers[blockKey] = (
     /** @type {any} */ event,
   ) => {
@@ -88,17 +89,21 @@ export function webviewBlockContents(state, block) {
         if (clickHref && /** @type {any} */ (window).hypercanvasDispatch) {
           /** @type {any} */ (window).hypercanvasDispatch(
             (/** @type {State} */ state) => {
-              const updatedBlock = getCurrentBlocks(state).find(
-                (b) => b.id === block.id,
+              const block = getCurrentBlocks(state).find(
+                (b) => b.id === blockId,
               );
-              if (
-                updatedBlock &&
-                updatedBlock.type === "webview" &&
-                updatedBlock.previewChildId
-              ) {
-                return updateBlock(state, updatedBlock.previewChildId, {
+              if (block && block.type === "webview" && block.previewChildId) {
+                let newState = updateBlock(state, block.previewChildId, {
                   isPreview: false,
                 });
+                newState = updateBlock(newState, block.id, {
+                  previewChildId: null,
+                  realChildrenIds: [
+                    ...block.realChildrenIds,
+                    block.previewChildId,
+                  ],
+                });
+                return newState;
               }
               return state;
             },
