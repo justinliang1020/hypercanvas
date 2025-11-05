@@ -9,7 +9,7 @@ import {
   BLOCK_BORDER_RADIUS,
   BLOCK_CONTENTS_CLASS_NAME,
 } from "../constants.js";
-import { getCurrentPage } from "../pages.js";
+import { getCurrentBlocks, getCurrentPage } from "../pages.js";
 import { getSelectedBlocks } from "../selection.js";
 
 /**
@@ -88,9 +88,19 @@ export function webviewBlockContents(state, block) {
         if (clickHref && /** @type {any} */ (window).hypercanvasDispatch) {
           /** @type {any} */ (window).hypercanvasDispatch(
             (/** @type {State} */ state) => {
-              let newState = removePreviewChildBlock(state, block.id);
-              newState = addChildBlock(newState, block.id, clickHref, false);
-              return newState;
+              const updatedBlock = getCurrentBlocks(state).find(
+                (b) => b.id === block.id,
+              );
+              if (
+                updatedBlock &&
+                updatedBlock.type === "webview" &&
+                updatedBlock.previewChildId
+              ) {
+                return updateBlock(state, updatedBlock.previewChildId, {
+                  isPreview: false,
+                });
+              }
+              return state;
             },
           );
         }
