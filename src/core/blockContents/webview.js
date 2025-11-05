@@ -161,6 +161,7 @@ export function webviewBlockContents(state, block) {
 
   return h("webview", {
     style: {
+      display: block.domReady ? "" : "none",
       pointerEvents: isEditing || state.isInteractMode ? null : "none",
       width: "100%",
       height: "100%",
