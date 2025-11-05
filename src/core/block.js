@@ -34,6 +34,7 @@ import {
   textContent,
 } from "./blockContents/text.js";
 import { imageContent } from "./blockContents/image.js";
+import { addLink } from "./link.js";
 
 /**
  * Creates a block component renderer
@@ -389,6 +390,11 @@ export function deleteSelectedBlocks(state) {
     // deleting a block while hovered over it doesn't trigger the block's "onpointerleave" event,
     // so we must manually change the cursor style
     cursorStyle: "default",
+    links: currentPage.links.filter(
+      (link) =>
+        !currentPage.selectedIds.includes(link.parentBlockId) &&
+        !currentPage.selectedIds.includes(link.childBlockId),
+    ),
   });
 
   return saveMementoAndReturn(state, newState);
@@ -540,7 +546,7 @@ export function addChildBlock(state, parentBlockId, src, isPreview) {
   const newX = parentBlock.x + parentBlock.width + offsetX;
   const newY = parentBlock.y;
 
-  let { state: newState, newBlockId } = addWebviewBlock(
+  let { state: newState, newBlockId: childBlockId } = addWebviewBlock(
     state,
     {
       initialSrc: src,
@@ -551,15 +557,16 @@ export function addChildBlock(state, parentBlockId, src, isPreview) {
     DEFAULT_BLOCK_WIDTH,
     DEFAULT_BLOCK_HEIGHT,
   );
+  newState = addLink(newState, parentBlockId, childBlockId);
 
   //TODO: fix kinda broken
   if (isPreview) {
     newState = updateBlock(newState, parentBlock.id, {
-      previewChildId: newBlockId,
+      previewChildId: childBlockId,
     });
   } else {
     newState = updateBlock(newState, parentBlock.id, {
-      realChildrenIds: [...parentBlock.realChildrenIds, newBlockId],
+      realChildrenIds: [...parentBlock.realChildrenIds, childBlockId],
     });
   }
   return newState;

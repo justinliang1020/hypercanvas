@@ -1,4 +1,4 @@
-import { h } from "hyperapp";
+import { h, text } from "hyperapp";
 import { pasteEffect } from "./utils.js";
 import {
   copySelectedBlocks,
@@ -13,7 +13,6 @@ import {
   getCurrentBlocks,
   getCurrentViewport,
   updateCurrentPage,
-  getCurrentLinks,
 } from "./pages.js";
 import {
   calculatePreviewSelection,
@@ -581,6 +580,8 @@ export function onkeydown(state, event) {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 export function viewport(state) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return h("div", {}, text("no current page"));
   return h(
     "div",
     {
@@ -614,7 +615,7 @@ export function viewport(state) {
         },
         [
           // Render links
-          ...getCurrentLinks(state).map(linkView(state)),
+          ...currentPage.links.map(linkView(state)),
           // Render blocks
           ...getCurrentBlocks(state).map(blockView(state)),
           // Render selection bounding box above blocks

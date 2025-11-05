@@ -20,34 +20,6 @@ export function getCurrentBlocks(state) {
 }
 
 /**
- * Returns a list of links between parent and child blocks
- * @param {State} state
- * @returns {Link[]}
- */
-export function getCurrentLinks(state) {
-  const blocks = getCurrentBlocks(state);
-  const links = blocks.flatMap((parentBlock) => {
-    if (parentBlock.type !== "webview") return [];
-    const previewChildBlock = blocks
-      .filter((b) => b.type === "webview")
-      .find((b) => b.id === parentBlock.previewChildId);
-    const realChildrenBlocks = blocks
-      .filter((b) => b.type === "webview")
-      .filter((b) => parentBlock.realChildrenIds.includes(b.id));
-
-    const childBlocks = [
-      ...(previewChildBlock ? [previewChildBlock] : []),
-      ...realChildrenBlocks,
-    ];
-    return childBlocks.map((childBlock) => ({
-      parentBlockId: parentBlock.id,
-      childBlockId: childBlock.id,
-    }));
-  });
-  return links;
-}
-
-/**
  * Gets blocks for the current page
  * @param {State} state - Current application state
  * @returns {Block[]} Blocks on current page
