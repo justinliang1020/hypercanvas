@@ -124,20 +124,6 @@ export function webviewBlockContents(state, block) {
         console.log(`IPC listener added for ${blockKey}`);
       }
 
-      /**
-       * @param {import("electron").DidNavigateEvent } event
-       */
-      function handleNavigationChange(event) {
-        console.log("Navigation detected:", event.url);
-        //@ts-ignore
-        if (window.hypercanvasDispatch) {
-          //@ts-ignore
-          window.hypercanvasDispatch((state) => {
-            return updateBlock(state, block.id, { src: event.url });
-          });
-        }
-      }
-
       function handleDidLoad() {
         //@ts-ignore
         if (window.hypercanvasDispatch) {
@@ -149,10 +135,18 @@ export function webviewBlockContents(state, block) {
       }
 
       webview.addEventListener("dom-ready", handleDidLoad);
-      webview.addEventListener("did-navigate", handleNavigationChange);
-      webview.addEventListener("did-navigate-in-page", handleNavigationChange);
     }
   }, 0);
+
+  /**
+   * @param {State} state
+   * @param {import("electron").DidNavigateEvent} event
+   * @return {State}
+   */
+  function handleNavigationChange(state, event) {
+    console.log("Navigation detected:", event.url);
+    return updateBlock(state, block.id, { src: event.url });
+  }
 
   return h("webview", {
     style: {
@@ -171,6 +165,14 @@ export function webviewBlockContents(state, block) {
     id: blockKey,
     key: `${block.id}`,
     preload: `./blockContents/webview-preload.js`,
+    "ondid-navigate": (
+      /** @type {State} */ state,
+      /** @type {import("electron").DidNavigateEvent} */ event,
+    ) => handleNavigationChange(state, event),
+    "ondid-navigate-in-page": (
+      /** @type {State} */ state,
+      /** @type {import("electron").DidNavigateEvent} */ event,
+    ) => handleNavigationChange(state, event),
   });
 }
 
