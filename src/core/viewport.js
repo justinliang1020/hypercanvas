@@ -4,8 +4,8 @@ import {
   copySelectedBlocks,
   deleteSelectedBlocks,
   blockView,
-  linkView,
 } from "./block.js";
+import { linkView } from "./link.js";
 import { handleResizePointerMove } from "./resize.js";
 import { saveMementoAndReturn, redoState, undoState } from "./memento.js";
 import {
