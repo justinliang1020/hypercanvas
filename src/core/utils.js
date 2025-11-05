@@ -66,14 +66,15 @@ export async function saveApplicationAndNotify(dispatch, state) {
 export async function saveApplication(state) {
   try {
     // Don't need to save mementoManager which is session undo/redo history
+    state = setBlocksDomReadyFalse(state);
+    state = syncBlocksSrc(state);
     const {
       mementoManager,
       notification,
       notificationVisible,
       clipboard,
       ...serializableSaveState
-    } = setBlocksDomReadyFalse(state);
-    // Don't need to save session clipboard and notification state
+    } = state;
 
     await window.fileAPI.writeFile(STATE_SAVE_PATH, serializableSaveState);
   } catch (error) {
@@ -94,6 +95,26 @@ function setBlocksDomReadyFalse(state) {
       blocks: page.blocks.map((block) => {
         if (block.type === "webview") {
           return { ...block, domReady: false };
+        }
+        return block;
+      }),
+    })),
+  };
+}
+
+/**
+ * Set the value of `initialSrc` to be `currentSrc` for webview blocks so the user retains page src when saving state
+ * @param {State} state
+ * @returns {State}
+ */
+function syncBlocksSrc(state) {
+  return {
+    ...state,
+    pages: state.pages.map((page) => ({
+      ...page,
+      blocks: page.blocks.map((block) => {
+        if (block.type === "webview") {
+          return { ...block, initialSrc: block.currentSrc };
         }
         return block;
       }),
