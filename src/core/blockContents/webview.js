@@ -161,6 +161,7 @@ export function webviewBlockContents(state, block) {
 
   return h("webview", {
     style: {
+      // this prevents the main process from lagging when attempting to do CSS transformations on webviews without domReady
       display: block.domReady ? "" : "none",
       pointerEvents: isEditing || state.isInteractMode ? null : "none",
       width: "100%",

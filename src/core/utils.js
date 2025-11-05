@@ -71,7 +71,7 @@ export async function saveApplication(state) {
       notification,
       notificationVisible,
       ...serializableSaveState
-    } = state;
+    } = setBlocksDomReadyFalse(state);
     // Don't need to save session clipboard and notification state
     serializableSaveState.clipboard = null;
 
@@ -80,6 +80,26 @@ export async function saveApplication(state) {
   } catch (error) {
     console.error("Failed to save application state:", error);
   }
+}
+
+/**
+ * Set the `domReady` property of all webview blocks to false. This is needed since on app load, none of the webviews have domReady loaded.
+ * @param {State} state
+ * @returns {State}
+ */
+function setBlocksDomReadyFalse(state) {
+  return {
+    ...state,
+    pages: state.pages.map((page) => ({
+      ...page,
+      blocks: page.blocks.map((block) => {
+        if (block.type === "webview") {
+          return { ...block, domReady: false };
+        }
+        return block;
+      }),
+    })),
+  };
 }
 
 /**
