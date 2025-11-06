@@ -36,7 +36,6 @@ export function webviewBlockContents(state, block) {
   }
 
   const blockKey = `block-${block.id}`;
-  const blockId = block.id;
 
   /**
    * @param {State} state
@@ -47,6 +46,7 @@ export function webviewBlockContents(state, block) {
     console.log("IPC message received:", event.channel, event.args);
     const channel = event.channel;
     const args = event.args || [];
+    const parentBlockId = block.id;
 
     switch (channel) {
       case "keydown":
@@ -70,7 +70,9 @@ export function webviewBlockContents(state, block) {
       case "anchor-hover":
         console.log("Processing anchor hover:", args[0]?.href);
         const hoverHref = args[0]?.href;
-        const block = getCurrentBlocks(state).find((b) => b.id === blockId);
+        const block = getCurrentBlocks(state).find(
+          (b) => b.id === parentBlockId,
+        );
         if (!block || block.type !== "webview" || !hoverHref) return state;
         const previewChildBlock = getCurrentBlocks(state).find(
           (b) => b.id === block.previewChildId,
@@ -87,7 +89,9 @@ export function webviewBlockContents(state, block) {
         const clickHref = args[0]?.href;
         console.log("Processing anchor click:", clickHref);
         if (clickHref) {
-          const block = getCurrentBlocks(state).find((b) => b.id === blockId);
+          const block = getCurrentBlocks(state).find(
+            (b) => b.id === parentBlockId,
+          );
           if (block && block.type === "webview" && block.previewChildId) {
             let newState = updateBlock(state, block.previewChildId, {
               isPreview: false,
@@ -98,7 +102,7 @@ export function webviewBlockContents(state, block) {
             });
             return newState;
           } else {
-            return addChildBlock(state, blockId, clickHref, false);
+            return addChildBlock(state, parentBlockId, clickHref, false);
           }
         }
         return state;
