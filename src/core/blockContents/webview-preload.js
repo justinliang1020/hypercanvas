@@ -77,7 +77,7 @@ function setupAnchorHandling() {
     });
 
     aEl.addEventListener("click", (event) => {
-      if (!event.metaKey) return;
+      if (!(event.metaKey || aEl.getAttribute("target") === "_blank")) return;
       const href = aEl.getAttribute("href");
       if (!href) return;
 

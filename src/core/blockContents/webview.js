@@ -84,8 +84,8 @@ export function webviewBlockContents(state, block) {
         return addChildBlock(state, block.id, hoverHref, true);
 
       case "anchor-click":
-        console.log("Processing anchor click:", args[0]?.href);
         const clickHref = args[0]?.href;
+        console.log("Processing anchor click:", clickHref);
         if (clickHref) {
           const block = getCurrentBlocks(state).find((b) => b.id === blockId);
           if (block && block.type === "webview" && block.previewChildId) {
@@ -97,8 +97,9 @@ export function webviewBlockContents(state, block) {
               realChildrenIds: [...block.realChildrenIds, block.previewChildId],
             });
             return newState;
+          } else {
+            return addChildBlock(state, blockId, clickHref, false);
           }
-          return state;
         }
         return state;
 
