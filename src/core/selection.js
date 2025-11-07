@@ -10,23 +10,23 @@ import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
 /**
  * Checks if a block is currently selected
  * @param {State} state - Current application state
- * @param {number} blockId - ID of block to check
+ * @param {number} id - ID of block to check
  * @returns {boolean} True if block is selected
  */
-export function isBlockSelected(state, blockId) {
+export function isSelected(state, id) {
   const currentPage = getCurrentPage(state);
-  return currentPage?.selectedIds?.includes(blockId) ?? false;
+  return currentPage?.selectedIds?.includes(id) ?? false;
 }
 
 /**
  * Checks if a block is in preview selection (during selection box drag)
  * @param {State} state - Current application state
- * @param {number} blockId - ID of block to check
+ * @param {number} id - ID of block to check
  * @returns {boolean} True if block is in preview selection
  */
-export function isBlockPreviewSelected(state, blockId) {
+export function isPendingSelected(state, id) {
   const currentPage = getCurrentPage(state);
-  return currentPage?.previewSelectedIds?.includes(blockId) ?? false;
+  return currentPage?.pendingSelectedIds?.includes(id) ?? false;
 }
 
 /**
@@ -175,7 +175,7 @@ export function removeBlockFromSelection(state, blockId) {
  * @returns {State} Updated state with block selection toggled
  */
 export function toggleBlockSelection(state, blockId) {
-  if (isBlockSelected(state, blockId)) {
+  if (isSelected(state, blockId)) {
     return removeBlockFromSelection(state, blockId);
   } else {
     return addBlockToSelection(state, blockId);
@@ -275,7 +275,7 @@ export function handleSelectionBoxComplete(state, selectionBox) {
 
   return updateCurrentPage(state, {
     selectedIds: newSelectedIds,
-    previewSelectedIds: [], // Clear preview after selection is finalized
+    pendingSelectedIds: [], // Clear preview after selection is finalized
   });
 }
 
@@ -316,16 +316,19 @@ export function calculatePreviewSelection(state, selectionBox) {
   // Find links that intersect with selection rectangle
   const intersectingLinkIds = currentPage.links
     .filter((link) => {
-      const parentBlock = blocks.find(b => b.id === link.parentBlockId);
-      const childBlock = blocks.find(b => b.id === link.childBlockId);
+      const parentBlock = blocks.find((b) => b.id === link.parentBlockId);
+      const childBlock = blocks.find((b) => b.id === link.childBlockId);
       if (!parentBlock || !childBlock) return false;
-      
+
       return lineIntersectsRect(
         parentBlock.x + parentBlock.width / 2,
         parentBlock.y + parentBlock.height / 2,
         childBlock.x + childBlock.width / 2,
         childBlock.y + childBlock.height / 2,
-        minX, minY, maxX, maxY
+        minX,
+        minY,
+        maxX,
+        maxY,
       );
     })
     .map((link) => link.id);
@@ -420,7 +423,7 @@ export function selectionBoundingBox(state) {
 /**
  * Checks if a line segment intersects with a rectangle
  * @param {number} x1 - Line start X
- * @param {number} y1 - Line start Y  
+ * @param {number} y1 - Line start Y
  * @param {number} x2 - Line end X
  * @param {number} y2 - Line end Y
  * @param {number} rectX - Rectangle left
@@ -429,18 +432,47 @@ export function selectionBoundingBox(state) {
  * @param {number} rectBottom - Rectangle bottom
  * @returns {boolean} True if line intersects rectangle
  */
-function lineIntersectsRect(x1, y1, x2, y2, rectX, rectY, rectRight, rectBottom) {
+function lineIntersectsRect(
+  x1,
+  y1,
+  x2,
+  y2,
+  rectX,
+  rectY,
+  rectRight,
+  rectBottom,
+) {
   // Check if either endpoint is inside rectangle
-  if ((x1 >= rectX && x1 <= rectRight && y1 >= rectY && y1 <= rectBottom) ||
-      (x2 >= rectX && x2 <= rectRight && y2 >= rectY && y2 <= rectBottom)) {
+  if (
+    (x1 >= rectX && x1 <= rectRight && y1 >= rectY && y1 <= rectBottom) ||
+    (x2 >= rectX && x2 <= rectRight && y2 >= rectY && y2 <= rectBottom)
+  ) {
     return true;
   }
-  
+
   // Check intersection with rectangle edges
   return (
     lineSegmentsIntersect(x1, y1, x2, y2, rectX, rectY, rectRight, rectY) || // Top edge
-    lineSegmentsIntersect(x1, y1, x2, y2, rectRight, rectY, rectRight, rectBottom) || // Right edge  
-    lineSegmentsIntersect(x1, y1, x2, y2, rectRight, rectBottom, rectX, rectBottom) || // Bottom edge
+    lineSegmentsIntersect(
+      x1,
+      y1,
+      x2,
+      y2,
+      rectRight,
+      rectY,
+      rectRight,
+      rectBottom,
+    ) || // Right edge
+    lineSegmentsIntersect(
+      x1,
+      y1,
+      x2,
+      y2,
+      rectRight,
+      rectBottom,
+      rectX,
+      rectBottom,
+    ) || // Bottom edge
     lineSegmentsIntersect(x1, y1, x2, y2, rectX, rectBottom, rectX, rectY) // Left edge
   );
 }
@@ -460,9 +492,9 @@ function lineIntersectsRect(x1, y1, x2, y2, rectX, rectY, rectRight, rectBottom)
 function lineSegmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
   const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
   if (denom === 0) return false;
-  
+
   const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denom;
   const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denom;
-  
+
   return t >= 0 && t <= 1 && u >= 0 && u <= 1;
 }

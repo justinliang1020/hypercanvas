@@ -54,7 +54,7 @@ interface Page {
   isViewportDragging: boolean;
   isTextEditorFocused: boolean;
   selectedIds: number[];
-  previewSelectedIds: number[];
+  pendingSelectedIds: number[];
   editingId: number | null;
   hoveringId: number | null;
   resizing: ResizeState | null;

@@ -18,8 +18,8 @@ import {
   getCurrentPage,
 } from "./pages.js";
 import {
-  isBlockSelected,
-  isBlockPreviewSelected,
+  isSelected,
+  isPendingSelected,
   selectBlock,
   getFirstSelectedBlockId,
   getSelectedBlocks,
@@ -46,8 +46,8 @@ export function blockView(state) {
     const currentPage = getCurrentPage(state);
     if (!currentPage) return h("div", {});
 
-    const isSelected = isBlockSelected(state, block.id);
-    const isPreviewSelected = isBlockPreviewSelected(state, block.id);
+    const isBlockSelected = isSelected(state, block.id);
+    const isBlockPendingSelected = isPendingSelected(state, block.id);
     const selectedBlocks = getSelectedBlocks(state);
     const isMultiSelect = selectedBlocks.length > 1;
     const isEditing = currentPage.editingId === block.id;
@@ -61,8 +61,8 @@ export function blockView(state) {
         isHovering,
         isEditing,
         isMultiSelect,
-        isSelected,
-        isPreviewSelected,
+        isSelected: isBlockSelected,
+        isPreviewSelected: isBlockPendingSelected,
         isInteractMode,
       },
       state,
@@ -191,7 +191,7 @@ export function blockView(state) {
     })();
 
     const resizeHandles =
-      isSelected && !isEditing && !isMultiSelect
+      isBlockSelected && !isEditing && !isMultiSelect
         ? Object.keys(RESIZE_HANDLERS).map((handle) =>
             ResizeHandle({
               handle: /** @type{ResizeString} */ (handle),
@@ -378,18 +378,18 @@ export function sendToBack(currentState, blockId) {
  * @param {State} state - Current application state
  * @returns {import("hyperapp").Dispatchable<State>} Updated state without the block
  */
-export function deleteSelectedBlocks(state) {
+export function deleteSelectedItems(state) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return state;
 
   const selectedIds = currentPage.selectedIds || [];
-  
+
   // Separate blocks and links for deletion
-  const selectedBlockIds = selectedIds.filter(id => 
-    currentPage.blocks.some(block => block.id === id)
+  const selectedBlockIds = selectedIds.filter((id) =>
+    currentPage.blocks.some((block) => block.id === id),
   );
-  const selectedLinkIds = selectedIds.filter(id => 
-    currentPage.links.some(link => link.id === id)
+  const selectedLinkIds = selectedIds.filter((id) =>
+    currentPage.links.some((link) => link.id === id),
   );
 
   const newState = updateCurrentPage(state, {
@@ -399,10 +399,10 @@ export function deleteSelectedBlocks(state) {
     ),
     // Remove selected links + links connected to deleted blocks
     links: currentPage.links.filter(
-      (link) => 
+      (link) =>
         !selectedLinkIds.includes(link.id) &&
         !selectedBlockIds.includes(link.parentBlockId) &&
-        !selectedBlockIds.includes(link.childBlockId)
+        !selectedBlockIds.includes(link.childBlockId),
     ),
     selectedIds: [],
     // deleting a block while hovered over it doesn't trigger the block's "onpointerleave" event,

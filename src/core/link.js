@@ -4,11 +4,7 @@ import {
   getCurrentPage,
   updateCurrentPage,
 } from "./pages.js";
-import {
-  isBlockSelected,
-  isBlockPreviewSelected,
-  selectBlock,
-} from "./selection.js";
+import { isSelected, isPendingSelected, selectBlock } from "./selection.js";
 
 /**
  * @param {State} state
@@ -34,15 +30,15 @@ export function linkView(state) {
     const arrowX = distance / 2 - arrowSize / 2;
     const arrowY = -(arrowSize / 3) - 2; //TODO: do a better formula
 
-    const isSelected = isBlockSelected(state, link.id);
-    const isPreviewSelected = isBlockPreviewSelected(state, link.id);
+    const isLinkSelected = isSelected(state, link.id);
+    const isLinkPendingSelected = isPendingSelected(state, link.id);
 
     let backgroundColor = "#888";
     let arrowColor = "black";
-    if (isSelected) {
+    if (isLinkSelected) {
       backgroundColor = "#007acc";
       arrowColor = "#007acc";
-    } else if (isPreviewSelected) {
+    } else if (isLinkPendingSelected) {
       backgroundColor = "rgba(0, 122, 204, 0.6)";
       arrowColor = "rgba(0, 122, 204, 0.6)";
     }

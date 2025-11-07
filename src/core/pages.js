@@ -62,7 +62,7 @@ export const defaultPage = {
   hoveringId: null,
   resizing: null,
   dragStart: null,
-  previewSelectedIds: [],
+  pendingSelectedIds: [],
   selectionBox: null,
   idCounter: 1,
   links: [],

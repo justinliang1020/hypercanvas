@@ -1,10 +1,6 @@
 import { h, text } from "hyperapp";
 import { pasteEffect } from "./utils.js";
-import {
-  copySelectedBlocks,
-  deleteSelectedBlocks,
-  blockView,
-} from "./block.js";
+import { copySelectedBlocks, deleteSelectedItems, blockView } from "./block.js";
 import { linkView } from "./link.js";
 import { handleResizePointerMove } from "./resize.js";
 import { saveMementoAndReturn, redoState, undoState } from "./memento.js";
@@ -15,7 +11,7 @@ import {
   updateCurrentPage,
 } from "./pages.js";
 import {
-  calculatePreviewSelection,
+  calculatePreviewSelection as calculatePendingSelection,
   deselectAllBlocks,
   getFirstSelectedBlockId,
   getSelectedBlockIds,
@@ -102,7 +98,7 @@ function handleSelectionBoxStart(state, canvasX, canvasY, isShiftKey) {
       currentY: canvasY,
     },
     selectedIds: isShiftKey ? getCurrentPage(state)?.selectedIds || [] : [],
-    previewSelectedIds: [],
+    pendingSelectedIds: [],
     editingId: null,
   });
 }
@@ -219,14 +215,14 @@ function handleSelectionBoxMove(state, event) {
     currentY: canvasY,
   };
 
-  const previewSelectedIds = calculatePreviewSelection(
+  const pendingSelectedIds = calculatePendingSelection(
     state,
     updatedSelectionBox,
   );
 
   return updateCurrentPage(state, {
     selectionBox: updatedSelectionBox,
-    previewSelectedIds,
+    pendingSelectedIds: pendingSelectedIds,
   });
 }
 
@@ -507,7 +503,7 @@ export function onkeydown(state, event) {
       const selectedBlockId = getFirstSelectedBlockId(state);
       if (selectedBlockId !== null && currentPage.editingId === null) {
         event.preventDefault();
-        return deleteSelectedBlocks(state);
+        return deleteSelectedItems(state);
       }
       // Let browser handle regular text deletion
       return state;
