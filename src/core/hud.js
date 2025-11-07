@@ -8,6 +8,7 @@ import {
 } from "./blockContents/webview.js";
 import { fontSizeDropdown, newTextBlock } from "./blockContents/text.js";
 import { newImageBlock } from "./blockContents/image.js";
+import { getCurrentPage } from "./pages.js";
 
 /**
  * @param {State} state - Current application state
@@ -19,18 +20,22 @@ export function hud(state) {
     {
       style: {
         position: "fixed",
-        top: "0",
-        left: "50%",
-        transform: "translateX(-50%)",
+        top: "50%",
+        left: "0%",
+        transform: "translateY(-50%)",
         margin: "0",
-        paddingTop: "10px",
+        padding: "10px",
+        boxSizing: "border-box",
         display: "flex",
+        flexDirection: "column",
+        height: "100%",
         gap: "5px",
-        alignItems: "center",
-        justifyContent: "center",
+        backgroundColor: "#FFFFFF",
       },
     },
     [
+      pageNav(state),
+      hr(),
       searchBar(state),
       goToUrlButton(state),
       newTextBlock(state),
@@ -40,6 +45,30 @@ export function hud(state) {
       ...selectedBlockButtons(state),
     ],
   );
+}
+
+/**
+ * @param {State} state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function pageNav(state) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return h("div", {}, [text("no current page")]);
+  return h("div", {}, [text(currentPage.name)]);
+}
+
+/**
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function hr() {
+  return h("hr", {
+    style: {
+      backgroundColor: "lightgrey",
+      height: "2px",
+      width: "100%",
+      border: "none",
+    },
+  });
 }
 
 /**
