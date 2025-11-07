@@ -1,11 +1,9 @@
 import { h, text } from "hyperapp";
 import { getSelectedBlocks } from "./selection.js";
 import {
-  forwardButton,
-  backButton,
   newWebviewButton,
   searchBar,
-  goToUrlButton,
+  historyNavigation,
 } from "./blockContents/webview.js";
 import { fontSizeDropdown, newTextBlock } from "./blockContents/text.js";
 import { newImageBlock } from "./blockContents/image.js";
@@ -78,17 +76,14 @@ function hr() {
 function selectedBlockPanel(state) {
   const firstSelectedBlock = getSelectedBlocks(state)[0];
   if (!firstSelectedBlock) return h("div", {});
+  /** @type {import("hyperapp").StyleProp} */
+  const style = { display: "flex", flexDirection: "column", gap: "3px" };
   switch (firstSelectedBlock.type) {
     case "webview":
-      return h("div", {}, [
-        searchBar(state),
-        goToUrlButton(state),
-        backButton(state),
-        forwardButton(state),
-      ]);
+      return h("div", { style }, [searchBar(state), historyNavigation(state)]);
     case "text":
-      return h("div", {}, [fontSizeDropdown(state)]);
+      return h("div", { style }, [fontSizeDropdown(state)]);
     default:
-      return h("div", {}, text("image stuff todo"));
+      return h("div", { style }, text("image stuff todo"));
   }
 }

@@ -173,7 +173,15 @@ export function webviewBlockContents(state, block) {
  * @param {State} state
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-export function backButton(state) {
+export function historyNavigation(state) {
+  return h("div", {}, [backButton(state), forwardButton(state)]);
+}
+
+/**
+ * @param {State} state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function backButton(state) {
   return navigationButton(state, "back", "<-");
 }
 
@@ -181,7 +189,7 @@ export function backButton(state) {
  * @param {State} state
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-export function forwardButton(state) {
+function forwardButton(state) {
   return navigationButton(state, "forward", "->");
 }
 
@@ -309,29 +317,13 @@ export function searchBar(state) {
     });
   }
 
-  return h("input", {
-    type: "text",
-    value: searchBarValue,
-    disabled: !firstSelectedBlock,
-    oninput,
-    // stop keyboard shortcuts from triggering
-    onkeydown: (state, event) => {
-      event.stopPropagation();
-      return state;
-    },
-  });
-}
-
-/**
- * @param {State} state - Current application state
- * @returns {import("hyperapp").ElementVNode<State>}
- */
-export function goToUrlButton(state) {
   /**
    * @param {State} state
+   * @param {Event} event
    * @returns {import("hyperapp").Dispatchable<State>}
    */
-  function onclick(state) {
+  function onsubmit(state, event) {
+    event.preventDefault();
     const selectedBlock = getSelectedBlocks(state)[0];
     if (selectedBlock && selectedBlock.type === "webview") {
       return updateBlock(state, selectedBlock.id, {
@@ -341,5 +333,24 @@ export function goToUrlButton(state) {
     return state;
   }
 
-  return h("button", { onclick }, text("go"));
+  return h(
+    "form",
+    {
+      onsubmit,
+    },
+    h("input", {
+      type: "text",
+      value: searchBarValue,
+      disabled: !firstSelectedBlock,
+      style: {
+        width: "100%",
+      },
+      oninput,
+      // stop keyboard shortcuts from triggering
+      onkeydown: (state, event) => {
+        event.stopPropagation();
+        return state;
+      },
+    }),
+  );
 }
