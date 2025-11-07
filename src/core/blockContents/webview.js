@@ -12,6 +12,14 @@ import { getCurrentBlocks, getCurrentPage } from "../pages.js";
 import { getSelectedBlocks } from "../selection.js";
 
 /**
+ * @param {number} blockId
+ * @returns {string}
+ */
+function webviewDomId(blockId) {
+  return `webview-${blockId}`;
+}
+
+/**
  * @param {State} state
  * @param {WebviewBlock} block
  * @return {import("hyperapp").ElementVNode<State>}
@@ -34,8 +42,6 @@ export function webviewBlockContents(state, block) {
     // We'll need to set this from the main app
     console.warn("Global dispatch not available for webview IPC");
   }
-
-  const blockKey = `block-${block.id}`;
 
   /**
    * @param {State} state
@@ -146,8 +152,7 @@ export function webviewBlockContents(state, block) {
     },
     class: BLOCK_CONTENTS_CLASS_NAME,
     src: block.initialSrc,
-    id: blockKey,
-    key: `${block.id}`,
+    id: webviewDomId(block.id),
     preload: `./blockContents/webview-preload.js`,
     "ondid-navigate": (
       /** @type {State} */ state,
@@ -198,9 +203,8 @@ function navigationButton(state, direction, display) {
       return { enabled: false, webview: undefined };
     }
 
-    const blockKey = `block-${firstSelectedBlock.id}`;
     const webviewElement = /** @type {import("electron").WebviewTag} */ (
-      document.getElementById(blockKey)
+      document.getElementById(webviewDomId(firstSelectedBlock.id))
     );
 
     if (!webviewElement) {
