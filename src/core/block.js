@@ -374,46 +374,6 @@ export function sendToBack(currentState, blockId) {
 }
 
 /**
- * Deletes a block from the state
- * @param {State} state - Current application state
- * @returns {import("hyperapp").Dispatchable<State>} Updated state without the block
- */
-export function deleteSelectedItems(state) {
-  const currentPage = getCurrentPage(state);
-  if (!currentPage) return state;
-
-  const selectedIds = currentPage.selectedIds || [];
-
-  // Separate blocks and links for deletion
-  const selectedBlockIds = selectedIds.filter((id) =>
-    currentPage.blocks.some((block) => block.id === id),
-  );
-  const selectedLinkIds = selectedIds.filter((id) =>
-    currentPage.links.some((link) => link.id === id),
-  );
-
-  const newState = updateCurrentPage(state, {
-    // Remove selected blocks
-    blocks: currentPage.blocks.filter(
-      (block) => !selectedBlockIds.includes(block.id),
-    ),
-    // Remove selected links + links connected to deleted blocks
-    links: currentPage.links.filter(
-      (link) =>
-        !selectedLinkIds.includes(link.id) &&
-        !selectedBlockIds.includes(link.parentBlockId) &&
-        !selectedBlockIds.includes(link.childBlockId),
-    ),
-    selectedIds: [],
-    // deleting a block while hovered over it doesn't trigger the block's "onpointerleave" event,
-    // so we must manually change the cursor style
-    cursorStyle: "default",
-  });
-
-  return saveMementoAndReturn(state, newState);
-}
-
-/**
  * Adds a new block to the state and renders its program
  * @param {State} state - Current application state
  * @param {BlockType} type

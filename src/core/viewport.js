@@ -1,6 +1,7 @@
 import { h, text } from "hyperapp";
 import { pasteEffect } from "./utils.js";
-import { copySelectedBlocks, deleteSelectedItems, blockView } from "./block.js";
+import { copySelectedBlocks, blockView } from "./block.js";
+import { deleteSelectedItems } from "./selection.js";
 import { linkView } from "./link.js";
 import { handleResizePointerMove } from "./resize.js";
 import { saveMementoAndReturn, redoState, undoState } from "./memento.js";

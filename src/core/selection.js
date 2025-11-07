@@ -6,6 +6,7 @@ import {
   getCurrentViewport,
 } from "./pages.js";
 import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
+import { saveMementoAndReturn } from "./memento.js";
 
 /**
  * Checks if a block is currently selected
@@ -497,4 +498,45 @@ function lineSegmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
   const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denom;
 
   return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+}
+
+/**
+ * Deletes a block from the state
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").Dispatchable<State>} Updated state without the block
+ */
+
+export function deleteSelectedItems(state) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return state;
+
+  const selectedIds = currentPage.selectedIds || [];
+
+  // Separate blocks and links for deletion
+  const selectedBlockIds = selectedIds.filter((id) =>
+    currentPage.blocks.some((block) => block.id === id),
+  );
+  const selectedLinkIds = selectedIds.filter((id) =>
+    currentPage.links.some((link) => link.id === id),
+  );
+
+  const newState = updateCurrentPage(state, {
+    // Remove selected blocks
+    blocks: currentPage.blocks.filter(
+      (block) => !selectedBlockIds.includes(block.id),
+    ),
+    // Remove selected links + links connected to deleted blocks
+    links: currentPage.links.filter(
+      (link) =>
+        !selectedLinkIds.includes(link.id) &&
+        !selectedBlockIds.includes(link.parentBlockId) &&
+        !selectedBlockIds.includes(link.childBlockId),
+    ),
+    selectedIds: [],
+    // deleting a block while hovered over it doesn't trigger the block's "onpointerleave" event,
+    // so we must manually change the cursor style
+    cursorStyle: "default",
+  });
+
+  return saveMementoAndReturn(state, newState);
 }
