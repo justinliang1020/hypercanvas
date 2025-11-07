@@ -36,11 +36,11 @@ export function hud(state) {
     [
       pageNav(state),
       hr(),
-      newTextBlock(state),
-      newImageBlock(state),
-      newWebviewButton(state),
-      text("---"),
-      selectedBlockPanel(state),
+      treeSection(state),
+      hr(),
+      newBlocksSection(state),
+      hr(),
+      selectedBlockSection(state),
     ],
   );
 }
@@ -73,17 +73,41 @@ function hr() {
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-function selectedBlockPanel(state) {
+function selectedBlockSection(state) {
   const firstSelectedBlock = getSelectedBlocks(state)[0];
   if (!firstSelectedBlock) return h("div", {});
-  /** @type {import("hyperapp").StyleProp} */
-  const style = { display: "flex", flexDirection: "column", gap: "3px" };
-  switch (firstSelectedBlock.type) {
-    case "webview":
-      return h("div", { style }, [navigationButtons(state), searchBar(state)]);
-    case "text":
-      return h("div", { style }, [fontSizeDropdown(state)]);
-    default:
-      return h("div", { style }, text("image stuff todo"));
-  }
+  /** @type {import("hyperapp").ElementVNode<State>[]} */
+  const contents = (() => {
+    switch (firstSelectedBlock.type) {
+      case "webview":
+        return [navigationButtons(state), searchBar(state)];
+      case "text":
+        return [fontSizeDropdown(state)];
+      default:
+        return [h("div", {}, text("image stuff todo"))];
+    }
+  })();
+  return h("div", { display: "flex", flexDirection: "column", gap: "3px" }, [
+    ...contents,
+  ]);
+}
+
+/**
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function newBlocksSection(state) {
+  return h("div", {}, [
+    newTextBlock(state),
+    newImageBlock(state),
+    newWebviewButton(state),
+  ]);
+}
+
+/**
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function treeSection(state) {
+  return h("div", { style: { height: "400px" } }, text("tree section"));
 }
