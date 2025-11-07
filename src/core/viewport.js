@@ -611,13 +611,12 @@ export function viewport(state) {
           },
         },
         [
-          // Render links
+          //BUG: webviews sometime re-render due to hyperapp's key vnode recreation algorithm
+          //for now we wrap blocks in its own div to avoid some of these errors, but this doesn't fix it completely
+          //could potentially work around this by having stable key wrappers for all blocks, even if they are deleted, but this seems kinda ugly
+          h("div", {}, getCurrentBlocks(state).map(blockView(state))),
           ...currentPage.links.map(linkView(state)),
-          // Render blocks
-          ...getCurrentBlocks(state).map(blockView(state)),
-          // Render selection bounding box above blocks
           selectionBoundingBox(state),
-          // Render selection box during drag
           selectionBoxComponent(state),
         ].filter(Boolean),
       ),
