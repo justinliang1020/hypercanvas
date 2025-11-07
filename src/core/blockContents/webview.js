@@ -9,7 +9,7 @@ import {
   BLOCK_CONTENTS_CLASS_NAME,
 } from "../constants.js";
 import { getCurrentBlocks, getCurrentPage } from "../pages.js";
-import { getSelectedBlocks } from "../selection.js";
+import { getHoveredBlock, getSelectedBlocks } from "../selection.js";
 
 /**
  * @param {number} blockId
@@ -273,3 +273,73 @@ export const DEFAULT_WEBVIEW_BLOCK_CONFIG = {
   realChildrenIds: [],
   domReady: false,
 };
+
+/**
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+export function searchBar(state) {
+  let searchBarValue = "";
+
+  const firstSelectedBlock = getSelectedBlocks(state)[0];
+  const hoveredBlock = getHoveredBlock(state);
+
+  if (
+    firstSelectedBlock &&
+    firstSelectedBlock.type === "webview" &&
+    firstSelectedBlock
+  ) {
+    searchBarValue = firstSelectedBlock.currentSrc;
+  } else if (hoveredBlock && hoveredBlock.type === "webview") {
+    searchBarValue = hoveredBlock.currentSrc;
+  }
+
+  /**
+   * @param {State} state
+   * @param {Event} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function oninput(state, event) {
+    if (!firstSelectedBlock) return state;
+    if (!event.target) return state;
+    const value = /** @type {HTMLInputElement} */ (event.target).value;
+
+    return updateBlock(state, firstSelectedBlock.id, {
+      currentSrc: value,
+    });
+  }
+
+  return h("input", {
+    type: "text",
+    value: searchBarValue,
+    disabled: !firstSelectedBlock,
+    oninput,
+    // stop keyboard shortcuts from triggering
+    onkeydown: (state, event) => {
+      event.stopPropagation();
+      return state;
+    },
+  });
+}
+
+/**
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+export function goToUrlButton(state) {
+  /**
+   * @param {State} state
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function onclick(state) {
+    const selectedBlock = getSelectedBlocks(state)[0];
+    if (selectedBlock && selectedBlock.type === "webview") {
+      return updateBlock(state, selectedBlock.id, {
+        initialSrc: selectedBlock.currentSrc,
+      });
+    }
+    return state;
+  }
+
+  return h("button", { onclick }, text("go"));
+}

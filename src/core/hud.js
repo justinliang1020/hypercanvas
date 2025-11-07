@@ -1,10 +1,11 @@
 import { h, text } from "hyperapp";
-import { getHoveredBlock, getSelectedBlocks } from "./selection.js";
-import { updateBlock } from "./block.js";
+import { getSelectedBlocks } from "./selection.js";
 import {
   forwardButton,
   backButton,
   newWebviewButton,
+  searchBar,
+  goToUrlButton,
 } from "./blockContents/webview.js";
 import { fontSizeDropdown, newTextBlock } from "./blockContents/text.js";
 import { newImageBlock } from "./blockContents/image.js";
@@ -29,6 +30,7 @@ export function hud(state) {
         display: "flex",
         flexDirection: "column",
         height: "100%",
+        width: "250px",
         gap: "5px",
         backgroundColor: "#FFFFFF",
       },
@@ -36,13 +38,11 @@ export function hud(state) {
     [
       pageNav(state),
       hr(),
-      searchBar(state),
-      goToUrlButton(state),
       newTextBlock(state),
       newImageBlock(state),
       newWebviewButton(state),
       text("---"),
-      ...selectedBlockButtons(state),
+      selectedBlockPanel(state),
     ],
   );
 }
@@ -73,88 +73,22 @@ function hr() {
 
 /**
  * @param {State} state - Current application state
- * @returns {import("hyperapp").ElementVNode<State>[]}
+ * @returns {import("hyperapp").ElementVNode<State>}
  */
-function selectedBlockButtons(state) {
+function selectedBlockPanel(state) {
   const firstSelectedBlock = getSelectedBlocks(state)[0];
-  if (!firstSelectedBlock) return [];
+  if (!firstSelectedBlock) return h("div", {});
   switch (firstSelectedBlock.type) {
     case "webview":
-      return [backButton(state), forwardButton(state)];
+      return h("div", {}, [
+        searchBar(state),
+        goToUrlButton(state),
+        backButton(state),
+        forwardButton(state),
+      ]);
     case "text":
-      return [fontSizeDropdown(state)];
+      return h("div", {}, [fontSizeDropdown(state)]);
     default:
-      return [];
+      return h("div", {}, text("image stuff todo"));
   }
-}
-
-/**
- * @param {State} state - Current application state
- * @returns {import("hyperapp").ElementVNode<State>}
- */
-function goToUrlButton(state) {
-  /**
-   * @param {State} state
-   * @returns {import("hyperapp").Dispatchable<State>}
-   */
-  function onclick(state) {
-    const selectedBlock = getSelectedBlocks(state)[0];
-    if (selectedBlock && selectedBlock.type === "webview") {
-      return updateBlock(state, selectedBlock.id, {
-        initialSrc: selectedBlock.currentSrc,
-      });
-    }
-    return state;
-  }
-
-  return h("button", { onclick }, text("go"));
-}
-
-/**
- * @param {State} state - Current application state
- * @returns {import("hyperapp").ElementVNode<State>}
- */
-function searchBar(state) {
-  let searchBarValue = "";
-
-  const firstSelectedBlock = getSelectedBlocks(state)[0];
-  const hoveredBlock = getHoveredBlock(state);
-
-  if (
-    firstSelectedBlock &&
-    firstSelectedBlock.type === "webview" &&
-    firstSelectedBlock
-  ) {
-    searchBarValue = firstSelectedBlock.currentSrc;
-  } else if (hoveredBlock && hoveredBlock.type === "webview") {
-    searchBarValue = hoveredBlock.currentSrc;
-  }
-
-  /**
-   * @param {State} state
-   * @param {Event} event
-   * @returns {import("hyperapp").Dispatchable<State>}
-   */
-  function oninput(state, event) {
-    if (!firstSelectedBlock) return state;
-    if (!event.target) return state;
-    const value = /** @type {HTMLInputElement} */ (event.target).value;
-
-    return updateBlock(state, firstSelectedBlock.id, {
-      currentSrc: value,
-    });
-  }
-
-  return h("input", {
-    type: "text",
-    style: { width: "20em" },
-    value: searchBarValue,
-    disabled: !firstSelectedBlock,
-    oninput,
-    // stop keyboard shortcuts from triggering
-    onkeydown: (state, event) => {
-      event.stopPropagation();
-      return state;
-    },
-  });
 }
