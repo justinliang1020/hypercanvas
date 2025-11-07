@@ -255,7 +255,7 @@ export function newWebviewButton(state) {
    * @returns {import("hyperapp").Dispatchable<State>}
    */
   function onclick(state, event) {
-    return addBlockToViewportCenter(state, "https://example.com", false);
+    return addBlockToViewportCenter(state, "https://google.com", false);
   }
   return h("button", { onclick }, text("New webview block"));
 }
