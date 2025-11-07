@@ -109,5 +109,54 @@ function newBlocksSection(state) {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 function treeSection(state) {
-  return h("div", { style: { height: "400px" } }, text("tree section"));
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) throw Error("no current page");
+  const childBlockIds = new Set(
+    currentPage.links.map((link) => link.childBlockId),
+  );
+  const rootBlockIds = currentPage.blocks
+    .filter((block) => !childBlockIds.has(block.id))
+    .map((block) => block.id);
+
+  return h(
+    "div",
+    { style: { height: "400px" } },
+    rootBlockIds.map((blockId) => blockNodeDisplay(state, blockId, 0)),
+  );
+}
+
+/**
+ * @param {State} state - Current application state
+ * @param {number} blockId
+ * @param {number} level
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function blockNodeDisplay(state, blockId, level) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) throw Error("no current page");
+  const block = currentPage.blocks.find((b) => b.id === blockId);
+  if (!block) throw Error(`couldn't find block of id ${blockId}`);
+
+  const contents = (() => {
+    switch (block.type) {
+      case "webview":
+        return block.currentSrc.slice(0, 30);
+      case "text":
+        return `text: ${block.value}`;
+      case "image":
+        return `image: ${block.src}`;
+    }
+  })();
+
+  const spacing = "..".repeat(level);
+  const display = h("div", {}, text(`${spacing}${contents}`));
+
+  const childrenIds = currentPage.links
+    .filter((link) => link.parentBlockId === blockId)
+    .map((link) => link.childBlockId);
+  const childrenNodeDisplays = childrenIds.map((id) =>
+    blockNodeDisplay(state, id, level + 1),
+  );
+
+  return h("div", {}, [display, ...childrenNodeDisplays]);
 }
