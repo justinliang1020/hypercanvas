@@ -3,7 +3,7 @@ import { getSelectedBlocks } from "./selection.js";
 import {
   newWebviewButton,
   searchBar,
-  historyNavigation,
+  navigationButtons,
 } from "./blockContents/webview.js";
 import { fontSizeDropdown, newTextBlock } from "./blockContents/text.js";
 import { newImageBlock } from "./blockContents/image.js";
@@ -80,7 +80,7 @@ function selectedBlockPanel(state) {
   const style = { display: "flex", flexDirection: "column", gap: "3px" };
   switch (firstSelectedBlock.type) {
     case "webview":
-      return h("div", { style }, [searchBar(state), historyNavigation(state)]);
+      return h("div", { style }, [navigationButtons(state), searchBar(state)]);
     case "text":
       return h("div", { style }, [fontSizeDropdown(state)]);
     default:

@@ -173,8 +173,11 @@ export function webviewBlockContents(state, block) {
  * @param {State} state
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-export function historyNavigation(state) {
-  return h("div", {}, [backButton(state), forwardButton(state)]);
+export function navigationButtons(state) {
+  return h("div", { style: { display: "flex", gap: "5px" } }, [
+    backButton(state),
+    forwardButton(state),
+  ]);
 }
 
 /**
@@ -344,6 +347,8 @@ export function searchBar(state) {
       disabled: !firstSelectedBlock,
       style: {
         width: "100%",
+        boxSizing: "border-box",
+        outline: "none", // disable orange editing border
       },
       oninput,
       // stop keyboard shortcuts from triggering
