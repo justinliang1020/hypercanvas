@@ -4,6 +4,11 @@ import {
   getCurrentPage,
   updateCurrentPage,
 } from "./pages.js";
+import {
+  isBlockSelected,
+  isBlockPreviewSelected,
+  selectBlock,
+} from "./selection.js";
 
 /**
  * @param {State} state
@@ -29,6 +34,19 @@ export function linkView(state) {
     const arrowX = distance / 2 - arrowSize / 2;
     const arrowY = -(arrowSize / 3) - 2; //TODO: do a better formula
 
+    const isSelected = isBlockSelected(state, link.id);
+    const isPreviewSelected = isBlockPreviewSelected(state, link.id);
+
+    let backgroundColor = "#888";
+    let arrowColor = "black";
+    if (isSelected) {
+      backgroundColor = "#007acc";
+      arrowColor = "#007acc";
+    } else if (isPreviewSelected) {
+      backgroundColor = "rgba(0, 122, 204, 0.6)";
+      arrowColor = "rgba(0, 122, 204, 0.6)";
+    }
+
     return h(
       "div",
       {
@@ -38,13 +56,17 @@ export function linkView(state) {
           top: `${parentCenterY}px`,
           width: `${distance}px`,
           height: "2px",
-          backgroundColor: "#888",
+          backgroundColor,
           transformOrigin: "0 50%",
           transform: `rotate(${angle}deg)`,
-          pointerEvents: "none",
-          zIndex: "0",
+          pointerEvents: "auto",
+          cursor: "pointer",
         },
-        key: `${parentBlock.id}-${childBlock.id}`,
+        key: `link-${link.id}`,
+        onpointerdown: (state, event) => {
+          event.stopPropagation();
+          return selectBlock(state, link.id);
+        },
       },
       [
         h("div", {
@@ -56,7 +78,7 @@ export function linkView(state) {
             height: "0",
             borderLeft: `${arrowSize / 2}px solid transparent`,
             borderRight: `${arrowSize / 2}px solid transparent`,
-            borderBottom: `${arrowSize}px solid black`,
+            borderBottom: `${arrowSize}px solid ${arrowColor}`,
             transform: "rotate(90deg)",
           },
         }),
@@ -75,7 +97,36 @@ export function addLink(state, parentBlockId, childBlockId) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return state;
 
+  const newLink = {
+    id: currentPage.idCounter,
+    parentBlockId,
+    childBlockId,
+  };
+
   return updateCurrentPage(state, {
-    links: [...currentPage.links, { parentBlockId, childBlockId }],
+    links: [...currentPage.links, newLink],
+    idCounter: currentPage.idCounter + 1,
   });
+}
+
+/**
+ * Utility to check if an ID belongs to a link
+ * @param {State} state
+ * @param {number} id
+ * @returns {boolean}
+ */
+export function isIdLink(state, id) {
+  const currentPage = getCurrentPage(state);
+  return currentPage?.links?.some((link) => link.id === id) ?? false;
+}
+
+/**
+ * Utility to get link by ID
+ * @param {State} state
+ * @param {number} id
+ * @returns {Link | null}
+ */
+export function getLinkById(state, id) {
+  const currentPage = getCurrentPage(state);
+  return currentPage?.links?.find((link) => link.id === id) ?? null;
 }

@@ -313,15 +313,35 @@ export function calculatePreviewSelection(state, selectionBox) {
     })
     .map((block) => block.id);
 
+  // Find links that intersect with selection rectangle
+  const intersectingLinkIds = currentPage.links
+    .filter((link) => {
+      const parentBlock = blocks.find(b => b.id === link.parentBlockId);
+      const childBlock = blocks.find(b => b.id === link.childBlockId);
+      if (!parentBlock || !childBlock) return false;
+      
+      return lineIntersectsRect(
+        parentBlock.x + parentBlock.width / 2,
+        parentBlock.y + parentBlock.height / 2,
+        childBlock.x + childBlock.width / 2,
+        childBlock.y + childBlock.height / 2,
+        minX, minY, maxX, maxY
+      );
+    })
+    .map((link) => link.id);
+
+  // Combine both types of IDs
+  const allIntersectingIds = [...intersectingBlockIds, ...intersectingLinkIds];
+
   // Return preview selection based on current selection and shift key
   const currentSelectedIds = currentPage.selectedIds || [];
 
   if (state.isShiftPressed) {
     // Shift+drag: add to existing selection
-    return [...new Set([...currentSelectedIds, ...intersectingBlockIds])];
+    return [...new Set([...currentSelectedIds, ...allIntersectingIds])];
   } else {
     // Regular drag: replace selection
-    return intersectingBlockIds;
+    return allIntersectingIds;
   }
 }
 
@@ -395,4 +415,54 @@ export function selectionBoundingBox(state) {
         : []),
     ],
   );
+}
+
+/**
+ * Checks if a line segment intersects with a rectangle
+ * @param {number} x1 - Line start X
+ * @param {number} y1 - Line start Y  
+ * @param {number} x2 - Line end X
+ * @param {number} y2 - Line end Y
+ * @param {number} rectX - Rectangle left
+ * @param {number} rectY - Rectangle top
+ * @param {number} rectRight - Rectangle right
+ * @param {number} rectBottom - Rectangle bottom
+ * @returns {boolean} True if line intersects rectangle
+ */
+function lineIntersectsRect(x1, y1, x2, y2, rectX, rectY, rectRight, rectBottom) {
+  // Check if either endpoint is inside rectangle
+  if ((x1 >= rectX && x1 <= rectRight && y1 >= rectY && y1 <= rectBottom) ||
+      (x2 >= rectX && x2 <= rectRight && y2 >= rectY && y2 <= rectBottom)) {
+    return true;
+  }
+  
+  // Check intersection with rectangle edges
+  return (
+    lineSegmentsIntersect(x1, y1, x2, y2, rectX, rectY, rectRight, rectY) || // Top edge
+    lineSegmentsIntersect(x1, y1, x2, y2, rectRight, rectY, rectRight, rectBottom) || // Right edge  
+    lineSegmentsIntersect(x1, y1, x2, y2, rectRight, rectBottom, rectX, rectBottom) || // Bottom edge
+    lineSegmentsIntersect(x1, y1, x2, y2, rectX, rectBottom, rectX, rectY) // Left edge
+  );
+}
+
+/**
+ * Checks if two line segments intersect
+ * @param {number} x1 - First line start X
+ * @param {number} y1 - First line start Y
+ * @param {number} x2 - First line end X
+ * @param {number} y2 - First line end Y
+ * @param {number} x3 - Second line start X
+ * @param {number} y3 - Second line start Y
+ * @param {number} x4 - Second line end X
+ * @param {number} y4 - Second line end Y
+ * @returns {boolean} True if line segments intersect
+ */
+function lineSegmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
+  const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+  if (denom === 0) return false;
+  
+  const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denom;
+  const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denom;
+  
+  return t >= 0 && t <= 1 && u >= 0 && u <= 1;
 }

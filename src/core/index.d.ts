@@ -36,6 +36,7 @@ type Block = WebviewBlock | TextBlock | ImageBlock;
 type BlockType = Block["type"];
 
 type Link = {
+  id: number;
   parentBlockId: number;
   childBlockId: number;
 };
@@ -59,7 +60,7 @@ interface Page {
   resizing: ResizeState | null;
   dragStart: DragState | null;
   selectionBox: SelectionBoxState | null;
-  blockIdCounter: number;
+  idCounter: number;
   links: Link[];
 }
 
