@@ -36,11 +36,10 @@ export function hud(state) {
     [
       pageNav(state),
       hr(),
-      treeSection(state),
-      hr(),
-      newBlocksSection(state),
-      hr(),
       selectedBlockSection(state),
+      hr(),
+      treeSection(state),
+      newBlocksSection(state),
     ],
   );
 }
@@ -75,7 +74,10 @@ function hr() {
  */
 function selectedBlockSection(state) {
   const firstSelectedBlock = getSelectedBlocks(state)[0];
-  if (!firstSelectedBlock) return h("div", {});
+  /** @type {import("hyperapp").StyleProp} */
+  const heightStyle = { height: "3em" };
+  if (!firstSelectedBlock)
+    return h("div", { style: heightStyle }, text("nothing selected"));
   /** @type {import("hyperapp").ElementVNode<State>[]} */
   const contents = (() => {
     switch (firstSelectedBlock.type) {
@@ -83,13 +85,22 @@ function selectedBlockSection(state) {
         return [navigationButtons(state), searchBar(state)];
       case "text":
         return [fontSizeDropdown(state)];
-      default:
+      case "image":
         return [h("div", {}, text("image stuff todo"))];
     }
   })();
-  return h("div", { display: "flex", flexDirection: "column", gap: "3px" }, [
-    ...contents,
-  ]);
+  return h(
+    "div",
+    {
+      style: {
+        display: "flex",
+        flexDirection: "column",
+        gap: "3px",
+        ...heightStyle,
+      },
+    },
+    [...contents],
+  );
 }
 
 /**
