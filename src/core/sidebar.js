@@ -1,11 +1,6 @@
 import { h, text } from "hyperapp";
-import { getSelectedBlocks } from "./selection.js";
-import {
-  newWebviewButton,
-  searchBar,
-  navigationButtons,
-} from "./blockContents/webview.js";
-import { fontSizeDropdown, newTextBlock } from "./blockContents/text.js";
+import { newWebviewButton } from "./blockContents/webview.js";
+import { newTextBlock } from "./blockContents/text.js";
 import { newImageBlock } from "./blockContents/image.js";
 import { getCurrentPage } from "./pages.js";
 
@@ -53,8 +48,6 @@ function sidebar(state) {
     [
       toggleSidebarButton(state),
       hr(),
-      selectedBlockSection(state),
-      hr(),
       treeSection(state),
       newBlocksSection(state),
     ],
@@ -93,41 +86,6 @@ function hr() {
       border: "none",
     },
   });
-}
-
-/**
- * @param {State} state - Current application state
- * @returns {import("hyperapp").ElementVNode<State>}
- */
-function selectedBlockSection(state) {
-  const firstSelectedBlock = getSelectedBlocks(state)[0];
-  /** @type {import("hyperapp").StyleProp} */
-  const heightStyle = { height: "3em" };
-  if (!firstSelectedBlock)
-    return h("div", { style: heightStyle }, text("nothing selected"));
-  /** @type {import("hyperapp").ElementVNode<State>[]} */
-  const contents = (() => {
-    switch (firstSelectedBlock.type) {
-      case "webview":
-        return [navigationButtons(state), searchBar(state)];
-      case "text":
-        return [fontSizeDropdown(state)];
-      case "image":
-        return [h("div", {}, text("image stuff todo"))];
-    }
-  })();
-  return h(
-    "div",
-    {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        gap: "3px",
-        ...heightStyle,
-      },
-    },
-    [...contents],
-  );
 }
 
 /**
