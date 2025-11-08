@@ -9,6 +9,7 @@ import {
 } from "./utils.js";
 import { defaultPage } from "./pages.js";
 import { sidebarWrapper } from "./sidebar.js";
+import { toolbar } from "./toolbar.js";
 
 initialize();
 
@@ -130,7 +131,12 @@ function main(state) {
         "dark-mode": state.isDarkMode,
       },
     },
-    [viewport(state), sidebarWrapper(state), notification(state)],
+    [
+      viewport(state),
+      sidebarWrapper(state),
+      toolbar(state),
+      notification(state),
+    ],
   );
 }
 
