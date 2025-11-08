@@ -13,7 +13,24 @@ import { getCurrentPage } from "./pages.js";
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-export function sidebar(state) {
+export function sidebarWrapper(state) {
+  const noSidebar = h(
+    "div",
+    {
+      style: { position: "fixed", top: "0%", left: "0%", padding: "10px" },
+    },
+    toggleSidebarButton(state),
+  );
+  const content = state.isSidebarVisible ? sidebar(state) : noSidebar;
+  //TODO: transition animation
+  return h("div", {}, content);
+}
+
+/**
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function sidebar(state) {
   return h(
     "div",
     {
@@ -34,7 +51,7 @@ export function sidebar(state) {
       },
     },
     [
-      pageNav(state),
+      toggleSidebarButton(state),
       hr(),
       selectedBlockSection(state),
       hr(),
@@ -48,10 +65,20 @@ export function sidebar(state) {
  * @param {State} state
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-function pageNav(state) {
-  const currentPage = getCurrentPage(state);
-  if (!currentPage) return h("div", {}, [text("no current page")]);
-  return h("div", {}, [text(currentPage.name)]);
+function toggleSidebarButton(state) {
+  /**
+   * @param {State} state
+   * @returns {State}
+   */
+  function onclick(state) {
+    return { ...state, isSidebarVisible: !state.isSidebarVisible };
+  }
+
+  const content = state.isSidebarVisible ? "hide" : "show";
+
+  return h("button", { onclick, style: { width: "fit-content" } }, [
+    text(content),
+  ]);
 }
 
 /**

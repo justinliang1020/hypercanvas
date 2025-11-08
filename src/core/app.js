@@ -8,7 +8,7 @@ import {
   saveApplicationAndNotify,
 } from "./utils.js";
 import { defaultPage } from "./pages.js";
-import { sidebar } from "./sidebar.js";
+import { sidebarWrapper } from "./sidebar.js";
 
 initialize();
 
@@ -130,7 +130,7 @@ function main(state) {
         "dark-mode": state.isDarkMode,
       },
     },
-    [viewport(state), sidebar(state), notification(state)],
+    [viewport(state), sidebarWrapper(state), notification(state)],
   );
 }
 
