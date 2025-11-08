@@ -1,7 +1,4 @@
 import { h, text } from "hyperapp";
-import { newWebviewButton } from "./blockContents/webview.js";
-import { newTextBlock } from "./blockContents/text.js";
-import { newImageBlock } from "./blockContents/image.js";
 import { getCurrentPage } from "./pages.js";
 
 /**
@@ -45,12 +42,7 @@ function sidebar(state) {
         backgroundColor: "#FFFFFF",
       },
     },
-    [
-      toggleSidebarButton(state),
-      hr(),
-      treeSection(state),
-      newBlocksSection(state),
-    ],
+    [toggleSidebarButton(state), hr(), treeSection(state)],
   );
 }
 
@@ -86,18 +78,6 @@ function hr() {
       border: "none",
     },
   });
-}
-
-/**
- * @param {State} state - Current application state
- * @returns {import("hyperapp").ElementVNode<State>}
- */
-function newBlocksSection(state) {
-  return h("div", {}, [
-    newTextBlock(state),
-    newImageBlock(state),
-    newWebviewButton(state),
-  ]);
 }
 
 /**
