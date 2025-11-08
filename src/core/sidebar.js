@@ -13,7 +13,7 @@ import { getCurrentPage } from "./pages.js";
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-export function hud(state) {
+export function sidebar(state) {
   return h(
     "div",
     {
