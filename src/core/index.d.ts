@@ -111,7 +111,7 @@ interface State {
   currentPageId: string;
   mementoManager: MementoManager;
   isDarkMode: boolean;
-  panelsVisible: boolean;
+  isSidebarVisible: boolean;
   programsPanelWidth: number;
   clipboard: Block[] | null;
   programFilter: string;

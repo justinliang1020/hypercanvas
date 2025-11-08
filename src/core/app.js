@@ -141,7 +141,7 @@ function initialState() {
     currentPageId: "",
     mementoManager: createMementoManager(),
     isDarkMode: false,
-    panelsVisible: true,
+    isSidebarVisible: true,
     programsPanelWidth: 300,
     clipboard: null,
     programFilter: "",

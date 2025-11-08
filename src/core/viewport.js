@@ -583,14 +583,7 @@ export function viewport(state) {
     "div",
     {
       id: "viewport",
-      class: {
-        "panels-hidden": !state.panelsVisible,
-        "panels-visible": state.panelsVisible,
-      },
       style: {
-        paddingRight: state.panelsVisible
-          ? `${state.programsPanelWidth}px`
-          : "0",
         touchAction: "none", // Prevent default touch behaviors
       },
       onselectstart,
@@ -632,7 +625,7 @@ export function viewport(state) {
 export function getViewportCenterCoordinates(state) {
   // Get viewport dimensions (assuming standard viewport, could be made more dynamic)
   const viewportWidth =
-    window.innerWidth - (state.panelsVisible ? state.programsPanelWidth : 0);
+    window.innerWidth - (state.isSidebarVisible ? state.programsPanelWidth : 0);
   const viewportHeight = window.innerHeight;
 
   // Calculate center of viewport in screen coordinates
