@@ -1,5 +1,5 @@
 import { h, text } from "hyperapp";
-import { getSelectedBlocks } from "./selection.js";
+import { getHoveredBlock, getSelectedBlocks } from "./selection.js";
 import { fontSizeDropdown, newTextBlock } from "./blockContents/text.js";
 import { newImageBlock } from "./blockContents/image.js";
 import {
@@ -13,18 +13,6 @@ import {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 export function toolbar(state) {
-  // const hoveredBlock = getHoveredBlock(state);
-  const firstSelectedBlock = getSelectedBlocks(state)[0];
-
-  const defaultContents = h("div", {}, [
-    newTextBlock(state),
-    newImageBlock(state),
-    newWebviewButton(state),
-  ]);
-
-  const contents = firstSelectedBlock
-    ? selectedBlockSection(state)
-    : defaultContents;
   return h(
     "div",
     {
@@ -48,7 +36,7 @@ export function toolbar(state) {
         boxShadow: "0 3px 4px 0 rgba(0, 0, 0, 0.25)",
       },
     },
-    contents,
+    toolbarContents(state),
   );
 }
 
@@ -56,12 +44,21 @@ export function toolbar(state) {
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State>[]}
  */
-function selectedBlockSection(state) {
+function toolbarContents(state) {
   const firstSelectedBlock = getSelectedBlocks(state)[0];
-  if (!firstSelectedBlock) throw Error("nothing selected");
+  const hoveredBlock = getHoveredBlock(state);
+  if (!firstSelectedBlock && !hoveredBlock) {
+    const defaultContents = [
+      newTextBlock(state),
+      newImageBlock(state),
+      newWebviewButton(state),
+    ];
+    return defaultContents;
+  }
 
+  const activeBlock = firstSelectedBlock || hoveredBlock;
   return (() => {
-    switch (firstSelectedBlock.type) {
+    switch (activeBlock.type) {
       case "webview":
         return [searchBar(state), divider(state), navigationButtons(state)];
       case "text":
