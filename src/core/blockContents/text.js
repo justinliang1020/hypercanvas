@@ -6,7 +6,7 @@ import {
   FONT_SIZES,
 } from "../constants.js";
 import { getViewportCenterCoordinates } from "../viewport.js";
-import { getSelectedBlocks } from "../selection.js";
+import { getHoveredBlock, getSelectedBlocks } from "../selection.js";
 
 /**
  * @param {State} state
@@ -76,11 +76,12 @@ export function newTextBlock(state) {
  */
 export function fontSizeDropdown(state) {
   const firstSelectedBlock = getSelectedBlocks(state)[0];
+  const hoveredBlock = getHoveredBlock(state);
+  const activeBlock = firstSelectedBlock || hoveredBlock;
 
   const enabled = firstSelectedBlock && firstSelectedBlock.type === "text";
-  const currentFontSize = enabled
-    ? /** @type {TextBlock} */ (firstSelectedBlock).fontSize
-    : 14;
+  const currentFontSize =
+    activeBlock && activeBlock.type === "text" ? activeBlock.fontSize : 0;
 
   /**
    * @param {State} state
@@ -105,7 +106,6 @@ export function fontSizeDropdown(state) {
     {
       disabled: !enabled,
       onchange,
-      //BUG: for some reason this doesn't render the correct initial font size. When clicking and holding down, this can be seen
       value: `${currentFontSize}`,
       style: {
         marginRight: "8px",
