@@ -280,7 +280,7 @@ export function newWebviewButton(state) {
   function onclick(state, event) {
     return addBlockToViewportCenter(state, "https://google.com", false);
   }
-  return h("button", { onclick }, text("New webview block"));
+  return h("button", { onclick }, text("🌐"));
 }
 
 /** @type {BlockConfig<WebviewBlock>} */

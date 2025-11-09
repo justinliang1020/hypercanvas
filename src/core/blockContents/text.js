@@ -67,7 +67,7 @@ export function newTextBlock(state) {
       DEFAULT_BLOCK_HEIGHT,
     ).state;
   }
-  return h("button", { onclick }, text("New text block"));
+  return h("button", { onclick }, text("𝐓"));
 }
 
 /**

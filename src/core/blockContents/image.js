@@ -41,5 +41,5 @@ export function newImageBlock(state) {
       DEFAULT_BLOCK_HEIGHT,
     ).state;
   }
-  return h("button", { onclick }, text("New image block"));
+  return h("button", { onclick }, text("🖼"));
 }
