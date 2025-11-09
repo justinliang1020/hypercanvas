@@ -13,6 +13,23 @@ import {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 export function toolbar(state) {
+  const firstSelectedBlock = getSelectedBlocks(state)[0];
+  const hoveredBlock = getHoveredBlock(state);
+  const activeBlock = firstSelectedBlock || hoveredBlock;
+  const contents = (() => {
+    if (!firstSelectedBlock && !hoveredBlock) {
+      return defaultToolbarContents(state);
+    }
+    switch (activeBlock.type) {
+      case "webview":
+        return [searchBar(state), divider(state), navigationButtons(state)];
+      case "text":
+        return [fontSizeDropdown(state)];
+      case "image":
+        return [h("div", {}, text("image stuff todo"))];
+    }
+  })();
+
   return h(
     "div",
     {
@@ -36,7 +53,7 @@ export function toolbar(state) {
         boxShadow: "0 3px 4px 0 rgba(0, 0, 0, 0.25)",
       },
     },
-    toolbarContents(state),
+    contents,
   );
 }
 
@@ -44,29 +61,8 @@ export function toolbar(state) {
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State>[]}
  */
-function toolbarContents(state) {
-  const firstSelectedBlock = getSelectedBlocks(state)[0];
-  const hoveredBlock = getHoveredBlock(state);
-  if (!firstSelectedBlock && !hoveredBlock) {
-    const defaultContents = [
-      newTextBlock(state),
-      newImageBlock(state),
-      newWebviewButton(state),
-    ];
-    return defaultContents;
-  }
-
-  const activeBlock = firstSelectedBlock || hoveredBlock;
-  return (() => {
-    switch (activeBlock.type) {
-      case "webview":
-        return [searchBar(state), divider(state), navigationButtons(state)];
-      case "text":
-        return [fontSizeDropdown(state)];
-      case "image":
-        return [h("div", {}, text("image stuff todo"))];
-    }
-  })();
+function defaultToolbarContents(state) {
+  return [newTextBlock(state), newImageBlock(state), newWebviewButton(state)];
 }
 
 /**
