@@ -57,6 +57,7 @@ interface Page {
   pendingSelectedIds: number[];
   editingId: number | null;
   hoveringId: number | null;
+  fullScreenId: number | null;
   resizing: ResizeState | null;
   dragStart: DragState | null;
   selectionBox: SelectionBoxState | null;

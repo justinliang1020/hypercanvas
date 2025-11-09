@@ -8,6 +8,7 @@ import {
   newWebviewButton,
   searchBar,
 } from "./blockContents/webview.js";
+import { getCurrentPage, updateCurrentPage } from "./pages.js";
 
 /**
  * @param {State} state - Current application state
@@ -28,6 +29,7 @@ export function toolbar(state) {
           divider(state),
           backButton(state),
           forwardButton(state),
+          fullScreenButton(state),
         ];
       case "text":
         return [fontSizeDropdown(state)];
@@ -79,4 +81,29 @@ function divider(state) {
   return h("div", {
     style: { height: "100%", width: "1px", backgroundColor: "#AEAEAE" },
   });
+}
+
+/**
+ * @param {State} state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function fullScreenButton(state) {
+  const firstSelectedBlock = getSelectedBlocks(state)[0];
+  const enabled = Boolean(firstSelectedBlock);
+  /**
+   * @param {State} state
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function onclick(state) {
+    const firstSelectedBlock = getSelectedBlocks(state)[0];
+    const currentPage = getCurrentPage(state);
+    if (!firstSelectedBlock || !currentPage) {
+      return state;
+    }
+    if (currentPage.fullScreenId !== null) {
+      return updateCurrentPage(state, { fullScreenId: null });
+    }
+    return updateCurrentPage(state, { fullScreenId: firstSelectedBlock.id });
+  }
+  return h("button", { disabled: !enabled, onclick }, text("⛶"));
 }

@@ -60,6 +60,7 @@ export const defaultPage = {
   selectedIds: [],
   editingId: null,
   hoveringId: null,
+  fullScreenId: null,
   resizing: null,
   dragStart: null,
   pendingSelectedIds: [],
