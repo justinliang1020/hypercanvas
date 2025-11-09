@@ -173,18 +173,7 @@ export function webviewBlockContents(state, block) {
  * @param {State} state
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-export function navigationButtons(state) {
-  return h("div", { style: { display: "flex", gap: "5px" } }, [
-    backButton(state),
-    forwardButton(state),
-  ]);
-}
-
-/**
- * @param {State} state
- * @returns {import("hyperapp").ElementVNode<State>}
- */
-function backButton(state) {
+export function backButton(state) {
   return navigationButton(state, "back", "←");
 }
 
@@ -192,7 +181,7 @@ function backButton(state) {
  * @param {State} state
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-function forwardButton(state) {
+export function forwardButton(state) {
   return navigationButton(state, "forward", "→");
 }
 

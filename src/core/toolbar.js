@@ -3,7 +3,8 @@ import { getHoveredBlock, getSelectedBlocks } from "./selection.js";
 import { fontSizeDropdown, newTextBlock } from "./blockContents/text.js";
 import { newImageBlock } from "./blockContents/image.js";
 import {
-  navigationButtons,
+  backButton,
+  forwardButton,
   newWebviewButton,
   searchBar,
 } from "./blockContents/webview.js";
@@ -22,7 +23,12 @@ export function toolbar(state) {
     }
     switch (activeBlock.type) {
       case "webview":
-        return [searchBar(state), divider(state), navigationButtons(state)];
+        return [
+          searchBar(state),
+          divider(state),
+          backButton(state),
+          forwardButton(state),
+        ];
       case "text":
         return [fontSizeDropdown(state)];
       case "image":
