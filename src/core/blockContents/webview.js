@@ -256,7 +256,15 @@ function navigationButton(state, direction, display) {
     return state;
   }
 
-  return h("button", { disabled: !enabled, onclick }, text(display));
+  return h(
+    "button",
+    {
+      disabled: !enabled,
+      onclick,
+      style: { whiteSpace: "nowrap" },
+    },
+    text(display),
+  );
 }
 
 /**
@@ -340,6 +348,9 @@ export function searchBar(state) {
     "form",
     {
       onsubmit,
+      style: {
+        width: "100%",
+      },
     },
     h("input", {
       type: "text",
