@@ -185,7 +185,7 @@ export function navigationButtons(state) {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 function backButton(state) {
-  return navigationButton(state, "back", "<-");
+  return navigationButton(state, "back", "←");
 }
 
 /**
@@ -193,7 +193,7 @@ function backButton(state) {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 function forwardButton(state) {
-  return navigationButton(state, "forward", "->");
+  return navigationButton(state, "forward", "→");
 }
 
 /**
@@ -359,6 +359,8 @@ export function searchBar(state) {
       style: {
         width: "100%",
         boxSizing: "border-box",
+        backgroundColor: "transparent",
+        border: "none",
         outline: "none", // disable orange editing border
       },
       oninput,

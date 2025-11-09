@@ -30,18 +30,22 @@ export function toolbar(state) {
     {
       style: {
         position: "fixed",
-        bottom: "3%",
+        bottom: "2%",
         left: "50%",
         transform: "translateX(-50%)",
         margin: "0",
-        padding: "10px",
         boxSizing: "border-box",
+        height: "35px",
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
-        width: "400px",
+        padding: "0 10px",
+        width: "600px",
         gap: "5px",
-        backgroundColor: "#FFFFFF",
+        backgroundColor: "white",
+        borderRadius: "10px",
+        border: "1px solid lightgrey",
+        boxShadow: "0 3px 4px 0 rgba(0, 0, 0, 0.25)",
       },
     },
     contents,
@@ -59,11 +63,21 @@ function selectedBlockSection(state) {
   return (() => {
     switch (firstSelectedBlock.type) {
       case "webview":
-        return [searchBar(state), navigationButtons(state)];
+        return [searchBar(state), divider(state), navigationButtons(state)];
       case "text":
         return [fontSizeDropdown(state)];
       case "image":
         return [h("div", {}, text("image stuff todo"))];
     }
   })();
+}
+
+/**
+ * @param {State} state - Current application state
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function divider(state) {
+  return h("div", {
+    style: { height: "100%", width: "1px", backgroundColor: "#AEAEAE" },
+  });
 }

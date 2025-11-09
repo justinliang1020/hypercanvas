@@ -40,6 +40,7 @@ function sidebar(state) {
         width: "250px",
         gap: "5px",
         backgroundColor: "#FFFFFF",
+        borderRight: "1px solid black",
       },
     },
     [toggleSidebarButton(state), hr(), treeSection(state)],
