@@ -9,6 +9,7 @@ import {
   searchBar,
 } from "./blockContents/webview.js";
 import { getCurrentPage, updateCurrentPage } from "./pages.js";
+import { updateBlock } from "./block.js";
 
 /**
  * @param {State} state - Current application state
@@ -95,15 +96,40 @@ function fullScreenButton(state) {
    * @returns {import("hyperapp").Dispatchable<State>}
    */
   function onclick(state) {
-    const firstSelectedBlock = getSelectedBlocks(state)[0];
-    const currentPage = getCurrentPage(state);
-    if (!firstSelectedBlock || !currentPage) {
-      return state;
-    }
-    if (currentPage.fullScreenId !== null) {
-      return updateCurrentPage(state, { fullScreenId: null });
-    }
-    return updateCurrentPage(state, { fullScreenId: firstSelectedBlock.id });
+    return fullScreenMode(state);
   }
   return h("button", { disabled: !enabled, onclick }, text("⛶"));
+}
+
+/**
+ * @param {State} state
+ * @returns {State}
+ */
+function fullScreenMode(state) {
+  const firstSelectedBlock = getSelectedBlocks(state)[0];
+  const currentPage = getCurrentPage(state);
+  if (!firstSelectedBlock || !currentPage) {
+    return state;
+  }
+  if (currentPage.fullScreenId !== null) {
+    return updateCurrentPage(state, { fullScreenId: null });
+  }
+  const offsetX = 30;
+  const offsetY = 80;
+  const viewportRect = /** @type {HTMLElement} */ (
+    document.getElementById("viewport")
+  ).getBoundingClientRect();
+  let newState = state;
+  newState = updateCurrentPage(newState, {
+    // fullScreenId: firstSelectedBlock.id,
+    offsetX: -firstSelectedBlock.x + offsetX / 2,
+    offsetY: -firstSelectedBlock.y + 10,
+    zoom: 1,
+    editingId: firstSelectedBlock.id,
+  });
+  newState = updateBlock(newState, firstSelectedBlock.id, {
+    width: viewportRect.width - offsetX,
+    height: viewportRect.height - offsetY,
+  });
+  return newState;
 }
