@@ -585,6 +585,12 @@ export function viewport(state) {
       id: "viewport",
       style: {
         touchAction: "none", // Prevent default touch behaviors
+        width: "100%",
+        height: "100%",
+        position: "relative",
+        overflow: "hidden",
+        boxSizing: "border-box",
+        transition: "width 0.3s ease",
       },
       onselectstart,
       onpointerdown,
@@ -601,6 +607,8 @@ export function viewport(state) {
             // `translateZ(0)` required to fix rendering glitch where small borders and zoomed out would create rendering artifacts
             // The problem occurs because browsers have difficulty rendering fractional pixels when scaling,
             transform: `translate(${getCurrentViewport(state).offsetX}px, ${getCurrentViewport(state).offsetY}px) scale(${getCurrentViewport(state).zoom}) translateZ(0)`,
+            position: "relative",
+            transformOrigin: "top left",
           },
         },
         [

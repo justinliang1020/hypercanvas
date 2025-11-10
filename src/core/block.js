@@ -218,6 +218,11 @@ export function blockView(state) {
           height: `${block.height}px`,
           zIndex: `${block.zIndex}`,
           borderRadius: borderRadius,
+          position: "absolute", // TODO: unneeded?
+          userSelect: "none",
+          boxSizing: "border-box",
+          touchAction: "none",
+          transformOrigin: "top left", // TODO: unneeded?
         },
         class: { block: true },
         onpointerover,

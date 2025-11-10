@@ -8,42 +8,13 @@ main {
   overscroll-behavior-x: none; /* disable swipe to go back a page */
 }
 
-#canvas {
-  position: relative;
-  transform-origin: top left;
-}
-
-/* Draggable element styles */
-.block {
-  position: absolute;
-  user-select: none;
-  box-sizing: border-box;
-  touch-action: none;
-  transform-origin: top left;
-
-  .resize-handle {
-    position: absolute;
-  }
-}
-
-/* Selection bounding box styles */
-.selection-bounding-box {
-  position: absolute;
-  pointer-events: none;
-  outline: 4px solid #007acc;
-  outline-offset: -2px;
-  z-index: 1000;
-  box-sizing: border-box;
-}
-
 #viewport {
-  width: 100%;
-  height: 100%;
-  position: relative;
   background-color: #d9d9d9;
-  overflow: hidden;
-  box-sizing: border-box;
-  transition: width 0.3s ease;
+}
+
+#notification {
+  background-color: #4caf50;
+  color: #ffffff;
 }
 
 /* Dark mode styles */
@@ -79,33 +50,11 @@ main.dark-mode {
   .selection-bounding-box {
     outline-color: blue;
   }
-}
 
-/* Notification styles */
-#notification {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #4caf50;
-  color: #ffffff;
-  padding: 12px 24px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 10000;
-  font-size: 14px;
-  font-weight: 500;
-  animation: slideDown 0.3s ease-out;
-  pointer-events: auto;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* Dark mode notification styles */
-main.dark-mode #notification {
-  background-color: #2d2d2d;
-  border: 1px solid #4caf50;
+  #notification {
+    background-color: #2d2d2d;
+    border: 1px solid #4caf50;
+  }
 }
 
 /* Notification animation */

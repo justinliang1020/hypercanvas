@@ -404,6 +404,9 @@ export function selectionBoundingBox(state) {
         outline: `${outlineWidth}px solid blue`,
         position: "absolute",
         pointerEvents: "none",
+        outlineOffset: "-2px",
+        zIndex: "10000",
+        boxSizing: "border-box",
       },
     },
     [
