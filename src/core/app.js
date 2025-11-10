@@ -8,7 +8,6 @@ import {
   saveApplicationAndNotify,
 } from "./utils.js";
 import { defaultPage } from "./pages.js";
-import { sidebarWrapper } from "./sidebar.js";
 import { toolbar } from "./toolbar.js";
 
 initialize();
@@ -133,7 +132,7 @@ function main(state) {
     },
     [
       viewport(state),
-      sidebarWrapper(state),
+      // sidebarWrapper(state),
       toolbar(state),
       notification(state),
     ],
