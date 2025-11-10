@@ -35,7 +35,7 @@ export function toolbar(state) {
       case "text":
         return [fontSizeDropdown(state)];
       case "image":
-        return [h("div", {}, text("image stuff todo"))];
+        return [fullScreenButton(state)];
     }
   })();
 
@@ -96,7 +96,13 @@ function fullScreenButton(state) {
    * @returns {import("hyperapp").Dispatchable<State>}
    */
   function onclick(state) {
-    return fullScreenMode(state);
+    const currentPage = getCurrentPage(state);
+    if (!currentPage) return state;
+    if (currentPage?.fullScreenState) {
+      return disableFullScreen(state);
+    } else {
+      return enableFullScreen(state);
+    }
   }
   return h("button", { disabled: !enabled, onclick }, text("⛶"));
 }
@@ -105,25 +111,11 @@ function fullScreenButton(state) {
  * @param {State} state
  * @returns {State}
  */
-function fullScreenMode(state) {
+function enableFullScreen(state) {
   const firstSelectedBlock = getSelectedBlocks(state)[0];
   const currentPage = getCurrentPage(state);
   if (!firstSelectedBlock || !currentPage) {
     return state;
-  }
-  if (currentPage.fullScreenState !== null) {
-    let newState = state;
-    newState = updateCurrentPage(newState, {
-      fullScreenState: null,
-      offsetX: currentPage.fullScreenState.offsetX,
-      offsetY: currentPage.fullScreenState.offsetY,
-      zoom: currentPage.fullScreenState.zoom,
-    });
-    newState = updateBlock(newState, firstSelectedBlock.id, {
-      width: currentPage.fullScreenState.width,
-      height: currentPage.fullScreenState.height,
-    });
-    return newState;
   }
   const offsetX = 30;
   const offsetY = 80;
@@ -147,6 +139,35 @@ function fullScreenMode(state) {
   newState = updateBlock(newState, firstSelectedBlock.id, {
     width: viewportRect.width - offsetX,
     height: viewportRect.height - offsetY,
+  });
+  return newState;
+}
+
+/**
+ * @param {State} state
+ * @returns {State}
+ */
+export function disableFullScreen(state) {
+  const firstSelectedBlock = getSelectedBlocks(state)[0];
+  const currentPage = getCurrentPage(state);
+  if (
+    !firstSelectedBlock ||
+    !currentPage ||
+    currentPage.fullScreenState === null
+  ) {
+    return state;
+  }
+
+  let newState = state;
+  newState = updateCurrentPage(newState, {
+    fullScreenState: null,
+    offsetX: currentPage.fullScreenState.offsetX,
+    offsetY: currentPage.fullScreenState.offsetY,
+    zoom: currentPage.fullScreenState.zoom,
+  });
+  newState = updateBlock(newState, firstSelectedBlock.id, {
+    width: currentPage.fullScreenState.width,
+    height: currentPage.fullScreenState.height,
   });
   return newState;
 }

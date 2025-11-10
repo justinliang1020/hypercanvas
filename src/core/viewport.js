@@ -23,6 +23,7 @@ import {
   selectionBoundingBox,
   selectionBoxComponent,
 } from "./selection.js";
+import { disableFullScreen } from "./toolbar.js";
 
 /**
  * Calculates canvas coordinates from screen coordinates
@@ -488,16 +489,13 @@ export function onkeydown(state, event) {
   // Handle keyboard shortcuts
   switch (event.key) {
     case "Escape":
-      if (currentPage.editingId !== null) {
-        event.preventDefault();
-        return updateCurrentPage(state, {
-          editingId: null,
-        });
-      } else if (hasSelection(state)) {
-        event.preventDefault();
-        return deselectAllBlocks(state);
+      if (currentPage.fullScreenState) {
+        return disableFullScreen(state);
       }
-      return state;
+      return updateCurrentPage(state, {
+        editingId: null,
+        selectedIds: [],
+      });
     case "Delete":
     case "Backspace":
       // Only handle block deletion if not in input field, a block is selected, and not in edit mode
