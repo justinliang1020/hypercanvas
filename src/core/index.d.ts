@@ -57,7 +57,7 @@ interface Page {
   pendingSelectedIds: number[];
   editingId: number | null;
   hoveringId: number | null;
-  fullScreenId: number | null;
+  fullScreenState: fullScreenState | null;
   resizing: ResizeState | null;
   dragStart: DragState | null;
   selectionBox: SelectionBoxState | null;
@@ -82,6 +82,15 @@ interface OriginalBlockState {
   y: number;
   width: number;
   height: number;
+}
+
+interface fullScreenState {
+  id: number; // block ID of full screen block
+  width: number; // original block width
+  height: number; // original block height
+  offsetX: number; // original page offsetX
+  offsetY: number; // original page offsetY
+  zoom: number; // original page zoom
 }
 
 interface ResizeState {

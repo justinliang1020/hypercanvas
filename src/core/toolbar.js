@@ -111,8 +111,19 @@ function fullScreenMode(state) {
   if (!firstSelectedBlock || !currentPage) {
     return state;
   }
-  if (currentPage.fullScreenId !== null) {
-    return updateCurrentPage(state, { fullScreenId: null });
+  if (currentPage.fullScreenState !== null) {
+    let newState = state;
+    newState = updateCurrentPage(newState, {
+      fullScreenState: null,
+      offsetX: currentPage.fullScreenState.offsetX,
+      offsetY: currentPage.fullScreenState.offsetY,
+      zoom: currentPage.fullScreenState.zoom,
+    });
+    newState = updateBlock(newState, firstSelectedBlock.id, {
+      width: currentPage.fullScreenState.width,
+      height: currentPage.fullScreenState.height,
+    });
+    return newState;
   }
   const offsetX = 30;
   const offsetY = 80;
@@ -121,11 +132,17 @@ function fullScreenMode(state) {
   ).getBoundingClientRect();
   let newState = state;
   newState = updateCurrentPage(newState, {
-    // fullScreenId: firstSelectedBlock.id,
+    fullScreenState: {
+      id: firstSelectedBlock.id,
+      width: firstSelectedBlock.width,
+      height: firstSelectedBlock.height,
+      offsetX: currentPage.offsetX,
+      offsetY: currentPage.offsetY,
+      zoom: currentPage.zoom,
+    },
     offsetX: -firstSelectedBlock.x + offsetX / 2,
     offsetY: -firstSelectedBlock.y + 10,
     zoom: 1,
-    editingId: firstSelectedBlock.id,
   });
   newState = updateBlock(newState, firstSelectedBlock.id, {
     width: viewportRect.width - offsetX,
