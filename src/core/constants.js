@@ -3,8 +3,8 @@
 // -----------------------------
 
 export const MIN_SIZE = 20; // Minimum size in px
-export const STATE_SAVE_PATH = "state.json";
-export const MEDIA_SAVE_PATH = "media/";
+export const STATE_SAVE_PATH = "user/state.json";
+export const MEDIA_SAVE_PATH = "user/media/";
 export const PASTE_OFFSET_X = 20;
 export const PASTE_OFFSET_Y = 20;
 

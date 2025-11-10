@@ -8,7 +8,7 @@
     "hypercanvas": "./src/cli/index.js"
   },
   "scripts": {
-    "start": "node src/cli/index.js local",
+    "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
@@ -28,7 +28,6 @@
     ]
   },
   "dependencies": {
-    "chokidar": "^4.0.3",
     "electron-squirrel-startup": "^1.0.1",
     "hyperapp": "^2.0.22"
   },

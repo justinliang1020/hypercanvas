@@ -127,22 +127,6 @@ export interface ElectronAPI {
   ): (event: IpcRendererEvent, isDark: boolean) => void;
 
   /**
-   * Listen for system theme changes
-   * @param callback - Function to call when theme changes (receives isDark boolean)
-   * @returns The listener function for removal
-   */
-  onUserFilesChanged(
-    callback: (
-      chokidarEvent: import("chokidar/handler.js").EventName,
-      path: string,
-    ) => void,
-  ): (
-    event: IpcRendererEvent,
-    chokidarEvent: import("chokidar/handler.js").EventName,
-    path: string,
-  ) => void;
-
-  /**
    * Remove theme change listener
    * @param listener - The listener function returned by onThemeChanged
    */
