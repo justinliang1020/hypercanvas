@@ -144,6 +144,7 @@ export function webviewBlockContents(state, block) {
       width: "100%",
       height: "100%",
       overflow: "hidden",
+      willChange: "transform",
       border: "none",
       borderRadius: `${BLOCK_BORDER_RADIUS}px`,
       ...(block.isPreview ? previewStyles : {}),
