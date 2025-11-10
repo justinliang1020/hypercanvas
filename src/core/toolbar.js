@@ -117,6 +117,7 @@ function enableFullScreen(state) {
   if (!firstSelectedBlock || !currentPage) {
     return state;
   }
+  //TODO: fix magic number
   const offsetX = 30;
   const offsetY = 80;
   const viewportRect = /** @type {HTMLElement} */ (

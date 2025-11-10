@@ -216,7 +216,8 @@ export function blockView(state) {
         key: `block-${block.id}`,
         "data-id": block.id,
         style: {
-          outline: isFullScreen ? "100px solid black" : outline,
+          // outline hides the background when in full screen mode
+          outline: isFullScreen ? "100px solid black" : outline, //TODO: fix magic number
           transform: `translate(${block.x}px, ${block.y}px)`,
           width: `${block.width}px`,
           height: `${block.height}px`,
