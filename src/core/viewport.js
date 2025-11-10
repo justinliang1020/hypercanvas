@@ -579,6 +579,8 @@ export function onkeydown(state, event) {
 export function viewport(state) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return h("div", {}, text("no current page"));
+  const currentViewport = getCurrentViewport(state);
+  if (!currentViewport) return h("div", {}, text("no current viewport"));
   return h(
     "div",
     {
@@ -606,7 +608,7 @@ export function viewport(state) {
           style: {
             // `translateZ(0)` required to fix rendering glitch where small borders and zoomed out would create rendering artifacts
             // The problem occurs because browsers have difficulty rendering fractional pixels when scaling,
-            transform: `translate(${getCurrentViewport(state).offsetX}px, ${getCurrentViewport(state).offsetY}px) scale(${getCurrentViewport(state).zoom}) translateZ(0)`,
+            transform: `translate(${currentPage.offsetX}px, ${currentPage.offsetY}px) scale(${currentPage.zoom}) translateZ(0)`,
             position: "relative",
             transformOrigin: "top left",
           },
