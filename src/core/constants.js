@@ -45,3 +45,5 @@ export const BLOCK_BORDER_RADIUS = 10; // px
 export const FONT_SIZES = [
   8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 64, 72,
 ]; // px
+
+export const Z_INDEX_TOP = 100000;

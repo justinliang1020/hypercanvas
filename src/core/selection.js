@@ -7,6 +7,7 @@ import {
 } from "./pages.js";
 import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
 import { saveMementoAndReturn } from "./memento.js";
+import { Z_INDEX_TOP } from "./constants.js";
 
 /**
  * Checks if a block is currently selected
@@ -405,7 +406,7 @@ export function selectionBoundingBox(state) {
         position: "absolute",
         pointerEvents: "none",
         outlineOffset: "-2px",
-        zIndex: "10000",
+        zIndex: `${Z_INDEX_TOP}`,
         boxSizing: "border-box",
       },
     },

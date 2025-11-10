@@ -7,6 +7,7 @@ import {
   DEFAULT_BLOCK_WIDTH,
   DEFAULT_BLOCK_HEIGHT,
   BLOCK_BORDER_RADIUS,
+  Z_INDEX_TOP,
 } from "./constants.js";
 import { saveMementoAndReturn } from "./memento.js";
 import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
@@ -215,11 +216,11 @@ export function blockView(state) {
         key: `block-${block.id}`,
         "data-id": block.id,
         style: {
-          outline: isFullScreen ? undefined : outline,
+          outline: isFullScreen ? "100px solid black" : outline,
           transform: `translate(${block.x}px, ${block.y}px)`,
           width: `${block.width}px`,
           height: `${block.height}px`,
-          zIndex: `${block.zIndex}`,
+          zIndex: isFullScreen ? `${Z_INDEX_TOP}` : `${block.zIndex}`,
           borderRadius: borderRadius,
           position: "absolute", // TODO: unneeded?
           userSelect: "none",
