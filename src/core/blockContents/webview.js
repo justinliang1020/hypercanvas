@@ -27,7 +27,6 @@ function webviewDomId(blockId) {
 export function webviewBlockContents(state, block) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return h("div", {});
-  const isEditing = currentPage.editingId === block.id;
 
   /** @type {import("hyperapp").StyleProp} */
   const previewStyles = {
@@ -142,7 +141,6 @@ export function webviewBlockContents(state, block) {
     style: {
       // this prevents the main process from lagging when attempting to do CSS transformations on webviews without domReady
       display: block.domReady ? "" : "none",
-      pointerEvents: isEditing || state.isInteractMode ? null : "none",
       width: "100%",
       height: "100%",
       overflow: "hidden",

@@ -53,6 +53,9 @@ export function blockView(state) {
     const isEditing = currentPage.editingId === block.id;
     const isHovering = currentPage.hoveringId === block.id;
     const isInteractMode = state.isInteractMode;
+    const isFullScreen =
+      currentPage.fullScreenState &&
+      currentPage.fullScreenState.id === block.id;
 
     // Having small borders, i.e. 1px, can cause rendering glitches to occur when CSS transform translations are applied such as zooming out
     // Scale outline thickness inversely with zoom to maintain consistent visual appearance
@@ -212,7 +215,7 @@ export function blockView(state) {
         key: `block-${block.id}`,
         "data-id": block.id,
         style: {
-          outline: outline,
+          outline: isFullScreen ? undefined : outline,
           transform: `translate(${block.x}px, ${block.y}px)`,
           width: `${block.width}px`,
           height: `${block.height}px`,
@@ -225,23 +228,24 @@ export function blockView(state) {
           transformOrigin: "top left", // TODO: unneeded?
         },
         class: { block: true },
-        onpointerover,
-        onpointerleave,
-        onpointerdown,
-        ondblclick,
+        onpointerover: isFullScreen ? undefined : onpointerover,
+        onpointerleave: isFullScreen ? undefined : onpointerleave,
+        onpointerdown: isFullScreen ? undefined : onpointerdown,
+        ondblclick: isFullScreen ? undefined : ondblclick,
       },
       [
         h(
+          // this is just a wrapper for preventing pointer events
           "div",
           {
             style: {
-              pointerEvents: `${isEditing ? "" : "none"}`,
+              pointerEvents: `${isEditing || isFullScreen ? "" : "none"}`,
               height: "100%",
             },
           },
           contents,
         ),
-        ...resizeHandles,
+        ...(isFullScreen ? [] : resizeHandles),
       ],
     );
   };

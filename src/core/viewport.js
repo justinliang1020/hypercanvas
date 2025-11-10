@@ -581,6 +581,8 @@ export function viewport(state) {
   if (!currentPage) return h("div", {}, text("no current page"));
   const currentViewport = getCurrentViewport(state);
   if (!currentViewport) return h("div", {}, text("no current viewport"));
+  const isFullScreen = currentPage.fullScreenState !== null;
+
   return h(
     "div",
     {
@@ -594,11 +596,11 @@ export function viewport(state) {
         boxSizing: "border-box",
         transition: "width 0.3s ease",
       },
-      onselectstart,
-      onpointerdown,
-      onpointermove,
-      onpointerup,
-      onwheel,
+      onselectstart: isFullScreen ? undefined : onselectstart,
+      onpointerdown: isFullScreen ? undefined : onpointerdown,
+      onpointermove: isFullScreen ? undefined : onpointermove,
+      onpointerup: isFullScreen ? undefined : onpointerup,
+      onwheel: isFullScreen ? undefined : onwheel,
     },
     [
       h(
