@@ -48,27 +48,14 @@ export function blockView(state) {
     if (!currentPage) return h("div", {});
 
     const isBlockSelected = isSelected(state, block.id);
-    const isBlockPendingSelected = isPendingSelected(state, block.id);
     const selectedBlocks = getSelectedBlocks(state);
     const isMultiSelect = selectedBlocks.length > 1;
     const isEditing = currentPage.editingId === block.id;
-    const isHovering = currentPage.hoveringId === block.id;
     const isFullScreen =
       currentPage.fullScreenState &&
       currentPage.fullScreenState.id === block.id;
 
-    // Having small borders, i.e. 1px, can cause rendering glitches to occur when CSS transform translations are applied such as zooming out
-    // Scale outline thickness inversely with zoom to maintain consistent visual appearance
-    const outline = getBlockOutline(
-      {
-        isHovering,
-        isEditing,
-        isMultiSelect,
-        isSelected: isBlockSelected,
-        isPreviewSelected: isBlockPendingSelected,
-      },
-      state,
-    );
+    const outline = getBlockOutline(state, block.id);
 
     /**
      * @param {State} state
@@ -262,21 +249,21 @@ function createOutline(width, color, zoom) {
 
 /**
  * Determines the outline style for a block based on its current state
- * @param {{isHovering: boolean, isEditing: boolean, isMultiSelect: boolean, isSelected: boolean, isPreviewSelected: boolean}} blockState - Block state flags
+ * Having small borders, i.e. 1px, can cause rendering glitches to occur when CSS transform translations are applied such as zooming out
+ * Scale outline thickness inversely with zoom to maintain consistent visual appearance
  * @param {State} state - Application state
+ * @param {number} blockId - Application state
  * @returns {string|null} CSS outline property value
  */
-function getBlockOutline(blockState, state) {
-  const {
-    isHovering,
-    isEditing,
-    isMultiSelect,
-    isSelected,
-    isPreviewSelected,
-  } = blockState;
-
+function getBlockOutline(state, blockId) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return null;
+  const selectedBlocks = getSelectedBlocks(state);
+  const isMultiSelect = selectedBlocks.length > 1;
+  const isEditing = currentPage.editingId === blockId;
+  const isHovering = currentPage.hoveringId === blockId;
+  const isBlockSelected = isSelected(state, blockId);
+  const isPreviewSelected = isPendingSelected(state, blockId);
 
   if (isEditing) {
     return createOutline(
@@ -287,10 +274,10 @@ function getBlockOutline(blockState, state) {
   }
 
   if (isMultiSelect) {
-    return ""; // No outline for multi-select
+    return null; // No outline for multi-select
   }
 
-  if (isSelected) {
+  if (isBlockSelected) {
     return createOutline(
       OUTLINE_WIDTHS.THICK,
       OUTLINE_COLORS.SELECTED,
