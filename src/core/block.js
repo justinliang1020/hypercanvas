@@ -19,7 +19,6 @@ import {
   getCurrentPage,
 } from "./pages.js";
 import {
-  isSelected,
   isPendingSelected,
   selectBlock,
   getSelectedBlocks,
@@ -46,7 +45,7 @@ export function blockView(state, block) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return h("div", {});
 
-  const isBlockSelected = isSelected(state, block.id);
+  const isSelected = currentPage.selectedIds.includes(block.id);
   const isHovering = currentPage.hoveringId === block.id;
   const selectedBlocks = getSelectedBlocks(state);
   const isMultiSelect = selectedBlocks.length > 1;
@@ -186,8 +185,7 @@ export function blockView(state, block) {
         touchAction: "none",
         transformOrigin: "top left", // TODO: unneeded?
         padding: isFullScreen ? "" : "100px",
-        backgroundColor:
-          isHovering || isBlockSelected ? "#a9ad974d" : "transparent",
+        backgroundColor: isHovering || isSelected ? "#a9ad974d" : "transparent",
       },
       class: { block: true },
       onpointerover: isFullScreen ? undefined : onpointerover,
@@ -207,7 +205,7 @@ export function blockView(state, block) {
         },
         contents,
       ),
-      ...(!isFullScreen && isBlockSelected && !isEditing && !isMultiSelect
+      ...(!isFullScreen && isSelected && !isEditing && !isMultiSelect
         ? resizeHandles
         : []),
     ],
@@ -240,7 +238,7 @@ function getBlockOutline(state, blockId) {
   const isMultiSelect = selectedBlocks.length > 1;
   const isEditing = currentPage.editingId === blockId;
   const isHovering = currentPage.hoveringId === blockId;
-  const isBlockSelected = isSelected(state, blockId);
+  const isSelected = currentPage.selectedIds.includes(blockId);
   const isPreviewSelected = isPendingSelected(state, blockId);
 
   if (isEditing) {
@@ -255,7 +253,7 @@ function getBlockOutline(state, blockId) {
     return null; // No outline for multi-select
   }
 
-  if (isBlockSelected) {
+  if (isSelected) {
     return createOutline(
       OUTLINE_WIDTHS.THICK,
       OUTLINE_COLORS.SELECTED,

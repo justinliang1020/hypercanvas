@@ -1,10 +1,6 @@
 import { h } from "hyperapp";
-import {
-  getCurrentBlocks,
-  getCurrentPage,
-  updateCurrentPage,
-} from "./pages.js";
-import { isSelected, isPendingSelected, selectBlock } from "./selection.js";
+import { getCurrentPage, updateCurrentPage } from "./pages.js";
+import { isPendingSelected, selectBlock } from "./selection.js";
 
 /**
  * @param {State} state
@@ -12,7 +8,9 @@ import { isSelected, isPendingSelected, selectBlock } from "./selection.js";
  */
 export function linkView(state) {
   return (link) => {
-    const currentBlocks = getCurrentBlocks(state);
+    const currentPage = getCurrentPage(state);
+    if (!currentPage) throw Error("No current page");
+    const currentBlocks = currentPage.blocks;
     const parentBlock = currentBlocks.find((b) => b.id === link.parentBlockId);
     const childBlock = currentBlocks.find((b) => b.id === link.childBlockId);
     if (!parentBlock || !childBlock) throw Error(`invalid link: ${link}`);
@@ -30,7 +28,7 @@ export function linkView(state) {
     const arrowX = distance / 2 - arrowSize / 2;
     const arrowY = -(arrowSize / 3) - 2; //TODO: do a better formula
 
-    const isLinkSelected = isSelected(state, link.id);
+    const isLinkSelected = currentPage.selectedIds.includes(link.id);
     const isLinkPendingSelected = isPendingSelected(state, link.id);
 
     let backgroundColor = "#888";

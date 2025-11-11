@@ -10,17 +10,6 @@ import { saveMementoAndReturn } from "./memento.js";
 import { Z_INDEX_TOP } from "./constants.js";
 
 /**
- * Checks if a block is currently selected
- * @param {State} state - Current application state
- * @param {number} id - ID of block to check
- * @returns {boolean} True if block is selected
- */
-export function isSelected(state, id) {
-  const currentPage = getCurrentPage(state);
-  return currentPage?.selectedIds?.includes(id) ?? false;
-}
-
-/**
  * Checks if a block is in preview selection (during selection box drag)
  * @param {State} state - Current application state
  * @param {number} id - ID of block to check
@@ -177,7 +166,9 @@ export function removeBlockFromSelection(state, blockId) {
  * @returns {State} Updated state with block selection toggled
  */
 export function toggleBlockSelection(state, blockId) {
-  if (isSelected(state, blockId)) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) throw Error("No current page");
+  if (currentPage.selectedIds.includes(blockId)) {
     return removeBlockFromSelection(state, blockId);
   } else {
     return addBlockToSelection(state, blockId);
