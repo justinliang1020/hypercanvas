@@ -218,6 +218,7 @@ export function blockView(state) {
         style: {
           // outline hides the background when in full screen mode
           outline: isFullScreen ? "100px solid black" : outline, //TODO: fix magic number
+          willChange: "transform", // improves performance of rendered blocks
           transform: `translate(${block.x}px, ${block.y}px)`,
           width: `${block.width}px`,
           height: `${block.height}px`,
