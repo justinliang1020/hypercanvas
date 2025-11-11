@@ -153,6 +153,7 @@ function applyAspectRatioConstraint(dimensions, originalBlock, handle) {
  */
 export function ResizeHandle({ handle, zoom, context }) {
   const handleSize = 10 / zoom;
+  // const handleOffset = 5 / zoom;
   const handleOffset = 5 / zoom;
   const borderWidth = 1 / zoom;
 
