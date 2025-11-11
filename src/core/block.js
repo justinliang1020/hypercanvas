@@ -40,200 +40,198 @@ import { addLink } from "./link.js";
 /**
  * Creates a block component renderer
  * @param {State} state - Current application state
- * @returns {(block: Block) => import("hyperapp").ElementVNode<State>} Block renderer function
+ * @param {Block} block
+ * @returns {import("hyperapp").ElementVNode<State>} Block renderer function
  */
-export function blockView(state) {
-  return (block) => {
+export function blockView(state, block) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return h("div", {});
+
+  const isBlockSelected = isSelected(state, block.id);
+  const selectedBlocks = getSelectedBlocks(state);
+  const isMultiSelect = selectedBlocks.length > 1;
+  const isEditing = currentPage.editingId === block.id;
+  const isFullScreen =
+    currentPage.fullScreenState && currentPage.fullScreenState.id === block.id;
+
+  const outline = getBlockOutline(state, block.id);
+
+  /**
+   * @param {State} state
+   * @param {PointerEvent} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function onpointerover(state, event) {
+    event.stopPropagation();
     const currentPage = getCurrentPage(state);
-    if (!currentPage) return h("div", {});
+    if (!currentPage) return state;
 
-    const isBlockSelected = isSelected(state, block.id);
-    const selectedBlocks = getSelectedBlocks(state);
-    const isMultiSelect = selectedBlocks.length > 1;
-    const isEditing = currentPage.editingId === block.id;
-    const isFullScreen =
-      currentPage.fullScreenState &&
-      currentPage.fullScreenState.id === block.id;
+    if (
+      getFirstSelectedBlockId(state) !== null &&
+      getFirstSelectedBlockId(state) !== block.id &&
+      currentPage.dragStart !== null
+    )
+      return state;
 
-    const outline = getBlockOutline(state, block.id);
-
-    /**
-     * @param {State} state
-     * @param {PointerEvent} event
-     * @returns {import("hyperapp").Dispatchable<State>}
-     */
-    function onpointerover(state, event) {
-      event.stopPropagation();
-      const currentPage = getCurrentPage(state);
-      if (!currentPage) return state;
-
-      if (
-        getFirstSelectedBlockId(state) !== null &&
-        getFirstSelectedBlockId(state) !== block.id &&
-        currentPage.dragStart !== null
-      )
-        return state;
-
-      // Don't change cursor if we're over a resize handle
-      const target = /** @type {HTMLElement} */ (event.target);
-      if (target.classList.contains("resize-handle")) {
-        return updateCurrentPage(state, {
-          hoveringId: block.id,
-        });
-      }
-
-      // Set cursor based on current mode
-      let cursorStyle;
-      if (isMultiSelect) {
-        cursorStyle = "default";
-      } else if (currentPage.editingId === block.id) {
-        // In edit mode, use default cursor
-        cursorStyle = "default";
-      } else {
-        // Normal mode, use move cursor
-        cursorStyle = "move";
-      }
-
+    // Don't change cursor if we're over a resize handle
+    const target = /** @type {HTMLElement} */ (event.target);
+    if (target.classList.contains("resize-handle")) {
       return updateCurrentPage(state, {
         hoveringId: block.id,
-        cursorStyle: cursorStyle,
       });
     }
 
-    /**
-     * @param {State} state
-     * @param {PointerEvent} event
-     * @returns {import("hyperapp").Dispatchable<State>}
-     */
-    function onpointerleave(state, event) {
-      event.stopPropagation();
-      return updateCurrentPage(state, {
-        hoveringId: null,
-        cursorStyle: "default",
-      });
+    // Set cursor based on current mode
+    let cursorStyle;
+    if (isMultiSelect) {
+      cursorStyle = "default";
+    } else if (currentPage.editingId === block.id) {
+      // In edit mode, use default cursor
+      cursorStyle = "default";
+    } else {
+      // Normal mode, use move cursor
+      cursorStyle = "move";
     }
 
-    /**
-     * @param {State} state
-     * @param {PointerEvent} event
-     * @returns {import("hyperapp").Dispatchable<State>}
-     */
-    function onpointerdown(state, event) {
-      const currentPage = getCurrentPage(state);
-      if (!currentPage) return state;
-      if (isMultiSelect) return state;
+    return updateCurrentPage(state, {
+      hoveringId: block.id,
+      cursorStyle: cursorStyle,
+    });
+  }
 
-      event.stopPropagation();
+  /**
+   * @param {State} state
+   * @param {PointerEvent} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function onpointerleave(state, event) {
+    event.stopPropagation();
+    return updateCurrentPage(state, {
+      hoveringId: null,
+      cursorStyle: "default",
+    });
+  }
 
-      // If block is in edit mode, don't start dragging
-      if (currentPage.editingId === block.id) {
-        return state;
-      }
+  /**
+   * @param {State} state
+   * @param {PointerEvent} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function onpointerdown(state, event) {
+    const currentPage = getCurrentPage(state);
+    if (!currentPage) return state;
+    if (isMultiSelect) return state;
 
-      // Handle shift-click for multi-select
-      if (event.shiftKey) {
-        return toggleBlockSelection(state, block.id);
-      }
+    event.stopPropagation();
 
-      // Normal selection and drag start
-      const selectedState = selectBlock(state, block.id);
-      return updateCurrentPage(selectedState, {
-        dragStart: {
-          id: block.id,
-          startX: block.x,
-          startY: block.y,
-        },
-      });
+    // If block is in edit mode, don't start dragging
+    if (currentPage.editingId === block.id) {
+      return state;
     }
 
-    /**
-     * @param {State} state
-     * @param {MouseEvent} event
-     * @returns {import("hyperapp").Dispatchable<State>}
-     */
-    function ondblclick(state, event) {
-      event.stopPropagation();
-
-      const currentPage = getCurrentPage(state);
-      if (!currentPage || currentPage.isTextEditorFocused) return state;
-
-      // Double-click enters edit mode
-      const selectedState = selectBlock(state, block.id);
-      return updateCurrentPage(selectedState, {
-        editingId: block.id,
-        dragStart: null,
-      });
+    // Handle shift-click for multi-select
+    if (event.shiftKey) {
+      return toggleBlockSelection(state, block.id);
     }
 
-    const contents = (() => {
-      switch (block.type) {
-        case "webview":
-          return webviewBlockContents(state, block);
-        case "text":
-          return textContent(state, block);
-        case "image":
-          return imageContent(state, block);
-      }
-    })();
-
-    const resizeHandles =
-      isBlockSelected && !isEditing && !isMultiSelect
-        ? Object.keys(RESIZE_HANDLERS).map((handle) =>
-            ResizeHandle({
-              handle: /** @type{ResizeString} */ (handle),
-              zoom: currentPage.zoom,
-              context: "block",
-            }),
-          )
-        : [];
-
-    const borderRadius =
-      block.type === "webview" ? `${BLOCK_BORDER_RADIUS}px` : "0px";
-
-    return h(
-      "div",
-      {
-        // Key ensures Hyperapp's virtual DOM can properly track each block element during list updates,
-        // preventing DOM node reuse bugs when blocks are deleted (fixes positioning issues)
-        key: `block-${block.id}`,
-        "data-id": block.id,
-        style: {
-          // outline hides the background when in full screen mode
-          outline: isFullScreen ? "100px solid black" : outline, //TODO: fix magic number
-          willChange: "transform", // improves performance of rendered blocks
-          transform: `translate(${block.x}px, ${block.y}px)`,
-          width: `${block.width}px`,
-          height: `${block.height}px`,
-          zIndex: isFullScreen ? `${Z_INDEX_TOP}` : `${block.zIndex}`,
-          borderRadius: borderRadius,
-          position: "absolute", // TODO: unneeded?
-          userSelect: "none",
-          boxSizing: "border-box",
-          touchAction: "none",
-          transformOrigin: "top left", // TODO: unneeded?
-        },
-        class: { block: true },
-        onpointerover: isFullScreen ? undefined : onpointerover,
-        onpointerleave: isFullScreen ? undefined : onpointerleave,
-        onpointerdown: isFullScreen ? undefined : onpointerdown,
-        ondblclick: isFullScreen ? undefined : ondblclick,
+    // Normal selection and drag start
+    const selectedState = selectBlock(state, block.id);
+    return updateCurrentPage(selectedState, {
+      dragStart: {
+        id: block.id,
+        startX: block.x,
+        startY: block.y,
       },
-      [
-        h(
-          // this is just a wrapper for preventing pointer events
-          "div",
-          {
-            style: {
-              pointerEvents: `${isEditing || isFullScreen ? "" : "none"}`,
-              height: "100%",
-            },
+    });
+  }
+
+  /**
+   * @param {State} state
+   * @param {MouseEvent} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function ondblclick(state, event) {
+    event.stopPropagation();
+
+    const currentPage = getCurrentPage(state);
+    if (!currentPage || currentPage.isTextEditorFocused) return state;
+
+    // Double-click enters edit mode
+    const selectedState = selectBlock(state, block.id);
+    return updateCurrentPage(selectedState, {
+      editingId: block.id,
+      dragStart: null,
+    });
+  }
+
+  const contents = (() => {
+    switch (block.type) {
+      case "webview":
+        return webviewBlockContents(state, block);
+      case "text":
+        return textContent(state, block);
+      case "image":
+        return imageContent(state, block);
+    }
+  })();
+
+  const resizeHandles =
+    isBlockSelected && !isEditing && !isMultiSelect
+      ? Object.keys(RESIZE_HANDLERS).map((handle) =>
+          ResizeHandle({
+            handle: /** @type{ResizeString} */ (handle),
+            zoom: currentPage.zoom,
+            context: "block",
+          }),
+        )
+      : [];
+
+  const borderRadius =
+    block.type === "webview" ? `${BLOCK_BORDER_RADIUS}px` : "0px";
+
+  return h(
+    "div",
+    {
+      // Key ensures Hyperapp's virtual DOM can properly track each block element during list updates,
+      // preventing DOM node reuse bugs when blocks are deleted (fixes positioning issues)
+      key: `block-${block.id}`,
+      "data-id": block.id,
+      style: {
+        // outline hides the background when in full screen mode
+        outline: isFullScreen ? "100px solid black" : outline, //TODO: fix magic number
+        willChange: "transform", // improves performance of rendered blocks
+        transform: `translate(${block.x}px, ${block.y}px)`,
+        width: `${block.width}px`,
+        height: `${block.height}px`,
+        zIndex: isFullScreen ? `${Z_INDEX_TOP}` : `${block.zIndex}`,
+        borderRadius: borderRadius,
+        position: "absolute", // TODO: unneeded?
+        userSelect: "none",
+        boxSizing: "border-box",
+        touchAction: "none",
+        transformOrigin: "top left", // TODO: unneeded?
+      },
+      class: { block: true },
+      onpointerover: isFullScreen ? undefined : onpointerover,
+      onpointerleave: isFullScreen ? undefined : onpointerleave,
+      onpointerdown: isFullScreen ? undefined : onpointerdown,
+      ondblclick: isFullScreen ? undefined : ondblclick,
+    },
+    [
+      h(
+        // this is just a wrapper for preventing pointer events
+        "div",
+        {
+          style: {
+            pointerEvents: `${isEditing || isFullScreen ? "" : "none"}`,
+            height: "100%",
           },
-          contents,
-        ),
-        ...(isFullScreen ? [] : resizeHandles),
-      ],
-    );
-  };
+        },
+        contents,
+      ),
+      ...(isFullScreen ? [] : resizeHandles),
+    ],
+  );
 }
 
 /**
