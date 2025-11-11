@@ -130,7 +130,6 @@ interface State {
   editingPageId: string | null;
   isShiftPressed: boolean;
   userPath: string;
-  isInteractMode: boolean;
 }
 
 type ResizeHandler = (

@@ -53,7 +53,6 @@ export function blockView(state) {
     const isMultiSelect = selectedBlocks.length > 1;
     const isEditing = currentPage.editingId === block.id;
     const isHovering = currentPage.hoveringId === block.id;
-    const isInteractMode = state.isInteractMode;
     const isFullScreen =
       currentPage.fullScreenState &&
       currentPage.fullScreenState.id === block.id;
@@ -67,7 +66,6 @@ export function blockView(state) {
         isMultiSelect,
         isSelected: isBlockSelected,
         isPreviewSelected: isBlockPendingSelected,
-        isInteractMode,
       },
       state,
     );
@@ -101,7 +99,7 @@ export function blockView(state) {
       let cursorStyle;
       if (isMultiSelect) {
         cursorStyle = "default";
-      } else if (currentPage.editingId === block.id || state.isInteractMode) {
+      } else if (currentPage.editingId === block.id) {
         // In edit mode, use default cursor
         cursorStyle = "default";
       } else {
@@ -141,7 +139,7 @@ export function blockView(state) {
       event.stopPropagation();
 
       // If block is in edit mode, don't start dragging
-      if (currentPage.editingId === block.id || state.isInteractMode) {
+      if (currentPage.editingId === block.id) {
         return state;
       }
 
@@ -170,10 +168,7 @@ export function blockView(state) {
       event.stopPropagation();
 
       const currentPage = getCurrentPage(state);
-      if (!currentPage) return state;
-      if (state.isInteractMode || currentPage.isTextEditorFocused) {
-        return state;
-      }
+      if (!currentPage || currentPage.isTextEditorFocused) return state;
 
       // Double-click enters edit mode
       const selectedState = selectBlock(state, block.id);
@@ -267,7 +262,7 @@ function createOutline(width, color, zoom) {
 
 /**
  * Determines the outline style for a block based on its current state
- * @param {{isHovering: boolean, isEditing: boolean, isMultiSelect: boolean, isSelected: boolean, isPreviewSelected: boolean, isInteractMode: boolean}} blockState - Block state flags
+ * @param {{isHovering: boolean, isEditing: boolean, isMultiSelect: boolean, isSelected: boolean, isPreviewSelected: boolean}} blockState - Block state flags
  * @param {State} state - Application state
  * @returns {string|null} CSS outline property value
  */
@@ -278,19 +273,10 @@ function getBlockOutline(blockState, state) {
     isMultiSelect,
     isSelected,
     isPreviewSelected,
-    isInteractMode,
   } = blockState;
 
   const currentPage = getCurrentPage(state);
   if (!currentPage) return null;
-
-  if (isInteractMode) {
-    return createOutline(
-      OUTLINE_WIDTHS.THICK,
-      OUTLINE_COLORS.INTERACT_MODE,
-      currentPage.zoom,
-    );
-  }
 
   if (isEditing) {
     return createOutline(
