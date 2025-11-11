@@ -100,6 +100,8 @@ export function blockView(state, block) {
     // we must check for multi-select before stopping event propagation
     if (isMultiSelect) return state;
 
+    // console.log("root");
+
     event.stopPropagation();
 
     const currentPage = getCurrentPage(state);
@@ -160,6 +162,20 @@ export function blockView(state, block) {
     }),
   );
 
+  /**
+   * @param {State} state
+   * @param {PointerEvent} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function contentsOnpointerdown(state, event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    console.log("contents");
+
+    return updateCurrentPage(state, { selectedIds: [block.id] });
+  }
+
   return h(
     "div",
     {
@@ -200,9 +216,10 @@ export function blockView(state, block) {
         "div",
         {
           style: {
-            // pointerEvents: `${isEditing || isFullScreen ? "" : "none"}`,
             height: "100%",
+            outline: isSelected ? "3px solid orange" : "",
           },
+          onpointerdown: contentsOnpointerdown,
         },
         contents,
       ),

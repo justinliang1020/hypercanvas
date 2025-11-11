@@ -137,6 +137,11 @@ export function webviewBlockContents(state, block) {
     return updateBlock(state, block.id, { currentSrc: event.url });
   }
 
+  const isSelected = currentPage.selectedIds.includes(block.id);
+  const isFullScreen =
+    currentPage.fullScreenState && currentPage.fullScreenState.id === block.id;
+  const isDragging = currentPage.dragStart !== null;
+
   return h("webview", {
     style: {
       // this prevents the main process from lagging when attempting to do CSS transformations on webviews without domReady
@@ -146,6 +151,8 @@ export function webviewBlockContents(state, block) {
       overflow: "hidden",
       border: "none",
       borderRadius: `${BLOCK_BORDER_RADIUS}px`,
+
+      pointerEvents: `${(isSelected || isFullScreen) && !isDragging ? "" : "none"}`,
       ...(block.isPreview ? previewStyles : {}),
     },
     class: BLOCK_CONTENTS_CLASS_NAME,
