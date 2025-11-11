@@ -20,7 +20,6 @@ import {
 } from "./pages.js";
 import {
   isPendingSelected,
-  selectBlock,
   getSelectedBlocks,
   toggleBlockSelection,
 } from "./selection.js";
@@ -127,25 +126,6 @@ export function blockView(state, block) {
     });
   }
 
-  /**
-   * @param {State} state
-   * @param {MouseEvent} event
-   * @returns {import("hyperapp").Dispatchable<State>}
-   */
-  function ondblclick(state, event) {
-    event.stopPropagation();
-
-    const currentPage = getCurrentPage(state);
-    if (!currentPage || currentPage.isTextEditorFocused) return state;
-
-    // Double-click enters edit mode
-    const selectedState = selectBlock(state, block.id);
-    return updateCurrentPage(selectedState, {
-      editingId: block.id,
-      dragStart: null,
-    });
-  }
-
   const contents = (() => {
     switch (block.type) {
       case "webview":
@@ -220,7 +200,6 @@ export function blockView(state, block) {
       onpointerover: isFullScreen ? undefined : onpointerover,
       onpointerleave: isFullScreen ? undefined : onpointerleave,
       onpointerdown: isFullScreen ? undefined : onpointerdown,
-      ondblclick: isFullScreen ? undefined : ondblclick,
     },
     [
       h(
@@ -275,7 +254,25 @@ function framePart(state, block, direction) {
   const isMultiSelect =
     currentPage.selectionBox !== null || currentPage.selectedIds.length > 1;
 
+  /**
+   * @param {State} state
+   * @param {MouseEvent} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function ondblclick(state, event) {
+    //TODO: better zoom algorithm
+    const currentPage = getCurrentPage(state);
+    if (!currentPage || currentPage.isTextEditorFocused) return state;
+
+    return updateCurrentPage(state, {
+      offsetX: -block.x + 100,
+      offsetY: -block.y + 100,
+      zoom: 1,
+    });
+  }
+
   return h("div", {
+    ondblclick,
     style: {
       backgroundColor:
         (isHovering || isSelected) && !isMultiSelect
