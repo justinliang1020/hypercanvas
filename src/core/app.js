@@ -35,28 +35,6 @@ const onKeyDown = (action) => {
 };
 
 /**
- * @param {import("hyperapp").Action<State>} action
- * @returns {import("hyperapp").Subscription<State>}
- */
-const onKeyUp = (action) => {
-  /**
-   * @param {import("hyperapp").Dispatch<State>} dispatch
-   * @param {any} options
-   */
-  function keyupSubscriber(dispatch, options) {
-    /**
-     * @param {KeyboardEvent} event
-     */
-    function handler(event) {
-      dispatch(options.action, event);
-    }
-    addEventListener("keyup", handler);
-    return () => removeEventListener("keyup", handler);
-  }
-  return [keyupSubscriber, { action }];
-};
-
-/**
  * @param {State} state
  * @param {KeyboardEvent} event
  * @returns {import("hyperapp").Dispatchable<State>}
@@ -69,11 +47,6 @@ const KeyDown = (state, event) => {
   }
 
   switch (event.key) {
-    case "Shift":
-      return {
-        ...state,
-        isShiftPressed: true,
-      };
     case "s":
       // Handle save shortcut (Ctrl+S or Cmd+S)
       if (event.ctrlKey || event.metaKey) {
@@ -81,23 +54,6 @@ const KeyDown = (state, event) => {
         return [state, (dispatch) => saveApplicationAndNotify(dispatch, state)];
       }
       return state;
-    default:
-      return state;
-  }
-};
-
-/**
- * @param {State} state
- * @param {KeyboardEvent} event
- * @returns {import("hyperapp").Dispatchable<State>}
- */
-const KeyUp = (state, event) => {
-  switch (event.key) {
-    case "Shift":
-      return {
-        ...state,
-        isShiftPressed: false,
-      };
     default:
       return state;
   }
@@ -143,7 +99,6 @@ function initialState() {
     notification: null,
     notificationVisible: false,
     editingPageId: null,
-    isShiftPressed: false,
     userPath: "",
   };
 
@@ -235,7 +190,6 @@ async function initialize() {
     subscriptions: (state) => [
       [themeChangeSubscription, {}],
       onKeyDown(KeyDown),
-      onKeyUp(KeyUp),
     ],
     dispatch: dispatchMiddleware,
   });

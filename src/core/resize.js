@@ -315,7 +315,7 @@ export function handleResizePointerMove(state, event) {
       percentY: canvasY,
     });
 
-    if (state.isShiftPressed) {
+    if (event.shiftKey) {
       newBBox = applyAspectRatioConstraint(
         newBBox,
         virtualBoundingBox,
@@ -362,7 +362,7 @@ export function handleResizePointerMove(state, event) {
 
   let newDimensions = handler(block, { percentX: canvasX, percentY: canvasY });
 
-  if (state.isShiftPressed) {
+  if (event.shiftKey) {
     const originalBlock = {
       ...block,
       width: page.resizing.startWidth,

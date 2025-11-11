@@ -128,7 +128,6 @@ interface State {
   notification: string | null;
   notificationVisible: boolean;
   editingPageId: string | null;
-  isShiftPressed: boolean;
   userPath: string;
 }
 

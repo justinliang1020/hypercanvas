@@ -270,10 +270,19 @@ export function selectionBoxComponent(state) {
  * Handles completion of selection box drag operation
  * @param {State} state - Current application state
  * @param {SelectionBoxState} selectionBox - Selection box state
+ * @param {boolean} isShiftPressed - Selection box state
  * @returns {State} Updated state with blocks selected
  */
-export function handleSelectionBoxComplete(state, selectionBox) {
-  const newSelectedIds = calculatePreviewSelection(state, selectionBox);
+export function handleSelectionBoxComplete(
+  state,
+  selectionBox,
+  isShiftPressed,
+) {
+  const newSelectedIds = calculatePreviewSelection(
+    state,
+    selectionBox,
+    isShiftPressed,
+  );
 
   return updateCurrentPage(state, {
     selectedIds: newSelectedIds,
@@ -285,10 +294,11 @@ export function handleSelectionBoxComplete(state, selectionBox) {
  * Calculates which blocks would be selected by the current selection box
  * @param {State} state - Current application state
  * @param {SelectionBoxState} selectionBox - Selection box state
+ * @param {boolean} isShiftPressed - Selection box state
  * @returns {number[]} Array of block IDs that would be selected
  */
 
-export function calculatePreviewSelection(state, selectionBox) {
+export function calculatePreviewSelection(state, selectionBox, isShiftPressed) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return [];
 
@@ -341,7 +351,7 @@ export function calculatePreviewSelection(state, selectionBox) {
   // Return preview selection based on current selection and shift key
   const currentSelectedIds = currentPage.selectedIds || [];
 
-  if (state.isShiftPressed) {
+  if (isShiftPressed) {
     // Shift+drag: add to existing selection
     return [...new Set([...currentSelectedIds, ...allIntersectingIds])];
   } else {

@@ -12,7 +12,7 @@ import {
   updateCurrentPage,
 } from "./pages.js";
 import {
-  calculatePreviewSelection as calculatePendingSelection,
+  calculatePreviewSelection,
   deselectAllBlocks,
   getFirstSelectedBlockId,
   getSelectedBlockIds,
@@ -217,9 +217,10 @@ function handleSelectionBoxMove(state, event) {
     currentY: canvasY,
   };
 
-  const pendingSelectedIds = calculatePendingSelection(
+  const pendingSelectedIds = calculatePreviewSelection(
     state,
     updatedSelectionBox,
+    event.shiftKey,
   );
 
   return updateCurrentPage(state, {
@@ -396,9 +397,10 @@ function handleResizeCompletion(state, newState) {
 
 /**
  * @param {State} state
+ * @param {PointerEvent} event
  * @returns {import("hyperapp").Dispatchable<State>}
  */
-function onpointerup(state) {
+function onpointerup(state, event) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return state;
 
@@ -409,7 +411,11 @@ function onpointerup(state) {
   });
 
   if (currentPage.selectionBox) {
-    newState = handleSelectionBoxComplete(newState, currentPage.selectionBox);
+    newState = handleSelectionBoxComplete(
+      newState,
+      currentPage.selectionBox,
+      event.shiftKey,
+    );
     newState = updateCurrentPage(newState, { selectionBox: null });
   }
 
