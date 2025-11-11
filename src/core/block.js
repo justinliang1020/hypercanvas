@@ -170,7 +170,7 @@ export function blockView(state, block) {
    * @param {PointerEvent} event
    * @returns {import("hyperapp").Dispatchable<State>}
    */
-  function contentsOnpointerdown(state, event) {
+  function wrapperOnpointerdown(state, event) {
     event.preventDefault();
     event.stopPropagation();
 
@@ -184,7 +184,7 @@ export function blockView(state, block) {
    * @param {PointerEvent} event
    * @returns {import("hyperapp").Dispatchable<State>}
    */
-  function contentsOnpointerover(state, event) {
+  function wrapperOnpointerover(state, event) {
     event.stopPropagation();
     if (isDraggingAnything) return state;
     return updateCurrentPage(state, { cursorStyle: "default" });
@@ -226,15 +226,14 @@ export function blockView(state, block) {
     },
     [
       h(
-        // this is just a wrapper for preventing pointer events
         "div",
         {
           style: {
             height: "100%",
             outline: isSelected ? "5px solid orange" : "",
           },
-          onpointerdown: contentsOnpointerdown,
-          onpointerover: contentsOnpointerover,
+          onpointerdown: wrapperOnpointerdown,
+          onpointerover: wrapperOnpointerover,
         },
         contents,
       ),
