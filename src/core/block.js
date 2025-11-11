@@ -231,7 +231,7 @@ export function blockView(state, block) {
         {
           style: {
             height: "100%",
-            outline: isSelected ? "3px solid orange" : "",
+            outline: isSelected ? "5px solid orange" : "",
           },
           onpointerdown: contentsOnpointerdown,
           onpointerover: contentsOnpointerover,
