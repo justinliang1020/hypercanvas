@@ -155,19 +155,13 @@ export function blockView(state, block) {
     }
   })();
 
-  const resizeHandles =
-    isBlockSelected && !isEditing && !isMultiSelect
-      ? Object.keys(RESIZE_HANDLERS).map((handle) =>
-          ResizeHandle({
-            handle: /** @type{ResizeString} */ (handle),
-            zoom: currentPage.zoom,
-            context: "block",
-          }),
-        )
-      : [];
-
-  const borderRadius =
-    block.type === "webview" ? `${BLOCK_BORDER_RADIUS}px` : "0px";
+  const resizeHandles = Object.keys(RESIZE_HANDLERS).map((handle) =>
+    ResizeHandle({
+      handle: /** @type{ResizeString} */ (handle),
+      zoom: currentPage.zoom,
+      context: "block",
+    }),
+  );
 
   return h(
     "div",
@@ -184,7 +178,8 @@ export function blockView(state, block) {
         width: `${block.width}px`,
         height: `${block.height}px`,
         zIndex: isFullScreen ? `${Z_INDEX_TOP}` : `${block.zIndex}`,
-        borderRadius: borderRadius,
+        borderRadius:
+          block.type === "webview" ? `${BLOCK_BORDER_RADIUS}px` : "0px",
         position: "absolute", // TODO: unneeded?
         userSelect: "none",
         boxSizing: "border-box",
@@ -209,7 +204,9 @@ export function blockView(state, block) {
         },
         contents,
       ),
-      ...(isFullScreen ? [] : resizeHandles),
+      ...(!isFullScreen && isBlockSelected && !isEditing && !isMultiSelect
+        ? resizeHandles
+        : []),
     ],
   );
 }
