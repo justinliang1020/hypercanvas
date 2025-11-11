@@ -416,7 +416,7 @@ export function selectionBoundingBox(state) {
       ...(!isResizing
         ? Object.keys(RESIZE_HANDLERS).map((handle) =>
             ResizeHandle({
-              handle: /** @type{ResizeString} */ (handle),
+              handle: /** @type{CardinalDirection} */ (handle),
               zoom: viewport.zoom,
               context: "multi",
             }),

@@ -151,7 +151,7 @@ export function webviewBlockContents(state, block) {
       overflow: "hidden",
       border: "none",
       borderRadius: `${BLOCK_BORDER_RADIUS}px`,
-
+      outline: isSelected ? "5px solid orange" : "",
       pointerEvents: `${(isSelected || isFullScreen) && !isDragging ? "" : "none"}`,
       ...(block.isPreview ? previewStyles : {}),
     },

@@ -95,7 +95,7 @@ interface fullScreenState {
 
 interface ResizeState {
   id: number | string;
-  handle: ResizeString;
+  handle: CardinalDirection;
   startWidth: number;
   startHeight: number;
   startX: number;
@@ -136,6 +136,6 @@ type ResizeHandler = (
   e: { percentX: number; percentY: number },
 ) => { width: number; height: number; x: number; y: number };
 
-type ResizeString = "nw" | "ne" | "sw" | "se" | "n" | "s" | "e" | "w";
+type CardinalDirection = "nw" | "ne" | "sw" | "se" | "n" | "s" | "e" | "w";
 
 type BlockConfig<T> = Omit<T, keyof BaseBlock | "type">;

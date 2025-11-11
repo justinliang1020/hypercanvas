@@ -13,7 +13,7 @@ import {
 } from "./selection.js";
 
 /**
- * @type {Record<ResizeString, ResizeHandler>}
+ * @type {Record<CardinalDirection, ResizeHandler>}
  */
 export const RESIZE_HANDLERS = {
   //TODO: refactor this to not use type block, rather a specialized type that just has the properties needed
@@ -145,7 +145,7 @@ function applyAspectRatioConstraint(dimensions, originalBlock, handle) {
  * Renders an interactive handle div with proper cursor and pointer handlers.
  *
  * @param {{
- *   handle: ResizeString,
+ *   handle: CardinalDirection,
  *   zoom: number,
  *   context: "block"|"multi"
  * }} props
@@ -230,7 +230,7 @@ export function ResizeHandle({ handle, zoom, context }) {
         return updateCurrentPage(selectedState, {
           resizing: {
             id: blockId,
-            handle: /** @type {ResizeString} */ (
+            handle: /** @type {CardinalDirection} */ (
               /** @type {HTMLElement} */ (event.target).dataset.handle
             ),
             startWidth: block.width,
