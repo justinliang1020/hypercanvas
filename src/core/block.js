@@ -47,7 +47,9 @@ export function blockView(state, block) {
 
   const isSelected = currentPage.selectedIds.includes(block.id);
   const isHovering = currentPage.hoveringId === block.id;
-  const isMultiSelect = currentPage.selectionBox !== null;
+  const isDraggingAnything = currentPage.dragStart !== null;
+  const isMultiSelect =
+    currentPage.selectionBox !== null || currentPage.selectedIds.length > 1;
   const isFullScreen =
     currentPage.fullScreenState && currentPage.fullScreenState.id === block.id;
   const outline = getBlockOutline(state, block.id);
@@ -60,7 +62,7 @@ export function blockView(state, block) {
   function onpointerover(state, event) {
     event.stopPropagation();
     const currentPage = getCurrentPage(state);
-    if (!currentPage) return state;
+    if (!currentPage || isDraggingAnything) return state;
 
     const cursorStyle = (() => {
       const target = /** @type {HTMLElement} */ (event.target);
@@ -85,6 +87,7 @@ export function blockView(state, block) {
    */
   function onpointerleave(state, event) {
     event.stopPropagation();
+    if (isDraggingAnything) return state;
     return updateCurrentPage(state, {
       hoveringId: null,
       cursorStyle: "default",
@@ -176,6 +179,17 @@ export function blockView(state, block) {
     return updateCurrentPage(state, { selectedIds: [block.id] });
   }
 
+  /**
+   * @param {State} state
+   * @param {PointerEvent} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function contentsOnpointerover(state, event) {
+    event.stopPropagation();
+    if (isDraggingAnything) return state;
+    return updateCurrentPage(state, { cursorStyle: "default" });
+  }
+
   return h(
     "div",
     {
@@ -220,6 +234,7 @@ export function blockView(state, block) {
             outline: isSelected ? "3px solid orange" : "",
           },
           onpointerdown: contentsOnpointerdown,
+          onpointerover: contentsOnpointerover,
         },
         contents,
       ),
