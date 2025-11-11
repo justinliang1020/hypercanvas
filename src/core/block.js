@@ -100,30 +100,28 @@ export function blockView(state, block) {
    * @returns {import("hyperapp").Dispatchable<State>}
    */
   function onpointerdown(state, event) {
-    const currentPage = getCurrentPage(state);
-    if (!currentPage) return state;
+    // we must check for multi-select before stopping event propagation
     if (isMultiSelect) return state;
 
     event.stopPropagation();
 
-    // If block is in edit mode, don't start dragging
-    if (currentPage.editingId === block.id) {
+    const currentPage = getCurrentPage(state);
+    if (!currentPage || currentPage.editingId === block.id) {
       return state;
     }
 
-    // Handle shift-click for multi-select
     if (event.shiftKey) {
       return toggleBlockSelection(state, block.id);
     }
 
-    // Normal selection and drag start
-    const selectedState = selectBlock(state, block.id);
-    return updateCurrentPage(selectedState, {
+    return updateCurrentPage(state, {
       dragStart: {
         id: block.id,
         startX: block.x,
         startY: block.y,
       },
+      selectedIds: [block.id],
+      editingId: null, // Exit edit mode when selecting
     });
   }
 
