@@ -47,12 +47,12 @@ export function blockView(state, block) {
   if (!currentPage) return h("div", {});
 
   const isBlockSelected = isSelected(state, block.id);
+  const isHovering = currentPage.hoveringId === block.id;
   const selectedBlocks = getSelectedBlocks(state);
   const isMultiSelect = selectedBlocks.length > 1;
   const isEditing = currentPage.editingId === block.id;
   const isFullScreen =
     currentPage.fullScreenState && currentPage.fullScreenState.id === block.id;
-
   const outline = getBlockOutline(state, block.id);
 
   /**
@@ -185,6 +185,9 @@ export function blockView(state, block) {
         boxSizing: "border-box",
         touchAction: "none",
         transformOrigin: "top left", // TODO: unneeded?
+        padding: isFullScreen ? "" : "100px",
+        backgroundColor:
+          isHovering || isBlockSelected ? "#a9ad974d" : "transparent",
       },
       class: { block: true },
       onpointerover: isFullScreen ? undefined : onpointerover,
@@ -198,7 +201,7 @@ export function blockView(state, block) {
         "div",
         {
           style: {
-            pointerEvents: `${isEditing || isFullScreen ? "" : "none"}`,
+            // pointerEvents: `${isEditing || isFullScreen ? "" : "none"}`,
             height: "100%",
           },
         },
