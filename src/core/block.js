@@ -22,7 +22,6 @@ import {
   isSelected,
   isPendingSelected,
   selectBlock,
-  getFirstSelectedBlockId,
   getSelectedBlocks,
   toggleBlockSelection,
 } from "./selection.js";
@@ -66,32 +65,15 @@ export function blockView(state, block) {
     const currentPage = getCurrentPage(state);
     if (!currentPage) return state;
 
-    if (
-      getFirstSelectedBlockId(state) !== null &&
-      getFirstSelectedBlockId(state) !== block.id &&
-      currentPage.dragStart !== null
-    )
-      return state;
-
-    // Don't change cursor if we're over a resize handle
-    const target = /** @type {HTMLElement} */ (event.target);
-    if (target.classList.contains("resize-handle")) {
-      return updateCurrentPage(state, {
-        hoveringId: block.id,
-      });
-    }
-
-    // Set cursor based on current mode
-    let cursorStyle;
-    if (isMultiSelect) {
-      cursorStyle = "default";
-    } else if (currentPage.editingId === block.id) {
-      // In edit mode, use default cursor
-      cursorStyle = "default";
-    } else {
-      // Normal mode, use move cursor
-      cursorStyle = "move";
-    }
+    const cursorStyle = (() => {
+      const target = /** @type {HTMLElement} */ (event.target);
+      if (target.classList.contains("resize-handle")) {
+        return currentPage.cursorStyle;
+      } else if (isMultiSelect || currentPage.editingId === block.id) {
+        return "default";
+      }
+      return "move";
+    })();
 
     return updateCurrentPage(state, {
       hoveringId: block.id,
