@@ -197,11 +197,11 @@ export function blockView(state, block) {
         zIndex: isFullScreen ? `${Z_INDEX_TOP}` : `${block.zIndex}`,
         borderRadius:
           block.type === "webview" ? `${BLOCK_BORDER_RADIUS}px` : "0px",
-        position: "absolute", // TODO: unneeded?
+        position: "absolute",
         userSelect: "none",
         boxSizing: "border-box",
         touchAction: "none",
-        transformOrigin: "top left", // TODO: unneeded?
+        transformOrigin: "top left",
         padding: isFullScreen ? "" : "100px",
         backgroundColor:
           (isHovering || isResizing) && !isMultiSelect
