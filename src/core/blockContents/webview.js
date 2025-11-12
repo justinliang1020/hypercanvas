@@ -137,7 +137,7 @@ export function webviewBlockContents(state, block) {
     return updateBlock(state, block.id, { currentSrc: event.url });
   }
 
-  const isSelected = currentPage.selectedIds.includes(block.id);
+  const isEditing = currentPage.editingId === block.id;
   const isFullScreen =
     currentPage.fullScreenState && currentPage.fullScreenState.id === block.id;
   const isDragging = currentPage.dragStart !== null;
@@ -152,7 +152,7 @@ export function webviewBlockContents(state, block) {
       border: "none",
       borderRadius: `${BLOCK_BORDER_RADIUS}px`,
 
-      pointerEvents: `${(isSelected || isFullScreen) && !isDragging ? "" : "none"}`,
+      pointerEvents: `${(isEditing || isFullScreen) && !isDragging ? "" : "none"}`,
       ...(block.isPreview ? previewStyles : {}),
     },
     class: BLOCK_CONTENTS_CLASS_NAME,
