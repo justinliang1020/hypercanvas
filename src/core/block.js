@@ -6,7 +6,6 @@ import {
   OUTLINE_WIDTHS,
   DEFAULT_BLOCK_WIDTH,
   DEFAULT_BLOCK_HEIGHT,
-  BLOCK_BORDER_RADIUS,
   Z_INDEX_TOP,
 } from "./constants.js";
 import { saveMementoAndReturn } from "./memento.js";
@@ -195,8 +194,6 @@ export function blockView(state, block) {
         width: `${block.width}px`,
         height: `${block.height}px`,
         zIndex: isFullScreen ? `${Z_INDEX_TOP}` : `${block.zIndex}`,
-        borderRadius:
-          block.type === "webview" ? `${BLOCK_BORDER_RADIUS}px` : "0px",
         position: "absolute",
         userSelect: "none",
         boxSizing: "border-box",
