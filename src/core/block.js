@@ -34,7 +34,6 @@ import {
 } from "./blockContents/text.js";
 import { imageContent } from "./blockContents/image.js";
 import { addLink } from "./link.js";
-import { framePart } from "./frame.js";
 
 /**
  * Creates a block component renderer
@@ -160,7 +159,7 @@ export function blockView(state, block) {
 
   const resizeHandles = Object.keys(RESIZE_HANDLERS).map((handle) =>
     ResizeHandle({
-      handle: /** @type{CardinalDirection} */ (handle),
+      handle: /** @type{ResizeString} */ (handle),
       zoom: currentPage.zoom,
       context: "block",
     }),
@@ -188,10 +187,7 @@ export function blockView(state, block) {
   function wrapperOnpointerover(state, event) {
     event.stopPropagation();
     if (isDraggingAnything) return state;
-    return updateCurrentPage(state, {
-      cursorStyle: "default",
-      hoveringId: block.id,
-    });
+    return updateCurrentPage(state, { cursorStyle: "default" });
   }
 
   return h(
@@ -216,6 +212,11 @@ export function blockView(state, block) {
         boxSizing: "border-box",
         touchAction: "none",
         transformOrigin: "top left", // TODO: unneeded?
+        padding: isFullScreen ? "" : "100px",
+        backgroundColor:
+          (isHovering || isSelected) && !isMultiSelect
+            ? "#a9ad974d"
+            : "transparent",
       },
       class: { block: true },
       onpointerover: isFullScreen ? undefined : onpointerover,
@@ -225,34 +226,16 @@ export function blockView(state, block) {
     },
     [
       h(
-        "grid",
+        "div",
         {
           style: {
             height: "100%",
-            display: "grid",
-            gridTemplateColumns: "100px 1fr 100px",
-            gridTemplateRows: "100px 1fr 100px",
-            width: "100%",
+            outline: isSelected ? "5px solid orange" : "",
           },
+          onpointerdown: wrapperOnpointerdown,
+          onpointerover: wrapperOnpointerover,
         },
-        [
-          framePart(state, block, "nw"),
-          framePart(state, block, "n"),
-          framePart(state, block, "ne"),
-          framePart(state, block, "w"),
-          h(
-            "div",
-            {
-              onpointerdown: wrapperOnpointerdown,
-              onpointerover: wrapperOnpointerover,
-            },
-            contents,
-          ),
-          framePart(state, block, "e"),
-          framePart(state, block, "sw"),
-          framePart(state, block, "s"),
-          framePart(state, block, "se"),
-        ],
+        contents,
       ),
       ...(!isFullScreen && (isHovering || isSelected) && !isMultiSelect
         ? resizeHandles
