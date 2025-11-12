@@ -125,6 +125,8 @@ export function disableFullScreen(state) {
     offsetX: currentPage.fullScreenState.offsetX,
     offsetY: currentPage.fullScreenState.offsetY,
     zoom: currentPage.fullScreenState.zoom,
+    selectedIds: [],
+    hoveringId: null,
   });
   newState = updateBlock(newState, editingBlock.id, {
     width: currentPage.fullScreenState.width,
