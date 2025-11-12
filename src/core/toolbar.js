@@ -1,5 +1,5 @@
 import { h, text } from "hyperapp";
-import { getHoveredBlock, getSelectedBlocks } from "./selection.js";
+import { getEditingBlock, getHoveredBlock } from "./selection.js";
 import { fontSizeDropdown, newTextBlock } from "./blockContents/text.js";
 import { newImageBlock } from "./blockContents/image.js";
 import {
@@ -17,11 +17,11 @@ import { enableFullScreen } from "./utils.js";
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 export function toolbar(state) {
-  const firstSelectedBlock = getSelectedBlocks(state)[0];
+  const editingBlock = getEditingBlock(state);
   const hoveredBlock = getHoveredBlock(state);
-  const activeBlock = firstSelectedBlock || hoveredBlock;
   const contents = (() => {
-    if (!firstSelectedBlock && !hoveredBlock) {
+    const activeBlock = editingBlock || hoveredBlock;
+    if (!activeBlock) {
       return defaultToolbarContents(state);
     }
     switch (activeBlock.type) {
@@ -90,8 +90,8 @@ function divider(state) {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 function fullScreenButton(state) {
-  const firstSelectedBlock = getSelectedBlocks(state)[0];
-  const enabled = Boolean(firstSelectedBlock);
+  const editingBlock = getEditingBlock(state);
+  const enabled = Boolean(editingBlock);
   /**
    * @param {State} state
    * @returns {import("hyperapp").Dispatchable<State>}
@@ -99,10 +99,10 @@ function fullScreenButton(state) {
   function onclick(state) {
     const currentPage = getCurrentPage(state);
     if (!currentPage) return state;
-    if (currentPage?.fullScreenState) {
+    if (currentPage?.fullScreenState || !editingBlock) {
       return disableFullScreen(state);
     } else {
-      return enableFullScreen(state, firstSelectedBlock);
+      return enableFullScreen(state, editingBlock);
     }
   }
   return h("button", { disabled: !enabled, onclick }, text("⛶"));
@@ -113,13 +113,9 @@ function fullScreenButton(state) {
  * @returns {State}
  */
 export function disableFullScreen(state) {
-  const firstSelectedBlock = getSelectedBlocks(state)[0];
+  const editingBlock = getEditingBlock(state);
   const currentPage = getCurrentPage(state);
-  if (
-    !firstSelectedBlock ||
-    !currentPage ||
-    currentPage.fullScreenState === null
-  ) {
+  if (!editingBlock || !currentPage || currentPage.fullScreenState === null) {
     return state;
   }
 
@@ -130,7 +126,7 @@ export function disableFullScreen(state) {
     offsetY: currentPage.fullScreenState.offsetY,
     zoom: currentPage.fullScreenState.zoom,
   });
-  newState = updateBlock(newState, firstSelectedBlock.id, {
+  newState = updateBlock(newState, editingBlock.id, {
     width: currentPage.fullScreenState.width,
     height: currentPage.fullScreenState.height,
   });

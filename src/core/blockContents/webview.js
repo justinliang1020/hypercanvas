@@ -9,7 +9,7 @@ import {
   BLOCK_CONTENTS_CLASS_NAME,
 } from "../constants.js";
 import { getCurrentBlocks, getCurrentPage } from "../pages.js";
-import { getHoveredBlock, getSelectedBlocks } from "../selection.js";
+import { getEditingBlock, getHoveredBlock } from "../selection.js";
 
 /**
  * @param {number} blockId
@@ -197,19 +197,19 @@ export function forwardButton(state) {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 function navigationButton(state, direction, display) {
-  const firstSelectedBlock = getSelectedBlocks(state)[0];
+  const editingBlock = getEditingBlock(state);
 
   const { enabled, webview: webviewElement } = (() => {
     if (
-      !firstSelectedBlock ||
-      firstSelectedBlock.type !== "webview" ||
-      !firstSelectedBlock.domReady
+      !editingBlock ||
+      editingBlock.type !== "webview" ||
+      !editingBlock.domReady
     ) {
       return { enabled: false, webview: undefined };
     }
 
     const webviewElement = /** @type {import("electron").WebviewTag} */ (
-      document.getElementById(webviewDomId(firstSelectedBlock.id))
+      document.getElementById(webviewDomId(editingBlock.id))
     );
 
     if (!webviewElement) {
@@ -294,15 +294,11 @@ export const DEFAULT_WEBVIEW_BLOCK_CONFIG = {
 export function searchBar(state) {
   let searchBarValue = "";
 
-  const firstSelectedBlock = getSelectedBlocks(state)[0];
+  const editingBlock = getEditingBlock(state);
   const hoveredBlock = getHoveredBlock(state);
 
-  if (
-    firstSelectedBlock &&
-    firstSelectedBlock.type === "webview" &&
-    firstSelectedBlock
-  ) {
-    searchBarValue = firstSelectedBlock.currentSrc;
+  if (editingBlock && editingBlock.type === "webview" && editingBlock) {
+    searchBarValue = editingBlock.currentSrc;
   } else if (hoveredBlock && hoveredBlock.type === "webview") {
     searchBarValue = hoveredBlock.currentSrc;
   }
@@ -313,11 +309,11 @@ export function searchBar(state) {
    * @returns {import("hyperapp").Dispatchable<State>}
    */
   function oninput(state, event) {
-    if (!firstSelectedBlock) return state;
+    if (!editingBlock) return state;
     if (!event.target) return state;
     const value = /** @type {HTMLInputElement} */ (event.target).value;
 
-    return updateBlock(state, firstSelectedBlock.id, {
+    return updateBlock(state, editingBlock.id, {
       currentSrc: value,
     });
   }
@@ -329,10 +325,10 @@ export function searchBar(state) {
    */
   function onsubmit(state, event) {
     event.preventDefault();
-    const selectedBlock = getSelectedBlocks(state)[0];
-    if (selectedBlock && selectedBlock.type === "webview") {
-      return updateBlock(state, selectedBlock.id, {
-        initialSrc: selectedBlock.currentSrc,
+    const editingBlock = getEditingBlock(state);
+    if (editingBlock && editingBlock.type === "webview") {
+      return updateBlock(state, editingBlock.id, {
+        initialSrc: editingBlock.currentSrc,
       });
     }
     return state;
@@ -349,7 +345,7 @@ export function searchBar(state) {
     h("input", {
       type: "text",
       value: searchBarValue,
-      disabled: !firstSelectedBlock,
+      disabled: !editingBlock,
       style: {
         width: "100%",
         boxSizing: "border-box",

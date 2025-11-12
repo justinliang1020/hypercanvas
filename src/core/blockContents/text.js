@@ -6,7 +6,7 @@ import {
   FONT_SIZES,
 } from "../constants.js";
 import { getViewportCenterCoordinates } from "../viewport.js";
-import { getHoveredBlock, getSelectedBlocks } from "../selection.js";
+import { getEditingBlock, getHoveredBlock } from "../selection.js";
 
 /**
  * @param {State} state
@@ -75,11 +75,11 @@ export function newTextBlock(state) {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 export function fontSizeDropdown(state) {
-  const firstSelectedBlock = getSelectedBlocks(state)[0];
+  const editingBlock = getEditingBlock(state);
   const hoveredBlock = getHoveredBlock(state);
-  const activeBlock = firstSelectedBlock || hoveredBlock;
+  const activeBlock = editingBlock || hoveredBlock;
 
-  const enabled = firstSelectedBlock && firstSelectedBlock.type === "text";
+  const enabled = editingBlock && editingBlock.type === "text";
   const currentFontSize =
     activeBlock && activeBlock.type === "text" ? activeBlock.fontSize : 0;
 
@@ -91,7 +91,7 @@ export function fontSizeDropdown(state) {
   function onchange(state, event) {
     if (!enabled) return state;
 
-    const selectedBlock = /** @type {TextBlock} */ (firstSelectedBlock);
+    const selectedBlock = /** @type {TextBlock} */ (editingBlock);
     const newFontSize = parseInt(
       /** @type {HTMLSelectElement} */ (event.target).value,
     );
