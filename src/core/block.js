@@ -45,7 +45,6 @@ export function blockView(state, block) {
 
   const isResizing = currentPage.resizing?.id === block.id;
   const isHovering = currentPage.hoveringId === block.id;
-  const isEditing = currentPage.editingId === block.id;
   const isDraggingAnything = currentPage.dragStart !== null;
   const isMultiSelect =
     currentPage.selectionBox !== null || currentPage.selectedIds.length > 1;
@@ -217,7 +216,6 @@ export function blockView(state, block) {
         {
           style: {
             height: "100%",
-            outline: isEditing ? "5px solid orange" : "",
           },
           onpointerdown: wrapperOnpointerdown,
           onpointerover: wrapperOnpointerover,

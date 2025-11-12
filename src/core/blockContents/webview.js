@@ -151,11 +151,11 @@ export function webviewBlockContents(state, block) {
       overflow: "hidden",
       border: "none",
       borderRadius: `${BLOCK_BORDER_RADIUS}px`,
-
+      boxShadow: isEditing ? "0 0px 10px 10px orange" : "",
       pointerEvents: `${(isEditing || isFullScreen) && !isDragging ? "" : "none"}`,
       ...(block.isPreview ? previewStyles : {}),
     },
-    class: BLOCK_CONTENTS_CLASS_NAME,
+    class: `${BLOCK_CONTENTS_CLASS_NAME} webview`,
     src: block.initialSrc,
     id: webviewDomId(block.id),
     preload: `./blockContents/webview-preload.js`,
