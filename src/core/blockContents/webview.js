@@ -150,6 +150,7 @@ export function webviewBlockContents(state, block) {
       height: "100%",
       overflow: "hidden",
       border: "none",
+      backgroundColor: "white",
       borderRadius: `${BLOCK_BORDER_RADIUS}px`,
       boxShadow: isEditing ? "0 0px 10px 10px orange" : "",
       pointerEvents: `${(isEditing || isFullScreen) && !isDragging ? "" : "none"}`,
