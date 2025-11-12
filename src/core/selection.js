@@ -390,8 +390,6 @@ export function selectionBoundingBox(state) {
 
   const viewport = getCurrentViewport(state);
   const outlineWidth = 4 / viewport.zoom;
-  const currentPage = getCurrentPage(state);
-  const isResizing = currentPage?.resizing?.id === "selection-bounding-box";
 
   return h(
     "div",
@@ -411,18 +409,14 @@ export function selectionBoundingBox(state) {
         boxSizing: "border-box",
       },
     },
-    [
-      // Add resize handles for multi-select
-      ...(!isResizing
-        ? Object.keys(RESIZE_HANDLERS).map((handle) =>
-            ResizeHandle({
-              handle: /** @type{ResizeString} */ (handle),
-              zoom: viewport.zoom,
-              context: "multi",
-            }),
-          )
-        : []),
-    ],
+    // Add resize handles for multi-select
+    Object.keys(RESIZE_HANDLERS).map((handle) =>
+      ResizeHandle({
+        handle: /** @type{ResizeString} */ (handle),
+        zoom: viewport.zoom,
+        context: "multi",
+      }),
+    ),
   );
 }
 
