@@ -12,7 +12,7 @@ import {
 import { saveMementoAndReturn } from "./memento.js";
 import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
 import { getViewportCenterCoordinates } from "./viewport.js";
-import { clearUserClipboardEffect } from "./utils.js";
+import { clearUserClipboardEffect, enableFullScreen } from "./utils.js";
 import {
   getCurrentBlocks,
   updateCurrentPage,
@@ -20,7 +20,6 @@ import {
 } from "./pages.js";
 import {
   isPendingSelected,
-  selectBlock,
   getSelectedBlocks,
   toggleBlockSelection,
 } from "./selection.js";
@@ -135,15 +134,7 @@ export function blockView(state, block) {
   function ondblclick(state, event) {
     event.stopPropagation();
 
-    const currentPage = getCurrentPage(state);
-    if (!currentPage || currentPage.isTextEditorFocused) return state;
-
-    // Double-click enters edit mode
-    const selectedState = selectBlock(state, block.id);
-    return updateCurrentPage(selectedState, {
-      editingId: block.id,
-      dragStart: null,
-    });
+    return enableFullScreen(state, block);
   }
 
   const contents = (() => {

@@ -1,7 +1,8 @@
-import { addImageBlock, pasteClipboardBlocks } from "./block.js";
+import { addImageBlock, pasteClipboardBlocks, updateBlock } from "./block.js";
 import { MEDIA_SAVE_PATH, STATE_SAVE_PATH } from "./constants.js";
 import { h, text } from "hyperapp";
 import { getViewportCenterCoordinates } from "./viewport.js";
+import { getCurrentPage, updateCurrentPage } from "./pages.js";
 
 /**
  * Creates a notification component that displays in the top middle
@@ -231,3 +232,40 @@ export const wrapDispatch = (fn) => (dispatch) => (action, payload) => {
   }
   dispatch(action, payload);
 };
+
+/**
+ * @param {State} state
+ * @param {Block} block
+ * @returns {State}
+ */
+export function enableFullScreen(state, block) {
+  const currentPage = getCurrentPage(state);
+  if (!block || !currentPage) {
+    return state;
+  }
+  //TODO: fix magic number
+  const offsetX = 30;
+  const offsetY = 80;
+  const viewportRect = /** @type {HTMLElement} */ (
+    document.getElementById("viewport")
+  ).getBoundingClientRect();
+  let newState = state;
+  newState = updateCurrentPage(newState, {
+    fullScreenState: {
+      id: block.id,
+      width: block.width,
+      height: block.height,
+      offsetX: currentPage.offsetX,
+      offsetY: currentPage.offsetY,
+      zoom: currentPage.zoom,
+    },
+    offsetX: -block.x + offsetX / 2,
+    offsetY: -block.y + 10,
+    zoom: 1,
+  });
+  newState = updateBlock(newState, block.id, {
+    width: viewportRect.width - offsetX,
+    height: viewportRect.height - offsetY,
+  });
+  return newState;
+}
