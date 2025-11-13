@@ -43,6 +43,7 @@ export function blockView(state, block) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return h("div", {});
 
+  const isSelected = currentPage.selectedIds.includes(block.id);
   const isResizing = currentPage.resizing?.id === block.id;
   const isHovering = currentPage.hoveringId === block.id;
   const isDraggingAnything = currentPage.dragStart !== null;
@@ -200,7 +201,7 @@ export function blockView(state, block) {
         transformOrigin: "top left",
         padding: isFullScreen ? "" : "100px",
         backgroundColor:
-          (isHovering || isResizing) && !isMultiSelect
+          (isHovering || isSelected || isResizing) && !isMultiSelect
             ? "#a9ad974d"
             : "transparent",
       },
@@ -222,7 +223,9 @@ export function blockView(state, block) {
         },
         contents,
       ),
-      ...(!isFullScreen && (isHovering || isResizing) && !isMultiSelect
+      ...(!isFullScreen &&
+      (isSelected || isHovering || isResizing) &&
+      !isMultiSelect
         ? resizeHandles
         : []),
     ],
@@ -256,6 +259,7 @@ function getBlockOutline(state, blockId) {
   const isHovering = currentPage.hoveringId === blockId;
   const isResizing = currentPage.resizing?.id === blockId;
   const isPreviewSelected = isPendingSelected(state, blockId);
+  const isSelected = currentPage.selectedIds.includes(blockId);
 
   if (isMultiSelect) {
     return null; // No outline for multi-select
@@ -277,7 +281,7 @@ function getBlockOutline(state, blockId) {
     );
   }
 
-  if (isHovering || isResizing) {
+  if (isHovering || isResizing || isSelected) {
     return createOutline(
       OUTLINE_WIDTHS.THIN,
       OUTLINE_COLORS.HOVERING,
