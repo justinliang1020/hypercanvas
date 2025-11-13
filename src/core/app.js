@@ -100,6 +100,7 @@ function initialState() {
     notificationVisible: false,
     editingPageId: null,
     userPath: "",
+    contextMenu: null,
   };
 
   // Set currentPageId to the first page

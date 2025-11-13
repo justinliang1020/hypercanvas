@@ -24,6 +24,7 @@ import {
   selectionBoxComponent,
 } from "./selection.js";
 import { disableFullScreen } from "./toolbar.js";
+import { frameContextMenu } from "./contextMenu.js";
 
 /**
  * Calculates canvas coordinates from screen coordinates
@@ -32,7 +33,7 @@ import { disableFullScreen } from "./toolbar.js";
  * @param {State} state - Application state
  * @returns {{canvasX: number, canvasY: number}} Canvas coordinates
  */
-function getCanvasCoordinates(clientX, clientY, state) {
+export function getCanvasCoordinates(clientX, clientY, state) {
   const canvasRect = /** @type {HTMLElement} */ (
     document.getElementById("canvas")
   ).getBoundingClientRect();
@@ -631,6 +632,7 @@ export function viewport(state) {
           ...currentPage.links.map(linkView(state)),
           selectionBoundingBox(state),
           selectionBoxComponent(state),
+          ...(state.contextMenu ? [frameContextMenu(state)] : []),
         ].filter(Boolean),
       ),
     ],

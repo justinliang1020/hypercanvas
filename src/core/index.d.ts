@@ -116,6 +116,12 @@ interface SelectionBoxState {
   currentY: number;
 }
 
+interface ContextMenu {
+  target: WebviewBlock;
+  x: number;
+  y: nubmer;
+}
+
 interface State {
   pages: Page[];
   currentPageId: string;
@@ -124,6 +130,7 @@ interface State {
   isSidebarVisible: boolean;
   programsPanelWidth: number;
   clipboard: Block[] | null;
+  contextMenu: ContextMenu | null;
   programFilter: string;
   notification: string | null;
   notificationVisible: boolean;

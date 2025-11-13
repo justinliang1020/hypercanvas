@@ -10,7 +10,10 @@ import {
 } from "./constants.js";
 import { saveMementoAndReturn } from "./memento.js";
 import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
-import { getViewportCenterCoordinates } from "./viewport.js";
+import {
+  getCanvasCoordinates,
+  getViewportCenterCoordinates,
+} from "./viewport.js";
 import { clearUserClipboardEffect, enableFullScreen } from "./utils.js";
 import {
   getCurrentBlocks,
@@ -126,6 +129,30 @@ export function blockView(state, block) {
 
   /**
    * @param {State} state
+   * @param {PointerEvent} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function oncontextmenu(state, event) {
+    const { canvasX, canvasY } = getCanvasCoordinates(
+      event.clientX,
+      event.clientY,
+      state,
+    );
+    if (block.type === "webview") {
+      return {
+        ...state,
+        contextMenu: {
+          target: block,
+          x: canvasX,
+          y: canvasY,
+        },
+      };
+    }
+    return state;
+  }
+
+  /**
+   * @param {State} state
    * @param {MouseEvent} event
    * @returns {import("hyperapp").Dispatchable<State>}
    */
@@ -210,6 +237,7 @@ export function blockView(state, block) {
       onpointerleave: isFullScreen ? undefined : onpointerleave,
       onpointerdown: isFullScreen ? undefined : onpointerdown,
       ondblclick: isFullScreen ? undefined : ondblclick,
+      oncontextmenu,
     },
     [
       h(
