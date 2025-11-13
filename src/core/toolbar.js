@@ -1,7 +1,6 @@
 import { h, text } from "hyperapp";
 import { getEditingBlock, getHoveredBlock } from "./selection.js";
-import { fontSizeDropdown, newTextBlock } from "./blockContents/text.js";
-import { newImageBlock } from "./blockContents/image.js";
+import { fontSizeDropdown } from "./blockContents/text.js";
 import {
   backButton,
   forwardButton,
@@ -22,7 +21,7 @@ export function toolbar(state) {
   const contents = (() => {
     const activeBlock = editingBlock || hoveredBlock;
     if (!activeBlock) {
-      return defaultToolbarContents(state);
+      return [newWebviewButton(state)];
     }
     switch (activeBlock.type) {
       case "webview":
@@ -45,9 +44,8 @@ export function toolbar(state) {
     {
       style: {
         position: "fixed",
-        bottom: "2%",
-        left: "50%",
-        transform: "translateX(-50%)",
+        bottom: "20px",
+        left: "10px",
         margin: "0",
         boxSizing: "border-box",
         height: "35px",
@@ -55,7 +53,7 @@ export function toolbar(state) {
         flexDirection: "row",
         alignItems: "center",
         padding: "0 10px",
-        width: "600px",
+        width: "400px",
         gap: "5px",
         backgroundColor: "white",
         borderRadius: "10px",
@@ -65,14 +63,6 @@ export function toolbar(state) {
     },
     contents,
   );
-}
-
-/**
- * @param {State} state - Current application state
- * @returns {import("hyperapp").ElementVNode<State>[]}
- */
-function defaultToolbarContents(state) {
-  return [newTextBlock(state), newImageBlock(state), newWebviewButton(state)];
 }
 
 /**
