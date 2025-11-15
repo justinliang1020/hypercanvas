@@ -13,7 +13,7 @@ import {
 import { saveMementoAndReturn } from "./memento.js";
 import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
 import {
-  getCanvasCoordinates,
+  // getCanvasCoordinates,
   getViewportCenterCoordinates,
 } from "./viewport.js";
 import { clearUserClipboardEffect, enableFullScreen } from "./utils.js";
@@ -135,21 +135,21 @@ export function blockView(state, block) {
    * @returns {import("hyperapp").Dispatchable<State>}
    */
   function oncontextmenu(state, event) {
-    const { canvasX, canvasY } = getCanvasCoordinates(
-      event.clientX,
-      event.clientY,
-      state,
-    );
-    if (block.type === "webview") {
-      return {
-        ...state,
-        contextMenu: {
-          target: block,
-          x: canvasX,
-          y: canvasY,
-        },
-      };
-    }
+    // const { canvasX, canvasY } = getCanvasCoordinates(
+    //   event.clientX,
+    //   event.clientY,
+    //   state,
+    // );
+    // if (block.type === "webview") {
+    //   return {
+    //     ...state,
+    //     contextMenu: {
+    //       target: block,
+    //       x: canvasX,
+    //       y: canvasY,
+    //     },
+    //   };
+    // }
     return state;
   }
 
