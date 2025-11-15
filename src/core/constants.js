@@ -45,6 +45,7 @@ export const DEFAULT_BLOCK_WIDTH = blockContentsWidth + 2 * BLOCK_PADDING;
 export const DEFAULT_BLOCK_HEIGHT = blockContentsHeight + 2 * BLOCK_PADDING;
 export const BLOCK_BORDER_RADIUS = 10; // px
 export const NEW_CHILD_BLOCK_OFFSET_X = 100;
+export const BLOCK_OPEN_SPACE_PUSH_OFFSET = 10;
 
 export const FONT_SIZES = [
   8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 64, 72,

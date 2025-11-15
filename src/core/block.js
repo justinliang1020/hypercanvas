@@ -9,6 +9,7 @@ import {
   Z_INDEX_TOP,
   BLOCK_PADDING,
   NEW_CHILD_BLOCK_OFFSET_X,
+  BLOCK_OPEN_SPACE_PUSH_OFFSET,
 } from "./constants.js";
 import { saveMementoAndReturn } from "./memento.js";
 import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
@@ -545,6 +546,9 @@ export function addChildBlock(state, parentBlockId, src, isPreview) {
       realChildrenIds: [...parentBlock.realChildrenIds, childBlockId],
     });
   }
+
+  newState = allocateOpenSpaceForNewBlock(newState, childBlockId);
+
   return newState;
 }
 
@@ -651,4 +655,56 @@ export function updateBlock(state, blockId, newBlockConfig) {
       block.id === blockId ? { ...block, ...newBlockConfig } : block,
     ),
   });
+}
+
+/**
+ * Returns whether a block is in a given area.
+ * This will return true even if only part of the block is in the area
+ * @param {Block} block
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @returns {boolean}
+ */
+function blockWithinArea(block, x, y, width, height) {
+  return !(
+    block.x + block.width < x || // block is to the left of area
+    block.x > x + width || // block is to the right of area
+    block.y + block.height < y || // block is above area
+    block.y > y + height // block is below area
+  );
+}
+
+/**
+ * Given a Block, allocate area on the canvas for it to exist without having to overlap other blocks.
+ * Other blocks in the area will be pushed downwards recursively,
+ * i.e. if a block exists below the block being pushed down, that block would also be pushed down.
+ * @param {State} state
+ * @param {number} blockId
+ */
+function allocateOpenSpaceForNewBlock(state, blockId) {
+  const newBlock = getCurrentBlocks(state).find(
+    (block) => block.id === blockId,
+  );
+  if (!newBlock) return state;
+  const existingBlocksInArea = getCurrentBlocks(state).filter(
+    (block) =>
+      newBlock.id !== block.id &&
+      blockWithinArea(
+        block,
+        newBlock.x,
+        newBlock.y,
+        newBlock.width,
+        newBlock.height,
+      ),
+  );
+  let newState = state;
+  for (const block of existingBlocksInArea) {
+    newState = updateBlock(newState, block.id, {
+      y: block.y + block.height + BLOCK_OPEN_SPACE_PUSH_OFFSET,
+    });
+    newState = allocateOpenSpaceForNewBlock(newState, block.id);
+  }
+  return newState;
 }
