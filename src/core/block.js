@@ -7,6 +7,8 @@ import {
   DEFAULT_BLOCK_WIDTH,
   DEFAULT_BLOCK_HEIGHT,
   Z_INDEX_TOP,
+  BLOCK_PADDING,
+  NEW_CHILD_BLOCK_OFFSET_X,
 } from "./constants.js";
 import { saveMementoAndReturn } from "./memento.js";
 import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
@@ -226,7 +228,7 @@ export function blockView(state, block) {
         boxSizing: "border-box",
         touchAction: "none",
         transformOrigin: "top left",
-        padding: isFullScreen ? "" : "100px",
+        padding: isFullScreen ? "" : `${BLOCK_PADDING}px`,
         backgroundColor:
           (isHovering || isSelected || isResizing) && !isMultiSelect
             ? "#a9ad974d"
@@ -516,7 +518,7 @@ export function addChildBlock(state, parentBlockId, src, isPreview) {
   if (!parentBlock || parentBlock.type !== "webview") {
     throw Error(`no parent block found of id ${parentBlockId}`);
   }
-  const offsetX = 150;
+  const offsetX = NEW_CHILD_BLOCK_OFFSET_X;
   const newX = parentBlock.x + parentBlock.width + offsetX;
   const newY = parentBlock.y;
 

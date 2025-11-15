@@ -38,9 +38,13 @@ export const OUTLINE_WIDTHS = {
 
 export const BLOCK_CONTENTS_CLASS_NAME = "block-contents";
 
-export const DEFAULT_BLOCK_WIDTH = 900;
-export const DEFAULT_BLOCK_HEIGHT = 1200;
+const blockContentsWidth = 500; // golden ratio lol
+const blockContentsHeight = 809; // golden ratio lol
+export const BLOCK_PADDING = 70;
+export const DEFAULT_BLOCK_WIDTH = blockContentsWidth + 2 * BLOCK_PADDING;
+export const DEFAULT_BLOCK_HEIGHT = blockContentsHeight + 2 * BLOCK_PADDING;
 export const BLOCK_BORDER_RADIUS = 10; // px
+export const NEW_CHILD_BLOCK_OFFSET_X = 100;
 
 export const FONT_SIZES = [
   8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 64, 72,
