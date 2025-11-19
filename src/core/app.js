@@ -136,9 +136,6 @@ function themeChangeSubscription(dispatch) {
  * @type {(dispatch: import("hyperapp").Dispatch<State>) => import("hyperapp").Dispatch<State>}
  */
 const dispatchMiddleware = (dispatch) => {
-  // Store dispatch globally for webview IPC handlers
-  /** @type {any} */ (window).hypercanvasDispatch = dispatch;
-
   return (action, payload) => {
     dispatch(action, payload);
   };

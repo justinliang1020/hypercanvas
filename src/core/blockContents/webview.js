@@ -35,13 +35,6 @@ export function webviewBlockContents(state, block) {
     outline: "2px dashed grey",
   };
 
-  // Set up IPC message handling using a global dispatch reference
-  // This approach works around Hyperapp's limitation with custom webview events
-  if (!(/** @type {any} */ (window).hypercanvasDispatch)) {
-    // We'll need to set this from the main app
-    console.warn("Global dispatch not available for webview IPC");
-  }
-
   /**
    * @param {State} state
    * @param {Event} event
