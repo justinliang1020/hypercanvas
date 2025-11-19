@@ -9,6 +9,7 @@ import {
 } from "./utils.js";
 import { defaultPage } from "./pages.js";
 import { toolbar } from "./toolbar.js";
+import { dispatchMiddleware } from "../debugger/debugger.js";
 
 initialize();
 
@@ -130,16 +131,6 @@ function themeChangeSubscription(dispatch) {
     window.electronAPI.removeThemeListener(listener);
   };
 }
-
-/**
- * For now, i won't think about effects or manual dispatch. Only actions and state
- * @type {(dispatch: import("hyperapp").Dispatch<State>) => import("hyperapp").Dispatch<State>}
- */
-const dispatchMiddleware = (dispatch) => {
-  return (action, payload) => {
-    dispatch(action, payload);
-  };
-};
 
 /**
  * Initializes the application with saved state and starts the Hyperapp
