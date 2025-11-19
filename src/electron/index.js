@@ -292,10 +292,6 @@ ipcMain.handle("file:read", async (event, filename) => {
   }
 });
 
-ipcMain.handle("file:userPath", async (event) => {
-  return userPath;
-});
-
 // Dialog handler for file selection
 ipcMain.handle("dialog:showOpenDialog", async (event, options) => {
   try {

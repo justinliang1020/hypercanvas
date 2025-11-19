@@ -135,7 +135,6 @@ interface State {
   notification: string | null;
   notificationVisible: boolean;
   editingPageId: string | null;
-  userPath: string;
 }
 
 type ResizeHandler = (

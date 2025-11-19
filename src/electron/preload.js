@@ -11,7 +11,6 @@ const fileAPI = {
   writeFile: (filename, data) =>
     ipcRenderer.invoke("file:write", filename, data),
   readFile: (filename) => ipcRenderer.invoke("file:read", filename),
-  getUserPath: () => ipcRenderer.invoke("file:userPath"),
   showOpenDialog: (options) =>
     ipcRenderer.invoke("dialog:showOpenDialog", options),
   uploadImageFromDialog: (mediaSavePath = "user/media") =>

@@ -99,7 +99,6 @@ function initialState() {
     notification: null,
     notificationVisible: false,
     editingPageId: null,
-    userPath: "",
     contextMenu: null,
   };
 
@@ -162,8 +161,6 @@ async function initialize() {
   } catch {
     state = initialState();
   }
-
-  state.userPath = await window.fileAPI.getUserPath();
 
   // Initialize dark mode based on system theme
   try {
