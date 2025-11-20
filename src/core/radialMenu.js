@@ -99,8 +99,6 @@ function createOptionSector(option, index, totalOptions) {
 function createDivider(index, totalSections) {
   const angle = (index * 2 * Math.PI) / totalSections;
   const length = outerRadius; // From center to outer edge
-  const x = length * Math.cos(angle);
-  const y = length * Math.sin(angle);
 
   return h("div", {
     class: "divider",
@@ -109,8 +107,8 @@ function createDivider(index, totalSections) {
       width: `${length}px`,
       height: "1px",
       backgroundColor: "rgba(255, 255, 255, 0.3)",
-      left: `${x}px`,
-      top: `${y}px`,
+      left: "0px",
+      top: "0px",
       transform: `rotate(${angle}rad)`,
       transformOrigin: "0 0",
     },
