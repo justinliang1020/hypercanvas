@@ -17,6 +17,18 @@ main {
   color: #ffffff;
 }
 
+/* Radial menu hover effects */
+.sector-path {
+  transition:
+    fill 0.2s ease,
+    stroke 0.2s ease;
+}
+
+.sector-path:hover {
+  fill: rgba(255, 255, 255, 0.3) !important;
+  stroke: rgba(255, 255, 255, 0.6) !important;
+}
+
 /* Dark mode styles */
 main.dark-mode {
   textarea {
@@ -54,6 +66,11 @@ main.dark-mode {
   #notification {
     background-color: #2d2d2d;
     border: 1px solid #4caf50;
+  }
+
+  .sector-path:hover {
+    fill: rgba(255, 255, 255, 0.2) !important;
+    stroke: rgba(255, 255, 255, 0.5) !important;
   }
 }
 

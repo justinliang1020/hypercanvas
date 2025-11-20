@@ -52,42 +52,20 @@ function createSectorPath(index, totalSections) {
 function createOptionSector(option, index, totalOptions) {
   const pathData = createSectorPath(index, totalOptions);
 
-  return h(
-    "div",
-    {
-      class: "option-sector",
-      "data-index": index,
-      role: "menuitem",
-      "aria-label": option.label,
-      style: {
-        position: "absolute",
-        pointerEvents: "auto",
-        cursor: "pointer",
-      },
+  return h("path", {
+    class: "sector-path",
+    "data-index": index,
+    role: "menuitem",
+    "aria-label": option.label,
+    d: pathData,
+    style: {
+      fill: "rgba(255, 255, 255, 0.1)",
+      stroke: "rgba(255, 255, 255, 0.3)",
+      strokeWidth: "1px",
+      pointerEvents: "auto",
+      cursor: "pointer",
     },
-    h(
-      "svg",
-      {
-        width: 240,
-        height: 240,
-        style: {
-          position: "absolute",
-          left: "-120px",
-          top: "-120px",
-          pointerEvents: "none",
-        },
-      },
-      h("path", {
-        class: "sector-path",
-        d: pathData,
-        style: {
-          fill: "rgba(255, 255, 255, 0.1)",
-          stroke: "rgba(255, 255, 255, 0.3)",
-          strokeWidth: "1px",
-        },
-      }),
-    ),
-  );
+  });
 }
 
 /**
@@ -182,6 +160,27 @@ export function radialMenu(state) {
       },
     },
     [
+      // Single SVG containing all sectors
+      h(
+        "svg",
+        {
+          width: 240,
+          height: 240,
+          style: {
+            position: "absolute",
+            left: "-120px",
+            top: "-120px",
+            pointerEvents: "auto",
+          },
+        },
+        [
+          // Option sectors as paths
+          ...options.map((option, index) =>
+            createOptionSector(option, index, options.length),
+          ),
+        ]
+      ),
+
       // Center indicator
       h("div", {
         class: "center-indicator",
@@ -204,11 +203,6 @@ export function radialMenu(state) {
       // Option labels
       ...options.map((option, index) =>
         createOptionLabel(option, index, options.length),
-      ),
-
-      // Option sectors
-      ...options.map((option, index) =>
-        createOptionSector(option, index, options.length),
       ),
     ],
   );
