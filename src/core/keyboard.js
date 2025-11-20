@@ -10,7 +10,7 @@ import {
   hasSelection,
 } from "./selection.js";
 import { disableFullScreen } from "./toolbar.js";
-import { pasteEffect, saveApplicationAndNotify } from "./utils.js";
+import { pasteEffect, saveApplicationAndNotify, updateState } from "./utils.js";
 
 /**
  * @param {State} state
@@ -119,6 +119,13 @@ export function onkeydown(state, event) {
         }
       }
       return state;
+
+    case " ":
+      if (currentPage.editingId === null) {
+        return updateState(state, {
+          contextMenu: { target: "viewport", x: state.mouseX, y: state.mouseY },
+        });
+      }
 
     default:
       return state;

@@ -114,7 +114,7 @@ interface SelectionBoxState {
 }
 
 interface ContextMenu {
-  target: WebviewBlock;
+  target: WebviewBlock | "viewport";
   x: number;
   y: nubmer;
 }

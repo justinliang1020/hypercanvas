@@ -20,7 +20,6 @@ import {
   selectionBoundingBox,
   selectionBoxComponent,
 } from "./selection.js";
-import { frameContextMenu } from "./contextMenu.js";
 
 /**
  * Calculates canvas coordinates from screen coordinates
@@ -530,7 +529,6 @@ export function viewport(state) {
           ...currentPage.links.map(linkView(state)),
           selectionBoundingBox(state),
           selectionBoxComponent(state),
-          ...(state.contextMenu ? [frameContextMenu(state)] : []),
         ].filter(Boolean),
       ),
     ],

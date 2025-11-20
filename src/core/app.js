@@ -7,6 +7,7 @@ import { notification, saveApplication } from "./utils.js";
 import { defaultPage } from "./pages.js";
 import { toolbar } from "./toolbar.js";
 import { dispatchMiddleware } from "../debugger/debugger.js";
+import { frameContextMenu } from "./contextMenu.js";
 
 initialize();
 
@@ -32,6 +33,7 @@ function main(state) {
       // sidebarWrapper(state),
       toolbar(state),
       notification(state),
+      frameContextMenu(state),
     ],
   );
 }
