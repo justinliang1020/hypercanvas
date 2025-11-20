@@ -1,4 +1,5 @@
 import { h, text } from "hyperapp";
+import { Z_INDEX_TOP } from "./constants.js";
 
 const outerRadius = 120;
 const innerRadius = 15;
@@ -164,7 +165,7 @@ export function radialMenu(state) {
         left: `${state.contextMenu.x}px`,
         top: `${state.contextMenu.y}px`,
         pointerEvents: "auto",
-        zIndex: "1000",
+        zIndex: `${Z_INDEX_TOP}`,
       },
     },
     [
