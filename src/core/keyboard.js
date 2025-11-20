@@ -131,6 +131,25 @@ export function onkeydown(state, event) {
       return state;
   }
 }
+/**
+ * @param {State} state
+ * @param {KeyboardEvent} event
+ * @returns {import("hyperapp").Dispatchable<State>}
+ */
+export function onkeyup(state, event) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return state;
+  switch (event.key) {
+    case " ":
+      if (currentPage.editingId === null) {
+        return updateState(state, {
+          contextMenu: null,
+        });
+      }
+    default:
+      return state;
+  }
+}
 
 /**
  * Subscription that handles hyperapp
@@ -146,4 +165,20 @@ export function keydownSubscription(dispatch) {
   }
   addEventListener("keydown", handler);
   return () => removeEventListener("keydown", handler);
+}
+
+/**
+ * Subscription that handles hyperapp
+ * @param {import("hyperapp").Dispatch<State>} dispatch - Function to dispatch actions
+ * @returns {() => void} Cleanup function
+ */
+export function keyupSubscription(dispatch) {
+  /**
+   * @param {KeyboardEvent} event
+   */
+  function handler(event) {
+    dispatch(onkeyup, event);
+  }
+  addEventListener("keyup", handler);
+  return () => removeEventListener("keyup", handler);
 }

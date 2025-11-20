@@ -2,7 +2,7 @@ import { app, h } from "hyperapp";
 import { STATE_SAVE_PATH } from "./constants.js";
 import { createMementoManager } from "./memento.js";
 import { viewport } from "./viewport.js";
-import { keydownSubscription } from "./keyboard.js";
+import { keydownSubscription, keyupSubscription } from "./keyboard.js";
 import { notification, saveApplication } from "./utils.js";
 import { defaultPage } from "./pages.js";
 import { toolbar } from "./toolbar.js";
@@ -128,6 +128,7 @@ async function initialize() {
     subscriptions: (state) => [
       [themeChangeSubscription, {}],
       [keydownSubscription, {}],
+      [keyupSubscription, {}],
     ],
     dispatch: dispatchMiddleware,
   });
