@@ -1,64 +1,14 @@
 import { app, h } from "hyperapp";
 import { STATE_SAVE_PATH } from "./constants.js";
 import { createMementoManager } from "./memento.js";
-import { viewport, onkeydown } from "./viewport.js";
-import {
-  notification,
-  saveApplication,
-  saveApplicationAndNotify,
-} from "./utils.js";
+import { viewport } from "./viewport.js";
+import { KeyDown, onKeyDown } from "./keyboard.js";
+import { notification, saveApplication } from "./utils.js";
 import { defaultPage } from "./pages.js";
 import { toolbar } from "./toolbar.js";
 import { dispatchMiddleware } from "../debugger/debugger.js";
 
 initialize();
-
-/**
- * @param {import("hyperapp").Action<State>} action
- * @returns {import("hyperapp").Subscription<State>}
- */
-const onKeyDown = (action) => {
-  /**
-   * @param {import("hyperapp").Dispatch<State>} dispatch
-   * @param {any} options
-   */
-  function keydownSubscriber(dispatch, options) {
-    /**
-     * @param {KeyboardEvent} event
-     */
-    function handler(event) {
-      dispatch(options.action, event);
-    }
-    addEventListener("keydown", handler);
-    return () => removeEventListener("keydown", handler);
-  }
-  return [keydownSubscriber, { action }];
-};
-
-/**
- * @param {State} state
- * @param {KeyboardEvent} event
- * @returns {import("hyperapp").Dispatchable<State>}
- */
-const KeyDown = (state, event) => {
-  // First try viewport keyboard handling
-  const viewportResult = onkeydown(state, event);
-  if (viewportResult !== state) {
-    return viewportResult;
-  }
-
-  switch (event.key) {
-    case "s":
-      // Handle save shortcut (Ctrl+S or Cmd+S)
-      if (event.ctrlKey || event.metaKey) {
-        event.preventDefault();
-        return [state, (dispatch) => saveApplicationAndNotify(dispatch, state)];
-      }
-      return state;
-    default:
-      return state;
-  }
-};
 
 /**
  * Creates the main application component

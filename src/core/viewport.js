@@ -1,10 +1,9 @@
 import { h, text } from "hyperapp";
-import { pasteEffect, updateState } from "./utils.js";
-import { copySelectedBlocks, blockView } from "./block.js";
-import { deleteSelectedItems } from "./selection.js";
+import { updateState } from "./utils.js";
+import { blockView } from "./block.js";
 import { linkView } from "./link.js";
 import { handleResizePointerMove } from "./resize.js";
-import { saveMementoAndReturn, redoState, undoState } from "./memento.js";
+import { saveMementoAndReturn } from "./memento.js";
 import {
   getCurrentPage,
   getCurrentBlocks,
@@ -14,16 +13,13 @@ import {
 import {
   calculatePreviewSelection,
   deselectAllBlocks,
-  getFirstSelectedBlockId,
   getSelectedBlockIds,
   getSelectedBlocks,
   handleSelectionBoxComplete,
-  hasSelection,
   isPointInSelectionBounds,
   selectionBoundingBox,
   selectionBoxComponent,
 } from "./selection.js";
-import { disableFullScreen } from "./toolbar.js";
 import { frameContextMenu } from "./contextMenu.js";
 
 /**
@@ -479,102 +475,6 @@ function onwheel(state, event) {
 
   return state;
 }
-/**
- * @param {State} state
- * @param {KeyboardEvent} event
- * @returns {import("hyperapp").Dispatchable<State>}
- */
-export function onkeydown(state, event) {
-  const currentPage = getCurrentPage(state);
-  if (!currentPage) return state;
-
-  // Check if user is interacting with an input field or has text selected
-  const hasTextSelection = (window.getSelection()?.toString() ?? "").length > 0;
-
-  // Handle keyboard shortcuts
-  switch (event.key) {
-    case "Escape":
-      if (currentPage.fullScreenState) {
-        return disableFullScreen(state);
-      }
-      return updateCurrentPage(state, {
-        editingId: null,
-        selectedIds: [],
-      });
-    case "Delete":
-    case "Backspace":
-      // Only handle block deletion if not in input field, a block is selected, and not in edit mode
-      const selectedBlockId = getFirstSelectedBlockId(state);
-      if (selectedBlockId !== null && currentPage.editingId === null) {
-        event.preventDefault();
-        return deleteSelectedItems(state);
-      }
-      // Let browser handle regular text deletion
-      return state;
-
-    case "c":
-      // Handle copy shortcut (Ctrl+C or Cmd+C)
-      if (event.ctrlKey || event.metaKey) {
-        // Only handle block copy if not in input field, no text is selected, and not in edit mode
-        if (
-          !hasTextSelection &&
-          hasSelection(state) &&
-          currentPage.editingId === null
-        ) {
-          event.preventDefault();
-          return copySelectedBlocks(state);
-        } else {
-          // Let browser handle regular text copy
-          return {
-            ...state,
-            clipboard: null,
-          };
-        }
-      }
-      return state;
-
-    case "v":
-      // Handle paste shortcut (Ctrl+V or Cmd+V)
-      if (event.ctrlKey || event.metaKey) {
-        if (currentPage.editingId === null) {
-          event.preventDefault();
-          return [state, [pasteEffect, state]];
-        }
-      }
-      return state;
-
-    case "z":
-    case "Z":
-      // Handle undo/redo shortcuts
-      if (event.ctrlKey || event.metaKey) {
-        if (currentPage.editingId === null) {
-          event.preventDefault();
-          if (event.shiftKey) {
-            // Ctrl+Shift+Z or Cmd+Shift+Z = Redo
-            return redoState(state);
-          } else {
-            // Ctrl+Z or Cmd+Z = Undo
-            return undoState(state);
-          }
-        }
-      }
-      return state;
-
-    case "y":
-      // Handle redo shortcut (Ctrl+Y or Cmd+Y)
-      if (event.ctrlKey || event.metaKey) {
-        if (currentPage.editingId === null) {
-          event.preventDefault();
-          return redoState(state);
-        }
-      }
-      return state;
-
-    default:
-      return state;
-  }
-}
-
 /**
  * @param {State} state
  * @returns {import("hyperapp").ElementVNode<State>}
