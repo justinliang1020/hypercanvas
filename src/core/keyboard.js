@@ -1,4 +1,7 @@
-import { copySelectedBlocks } from "./block.js";
+import {
+  addWebviewBlockToViewportCenter,
+  copySelectedBlocks,
+} from "./block.js";
 import { redoState, undoState } from "./memento.js";
 import { getCurrentPage, updateCurrentPage } from "./pages.js";
 import {
@@ -62,6 +65,15 @@ export function onkeydown(state, event) {
         }
       }
       return state;
+
+    case "t":
+      if (event.metaKey) {
+        return addWebviewBlockToViewportCenter(
+          state,
+          "https://google.com",
+          false,
+        );
+      }
 
     case "v":
       // Handle paste shortcut (Ctrl+V or Cmd+V)

@@ -481,7 +481,7 @@ export function addImageBlock(state, config, x, y, width, height) {
  * @param {number} height - Block height in pixels
  * @returns {State} Updated state with new block
  **/
-export function addBlockToViewportCenter(
+export function addWebviewBlockToViewportCenter(
   state,
   src,
   isPreview,

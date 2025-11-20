@@ -2,7 +2,7 @@ import { h, text } from "hyperapp";
 import {
   addChildBlock,
   updateBlock,
-  addBlockToViewportCenter,
+  addWebviewBlockToViewportCenter,
 } from "../block.js";
 import {
   BLOCK_BORDER_RADIUS,
@@ -271,7 +271,7 @@ export function newWebviewButton(state) {
    * @returns {import("hyperapp").Dispatchable<State>}
    */
   function onclick(state, event) {
-    return addBlockToViewportCenter(state, "https://google.com", false);
+    return addWebviewBlockToViewportCenter(state, "https://google.com", false);
   }
   return h("button", { onclick }, text("🌐"));
 }
