@@ -4,7 +4,7 @@ import { h, text } from "hyperapp";
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State> | null} Block renderer function
  */
-export function frameContextMenu(state) {
+export function radialMenu(state) {
   if (!state.contextMenu) return null;
   return h(
     "div",
@@ -13,6 +13,7 @@ export function frameContextMenu(state) {
         position: "absolute",
         left: `${state.contextMenu.x}px`,
         top: `${state.contextMenu.y}px`,
+        pointerEvents: "none",
       },
     },
     text("hello world"),

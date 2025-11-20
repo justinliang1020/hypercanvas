@@ -111,12 +111,14 @@ export function onkeydown(state, event) {
       }
       return state;
 
-    case " ":
+    case " ": // space key
       if (isEditingBlock) return state;
 
-      return updateState(state, {
-        contextMenu: { target: "viewport", x: state.mouseX, y: state.mouseY },
-      });
+      if (state.contextMenu === null) {
+        return updateState(state, {
+          contextMenu: { target: "viewport", x: state.mouseX, y: state.mouseY },
+        });
+      }
 
     default:
       return state;
@@ -133,7 +135,7 @@ export function onkeyup(state, event) {
   const isEditingBlock = currentPage.editingId !== null;
 
   switch (event.key) {
-    case " ":
+    case " ": // space key
       if (isEditingBlock) return state;
 
       return updateState(state, {
