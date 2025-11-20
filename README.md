@@ -1,21 +1,7 @@
 # hypercanvas
 
-visual javascript canvas thing
+spatial canvas web browser
 
-**WARNING: IN PRE-ALPHA STATE. USE AT YOUR OWN DISCRETION. CONTACT JUSTIN FOR ANYTHING**
+WIP, pre-alpha state
 
-## development
-
-requires [pnpm](https://pnpm.io/)
-
-install dependencies
-
-```sh
-pnpm i
-```
-
-run app
-
-```sh
-pnpm start
-```
+see https://www.are.na/justin-liang/justin-browser
