@@ -56,7 +56,6 @@ export const defaultPage = {
   mouseY: 0,
   cursorStyle: "pointer",
   isViewportDragging: false,
-  isTextEditorFocused: false,
   selectedIds: [],
   editingId: null,
   hoveringId: null,

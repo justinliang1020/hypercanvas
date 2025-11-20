@@ -52,7 +52,6 @@ interface Page {
   mouseY: number;
   cursorStyle: string;
   isViewportDragging: boolean;
-  isTextEditorFocused: boolean;
   selectedIds: number[];
   pendingSelectedIds: number[];
   editingId: number | null;
@@ -131,10 +130,8 @@ interface State {
   programsPanelWidth: number;
   clipboard: Block[] | null;
   contextMenu: ContextMenu | null;
-  programFilter: string;
   notification: string | null;
   notificationVisible: boolean;
-  editingPageId: string | null;
 }
 
 type ResizeHandler = (

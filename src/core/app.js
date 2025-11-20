@@ -96,10 +96,8 @@ function initialState() {
     isSidebarVisible: true,
     programsPanelWidth: 300,
     clipboard: null,
-    programFilter: "",
     notification: null,
     notificationVisible: false,
-    editingPageId: null,
     contextMenu: null,
   };
 

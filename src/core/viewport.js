@@ -491,8 +491,6 @@ export function onkeydown(state, event) {
   // Check if user is interacting with an input field or has text selected
   const hasTextSelection = (window.getSelection()?.toString() ?? "").length > 0;
 
-  if (currentPage.isTextEditorFocused) return state;
-
   // Handle keyboard shortcuts
   switch (event.key) {
     case "Escape":
