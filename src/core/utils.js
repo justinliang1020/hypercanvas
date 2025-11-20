@@ -283,3 +283,17 @@ export function updateState(state, newState) {
     ...newState,
   };
 }
+
+/**
+ * https://x.com/stevekrouse/status/1988257237442171071/photo/1
+ * @template T
+ * @param {T} value - Initial value to pipe through functions
+ * @param {...(value: T) => T} fns - Functions to apply in sequence
+ * @returns {T} Final transformed value
+ */
+export function pipe(value, ...fns) {
+  for (const fn of fns) {
+    value = fn(value);
+  }
+  return value;
+}

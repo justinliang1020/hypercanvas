@@ -17,7 +17,7 @@ import {
   // getCanvasCoordinates,
   getViewportCenterCoordinates,
 } from "./viewport.js";
-import { clearUserClipboardEffect, enableFullScreen } from "./utils.js";
+import { clearUserClipboardEffect, enableFullScreen, pipe } from "./utils.js";
 import {
   getCurrentBlocks,
   updateCurrentPage,
@@ -521,33 +521,35 @@ export function addChildBlock(state, parentBlockId, src, isPreview) {
   const newX = parentBlock.x + parentBlock.width + offsetX;
   const newY = parentBlock.y;
 
-  let { state: newState, newBlockId: childBlockId } = addWebviewBlock(
-    state,
-    {
-      initialSrc: src,
-      isPreview,
+  const { state: stateWithChildBlock, newBlockId: childBlockId } =
+    addWebviewBlock(
+      state,
+      {
+        initialSrc: src,
+        isPreview,
+      },
+      newX,
+      newY,
+      DEFAULT_BLOCK_WIDTH,
+      DEFAULT_BLOCK_HEIGHT,
+    );
+
+  return pipe(
+    stateWithChildBlock,
+    (s) => addLink(s, parentBlockId, childBlockId),
+    (s) => {
+      if (isPreview) {
+        return updateBlock(s, parentBlock.id, {
+          previewChildId: childBlockId,
+        });
+      } else {
+        return updateBlock(s, parentBlock.id, {
+          realChildrenIds: [...parentBlock.realChildrenIds, childBlockId],
+        });
+      }
     },
-    newX,
-    newY,
-    DEFAULT_BLOCK_WIDTH,
-    DEFAULT_BLOCK_HEIGHT,
+    (s) => allocateOpenSpaceForNewBlock(s, childBlockId),
   );
-  newState = addLink(newState, parentBlockId, childBlockId);
-
-  //TODO: fix kinda broken
-  if (isPreview) {
-    newState = updateBlock(newState, parentBlock.id, {
-      previewChildId: childBlockId,
-    });
-  } else {
-    newState = updateBlock(newState, parentBlock.id, {
-      realChildrenIds: [...parentBlock.realChildrenIds, childBlockId],
-    });
-  }
-
-  newState = allocateOpenSpaceForNewBlock(newState, childBlockId);
-
-  return newState;
 }
 
 /**
