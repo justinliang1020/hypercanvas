@@ -90,6 +90,8 @@ function initialState() {
   /** @type {State} */
   const state = {
     pages: [defaultPage],
+    mouseX: 0,
+    mouseY: 0,
     currentPageId: "",
     mementoManager: createMementoManager(),
     isDarkMode: false,

@@ -48,8 +48,6 @@ interface Page {
   offsetX: number;
   offsetY: number;
   zoom: number;
-  mouseX: number;
-  mouseY: number;
   cursorStyle: string;
   isViewportDragging: boolean;
   selectedIds: number[];
@@ -126,6 +124,8 @@ interface State {
   currentPageId: string;
   mementoManager: MementoManager;
   isDarkMode: boolean;
+  mouseX: number;
+  mouseY: number;
   isSidebarVisible: boolean;
   programsPanelWidth: number;
   clipboard: Block[] | null;

@@ -239,13 +239,14 @@ function onpointermove(state, event) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return state;
 
-  const dx = event.clientX - currentPage.mouseX;
-  const dy = event.clientY - currentPage.mouseY;
+  const dx = event.clientX - state.mouseX;
+  const dy = event.clientY - state.mouseY;
 
-  state = updateCurrentPage(state, {
+  state = {
+    ...state,
     mouseX: event.clientX,
     mouseY: event.clientY,
-  });
+  };
 
   if (currentPage.resizing) {
     return handleResizePointerMove(state, event);
@@ -460,8 +461,8 @@ function onwheel(state, event) {
     const rect = /** @type {HTMLElement} */ (
       event.currentTarget
     )?.getBoundingClientRect();
-    const relativeMouseX = page.mouseX - rect.left;
-    const relativeMouseY = page.mouseY - rect.top;
+    const relativeMouseX = state.mouseX - rect.left;
+    const relativeMouseY = state.mouseY - rect.top;
 
     // Calculate zoom offset to keep mouse position fixed
     const zoomRatio = newZoom / page.zoom;

@@ -52,8 +52,6 @@ export const defaultPage = {
   offsetX: 0,
   offsetY: 0,
   zoom: 1,
-  mouseX: 0,
-  mouseY: 0,
   cursorStyle: "pointer",
   isViewportDragging: false,
   selectedIds: [],
