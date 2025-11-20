@@ -4,7 +4,6 @@
  */
 
 const { ipcRenderer } = require("electron");
-console.log("meow preload");
 
 // Forward keyboard events to parent window
 document.addEventListener("keydown", (event) => {
@@ -56,7 +55,6 @@ function getAbsoluteHref(href) {
 function setupAnchorHandling() {
   const aEls = document.getElementsByTagName("a");
 
-  console.log(`Setting up ${aEls.length} anchor elements`);
   [...aEls].forEach((aEl) => {
     // Skip if this element already has handlers
     if (aEl.hasAttribute("data-anchor-handlers-setup")) {
@@ -72,7 +70,6 @@ function setupAnchorHandling() {
       if (!href) return;
 
       const finalHref = getAbsoluteHref(href);
-      console.log("Sending anchor-hover IPC:", finalHref);
       ipcRenderer.sendToHost("anchor-hover", { href: finalHref });
     });
 
@@ -83,7 +80,6 @@ function setupAnchorHandling() {
 
       const finalHref = getAbsoluteHref(href);
       event.preventDefault();
-      console.log("Sending anchor-click IPC:", finalHref);
       ipcRenderer.sendToHost("anchor-click", { href: finalHref });
     });
   });

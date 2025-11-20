@@ -41,7 +41,6 @@ export function webviewBlockContents(state, block) {
    * @return {State}
    */
   function handleIpcMessage(state, /** @type {any} */ event) {
-    console.log("IPC message received:", event.channel, event.args);
     const channel = event.channel;
     const args = event.args || [];
     const parentBlockId = block.id;
@@ -66,7 +65,6 @@ export function webviewBlockContents(state, block) {
         return state;
 
       case "anchor-hover":
-        console.log("Processing anchor hover:", args[0]?.href);
         const hoverHref = args[0]?.href;
         const block = getCurrentBlocks(state).find(
           (b) => b.id === parentBlockId,
@@ -85,7 +83,6 @@ export function webviewBlockContents(state, block) {
 
       case "anchor-click":
         const clickHref = args[0]?.href;
-        console.log("Processing anchor click:", clickHref);
         if (clickHref) {
           const block = getCurrentBlocks(state).find(
             (b) => b.id === parentBlockId,
@@ -106,7 +103,7 @@ export function webviewBlockContents(state, block) {
         return state;
 
       default:
-        console.log("Unknown IPC channel:", channel);
+        console.error("Unknown IPC channel:", channel);
         return state;
     }
   }
@@ -126,7 +123,6 @@ export function webviewBlockContents(state, block) {
    * @return {State}
    */
   function handleNavigationChange(state, event) {
-    console.log("Navigation detected:", event.url);
     return updateBlock(state, block.id, { currentSrc: event.url });
   }
 

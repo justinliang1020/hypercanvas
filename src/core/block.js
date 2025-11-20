@@ -193,8 +193,6 @@ export function blockView(state, block) {
     event.preventDefault();
     event.stopPropagation();
 
-    console.log("contents");
-
     return updateCurrentPage(state, { editingId: block.id });
   }
 
