@@ -1,5 +1,5 @@
 import { h, text } from "hyperapp";
-import { pasteEffect } from "./utils.js";
+import { pasteEffect, updateState } from "./utils.js";
 import { copySelectedBlocks, blockView } from "./block.js";
 import { deleteSelectedItems } from "./selection.js";
 import { linkView } from "./link.js";
@@ -242,11 +242,10 @@ function onpointermove(state, event) {
   const dx = event.clientX - state.mouseX;
   const dy = event.clientY - state.mouseY;
 
-  state = {
-    ...state,
+  state = updateState(state, {
     mouseX: event.clientX,
     mouseY: event.clientY,
-  };
+  });
 
   if (currentPage.resizing) {
     return handleResizePointerMove(state, event);

@@ -270,3 +270,16 @@ export function enableFullScreen(state, block) {
   });
   return newState;
 }
+
+/**
+ * Updates the current page with new data
+ * @param {State} state - Current application state
+ * @param {Partial<State>} newState - Data to update on current page
+ * @returns {State} Updated state
+ */
+export function updateState(state, newState) {
+  return {
+    ...state,
+    ...newState,
+  };
+}
