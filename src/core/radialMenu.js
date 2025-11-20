@@ -194,6 +194,7 @@ export function radialMenu(state) {
           left: "-15px",
           top: "-15px",
           pointerEvents: "none",
+          boxSizing: "border-box",
         },
       }),
 
