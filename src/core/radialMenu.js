@@ -58,6 +58,14 @@ function createOptionSector(option, index, totalOptions) {
     role: "menuitem",
     "aria-label": option.label,
     d: pathData,
+    onpointerenter: (state) => {
+      console.log("enter", index);
+      return state;
+    },
+    onpointerleave: (state) => {
+      console.log("leave", index);
+      return state;
+    },
     style: {
       fill: "rgba(255, 255, 255, 0.1)",
       stroke: "rgba(255, 255, 255, 0.3)",
@@ -178,7 +186,7 @@ export function radialMenu(state) {
           ...options.map((option, index) =>
             createOptionSector(option, index, options.length),
           ),
-        ]
+        ],
       ),
 
       // Center indicator

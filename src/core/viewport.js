@@ -1,5 +1,4 @@
 import { h, text } from "hyperapp";
-import { updateState } from "./utils.js";
 import { blockView } from "./block.js";
 import { linkView } from "./link.js";
 import { handleResizePointerMove } from "./resize.js";
@@ -236,11 +235,6 @@ function onpointermove(state, event) {
 
   const dx = event.clientX - state.mouseX;
   const dy = event.clientY - state.mouseY;
-
-  state = updateState(state, {
-    mouseX: event.clientX,
-    mouseY: event.clientY,
-  });
 
   if (currentPage.resizing) {
     return handleResizePointerMove(state, event);

@@ -3,7 +3,7 @@ import { STATE_SAVE_PATH } from "./constants.js";
 import { createMementoManager } from "./memento.js";
 import { viewport } from "./viewport.js";
 import { keydownSubscription, keyupSubscription } from "./keyboard.js";
-import { notification, saveApplication } from "./utils.js";
+import { notification, saveApplication, updateState } from "./utils.js";
 import { defaultPage } from "./pages.js";
 import { toolbar } from "./toolbar.js";
 import { dispatchMiddleware } from "../debugger/debugger.js";
@@ -26,6 +26,14 @@ function main(state) {
       },
       class: {
         "dark-mode": state.isDarkMode,
+      },
+      onpointermove: (state, event) => {
+        // should be "global" to always track mouse state
+        // even better to add this on document if possible
+        return updateState(state, {
+          mouseX: event.clientX,
+          mouseY: event.clientY,
+        });
       },
     },
     [
