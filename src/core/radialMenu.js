@@ -1,5 +1,9 @@
 import { h, text } from "hyperapp";
 
+const outerRadius = 120;
+const innerRadius = 15;
+const labelRadius = 80; // Distance from center for labels
+
 /**
  * @typedef RadialOption
  * @property {string} label - Display label for the option
@@ -10,11 +14,9 @@ import { h, text } from "hyperapp";
  * Creates a sector path for the radial menu
  * @param {number} index - Section index
  * @param {number} totalSections - Total number of sections
- * @param {number} outerRadius - Outer radius
- * @param {number} innerRadius - Inner radius
  * @returns {string} SVG path data
  */
-function createSectorPath(index, totalSections, outerRadius, innerRadius) {
+function createSectorPath(index, totalSections) {
   const anglePerSection = (2 * Math.PI) / totalSections;
   const startAngle = index * anglePerSection;
   const endAngle = (index + 1) * anglePerSection;
@@ -48,7 +50,7 @@ function createSectorPath(index, totalSections, outerRadius, innerRadius) {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 function createOptionSector(option, index, totalOptions) {
-  const pathData = createSectorPath(index, totalOptions, 120, 15);
+  const pathData = createSectorPath(index, totalOptions);
 
   return h(
     "div",
@@ -96,7 +98,7 @@ function createOptionSector(option, index, totalOptions) {
  */
 function createDivider(index, totalSections) {
   const angle = (index * 2 * Math.PI) / totalSections;
-  const length = 105; // From center to outer edge
+  const length = outerRadius; // From center to outer edge
   const x = length * Math.cos(angle);
   const y = length * Math.sin(angle);
 
@@ -124,7 +126,6 @@ function createDivider(index, totalSections) {
  */
 function createOptionLabel(option, index, totalOptions) {
   const angle = ((index + 0.5) * (2 * Math.PI)) / totalOptions;
-  const labelRadius = 80; // Distance from center for labels
   const x = labelRadius * Math.cos(angle);
   const y = labelRadius * Math.sin(angle);
 
