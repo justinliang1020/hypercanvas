@@ -90,6 +90,14 @@ export function onkeydown(state, event) {
       }
       return state;
 
+    case "s":
+      // Handle save shortcut (Ctrl+S or Cmd+S)
+      if (event.ctrlKey || event.metaKey) {
+        event.preventDefault();
+        return [state, (dispatch) => saveApplicationAndNotify(dispatch, state)];
+      }
+      return state;
+
     case "y":
       // Handle redo shortcut (Ctrl+Y or Cmd+Y)
       if (event.ctrlKey || event.metaKey) {
@@ -106,48 +114,17 @@ export function onkeydown(state, event) {
 }
 
 /**
- * @param {import("hyperapp").Action<State>} action
- * @returns {import("hyperapp").Subscription<State>}
+ * Subscription that handles hyperapp
+ * @param {import("hyperapp").Dispatch<State>} dispatch - Function to dispatch actions
+ * @returns {() => void} Cleanup function
  */
-export const onKeyDown = (action) => {
+export function keydownSubscription(dispatch) {
   /**
-   * @param {import("hyperapp").Dispatch<State>} dispatch
-   * @param {any} options
+   * @param {KeyboardEvent} event
    */
-  function keydownSubscriber(dispatch, options) {
-    /**
-     * @param {KeyboardEvent} event
-     */
-    function handler(event) {
-      dispatch(options.action, event);
-    }
-    addEventListener("keydown", handler);
-    return () => removeEventListener("keydown", handler);
+  function handler(event) {
+    dispatch(onkeydown, event);
   }
-  return [keydownSubscriber, { action }];
-};
-
-/**
- * @param {State} state
- * @param {KeyboardEvent} event
- * @returns {import("hyperapp").Dispatchable<State>}
- */
-export const KeyDown = (state, event) => {
-  // First try viewport keyboard handling
-  const viewportResult = onkeydown(state, event);
-  if (viewportResult !== state) {
-    return viewportResult;
-  }
-
-  switch (event.key) {
-    case "s":
-      // Handle save shortcut (Ctrl+S or Cmd+S)
-      if (event.ctrlKey || event.metaKey) {
-        event.preventDefault();
-        return [state, (dispatch) => saveApplicationAndNotify(dispatch, state)];
-      }
-      return state;
-    default:
-      return state;
-  }
-};
+  addEventListener("keydown", handler);
+  return () => removeEventListener("keydown", handler);
+}

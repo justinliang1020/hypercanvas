@@ -2,7 +2,7 @@ import { app, h } from "hyperapp";
 import { STATE_SAVE_PATH } from "./constants.js";
 import { createMementoManager } from "./memento.js";
 import { viewport } from "./viewport.js";
-import { KeyDown, onKeyDown } from "./keyboard.js";
+import { keydownSubscription } from "./keyboard.js";
 import { notification, saveApplication } from "./utils.js";
 import { defaultPage } from "./pages.js";
 import { toolbar } from "./toolbar.js";
@@ -125,7 +125,7 @@ async function initialize() {
     node: /** @type {Node} */ (document.getElementById("app")),
     subscriptions: (state) => [
       [themeChangeSubscription, {}],
-      onKeyDown(KeyDown),
+      [keydownSubscription, {}],
     ],
     dispatch: dispatchMiddleware,
   });
