@@ -10,6 +10,7 @@ import {
 } from "../constants.js";
 import { getCurrentBlocks, getCurrentPage } from "../pages.js";
 import { getEditingBlock, getHoveredBlock } from "../selection.js";
+import { pipe } from "../utils.js";
 
 /**
  * @param {number} blockId
@@ -88,14 +89,22 @@ export function webviewBlockContents(state, block) {
             (b) => b.id === parentBlockId,
           );
           if (block && block.type === "webview" && block.previewChildId) {
-            let newState = updateBlock(state, block.previewChildId, {
-              isPreview: false,
-            });
-            newState = updateBlock(newState, block.id, {
-              previewChildId: null,
-              realChildrenIds: [...block.realChildrenIds, block.previewChildId],
-            });
-            return newState;
+            const blockPreviewChildId = block.previewChildId;
+            return pipe(
+              state,
+              (s) =>
+                updateBlock(s, blockPreviewChildId, {
+                  isPreview: false,
+                }),
+              (s) =>
+                updateBlock(s, block.id, {
+                  previewChildId: null,
+                  realChildrenIds: [
+                    ...block.realChildrenIds,
+                    blockPreviewChildId,
+                  ],
+                }),
+            );
           } else {
             return addChildBlock(state, parentBlockId, clickHref, false);
           }
