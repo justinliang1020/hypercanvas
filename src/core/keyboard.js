@@ -4,11 +4,7 @@ import {
 } from "./block.js";
 import { redoState, undoState } from "./memento.js";
 import { getCurrentPage, updateCurrentPage } from "./pages.js";
-import {
-  getFirstSelectedBlockId,
-  deleteSelectedItems,
-  hasSelection,
-} from "./selection.js";
+import { deleteSelectedItems, hasSelection } from "./selection.js";
 import { disableFullScreen } from "./toolbar.js";
 import { pasteEffect, saveApplicationAndNotify, updateState } from "./utils.js";
 
@@ -23,6 +19,7 @@ export function onkeydown(state, event) {
 
   // Check if user is interacting with an input field or has text selected
   const hasTextSelection = (window.getSelection()?.toString() ?? "").length > 0;
+  const isEditingBlock = currentPage.editingId !== null;
 
   // Handle keyboard shortcuts
   switch (event.key) {
@@ -36,24 +33,17 @@ export function onkeydown(state, event) {
       });
     case "Delete":
     case "Backspace":
-      // Only handle block deletion if not in input field, a block is selected, and not in edit mode
-      const selectedBlockId = getFirstSelectedBlockId(state);
-      if (selectedBlockId !== null && currentPage.editingId === null) {
-        event.preventDefault();
-        return deleteSelectedItems(state);
-      }
-      // Let browser handle regular text deletion
-      return state;
+      if (isEditingBlock) return state;
+
+      return deleteSelectedItems(state);
 
     case "c":
+      if (isEditingBlock) return state;
+
       // Handle copy shortcut (Ctrl+C or Cmd+C)
       if (event.ctrlKey || event.metaKey) {
         // Only handle block copy if not in input field, no text is selected, and not in edit mode
-        if (
-          !hasTextSelection &&
-          hasSelection(state) &&
-          currentPage.editingId === null
-        ) {
+        if (!hasTextSelection && hasSelection(state)) {
           event.preventDefault();
           return copySelectedBlocks(state);
         } else {
@@ -77,6 +67,7 @@ export function onkeydown(state, event) {
 
     case "v":
       // Handle paste shortcut (Ctrl+V or Cmd+V)
+      if (isEditingBlock) return state;
       if (event.ctrlKey || event.metaKey) {
         if (currentPage.editingId === null) {
           event.preventDefault();
@@ -88,16 +79,16 @@ export function onkeydown(state, event) {
     case "z":
     case "Z":
       // Handle undo/redo shortcuts
+      if (isEditingBlock) return state;
+
       if (event.ctrlKey || event.metaKey) {
-        if (currentPage.editingId === null) {
-          event.preventDefault();
-          if (event.shiftKey) {
-            // Ctrl+Shift+Z or Cmd+Shift+Z = Redo
-            return redoState(state);
-          } else {
-            // Ctrl+Z or Cmd+Z = Undo
-            return undoState(state);
-          }
+        event.preventDefault();
+        if (event.shiftKey) {
+          // Ctrl+Shift+Z or Cmd+Shift+Z = Redo
+          return redoState(state);
+        } else {
+          // Ctrl+Z or Cmd+Z = Undo
+          return undoState(state);
         }
       }
       return state;
@@ -112,20 +103,20 @@ export function onkeydown(state, event) {
 
     case "y":
       // Handle redo shortcut (Ctrl+Y or Cmd+Y)
+      if (isEditingBlock) return state;
+
       if (event.ctrlKey || event.metaKey) {
-        if (currentPage.editingId === null) {
-          event.preventDefault();
-          return redoState(state);
-        }
+        event.preventDefault();
+        return redoState(state);
       }
       return state;
 
     case " ":
-      if (currentPage.editingId === null) {
-        return updateState(state, {
-          contextMenu: { target: "viewport", x: state.mouseX, y: state.mouseY },
-        });
-      }
+      if (isEditingBlock) return state;
+
+      return updateState(state, {
+        contextMenu: { target: "viewport", x: state.mouseX, y: state.mouseY },
+      });
 
     default:
       return state;
@@ -139,13 +130,15 @@ export function onkeydown(state, event) {
 export function onkeyup(state, event) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return state;
+  const isEditingBlock = currentPage.editingId !== null;
+
   switch (event.key) {
     case " ":
-      if (currentPage.editingId === null) {
-        return updateState(state, {
-          contextMenu: null,
-        });
-      }
+      if (isEditingBlock) return state;
+
+      return updateState(state, {
+        contextMenu: null,
+      });
     default:
       return state;
   }

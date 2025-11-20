@@ -524,7 +524,8 @@ export function deleteSelectedItems(state) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return state;
 
-  const selectedIds = currentPage.selectedIds || [];
+  const selectedIds = currentPage.selectedIds;
+  if (selectedIds.length === 0) return state;
 
   // Separate blocks and links for deletion
   const selectedBlockIds = selectedIds.filter((id) =>
