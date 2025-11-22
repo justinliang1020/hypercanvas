@@ -17,7 +17,12 @@ import {
   // getCanvasCoordinates,
   getViewportCenterCoordinates,
 } from "./viewport.js";
-import { clearUserClipboardEffect, enableFullScreen, pipe } from "./utils.js";
+import {
+  clearUserClipboardEffect,
+  enableFullScreen,
+  pipe,
+  updateState,
+} from "./utils.js";
 import {
   getCurrentBlocks,
   updateCurrentPage,
@@ -72,17 +77,21 @@ export function blockView(state, block) {
     const cursorStyle = (() => {
       const target = /** @type {HTMLElement} */ (event.target);
       if (target.classList.contains("resize-handle")) {
-        return currentPage.cursorStyle;
+        return state.cursorStyle;
       } else if (isMultiSelect || currentPage.editingId === block.id) {
         return "default";
       }
       return "move";
     })();
 
-    return updateCurrentPage(state, {
-      hoveringId: block.id,
-      cursorStyle: cursorStyle,
-    });
+    return pipe(
+      state,
+      (s) =>
+        updateCurrentPage(s, {
+          hoveringId: block.id,
+        }),
+      (s) => updateState(s, { cursorStyle: cursorStyle }),
+    );
   }
 
   /**
@@ -93,10 +102,14 @@ export function blockView(state, block) {
   function onpointerleave(state, event) {
     event.stopPropagation();
     if (isDraggingAnything) return state;
-    return updateCurrentPage(state, {
-      hoveringId: null,
-      cursorStyle: "default",
-    });
+    return pipe(
+      state,
+      (s) =>
+        updateCurrentPage(s, {
+          hoveringId: null,
+        }),
+      (s) => updateState(s, { cursorStyle: "default" }),
+    );
   }
 
   /**
@@ -204,7 +217,7 @@ export function blockView(state, block) {
   function wrapperOnpointerover(state, event) {
     event.stopPropagation();
     if (isDraggingAnything) return state;
-    return updateCurrentPage(state, { cursorStyle: "default" });
+    return updateState(state, { cursorStyle: "default" });
   }
 
   return h(

@@ -8,6 +8,7 @@ import {
 import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
 import { saveMementoAndReturn } from "./memento.js";
 import { Z_INDEX_TOP } from "./constants.js";
+import { pipe, updateState } from "./utils.js";
 
 /**
  * Checks if a block is in preview selection (during selection box drag)
@@ -535,23 +536,27 @@ export function deleteSelectedItems(state) {
     currentPage.links.some((link) => link.id === id),
   );
 
-  const newState = updateCurrentPage(state, {
-    // Remove selected blocks
-    blocks: currentPage.blocks.filter(
-      (block) => !selectedBlockIds.includes(block.id),
-    ),
-    // Remove selected links + links connected to deleted blocks
-    links: currentPage.links.filter(
-      (link) =>
-        !selectedLinkIds.includes(link.id) &&
-        !selectedBlockIds.includes(link.parentBlockId) &&
-        !selectedBlockIds.includes(link.childBlockId),
-    ),
-    selectedIds: [],
-    // deleting a block while hovered over it doesn't trigger the block's "onpointerleave" event,
-    // so we must manually change the cursor style
-    cursorStyle: "default",
-  });
+  const newState = pipe(
+    state,
+    (s) =>
+      updateCurrentPage(s, {
+        // Remove selected blocks
+        blocks: currentPage.blocks.filter(
+          (block) => !selectedBlockIds.includes(block.id),
+        ),
+        // Remove selected links + links connected to deleted blocks
+        links: currentPage.links.filter(
+          (link) =>
+            !selectedLinkIds.includes(link.id) &&
+            !selectedBlockIds.includes(link.parentBlockId) &&
+            !selectedBlockIds.includes(link.childBlockId),
+        ),
+        selectedIds: [],
+        // deleting a block while hovered over it doesn't trigger the block's "onpointerleave" event,
+        // so we must manually change the cursor style
+      }),
+    (s) => updateState(s, { cursorStyle: "default" }),
+  );
 
   return saveMementoAndReturn(state, newState);
 }

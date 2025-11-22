@@ -48,7 +48,6 @@ interface Page {
   offsetX: number;
   offsetY: number;
   zoom: number;
-  cursorStyle: string;
   isViewportDragging: boolean;
   selectedIds: number[];
   pendingSelectedIds: number[];
@@ -126,6 +125,7 @@ interface State {
   isDarkMode: boolean;
   mouseX: number;
   mouseY: number;
+  cursorStyle: CursorStyle;
   isSidebarVisible: boolean;
   programsPanelWidth: number;
   clipboard: Block[] | null;
@@ -142,3 +142,41 @@ type ResizeHandler = (
 type ResizeString = "nw" | "ne" | "sw" | "se" | "n" | "s" | "e" | "w";
 
 type BlockConfig<T> = Omit<T, keyof BaseBlock | "type">;
+
+type CursorStyle =
+  | "auto"
+  | "default"
+  | "none"
+  | "context-menu"
+  | "help"
+  | "pointer"
+  | "progress"
+  | "wait"
+  | "cell"
+  | "crosshair"
+  | "text"
+  | "vertical-text"
+  | "alias"
+  | "copy"
+  | "move"
+  | "no-drop"
+  | "not-allowed"
+  | "grab"
+  | "grabbing"
+  | "all-scroll"
+  | "col-resize"
+  | "row-resize"
+  | "n-resize"
+  | "s-resize"
+  | "e-resize"
+  | "w-resize"
+  | "ne-resize"
+  | "nw-resize"
+  | "se-resize"
+  | "sw-resize"
+  | "ew-resize"
+  | "ns-resize"
+  | "nesw-resize"
+  | "nwse-resize"
+  | "zoom-in"
+  | "zoom-out";

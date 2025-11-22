@@ -17,12 +17,11 @@ initialize();
  * @returns {import("hyperapp").ElementVNode<State>} Main application element
  */
 function main(state) {
-  const currentPage = state.pages.find((p) => p.id === state.currentPageId);
   return h(
     "main",
     {
       style: {
-        cursor: currentPage?.cursorStyle || "default",
+        cursor: state.cursorStyle || "default",
       },
       class: {
         "dark-mode": state.isDarkMode,
@@ -53,6 +52,7 @@ function initialState() {
     mouseX: 0,
     mouseY: 0,
     currentPageId: "",
+    cursorStyle: "default",
     mementoManager: createMementoManager(),
     isDarkMode: false,
     isSidebarVisible: true,

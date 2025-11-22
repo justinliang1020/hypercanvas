@@ -9,7 +9,7 @@ export const PASTE_OFFSET_X = 20;
 export const PASTE_OFFSET_Y = 20;
 
 /**
- * @type {Record<string, string>}
+ * @type {Record<string, CursorStyle>}
  */
 export const RESIZE_CURSORS = {
   nw: "nwse-resize",

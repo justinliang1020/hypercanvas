@@ -11,6 +11,7 @@ import {
   getSelectedBlocks,
   selectBlock,
 } from "./selection.js";
+import { pipe, updateState } from "./utils.js";
 
 /**
  * @type {Record<ResizeString, ResizeHandler>}
@@ -191,7 +192,7 @@ export function ResizeHandle({ handle, zoom, context }) {
    */
   function onpointerenter(state, event) {
     event.stopPropagation();
-    return updateCurrentPage(state, {
+    return updateState(state, {
       cursorStyle: RESIZE_CURSORS[handle] || "default",
     });
   }
@@ -203,7 +204,7 @@ export function ResizeHandle({ handle, zoom, context }) {
    */
   function onpointerleave(state, event) {
     event.stopPropagation();
-    return updateCurrentPage(state, { cursorStyle: "default" });
+    return updateState(state, { cursorStyle: "default" });
   }
 
   const commonProps = {
@@ -226,20 +227,27 @@ export function ResizeHandle({ handle, zoom, context }) {
         const blocks = getCurrentBlocks(state);
         const block = blocks.find((b) => b.id === blockId);
         if (!block) return state;
-        const selectedState = selectBlock(state, blockId);
-        return updateCurrentPage(selectedState, {
-          resizing: {
-            id: blockId,
-            handle: /** @type {ResizeString} */ (
-              /** @type {HTMLElement} */ (event.target).dataset.handle
-            ),
-            startWidth: block.width,
-            startHeight: block.height,
-            startX: block.x,
-            startY: block.y,
-          },
-          cursorStyle: RESIZE_CURSORS[handle] || "default",
-        });
+        return pipe(
+          state,
+          (s) => selectBlock(s, blockId),
+          (s) =>
+            updateCurrentPage(s, {
+              resizing: {
+                id: blockId,
+                handle: /** @type {ResizeString} */ (
+                  /** @type {HTMLElement} */ (event.target).dataset.handle
+                ),
+                startWidth: block.width,
+                startHeight: block.height,
+                startX: block.x,
+                startY: block.y,
+              },
+            }),
+          (s) =>
+            updateState(s, {
+              cursorStyle: RESIZE_CURSORS[handle] || "default",
+            }),
+        );
       },
     });
   }
@@ -252,25 +260,29 @@ export function ResizeHandle({ handle, zoom, context }) {
       const selectedBlocks = getSelectedBlocks(state);
       const bbox = getSelectionBoundingBox(state);
       if (!bbox || selectedBlocks.length <= 1) return state;
-      return updateCurrentPage(state, {
-        resizing: {
-          id: "selection-bounding-box",
-          handle,
-          startWidth: bbox.width,
-          startHeight: bbox.height,
-          startX: bbox.x,
-          startY: bbox.y,
-          originalBlocks: selectedBlocks.map((block) => ({
-            id: block.id,
-            x: block.x,
-            y: block.y,
-            width: block.width,
-            height: block.height,
-          })),
-        },
-
-        cursorStyle: RESIZE_CURSORS[handle] || "default",
-      });
+      return pipe(
+        state,
+        (s) =>
+          updateCurrentPage(s, {
+            resizing: {
+              id: "selection-bounding-box",
+              handle,
+              startWidth: bbox.width,
+              startHeight: bbox.height,
+              startX: bbox.x,
+              startY: bbox.y,
+              originalBlocks: selectedBlocks.map((block) => ({
+                id: block.id,
+                x: block.x,
+                y: block.y,
+                width: block.width,
+                height: block.height,
+              })),
+            },
+          }),
+        (s) =>
+          updateState(s, { cursorStyle: RESIZE_CURSORS[handle] || "default" }),
+      );
     },
   });
 }

@@ -11,7 +11,6 @@ import {
 } from "./pages.js";
 import {
   calculatePreviewSelection,
-  deselectAllBlocks,
   getSelectedBlockIds,
   getSelectedBlocks,
   handleSelectionBoxComplete,
@@ -19,6 +18,7 @@ import {
   selectionBoundingBox,
   selectionBoxComponent,
 } from "./selection.js";
+import { pipe, updateState } from "./utils.js";
 
 /**
  * Calculates canvas coordinates from screen coordinates
@@ -43,11 +43,14 @@ export function getCanvasCoordinates(clientX, clientY, state) {
  * @returns {import("hyperapp").Dispatchable<State>}
  */
 function handleMiddleMouseDown(state) {
-  const deselectedState = deselectAllBlocks(state);
-  return updateCurrentPage(deselectedState, {
-    isViewportDragging: true,
-    cursorStyle: "grabbing",
-  });
+  return pipe(
+    state,
+    (s) =>
+      updateCurrentPage(s, {
+        isViewportDragging: true,
+      }),
+    (s) => updateState(s, { cursorStyle: "grabbing" }),
+  );
 }
 
 /**

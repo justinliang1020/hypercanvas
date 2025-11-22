@@ -52,7 +52,6 @@ export const defaultPage = {
   offsetX: 0,
   offsetY: 0,
   zoom: 1,
-  cursorStyle: "pointer",
   isViewportDragging: false,
   selectedIds: [],
   editingId: null,
