@@ -543,8 +543,8 @@ export function addChildBlock(state, parentBlockId, src, isPreview) {
       },
       newX,
       newY,
-      DEFAULT_BLOCK_WIDTH,
-      DEFAULT_BLOCK_HEIGHT,
+      parentBlock.width,
+      parentBlock.height,
     );
 
   return pipe(
