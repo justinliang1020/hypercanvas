@@ -119,7 +119,7 @@ interface State {
   isDarkMode: boolean;
   mouseX: number;
   mouseY: number;
-  cursorStyle: CursorStyle;
+  cursorStyleOverride: CursorStyle | null;
   isSidebarVisible: boolean;
   programsPanelWidth: number;
   clipboard: Block[] | null;

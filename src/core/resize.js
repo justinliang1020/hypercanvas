@@ -11,7 +11,7 @@ import {
   getSelectedBlocks,
   selectBlock,
 } from "./selection.js";
-import { pipe } from "./utils.js";
+import { pipe, updateState } from "./utils.js";
 
 /**
  * @type {Record<ResizeString, ResizeHandler>}
@@ -242,6 +242,8 @@ export function ResizeHandle({ handle, zoom, context }) {
                 startY: block.y,
               },
             }),
+          (s) =>
+            updateState(s, { cursorStyleOverride: RESIZE_CURSORS[handle] }),
         );
       },
     });
@@ -255,24 +257,27 @@ export function ResizeHandle({ handle, zoom, context }) {
       const selectedBlocks = getSelectedBlocks(state);
       const bbox = getSelectionBoundingBox(state);
       if (!bbox || selectedBlocks.length <= 1) return state;
-      return pipe(state, (s) =>
-        updateCurrentPage(s, {
-          resizing: {
-            id: "selection-bounding-box",
-            handle,
-            startWidth: bbox.width,
-            startHeight: bbox.height,
-            startX: bbox.x,
-            startY: bbox.y,
-            originalBlocks: selectedBlocks.map((block) => ({
-              id: block.id,
-              x: block.x,
-              y: block.y,
-              width: block.width,
-              height: block.height,
-            })),
-          },
-        }),
+      return pipe(
+        state,
+        (s) =>
+          updateCurrentPage(s, {
+            resizing: {
+              id: "selection-bounding-box",
+              handle,
+              startWidth: bbox.width,
+              startHeight: bbox.height,
+              startX: bbox.x,
+              startY: bbox.y,
+              originalBlocks: selectedBlocks.map((block) => ({
+                id: block.id,
+                x: block.x,
+                y: block.y,
+                width: block.width,
+                height: block.height,
+              })),
+            },
+          }),
+        (s) => updateState(s, { cursorStyleOverride: RESIZE_CURSORS[handle] }),
       );
     },
   });

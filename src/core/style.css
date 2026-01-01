@@ -8,6 +8,10 @@ main {
   overscroll-behavior-x: none; /* disable swipe to go back a page */
 }
 
+.cursor-style-override {
+  cursor: var(--override-cursor) !important;
+}
+
 #viewport {
   background-color: #d9d9d9;
 }

@@ -301,6 +301,10 @@ function handleDragCompletion(state, newState) {
  */
 function handleResizeCompletion(state, newState) {
   const currentPage = getCurrentPage(state);
+  newState = {
+    ...newState,
+    cursorStyleOverride: null,
+  };
   if (!currentPage?.resizing) return newState;
 
   const blocks = getCurrentBlocks(state);

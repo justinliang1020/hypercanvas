@@ -19,10 +19,12 @@ function main(state) {
     "main",
     {
       style: {
-        cursor: state.cursorStyle || "default",
+        //@ts-ignore
+        "--override-cursor": state.cursorStyleOverride,
       },
       class: {
         "dark-mode": state.isDarkMode,
+        "cursor-style-override": state.cursorStyleOverride !== null,
       },
       onpointermove: (state, event) => {
         // should be "global" to always track mouse state
@@ -44,7 +46,7 @@ function initialState() {
     mouseX: 0,
     mouseY: 0,
     currentPageId: "",
-    cursorStyle: "default",
+    cursorStyleOverride: "default",
     mementoManager: createMementoManager(),
     isDarkMode: false,
     isSidebarVisible: true,

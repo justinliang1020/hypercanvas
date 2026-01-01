@@ -61,7 +61,15 @@ export function webviewBlockContents(state, block) {
       h(
         "div",
         {
-          style: { height: "100%", cursor: "default" },
+          style: {
+            height: "100%",
+            cursor: "default",
+            //@ts-ignore
+            "--override-cursor": state.cursorStyleOverride,
+          },
+          class: {
+            "cursor-style-override": state.cursorStyleOverride !== null,
+          },
           onpointerdown: enableEditingAndSelectedMode,
         },
         webview(state, block),
