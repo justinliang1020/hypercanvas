@@ -60,9 +60,6 @@ export function blockView(state, block) {
   const isDraggingAnything = currentPage.dragStart !== null;
   const isMultiSelect =
     currentPage.selectionBox !== null || currentPage.selectedIds.length > 1;
-  const isFullScreen =
-    currentPage.fullScreenState && currentPage.fullScreenState.id === block.id;
-  const outline = getBlockOutline(state, block.id);
 
   /**
    * @param {State} state
@@ -143,41 +140,6 @@ export function blockView(state, block) {
     });
   }
 
-  /**
-   * @param {State} state
-   * @param {PointerEvent} event
-   * @returns {import("hyperapp").Dispatchable<State>}
-   */
-  function oncontextmenu(state, event) {
-    // const { canvasX, canvasY } = getCanvasCoordinates(
-    //   event.clientX,
-    //   event.clientY,
-    //   state,
-    // );
-    // if (block.type === "webview") {
-    //   return {
-    //     ...state,
-    //     contextMenu: {
-    //       target: block,
-    //       x: canvasX,
-    //       y: canvasY,
-    //     },
-    //   };
-    // }
-    return state;
-  }
-
-  /**
-   * @param {State} state
-   * @param {MouseEvent} event
-   * @returns {import("hyperapp").Dispatchable<State>}
-   */
-  function ondblclick(state, event) {
-    event.stopPropagation();
-
-    return enableFullScreen(state, block);
-  }
-
   const contents = (() => {
     switch (block.type) {
       case "webview":
@@ -229,29 +191,26 @@ export function blockView(state, block) {
       "data-id": block.id,
       style: {
         // outline hides the background when in full screen mode
-        outline: isFullScreen ? "100px solid black" : outline, //TODO: fix magic number
         willChange: "transform", // improves performance of rendered blocks
         transform: `translate(${block.x}px, ${block.y}px)`,
         width: `${block.width}px`,
         height: `${block.height}px`,
-        zIndex: isFullScreen ? `${Z_INDEX_TOP}` : `${block.zIndex}`,
+        zIndex: `${block.zIndex}`,
         position: "absolute",
         userSelect: "none",
         boxSizing: "border-box",
         touchAction: "none",
         transformOrigin: "top left",
-        padding: isFullScreen ? "" : `${BLOCK_PADDING}px`,
+        padding: `${BLOCK_PADDING}px`,
         backgroundColor:
           (isHovering || isSelected || isResizing) && !isMultiSelect
             ? "#a9ad974d"
             : "transparent",
       },
       class: { block: true },
-      onpointerover: isFullScreen ? undefined : onpointerover,
-      onpointerleave: isFullScreen ? undefined : onpointerleave,
-      onpointerdown: isFullScreen ? undefined : onpointerdown,
-      ondblclick: isFullScreen ? undefined : ondblclick,
-      oncontextmenu,
+      onpointerover: onpointerover,
+      onpointerleave: onpointerleave,
+      onpointerdown: onpointerdown,
     },
     [
       h(
@@ -265,73 +224,11 @@ export function blockView(state, block) {
         },
         contents,
       ),
-      ...(!isFullScreen &&
-      (isSelected || isHovering || isResizing) &&
-      !isMultiSelect
+      ...((isSelected || isHovering || isResizing) && !isMultiSelect
         ? resizeHandles
         : []),
     ],
   );
-}
-
-/**
- * Creates a CSS outline string with zoom-adjusted width
- * @param {number} width - Base width in pixels
- * @param {string} color - CSS color value
- * @param {number} zoom - Current zoom level
- * @returns {string} CSS outline property value
- */
-function createOutline(width, color, zoom) {
-  return `${width / zoom}px solid ${color}`;
-}
-
-/**
- * Determines the outline style for a block based on its current state
- * Having small borders, i.e. 1px, can cause rendering glitches to occur when CSS transform translations are applied such as zooming out
- * Scale outline thickness inversely with zoom to maintain consistent visual appearance
- * @param {State} state - Application state
- * @param {number} blockId - Application state
- * @returns {string|null} CSS outline property value
- */
-function getBlockOutline(state, blockId) {
-  const currentPage = getCurrentPage(state);
-  if (!currentPage) return null;
-  const selectedBlocks = getSelectedBlocks(state);
-  const isMultiSelect = selectedBlocks.length > 1;
-  const isHovering = currentPage.hoveringId === blockId;
-  const isResizing = currentPage.resizing?.id === blockId;
-  const isPreviewSelected = isPendingSelected(state, blockId);
-  const isSelected = currentPage.selectedIds.includes(blockId);
-
-  if (isMultiSelect) {
-    return null; // No outline for multi-select
-  }
-
-  // if (isSelected) {
-  //   return createOutline(
-  //     OUTLINE_WIDTHS.THICK,
-  //     OUTLINE_COLORS.SELECTED,
-  //     currentPage.zoom,
-  //   );
-  // }
-
-  if (isPreviewSelected) {
-    return createOutline(
-      OUTLINE_WIDTHS.MEDIUM,
-      OUTLINE_COLORS.PREVIEW_SELECTED,
-      currentPage.zoom,
-    );
-  }
-
-  if (isHovering || isResizing || isSelected) {
-    return createOutline(
-      OUTLINE_WIDTHS.THIN,
-      OUTLINE_COLORS.HOVERING,
-      currentPage.zoom,
-    );
-  }
-
-  return null; // Default: no outline
 }
 
 // -----------------------------
