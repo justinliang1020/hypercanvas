@@ -160,18 +160,6 @@ export function webviewBlockContents(state, block) {
     h("div", { style: { background: "white" } }, text("hello world")),
   ]);
 
-  const titleBar = h(
-    "div",
-    {
-      style: {
-        height: "50px",
-        background: "white",
-        padding: "6px 10px",
-      },
-    },
-    [text("url")],
-  );
-
   const webview = h("webview", {
     style: {
       // this prevents the main process from lagging when attempting to do CSS transformations on webviews without domReady
@@ -215,7 +203,7 @@ export function webviewBlockContents(state, block) {
     },
     [
       buttons,
-      titleBar,
+      titleBar(state, block),
       h(
         "div",
         {
@@ -224,6 +212,32 @@ export function webviewBlockContents(state, block) {
         },
         webview,
       ),
+    ],
+  );
+}
+
+/**
+ * @param {State} state
+ * @param {WebviewBlock} block
+ * @return {import("hyperapp").ElementVNode<State>}
+ */
+function titleBar(state, block) {
+  return h(
+    "div",
+    {
+      style: {
+        height: "50px",
+        background: "white",
+        padding: "6px 10px",
+        borderBottom: "1px solid black",
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between",
+      },
+    },
+    [
+      h("div", { style: { fontSize: "2em" } }, text(block.currentSrc)),
+      h("div", { style: { fontSize: "2em" } }, text("title")),
     ],
   );
 }
