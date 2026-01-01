@@ -280,6 +280,7 @@ function toolbar(state, block) {
 function titleBar(state, block) {
   const currentPage = getCurrentPage(state);
   const isSelected = currentPage.selectedIds.includes(block.id);
+
   return h(
     "div",
     {
@@ -329,28 +330,20 @@ export function forwardButton(state, block) {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 function navigationButton(state, block, direction, display) {
-  const { enabled, webview: webviewElement } = (() => {
-    const webviewElement = /** @type {import("electron").WebviewTag} */ (
-      document.getElementById(webviewDomId(block.id))
-    );
+  const webviewElement = getWebviewElementIfDomReady(block);
 
-    if (!webviewElement || !block.domReady) {
-      return { enabled: false, webview: undefined };
+  /** @type {Boolean} */
+  const enabled = (() => {
+    if (!webviewElement) {
+      return false;
     }
 
-    const enabled = (() => {
-      switch (direction) {
-        case "back":
-          return webviewElement.canGoBack();
-        case "forward":
-          return webviewElement.canGoForward();
-      }
-    })();
-
-    return {
-      enabled: enabled,
-      webview: webviewElement,
-    };
+    switch (direction) {
+      case "back":
+        return webviewElement.canGoBack();
+      case "forward":
+        return webviewElement.canGoForward();
+    }
   })();
 
   /**
@@ -481,4 +474,22 @@ function urlBar(state, block) {
       onpointerdown: stopPropagation,
     }),
   );
+}
+
+/**
+ * Returns the webview element of a block if the DOM is ready.
+ * If the DOM is not ready, it returns null
+ * @param {WebviewBlock} block
+ * @returns {import("electron").WebviewTag | null}
+ */
+function getWebviewElementIfDomReady(block) {
+  const webviewElement = /** @type {import("electron").WebviewTag} */ (
+    document.getElementById(webviewDomId(block.id))
+  );
+
+  if (!webviewElement || !block.domReady) {
+    return null;
+  }
+
+  return webviewElement;
 }
