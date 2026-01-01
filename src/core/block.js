@@ -141,7 +141,6 @@ export function blockView(state, block) {
         zIndex: `${block.zIndex}`,
         position: "absolute",
         userSelect: "none",
-        boxSizing: "border-box",
         touchAction: "none",
         transformOrigin: "top left",
         cursor: "move",
