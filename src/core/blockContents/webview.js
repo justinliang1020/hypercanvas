@@ -463,6 +463,7 @@ export const DEFAULT_WEBVIEW_BLOCK_CONFIG = {
   canGoBack: false,
   canGoForward: false,
   faviconUrl: null,
+  isUrlBarExpanded: false,
 };
 
 /**
@@ -499,32 +500,57 @@ function urlBar(state, block) {
     });
   }
 
+  /**
+   * @param {State} state
+   * @param {Event} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function expandUrlBar(state, event) {
+    event.stopPropagation();
+
+    return [
+      updateBlock(state, block.id, {
+        isUrlBarExpanded: true,
+      }),
+    ];
+  }
+
+  /**
+   * @param {State} state
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function unexpandUrlBar(state) {
+    return updateBlock(state, block.id, {
+      isUrlBarExpanded: false,
+    });
+  }
+
   return h(
     "form",
     {
       onsubmit,
-
-      // stop keyboard shortcuts from triggering
-      onkeydown: stopPropagation,
+      onkeydown: stopPropagation, // stop keyboard shortcuts from triggering
       style: {
-        width: "100%",
+        width: block.isUrlBarExpanded ? "60%" : "30%",
       },
     },
     h("input", {
       type: "text",
       value: searchBarValue,
       style: {
-        width: "30%",
+        width: "100%",
         boxSizing: "border-box",
         borderRadius: "10px",
         backgroundColor: "#F0F0F0",
         border: "1px solid black",
         fontSize: "2em",
+        cursor: block.isUrlBarExpanded ? "auto" : "default",
         outline: "none", // disable orange editing border
       },
       onsubmit,
       oninput,
-      onpointerdown: stopPropagation,
+      onpointerdown: expandUrlBar,
+      onblur: unexpandUrlBar,
     }),
   );
 }

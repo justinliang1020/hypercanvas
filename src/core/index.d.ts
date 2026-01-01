@@ -23,6 +23,7 @@ interface WebviewBlock extends BaseBlock {
   faviconUrl: string | null;
   canGoBack: boolean;
   canGoForward: boolean;
+  isUrlBarExpanded: boolean;
 }
 
 interface TextBlock extends BaseBlock {
