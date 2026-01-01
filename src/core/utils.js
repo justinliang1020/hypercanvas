@@ -303,3 +303,29 @@ export function getIsWebviewFocused() {
     document.activeElement?.tagName === "IFRAME"
   );
 }
+
+/**
+ * Extracts the domain name from a URL, removing protocol and www subdomain
+ * @param {string} urlString - The URL to extract domain from
+ * @returns {string} The domain name (e.g., "https://www.example.com/" -> "example.com")
+ * @example
+ * getDomainFromUrl("https://www.example.com/") // returns "example.com"
+ * getDomainFromUrl("https://api.example.com/path") // returns "api.example.com"
+ * getDomainFromUrl("http://localhost:8080/") // returns "localhost:8080"
+ */
+export function getDomainFromUrl(urlString) {
+  try {
+    const url = new URL(urlString);
+    let domain = url.host; // host includes port if present
+
+    // Remove 'www.' prefix if present
+    if (domain.startsWith("www.")) {
+      domain = domain.substring(4);
+    }
+
+    return domain;
+  } catch (error) {
+    console.error("Invalid URL:", urlString, error);
+    return urlString;
+  }
+}

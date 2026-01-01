@@ -10,7 +10,7 @@ import {
   getCurrentPage,
   updateCurrentPage,
 } from "../pages.js";
-import { pipe } from "../utils.js";
+import { getDomainFromUrl, pipe } from "../utils.js";
 
 /**
  * @param {number} blockId
@@ -472,8 +472,6 @@ export const DEFAULT_WEBVIEW_BLOCK_CONFIG = {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 function urlBar(state, block) {
-  let searchBarValue = block.currentSrc;
-
   /**
    * @param {State} state
    * @param {Event} event
@@ -531,12 +529,14 @@ function urlBar(state, block) {
       onsubmit,
       onkeydown: stopPropagation, // stop keyboard shortcuts from triggering
       style: {
-        width: block.isUrlBarExpanded ? "60%" : "30%",
+        width: block.isUrlBarExpanded ? "60%" : "20%",
       },
     },
     h("input", {
       type: "text",
-      value: searchBarValue,
+      value: block.isUrlBarExpanded
+        ? block.currentSrc
+        : getDomainFromUrl(block.currentSrc),
       style: {
         width: "100%",
         boxSizing: "border-box",
