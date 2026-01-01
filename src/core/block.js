@@ -103,7 +103,6 @@ export function blockView(state, block) {
         startY: block.y,
       },
       selectedIds: [block.id],
-      editingId: null, // Exit edit mode when selecting
     });
   }
 

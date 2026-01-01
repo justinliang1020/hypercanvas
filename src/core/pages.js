@@ -58,7 +58,6 @@ export const defaultPage = {
   zoom: 1,
   isViewportDragging: false,
   selectedIds: [],
-  editingId: null,
   hoveringId: null,
   fullScreenState: null,
   resizing: null,

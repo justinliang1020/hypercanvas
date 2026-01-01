@@ -262,7 +262,6 @@ export function enableFullScreen(state, block) {
     offsetX: -block.x + offsetX / 2,
     offsetY: -block.y + 10,
     zoom: 1,
-    editingId: block.id,
   });
   newState = updateBlock(newState, block.id, {
     width: viewportRect.width - offsetX,
@@ -296,4 +295,11 @@ export function pipe(value, ...fns) {
     value = fn(value);
   }
   return value;
+}
+
+export function getIsWebviewFocused() {
+  return (
+    document.activeElement?.tagName === "WEBVIEW" ||
+    document.activeElement?.tagName === "IFRAME"
+  );
 }

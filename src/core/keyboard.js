@@ -5,7 +5,11 @@ import {
 import { redoState, undoState } from "./memento.js";
 import { getCurrentPage, updateCurrentPage } from "./pages.js";
 import { deleteSelectedItems, hasSelection } from "./selection.js";
-import { pasteEffect, saveApplicationAndNotify } from "./utils.js";
+import {
+  getIsWebviewFocused,
+  pasteEffect,
+  saveApplicationAndNotify,
+} from "./utils.js";
 
 /**
  * @param {State} state
@@ -18,23 +22,22 @@ export function onkeydown(state, event) {
 
   // Check if user is interacting with an input field or has text selected
   const hasTextSelection = (window.getSelection()?.toString() ?? "").length > 0;
-  const isEditingBlock = currentPage.editingId !== null;
+  const isWebviewFocused = getIsWebviewFocused();
 
   // Handle keyboard shortcuts
   switch (event.key) {
     case "Escape":
       return updateCurrentPage(state, {
-        editingId: null,
         selectedIds: [],
       });
     case "Delete":
     case "Backspace":
-      if (isEditingBlock) return state;
+      if (isWebviewFocused) return state;
 
       return deleteSelectedItems(state);
 
     case "c":
-      if (isEditingBlock) return state;
+      if (isWebviewFocused) return state;
 
       // Handle copy shortcut (Ctrl+C or Cmd+C)
       if (event.ctrlKey || event.metaKey) {
@@ -63,19 +66,17 @@ export function onkeydown(state, event) {
 
     case "v":
       // Handle paste shortcut (Ctrl+V or Cmd+V)
-      if (isEditingBlock) return state;
+      if (isWebviewFocused) return state;
       if (event.ctrlKey || event.metaKey) {
-        if (currentPage.editingId === null) {
-          event.preventDefault();
-          return [state, [pasteEffect, state]];
-        }
+        event.preventDefault();
+        return [state, [pasteEffect, state]];
       }
       return state;
 
     case "z":
     case "Z":
       // Handle undo/redo shortcuts
-      if (isEditingBlock) return state;
+      if (isWebviewFocused) return state;
 
       if (event.ctrlKey || event.metaKey) {
         event.preventDefault();
@@ -99,7 +100,7 @@ export function onkeydown(state, event) {
 
     case "y":
       // Handle redo shortcut (Ctrl+Y or Cmd+Y)
-      if (isEditingBlock) return state;
+      if (isWebviewFocused) return state;
 
       if (event.ctrlKey || event.metaKey) {
         event.preventDefault();

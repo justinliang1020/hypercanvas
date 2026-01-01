@@ -8,7 +8,7 @@ import {
 import { RESIZE_HANDLERS, resizeHandle } from "./resize.js";
 import { saveMementoAndReturn } from "./memento.js";
 import { Z_INDEX_TOP } from "./constants.js";
-import { pipe, updateState } from "./utils.js";
+import { pipe } from "./utils.js";
 
 /**
  * Checks if a block is in preview selection (during selection box drag)
@@ -56,21 +56,6 @@ export function getHoveredBlock(state) {
 }
 
 /**
- * Gets all currently selected blocks
- * @param {State} state - Current application state
- * @returns {Block | null} Array of selected blocks
- */
-export function getEditingBlock(state) {
-  const currentPage = getCurrentPage(state);
-  if (!currentPage) {
-    return null;
-  }
-
-  const blocks = getCurrentBlocks(state);
-  return blocks.find((block) => block.id === currentPage.editingId) ?? null;
-}
-
-/**
  * Gets the IDs of all currently selected blocks
  * @param {State} state - Current application state
  * @returns {number[]} Array of selected block IDs
@@ -99,7 +84,6 @@ export function hasSelection(state) {
 export function selectBlock(state, blockId) {
   return updateCurrentPage(state, {
     selectedIds: [blockId],
-    editingId: null, // Exit edit mode when selecting
   });
 }
 
@@ -111,7 +95,6 @@ export function selectBlock(state, blockId) {
 export function deselectAllBlocks(state) {
   return updateCurrentPage(state, {
     selectedIds: [],
-    editingId: null,
   });
 }
 
@@ -152,7 +135,6 @@ export function addBlockToSelection(state, blockId) {
 
   return updateCurrentPage(state, {
     selectedIds: [...currentSelectedIds, blockId],
-    editingId: null, // Exit edit mode when selecting
   });
 }
 
@@ -171,7 +153,6 @@ export function removeBlockFromSelection(state, blockId) {
 
   return updateCurrentPage(state, {
     selectedIds: newSelectedIds,
-    editingId: null, // Exit edit mode when deselecting
   });
 }
 

@@ -82,7 +82,6 @@ function handleSelectionBoxStart(state, canvasX, canvasY, isShiftKey) {
     },
     selectedIds: isShiftKey ? getCurrentPage(state)?.selectedIds || [] : [],
     pendingSelectedIds: [],
-    editingId: null,
   });
 }
 
@@ -222,7 +221,7 @@ function onpointermove(state, event) {
     return handleResizePointerMove(state, event);
   }
 
-  if (currentPage.dragStart && currentPage.editingId === null) {
+  if (currentPage.dragStart) {
     return handleBlockDrag(state, dx, dy);
   }
 

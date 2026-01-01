@@ -34,12 +34,11 @@ export function webviewBlockContents(state, block) {
    * @param {PointerEvent} event
    * @returns {import("hyperapp").Dispatchable<State>}
    */
-  function enableEditingAndSelectedMode(state, event) {
+  function enableSelectedMode(state, event) {
     event.preventDefault();
     event.stopPropagation();
 
     return updateCurrentPage(state, {
-      editingId: block.id,
       selectedIds: [block.id],
     });
   }
@@ -68,7 +67,7 @@ export function webviewBlockContents(state, block) {
           class: {
             "cursor-style-override": state.cursorStyleOverride !== null,
           },
-          onpointerdown: enableEditingAndSelectedMode,
+          onpointerdown: enableSelectedMode,
         },
         webview(state, block),
       ),
@@ -191,10 +190,8 @@ function webview(state, block) {
     return updateBlock(state, block.id, { currentSrc: event.url });
   }
 
-  const isEditing = currentPage.editingId === block.id;
-  const isFullScreen =
-    currentPage.fullScreenState && currentPage.fullScreenState.id === block.id;
-  const isDragging = currentPage.dragStart !== null;
+  const isSelected = currentPage.selectedIds.includes(block.id);
+  const isResizing = Boolean(currentPage.resizing);
 
   return h("webview", {
     style: {
@@ -205,8 +202,7 @@ function webview(state, block) {
       overflow: "hidden",
       border: "none",
       backgroundColor: "white",
-      boxShadow: isEditing ? "0 0px 10px 10px orange" : "",
-      pointerEvents: `${(isEditing || isFullScreen) && !isDragging ? "" : "none"}`,
+      pointerEvents: `${isSelected && !isResizing ? "" : "none"}`,
       ...(block.isPreview ? previewStyles : {}),
     },
     class: `${BLOCK_CONTENTS_CLASS_NAME} webview`,

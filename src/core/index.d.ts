@@ -51,7 +51,6 @@ interface Page {
   isViewportDragging: boolean;
   selectedIds: number[];
   pendingSelectedIds: number[];
-  editingId: number | null;
   hoveringId: number | null;
   fullScreenState: fullScreenState | null;
   resizing: ResizeState | null;
