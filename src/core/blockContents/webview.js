@@ -200,7 +200,17 @@ function webview(state, block) {
    * @return {State}
    */
   function handleNavigationChange(state, event) {
-    return updateBlock(state, block.id, { currentSrc: event.url });
+    const webviewElement = getWebviewElementIfDomReady(block);
+
+    if (!webviewElement) {
+      return updateBlock(state, block.id, { currentSrc: event.url });
+    }
+
+    return updateBlock(state, block.id, {
+      currentSrc: event.url,
+      canGoBack: webviewElement.canGoBack(),
+      canGoForward: webviewElement.canGoForward(),
+    });
   }
 
   const isSelected = currentPage.selectedIds.includes(block.id);
@@ -344,19 +354,13 @@ export function forwardButton(state, block) {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 function navigationButton(state, block, direction, display) {
-  const webviewElement = getWebviewElementIfDomReady(block);
-
   /** @type {Boolean} */
   const enabled = (() => {
-    if (!webviewElement) {
-      return false;
-    }
-
     switch (direction) {
       case "back":
-        return webviewElement.canGoBack();
+        return block.canGoBack;
       case "forward":
-        return webviewElement.canGoForward();
+        return block.canGoForward;
     }
   })();
 
@@ -365,6 +369,8 @@ function navigationButton(state, block, direction, display) {
    * @returns {import("hyperapp").Dispatchable<State>}
    */
   function onclick(state) {
+    const webviewElement = getWebviewElementIfDomReady(block);
+
     if (!webviewElement) return state;
 
     switch (direction) {
@@ -425,6 +431,8 @@ export const DEFAULT_WEBVIEW_BLOCK_CONFIG = {
   realChildrenIds: [],
   domReady: false,
   pageTitle: "",
+  canGoBack: false,
+  canGoForward: false,
 };
 
 /**

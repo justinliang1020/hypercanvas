@@ -20,6 +20,8 @@ interface WebviewBlock extends BaseBlock {
   previewChildId: number | null;
   realChildrenIds: number[];
   pageTitle: string;
+  canGoBack: boolean;
+  canGoForward: boolean;
 }
 
 interface TextBlock extends BaseBlock {
