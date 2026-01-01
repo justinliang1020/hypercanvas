@@ -5,7 +5,7 @@ import {
 import { redoState, undoState } from "./memento.js";
 import { getCurrentPage, updateCurrentPage } from "./pages.js";
 import { deleteSelectedItems, hasSelection } from "./selection.js";
-import { pasteEffect, saveApplicationAndNotify, updateState } from "./utils.js";
+import { pasteEffect, saveApplicationAndNotify } from "./utils.js";
 
 /**
  * @param {State} state

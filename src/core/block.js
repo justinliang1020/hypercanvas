@@ -2,38 +2,20 @@ import { h } from "hyperapp";
 import {
   PASTE_OFFSET_X,
   PASTE_OFFSET_Y,
-  OUTLINE_COLORS,
-  OUTLINE_WIDTHS,
   DEFAULT_BLOCK_WIDTH,
   DEFAULT_BLOCK_HEIGHT,
-  Z_INDEX_TOP,
-  BLOCK_PADDING,
   NEW_CHILD_BLOCK_OFFSET_X,
-  BLOCK_OPEN_SPACE_PUSH_OFFSET,
-  BLOCK_BORDER_RADIUS,
 } from "./constants.js";
 import { saveMementoAndReturn } from "./memento.js";
 import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
-import {
-  // getCanvasCoordinates,
-  getViewportCenterCoordinates,
-} from "./viewport.js";
-import {
-  clearUserClipboardEffect,
-  enableFullScreen,
-  pipe,
-  updateState,
-} from "./utils.js";
+import { getViewportCenterCoordinates } from "./viewport.js";
+import { clearUserClipboardEffect, pipe, updateState } from "./utils.js";
 import {
   getCurrentBlocks,
   updateCurrentPage,
   getCurrentPage,
 } from "./pages.js";
-import {
-  isPendingSelected,
-  getSelectedBlocks,
-  toggleBlockSelection,
-} from "./selection.js";
+import { getSelectedBlocks, toggleBlockSelection } from "./selection.js";
 import {
   DEFAULT_WEBVIEW_BLOCK_CONFIG,
   webviewBlockContents,
@@ -159,29 +141,6 @@ export function blockView(state, block) {
       context: "block",
     }),
   );
-
-  /**
-   * @param {State} state
-   * @param {PointerEvent} event
-   * @returns {import("hyperapp").Dispatchable<State>}
-   */
-  function wrapperOnpointerdown(state, event) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    return updateCurrentPage(state, { editingId: block.id });
-  }
-
-  /**
-   * @param {State} state
-   * @param {PointerEvent} event
-   * @returns {import("hyperapp").Dispatchable<State>}
-   */
-  function wrapperOnpointerover(state, event) {
-    event.stopPropagation();
-    if (isDraggingAnything) return state;
-    return updateState(state, { cursorStyle: "default" });
-  }
 
   return h(
     "div",
@@ -551,56 +510,4 @@ export function updateBlock(state, blockId, newBlockConfig) {
       block.id === blockId ? { ...block, ...newBlockConfig } : block,
     ),
   });
-}
-
-/**
- * Returns whether a block is in a given area.
- * This will return true even if only part of the block is in the area
- * @param {Block} block
- * @param {number} x
- * @param {number} y
- * @param {number} width
- * @param {number} height
- * @returns {boolean}
- */
-function blockWithinArea(block, x, y, width, height) {
-  return !(
-    block.x + block.width < x || // block is to the left of area
-    block.x > x + width || // block is to the right of area
-    block.y + block.height < y || // block is above area
-    block.y > y + height // block is below area
-  );
-}
-
-/**
- * Given a Block, allocate area on the canvas for it to exist without having to overlap other blocks.
- * Other blocks in the area will be pushed downwards recursively,
- * i.e. if a block exists below the block being pushed down, that block would also be pushed down.
- * @param {State} state
- * @param {number} blockId
- */
-function allocateOpenSpaceForNewBlock(state, blockId) {
-  const newBlock = getCurrentBlocks(state).find(
-    (block) => block.id === blockId,
-  );
-  if (!newBlock) return state;
-  const existingBlocksInArea = getCurrentBlocks(state).filter(
-    (block) =>
-      newBlock.id !== block.id &&
-      blockWithinArea(
-        block,
-        newBlock.x,
-        newBlock.y,
-        newBlock.width,
-        newBlock.height,
-      ),
-  );
-  let newState = state;
-  for (const block of existingBlocksInArea) {
-    newState = updateBlock(newState, block.id, {
-      y: block.y + block.height + BLOCK_OPEN_SPACE_PUSH_OFFSET,
-    });
-    newState = allocateOpenSpaceForNewBlock(newState, block.id);
-  }
-  return newState;
 }
