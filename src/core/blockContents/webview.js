@@ -198,18 +198,29 @@ export function webviewBlockContents(state, block) {
     "onipc-message": (/** @type {State} */ state, /** @type {Event} */ event) =>
       handleIpcMessage(state, event),
   });
-  return h("div", { style: { height: "100%" } }, [
-    titleBar,
-    h(
-      "div",
-      {
-        style: { height: "100%" },
 
-        onpointerdown: enableEditingMode,
+  return h(
+    "div",
+    {
+      style: {
+        height: "100%",
+        borderRadius: `${BLOCK_BORDER_RADIUS}px`,
+        overflow: "hidden",
+        outline: "3px solid black",
       },
-      webview,
-    ),
-  ]);
+    },
+    [
+      titleBar,
+      h(
+        "div",
+        {
+          style: { height: "100%" },
+          onpointerdown: enableEditingMode,
+        },
+        webview,
+      ),
+    ],
+  );
 }
 
 /**
