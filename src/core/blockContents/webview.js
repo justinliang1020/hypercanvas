@@ -52,7 +52,10 @@ export function webviewBlockContents(state, block) {
         height: "100%",
         borderRadius: `${BLOCK_BORDER_RADIUS}px`,
         overflow: "hidden",
-        outline: "2px solid black",
+        boxSizing: "border-box",
+        borderWidth: "2px",
+        borderStyle: "solid",
+        borderColor: isSelected ? "black" : "grey",
         boxShadow: isSelected
           ? "0 0 25px 15px rgba(0, 0, 0, 0.25)"
           : "0 0 10px 6px rgba(0, 0, 0, 0.25)",
@@ -277,6 +280,8 @@ function toolbar(state, block) {
  * @return {import("hyperapp").ElementVNode<State>}
  */
 function titleBar(state, block) {
+  const currentPage = getCurrentPage(state);
+  const isSelected = currentPage.selectedIds.includes(block.id);
   return h(
     "div",
     {
@@ -284,7 +289,9 @@ function titleBar(state, block) {
         height: "50px",
         background: "white",
         padding: "6px 10px",
-        borderBottom: "2px solid black",
+        borderBottomWidth: "2px",
+        borderBottomStyle: "solid",
+        borderBottomColor: isSelected ? "black" : "grey",
         display: "flex",
         flexDirection: "row",
         justifyContent: "space-between",
