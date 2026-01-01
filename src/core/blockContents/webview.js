@@ -52,7 +52,7 @@ export function webviewBlockContents(state, block) {
         boxSizing: "border-box",
         borderWidth: "2px",
         borderStyle: "solid",
-        borderColor: isSelected ? "black" : "grey",
+        borderColor: isSelected ? "#7F7F7F" : "#9A9A9A",
         boxShadow: isSelected
           ? "0 0 40px 8px rgba(0, 0, 0, 0.25)"
           : "0 0 20px 6px rgba(0, 0, 0, 0.25)",
@@ -284,11 +284,11 @@ function titleBar(state, block) {
     {
       style: {
         height: "50px",
-        background: "white",
+        background: isSelected ? "#DEDEDE" : "#F0F0F0",
         padding: "6px 10px",
         borderBottomWidth: "2px",
         borderBottomStyle: "solid",
-        borderBottomColor: isSelected ? "black" : "grey",
+        borderBottomColor: isSelected ? "#7F7F7F" : "#9A9A9A",
         display: "flex",
         flexDirection: "row",
         justifyContent: "space-between",
