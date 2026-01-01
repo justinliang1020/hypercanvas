@@ -375,7 +375,7 @@ export const DEFAULT_WEBVIEW_BLOCK_CONFIG = {
  * @param {State} state - Current application state
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-export function searchBar(state) {
+function searchBar(state) {
   let searchBarValue = "";
 
   const editingBlock = getEditingBlock(state);

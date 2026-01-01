@@ -5,7 +5,6 @@ import { viewport } from "./viewport.js";
 import { keydownSubscription, keyupSubscription } from "./keyboard.js";
 import { notification, saveApplication, updateState } from "./utils.js";
 import { defaultPage } from "./pages.js";
-import { toolbar } from "./toolbar.js";
 import { dispatchMiddleware } from "../debugger/debugger.js";
 
 initialize();
@@ -34,7 +33,7 @@ function main(state) {
         });
       },
     },
-    [viewport(state), toolbar(state), notification(state)],
+    [viewport(state), notification(state)],
   );
 }
 

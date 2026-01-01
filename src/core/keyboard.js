@@ -5,7 +5,6 @@ import {
 import { redoState, undoState } from "./memento.js";
 import { getCurrentPage, updateCurrentPage } from "./pages.js";
 import { deleteSelectedItems, hasSelection } from "./selection.js";
-import { disableFullScreen } from "./toolbar.js";
 import { pasteEffect, saveApplicationAndNotify, updateState } from "./utils.js";
 
 /**
@@ -24,9 +23,6 @@ export function onkeydown(state, event) {
   // Handle keyboard shortcuts
   switch (event.key) {
     case "Escape":
-      if (currentPage.fullScreenState) {
-        return disableFullScreen(state);
-      }
       return updateCurrentPage(state, {
         editingId: null,
         selectedIds: [],
