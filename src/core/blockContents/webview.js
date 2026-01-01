@@ -280,6 +280,8 @@ function toolbar(state, block) {
 function titleBar(state, block) {
   const currentPage = getCurrentPage(state);
   const isSelected = currentPage.selectedIds.includes(block.id);
+  const webviewElement = getWebviewElementIfDomReady(block);
+  const titleText = webviewElement ? webviewElement.getTitle() : "";
 
   return h(
     "div",
@@ -299,7 +301,11 @@ function titleBar(state, block) {
     },
     [
       urlBar(state, block),
-      h("div", { style: { fontSize: "2em" } }, text("title")),
+      h(
+        "div",
+        { style: { fontSize: "2em", whiteSpace: "nowrap" } },
+        text(titleText),
+      ),
     ],
   );
 }
