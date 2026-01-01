@@ -7,7 +7,6 @@ import { notification, saveApplication, updateState } from "./utils.js";
 import { defaultPage } from "./pages.js";
 import { toolbar } from "./toolbar.js";
 import { dispatchMiddleware } from "../debugger/debugger.js";
-import { radialMenu } from "./radialMenu.js";
 
 initialize();
 
@@ -35,13 +34,7 @@ function main(state) {
         });
       },
     },
-    [
-      viewport(state),
-      // sidebarWrapper(state),
-      toolbar(state),
-      notification(state),
-      radialMenu(state),
-    ],
+    [viewport(state), toolbar(state), notification(state)],
   );
 }
 
