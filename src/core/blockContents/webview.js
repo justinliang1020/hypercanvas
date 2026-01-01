@@ -254,7 +254,7 @@ function buttons(state, block) {
       onpointerover: stopPropagation,
       onpointerleave: stopPropagation,
     },
-    [backButton(state), forwardButton(state)],
+    [backButton(state, block), forwardButton(state, block)],
   );
 }
 
@@ -287,40 +287,33 @@ function titleBar(state, block) {
 
 /**
  * @param {State} state
+ * @param {Block} block
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-export function backButton(state) {
-  return navigationButton(state, "back", "←");
+export function backButton(state, block) {
+  return navigationButton(state, block, "back", "←");
 }
 
 /**
  * @param {State} state
+ * @param {Block} block
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-export function forwardButton(state) {
-  return navigationButton(state, "forward", "→");
+export function forwardButton(state, block) {
+  return navigationButton(state, block, "forward", "→");
 }
 
 /**
  * @param {State} state
+ * @param {Block} block
  * @param {"back" | "forward"} direction
  * @param {string} display
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-function navigationButton(state, direction, display) {
-  const editingBlock = getEditingBlock(state);
-
+function navigationButton(state, block, direction, display) {
   const { enabled, webview: webviewElement } = (() => {
-    if (
-      !editingBlock ||
-      editingBlock.type !== "webview" ||
-      !editingBlock.domReady
-    ) {
-      return { enabled: false, webview: undefined };
-    }
-
     const webviewElement = /** @type {import("electron").WebviewTag} */ (
-      document.getElementById(webviewDomId(editingBlock.id))
+      document.getElementById(webviewDomId(block.id))
     );
 
     if (!webviewElement) {
