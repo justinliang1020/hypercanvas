@@ -93,3 +93,6 @@ out/
 
 # Local data for development
 local/
+
+# Hyperapp debugger
+src/debugger/debuggerScript.js

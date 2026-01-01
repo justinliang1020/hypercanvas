@@ -1,4 +1,12 @@
-import { getSelectedBlocks } from "../core/selection.js";
+// `log` is a git-ignored function of signature below, found in ./debuggerScript.js
+// write whatever functions needed to debug in the `log` function
+// /**
+//  * @param {State} state
+//  */
+// export function log(state) {
+//   ...
+// }
+import { log } from "./debuggerScript.js";
 
 /**
  * For now, i won't think about effects or manual dispatch. Only actions and state
@@ -20,18 +28,9 @@ export function dispatchMiddleware(dispatch) {
  */
 function updateHyperappDebuggerState(state) {
   /** @type {any} */ (window).hd.state = state;
-}
-
-function getFirstSelectedBlock() {
-  /** @type {State} */
-  const state = /** @type {any} */ (window).hd.state;
-
-  const selectedBlocks = getSelectedBlocks(state);
-  console.table(selectedBlocks[0]);
-  return selectedBlocks[0];
+  log(state);
 }
 
 /** @type {any} */ (window).hd = {
   state: null,
-  logFirstSelectedBlock: getFirstSelectedBlock,
 };
