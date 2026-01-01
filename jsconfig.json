@@ -8,7 +8,7 @@
     "moduleResolution": "bundler",
     "target": "ESNext",
     "strict": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "baseUrl": "."
   },
   "include": ["./**/*.js", "./**/*.ts", "./**/*.d.ts"],

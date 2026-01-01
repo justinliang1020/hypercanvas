@@ -561,7 +561,7 @@ export function addChildBlock(state, parentBlockId, src, isPreview) {
         });
       }
     },
-    (s) => allocateOpenSpaceForNewBlock(s, childBlockId),
+    // (s) => allocateOpenSpaceForNewBlock(s, childBlockId),
   );
 }
 
