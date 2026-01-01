@@ -209,20 +209,7 @@ export function blockView(state, block) {
       onpointerdown: onpointerdown,
     },
     [
-      h(
-        "div",
-        {
-          style: {
-            height: "100%",
-
-            overflow: "hidden",
-            borderRadius: `${BLOCK_BORDER_RADIUS}px`,
-          },
-          // onpointerdown: wrapperOnpointerdown,
-          onpointerover: wrapperOnpointerover,
-        },
-        contents,
-      ),
+      contents,
       ...((isSelected || isHovering || isResizing) && !isMultiSelect
         ? resizeHandles
         : []),
