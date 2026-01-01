@@ -20,11 +20,11 @@ function main(state) {
     {
       style: {
         //@ts-ignore
-        "--override-cursor": state.cursorStyleOverride,
+        "--override-cursor": state.cursorStyleOverride, // the --override-cursor variable is propagated to all children elements, so it only needs to be applied here
       },
       class: {
         "dark-mode": state.isDarkMode,
-        "cursor-style-override": state.cursorStyleOverride !== null,
+        "cursor-style-override": state.cursorStyleOverride !== null, // apply this line to any elements you want to override cursor styles on
       },
       onpointermove: (state, event) => {
         // should be "global" to always track mouse state

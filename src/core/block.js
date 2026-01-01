@@ -146,8 +146,6 @@ export function blockView(state, block) {
         touchAction: "none",
         transformOrigin: "top left",
         cursor: "move",
-        //@ts-ignore
-        "--override-cursor": state.cursorStyleOverride,
       },
       class: {
         block: true,

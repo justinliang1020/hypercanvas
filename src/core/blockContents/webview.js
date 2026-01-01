@@ -64,8 +64,6 @@ export function webviewBlockContents(state, block) {
           style: {
             height: "100%",
             cursor: "default",
-            //@ts-ignore
-            "--override-cursor": state.cursorStyleOverride,
           },
           class: {
             "cursor-style-override": state.cursorStyleOverride !== null,
