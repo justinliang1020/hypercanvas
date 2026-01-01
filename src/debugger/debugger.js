@@ -1,7 +1,4 @@
-/**
- * @typedef HyperappDebugger
- * @property {State} state
- */
+import { getSelectedBlocks } from "../core/selection.js";
 
 /**
  * For now, i won't think about effects or manual dispatch. Only actions and state
@@ -12,15 +9,29 @@ export function dispatchMiddleware(dispatch) {
     if (!Array.isArray(action) && typeof action !== "function") {
       const state = /** @type {State} */ (action);
 
-      updateHyperappDebuggerVariable({ state: state });
+      updateHyperappDebuggerState(state);
     }
     dispatch(action, payload);
   };
 }
 
 /**
- * @param {HyperappDebugger} hyperappDebugger
+ * @param {State} state
  */
-function updateHyperappDebuggerVariable(hyperappDebugger) {
-  /** @type {any} */ (window).hyperappDebugger = hyperappDebugger;
+function updateHyperappDebuggerState(state) {
+  /** @type {any} */ (window).hd.state = state;
 }
+
+function getFirstSelectedBlock() {
+  /** @type {State} */
+  const state = /** @type {any} */ (window).hd.state;
+
+  const selectedBlocks = getSelectedBlocks(state);
+  console.table(selectedBlocks[0]);
+  return selectedBlocks[0];
+}
+
+/** @type {any} */ (window).hd = {
+  state: null,
+  logFirstSelectedBlock: getFirstSelectedBlock,
+};
