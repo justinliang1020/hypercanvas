@@ -169,6 +169,7 @@ export function ResizeHandle({ handle, zoom, context }) {
     width: isEdge && ["n", "s"].includes(handle) ? "auto" : `${handleSize}px`,
     height: isEdge && ["e", "w"].includes(handle) ? "auto" : `${handleSize}px`,
     pointerEvents: "auto",
+    cursor: RESIZE_CURSORS[handle],
   };
 
   if (handle.includes("n")) style.top = `-${handleOffset}px`;
@@ -192,9 +193,7 @@ export function ResizeHandle({ handle, zoom, context }) {
    */
   function onpointerenter(state, event) {
     event.stopPropagation();
-    return updateState(state, {
-      cursorStyle: RESIZE_CURSORS[handle] || "default",
-    });
+    return state;
   }
 
   /**
@@ -204,7 +203,7 @@ export function ResizeHandle({ handle, zoom, context }) {
    */
   function onpointerleave(state, event) {
     event.stopPropagation();
-    return updateState(state, { cursorStyle: "default" });
+    return state;
   }
 
   const commonProps = {
@@ -243,10 +242,6 @@ export function ResizeHandle({ handle, zoom, context }) {
                 startY: block.y,
               },
             }),
-          (s) =>
-            updateState(s, {
-              cursorStyle: RESIZE_CURSORS[handle] || "default",
-            }),
         );
       },
     });
@@ -260,28 +255,24 @@ export function ResizeHandle({ handle, zoom, context }) {
       const selectedBlocks = getSelectedBlocks(state);
       const bbox = getSelectionBoundingBox(state);
       if (!bbox || selectedBlocks.length <= 1) return state;
-      return pipe(
-        state,
-        (s) =>
-          updateCurrentPage(s, {
-            resizing: {
-              id: "selection-bounding-box",
-              handle,
-              startWidth: bbox.width,
-              startHeight: bbox.height,
-              startX: bbox.x,
-              startY: bbox.y,
-              originalBlocks: selectedBlocks.map((block) => ({
-                id: block.id,
-                x: block.x,
-                y: block.y,
-                width: block.width,
-                height: block.height,
-              })),
-            },
-          }),
-        (s) =>
-          updateState(s, { cursorStyle: RESIZE_CURSORS[handle] || "default" }),
+      return pipe(state, (s) =>
+        updateCurrentPage(s, {
+          resizing: {
+            id: "selection-bounding-box",
+            handle,
+            startWidth: bbox.width,
+            startHeight: bbox.height,
+            startX: bbox.x,
+            startY: bbox.y,
+            originalBlocks: selectedBlocks.map((block) => ({
+              id: block.id,
+              x: block.x,
+              y: block.y,
+              width: block.width,
+              height: block.height,
+            })),
+          },
+        }),
       );
     },
   });

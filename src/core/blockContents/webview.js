@@ -61,7 +61,7 @@ export function webviewBlockContents(state, block) {
       h(
         "div",
         {
-          style: { height: "100%" },
+          style: { height: "100%", cursor: "default" },
           onpointerdown: enableEditingAndSelectedMode,
         },
         webview(state, block),
@@ -255,6 +255,7 @@ function toolbar(state, block) {
         borderRadius: "25px",
         border: "2px solid black",
         gap: "5px",
+        cursor: "default",
       },
       onpointerdown: stopPropagation,
       onpointerover: stopPropagation,

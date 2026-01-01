@@ -54,23 +54,10 @@ export function blockView(state, block) {
     const currentPage = getCurrentPage(state);
     if (!currentPage || isDraggingAnything) return state;
 
-    const cursorStyle = (() => {
-      const target = /** @type {HTMLElement} */ (event.target);
-      if (target.classList.contains("resize-handle")) {
-        return state.cursorStyle;
-      } else if (isMultiSelect || currentPage.editingId === block.id) {
-        return "default";
-      }
-      return "move";
-    })();
-
-    return pipe(
-      state,
-      (s) =>
-        updateCurrentPage(s, {
-          hoveringId: block.id,
-        }),
-      (s) => updateState(s, { cursorStyle: cursorStyle }),
+    return pipe(state, (s) =>
+      updateCurrentPage(s, {
+        hoveringId: block.id,
+      }),
     );
   }
 
@@ -161,6 +148,7 @@ export function blockView(state, block) {
         boxSizing: "border-box",
         touchAction: "none",
         transformOrigin: "top left",
+        cursor: "move",
       },
       class: { block: true },
       onpointerover: onpointerover,
