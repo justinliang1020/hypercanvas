@@ -30,6 +30,50 @@ function webviewDomId(blockId) {
  * @return {import("hyperapp").ElementVNode<State>}
  */
 export function webviewBlockContents(state, block) {
+  /**
+   * @param {State} state
+   * @param {PointerEvent} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function enableEditingMode(state, event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    return updateCurrentPage(state, { editingId: block.id });
+  }
+
+  return h(
+    "div",
+    {
+      style: {
+        height: "100%",
+        borderRadius: `${BLOCK_BORDER_RADIUS}px`,
+        overflow: "hidden",
+        outline: "3px solid black",
+        boxShadow: "0 0 20px 12px rgba(0, 0, 0, 0.25)",
+      },
+    },
+    [
+      buttons(state, block),
+      titleBar(state, block),
+      h(
+        "div",
+        {
+          style: { height: "100%" },
+          onpointerdown: enableEditingMode,
+        },
+        webview(state, block),
+      ),
+    ],
+  );
+}
+
+/**
+ * @param {State} state
+ * @param {WebviewBlock} block
+ * @return {import("hyperapp").ElementVNode<State>}
+ */
+function webview(state, block) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return h("div", {});
 
@@ -144,19 +188,7 @@ export function webviewBlockContents(state, block) {
     currentPage.fullScreenState && currentPage.fullScreenState.id === block.id;
   const isDragging = currentPage.dragStart !== null;
 
-  /**
-   * @param {State} state
-   * @param {PointerEvent} event
-   * @returns {import("hyperapp").Dispatchable<State>}
-   */
-  function enableEditingMode(state, event) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    return updateCurrentPage(state, { editingId: block.id });
-  }
-
-  const webview = h("webview", {
+  return h("webview", {
     style: {
       // this prevents the main process from lagging when attempting to do CSS transformations on webviews without domReady
       display: block.domReady ? "" : "none",
@@ -186,31 +218,6 @@ export function webviewBlockContents(state, block) {
     "onipc-message": (/** @type {State} */ state, /** @type {Event} */ event) =>
       handleIpcMessage(state, event),
   });
-
-  return h(
-    "div",
-    {
-      style: {
-        height: "100%",
-        borderRadius: `${BLOCK_BORDER_RADIUS}px`,
-        overflow: "hidden",
-        outline: "3px solid black",
-        boxShadow: "0 0 20px 12px rgba(0, 0, 0, 0.25)",
-      },
-    },
-    [
-      buttons(state, block),
-      titleBar(state, block),
-      h(
-        "div",
-        {
-          style: { height: "100%" },
-          onpointerdown: enableEditingMode,
-        },
-        webview,
-      ),
-    ],
-  );
 }
 
 /**
