@@ -199,6 +199,7 @@ export function webviewBlockContents(state, block) {
         borderRadius: `${BLOCK_BORDER_RADIUS}px`,
         overflow: "hidden",
         outline: "3px solid black",
+        boxShadow: "0 0 20px 12px rgba(0, 0, 0, 0.25)",
       },
     },
     [
