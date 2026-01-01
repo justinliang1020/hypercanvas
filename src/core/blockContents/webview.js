@@ -144,18 +144,6 @@ export function webviewBlockContents(state, block) {
     currentPage.fullScreenState && currentPage.fullScreenState.id === block.id;
   const isDragging = currentPage.dragStart !== null;
 
-  const titleBar = h(
-    "div",
-    {
-      style: {
-        height: "50px",
-        background: "white",
-        padding: "6px 10px",
-      },
-    },
-    [text("url")],
-  );
-
   /**
    * @param {State} state
    * @param {PointerEvent} event
@@ -167,6 +155,22 @@ export function webviewBlockContents(state, block) {
 
     return updateCurrentPage(state, { editingId: block.id });
   }
+
+  const buttons = h("div", { style: { position: "absolute", top: "-50px" } }, [
+    h("div", { style: { background: "white" } }, text("hello world")),
+  ]);
+
+  const titleBar = h(
+    "div",
+    {
+      style: {
+        height: "50px",
+        background: "white",
+        padding: "6px 10px",
+      },
+    },
+    [text("url")],
+  );
 
   const webview = h("webview", {
     style: {
@@ -210,6 +214,7 @@ export function webviewBlockContents(state, block) {
       },
     },
     [
+      buttons,
       titleBar,
       h(
         "div",
