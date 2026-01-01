@@ -19,6 +19,7 @@ interface WebviewBlock extends BaseBlock {
   isPreview: boolean;
   previewChildId: number | null;
   realChildrenIds: number[];
+  pageTitle: string;
 }
 
 interface TextBlock extends BaseBlock {

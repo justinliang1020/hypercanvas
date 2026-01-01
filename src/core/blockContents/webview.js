@@ -187,6 +187,15 @@ function webview(state, block) {
 
   /**
    * @param {State} state
+   * @param {import("electron").PageTitleUpdatedEvent} event
+   * @return {State}
+   */
+  function handlePageTitleUpdated(state, event) {
+    return updateBlock(state, block.id, { pageTitle: event.title });
+  }
+
+  /**
+   * @param {State} state
    * @param {import("electron").DidNavigateEvent} event
    * @return {State}
    */
@@ -226,6 +235,7 @@ function webview(state, block) {
       handleDomReady(state, event),
     "onipc-message": (/** @type {State} */ state, /** @type {Event} */ event) =>
       handleIpcMessage(state, event),
+    "onpage-title-updated": handlePageTitleUpdated,
   });
 }
 
@@ -280,8 +290,6 @@ function toolbar(state, block) {
 function titleBar(state, block) {
   const currentPage = getCurrentPage(state);
   const isSelected = currentPage.selectedIds.includes(block.id);
-  const webviewElement = getWebviewElementIfDomReady(block);
-  const titleText = webviewElement ? webviewElement.getTitle() : "";
 
   return h(
     "div",
@@ -304,7 +312,7 @@ function titleBar(state, block) {
       h(
         "div",
         { style: { fontSize: "2em", whiteSpace: "nowrap" } },
-        text(titleText),
+        text(block.pageTitle),
       ),
     ],
   );
@@ -416,6 +424,7 @@ export const DEFAULT_WEBVIEW_BLOCK_CONFIG = {
   previewChildId: null,
   realChildrenIds: [],
   domReady: false,
+  pageTitle: "",
 };
 
 /**
