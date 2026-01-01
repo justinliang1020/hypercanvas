@@ -196,6 +196,7 @@ function webview(state, block) {
 
   const isSelected = currentPage.selectedIds.includes(block.id);
   const isResizing = Boolean(currentPage.resizing);
+  const isDragging = Boolean(currentPage.dragStart);
 
   return h("webview", {
     style: {
@@ -206,7 +207,7 @@ function webview(state, block) {
       overflow: "hidden",
       border: "none",
       backgroundColor: "white",
-      pointerEvents: `${isSelected && !isResizing ? "" : "none"}`,
+      pointerEvents: `${isSelected && !isResizing && !isDragging ? "" : "none"}`,
       ...(block.isPreview ? previewStyles : {}),
     },
     class: `${BLOCK_CONTENTS_CLASS_NAME} webview`,
