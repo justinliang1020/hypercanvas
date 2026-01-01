@@ -229,10 +229,11 @@ function titleBar(state, block) {
         height: "50px",
         background: "white",
         padding: "6px 10px",
-        borderBottom: "1px solid black",
+        borderBottom: "2px solid black",
         display: "flex",
         flexDirection: "row",
         justifyContent: "space-between",
+        alignItems: "center",
       },
     },
     [
