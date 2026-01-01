@@ -196,6 +196,18 @@ function webview(state, block) {
 
   /**
    * @param {State} state
+   * @param {import("electron").PageFaviconUpdatedEvent} event
+   * @return {State}
+   */
+  function handlePageFaviconUpdated(state, event) {
+    const firstFaviconUrl = event.favicons.at(0);
+    return updateBlock(state, block.id, {
+      faviconUrl: firstFaviconUrl ?? null,
+    });
+  }
+
+  /**
+   * @param {State} state
    * @param {import("electron").DidNavigateEvent} event
    * @return {State}
    */
@@ -246,6 +258,7 @@ function webview(state, block) {
     "onipc-message": (/** @type {State} */ state, /** @type {Event} */ event) =>
       handleIpcMessage(state, event),
     "onpage-title-updated": handlePageTitleUpdated,
+    "onpage-favicon-updated": handlePageFaviconUpdated,
   });
 }
 
@@ -321,9 +334,25 @@ function titleBar(state, block) {
       urlBar(state, block),
       h(
         "div",
-        { style: { fontSize: "2em", whiteSpace: "nowrap" } },
-        text(block.pageTitle),
+        {
+          style: {
+            display: "flex",
+            flexDirection: "row",
+          },
+        },
+        [
+          h("img", {
+            src: block.faviconUrl,
+            style: { height: "100%" },
+          }),
+          h(
+            "div",
+            { style: { fontSize: "2em", whiteSpace: "nowrap" } },
+            text(block.pageTitle),
+          ),
+        ],
       ),
+      ,
     ],
   );
 }
@@ -433,6 +462,7 @@ export const DEFAULT_WEBVIEW_BLOCK_CONFIG = {
   pageTitle: "",
   canGoBack: false,
   canGoForward: false,
+  faviconUrl: null,
 };
 
 /**

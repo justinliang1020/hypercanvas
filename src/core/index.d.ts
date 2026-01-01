@@ -20,6 +20,7 @@ interface WebviewBlock extends BaseBlock {
   previewChildId: number | null;
   realChildrenIds: number[];
   pageTitle: string;
+  faviconUrl: string | null;
   canGoBack: boolean;
   canGoForward: boolean;
 }
