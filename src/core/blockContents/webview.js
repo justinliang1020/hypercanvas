@@ -4,10 +4,7 @@ import {
   updateBlock,
   addWebviewBlockToViewportCenter,
 } from "../block.js";
-import {
-  BLOCK_BORDER_RADIUS,
-  BLOCK_CONTENTS_CLASS_NAME,
-} from "../constants.js";
+import { BLOCK_CONTENTS_CLASS_NAME } from "../constants.js";
 import {
   getCurrentBlocks,
   getCurrentPage,
@@ -50,15 +47,15 @@ export function webviewBlockContents(state, block) {
     {
       style: {
         height: "100%",
-        borderRadius: `${BLOCK_BORDER_RADIUS}px`,
+        borderRadius: "15px",
         overflow: "hidden",
         boxSizing: "border-box",
         borderWidth: "2px",
         borderStyle: "solid",
         borderColor: isSelected ? "black" : "grey",
         boxShadow: isSelected
-          ? "0 0 25px 15px rgba(0, 0, 0, 0.25)"
-          : "0 0 10px 6px rgba(0, 0, 0, 0.25)",
+          ? "0 0 40px 8px rgba(0, 0, 0, 0.25)"
+          : "0 0 20px 6px rgba(0, 0, 0, 0.25)",
       },
     },
     [
