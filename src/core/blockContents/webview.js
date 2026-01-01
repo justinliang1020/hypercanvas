@@ -300,7 +300,7 @@ function titleBar(state, block) {
 
 /**
  * @param {State} state
- * @param {Block} block
+ * @param {WebviewBlock} block
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 export function backButton(state, block) {
@@ -309,7 +309,7 @@ export function backButton(state, block) {
 
 /**
  * @param {State} state
- * @param {Block} block
+ * @param {WebviewBlock} block
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 export function forwardButton(state, block) {
@@ -318,7 +318,7 @@ export function forwardButton(state, block) {
 
 /**
  * @param {State} state
- * @param {Block} block
+ * @param {WebviewBlock} block
  * @param {"back" | "forward"} direction
  * @param {string} display
  * @returns {import("hyperapp").ElementVNode<State>}
@@ -329,7 +329,7 @@ function navigationButton(state, block, direction, display) {
       document.getElementById(webviewDomId(block.id))
     );
 
-    if (!webviewElement) {
+    if (!webviewElement || !block.domReady) {
       return { enabled: false, webview: undefined };
     }
 
