@@ -226,9 +226,36 @@ function webview(state, block) {
  * @return {import("hyperapp").ElementVNode<State>}
  */
 function buttons(state, block) {
-  return h("div", { style: { position: "absolute", top: "-50px" } }, [
-    h("div", { style: { background: "white" } }, text("hello world")),
-  ]);
+  /**
+   * @param {State} state
+   * @param {PointerEvent} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function stopPropagation(state, event) {
+    event.stopPropagation();
+    return state;
+  }
+  return h(
+    "div",
+    {
+      style: {
+        position: "absolute",
+        top: "-80px",
+        left: "50%",
+        display: "flex",
+        flexDirection: "row",
+        background: "white",
+        padding: "10px 10px",
+        borderRadius: "25px",
+        border: "2px solid black",
+        gap: "5px",
+      },
+      onpointerdown: stopPropagation,
+      onpointerover: stopPropagation,
+      onpointerleave: stopPropagation,
+    },
+    [backButton(state), forwardButton(state)],
+  );
 }
 
 /**
@@ -339,7 +366,16 @@ function navigationButton(state, direction, display) {
     {
       disabled: !enabled,
       onclick,
-      style: { whiteSpace: "nowrap" },
+      style: {
+        whiteSpace: "nowrap",
+        backgroundColor: "white",
+        border: "2px solid black",
+        borderRadius: "20px",
+        width: "34px",
+        height: "25px",
+        fontSize: "20px",
+        color: "black",
+      },
     },
     text(display),
   );
