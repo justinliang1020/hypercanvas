@@ -9,7 +9,7 @@ import {
 import { saveMementoAndReturn } from "./memento.js";
 import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
 import { getViewportCenterCoordinates } from "./viewport.js";
-import { clearUserClipboardEffect, pipe, updateState } from "./utils.js";
+import { clearUserClipboardEffect, pipe } from "./utils.js";
 import {
   getCurrentBlocks,
   updateCurrentPage,
@@ -69,13 +69,10 @@ export function blockView(state, block) {
   function onpointerleave(state, event) {
     event.stopPropagation();
     if (isDraggingAnything) return state;
-    return pipe(
-      state,
-      (s) =>
-        updateCurrentPage(s, {
-          hoveringId: null,
-        }),
-      (s) => updateState(s, { cursorStyle: "default" }),
+    return pipe(state, (s) =>
+      updateCurrentPage(s, {
+        hoveringId: null,
+      }),
     );
   }
 

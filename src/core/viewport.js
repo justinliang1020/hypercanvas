@@ -18,7 +18,6 @@ import {
   selectionBoundingBox,
   selectionBoxComponent,
 } from "./selection.js";
-import { pipe, updateState } from "./utils.js";
 
 /**
  * Calculates canvas coordinates from screen coordinates
@@ -35,22 +34,6 @@ export function getCanvasCoordinates(clientX, clientY, state) {
   const canvasX = (clientX - canvasRect.left) / viewport.zoom;
   const canvasY = (clientY - canvasRect.top) / viewport.zoom;
   return { canvasX, canvasY };
-}
-
-/**
- * Handles middle mouse button down for viewport dragging
- * @param {State} state - Application state
- * @returns {import("hyperapp").Dispatchable<State>}
- */
-function handleMiddleMouseDown(state) {
-  return pipe(
-    state,
-    (s) =>
-      updateCurrentPage(s, {
-        isViewportDragging: true,
-      }),
-    (s) => updateState(s, { cursorStyle: "grabbing" }),
-  );
 }
 
 /**
@@ -121,10 +104,6 @@ function onselectstart(state, event) {
  * @returns {import("hyperapp").Dispatchable<State>}
  */
 function onpointerdown(state, event) {
-  if (event.button === 1) {
-    return handleMiddleMouseDown(state);
-  }
-
   const { canvasX, canvasY } = getCanvasCoordinates(
     event.clientX,
     event.clientY,

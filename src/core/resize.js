@@ -11,7 +11,7 @@ import {
   getSelectedBlocks,
   selectBlock,
 } from "./selection.js";
-import { pipe, updateState } from "./utils.js";
+import { pipe } from "./utils.js";
 
 /**
  * @type {Record<ResizeString, ResizeHandler>}
