@@ -154,18 +154,12 @@ function applyAspectRatioConstraint(dimensions, originalBlock, handle) {
  */
 export function resizeHandle({ handle, zoom, context }) {
   const handleSize = 10 / zoom;
-  // const handleOffset = 5 / zoom;
   const handleOffset = 5 / zoom;
-  const borderWidth = 1 / zoom;
-
-  const isCorner = ["nw", "ne", "sw", "se"].includes(handle);
   const isEdge = ["n", "s", "e", "w"].includes(handle);
 
   /** @type {import("hyperapp").StyleProp} */
   const style = {
     position: "absolute",
-    backgroundColor: isCorner ? "white" : "transparent",
-    border: isCorner ? `${borderWidth}px solid blue` : "none",
     width: isEdge && ["n", "s"].includes(handle) ? "auto" : `${handleSize}px`,
     height: isEdge && ["e", "w"].includes(handle) ? "auto" : `${handleSize}px`,
     pointerEvents: "auto",
