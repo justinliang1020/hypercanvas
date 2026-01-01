@@ -222,19 +222,20 @@ function webview(state, block) {
 
 /**
  * @param {State} state
+ * @param {Event} event
+ * @returns {import("hyperapp").Dispatchable<State>}
+ */
+function stopPropagation(state, event) {
+  event.stopPropagation();
+  return state;
+}
+
+/**
+ * @param {State} state
  * @param {WebviewBlock} block
  * @return {import("hyperapp").ElementVNode<State>}
  */
 function buttons(state, block) {
-  /**
-   * @param {State} state
-   * @param {PointerEvent} event
-   * @returns {import("hyperapp").Dispatchable<State>}
-   */
-  function stopPropagation(state, event) {
-    event.stopPropagation();
-    return state;
-  }
   return h(
     "div",
     {
@@ -279,7 +280,7 @@ function titleBar(state, block) {
       },
     },
     [
-      h("div", { style: { fontSize: "2em" } }, text(block.currentSrc)),
+      urlBar(state, block),
       h("div", { style: { fontSize: "2em" } }, text("title")),
     ],
   );
@@ -403,19 +404,11 @@ export const DEFAULT_WEBVIEW_BLOCK_CONFIG = {
 
 /**
  * @param {State} state - Current application state
+ * @param {WebviewBlock} block
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-function searchBar(state) {
-  let searchBarValue = "";
-
-  const editingBlock = getEditingBlock(state);
-  const hoveredBlock = getHoveredBlock(state);
-
-  if (editingBlock && editingBlock.type === "webview" && editingBlock) {
-    searchBarValue = editingBlock.currentSrc;
-  } else if (hoveredBlock && hoveredBlock.type === "webview") {
-    searchBarValue = hoveredBlock.currentSrc;
-  }
+function urlBar(state, block) {
+  let searchBarValue = block.currentSrc;
 
   /**
    * @param {State} state
@@ -423,11 +416,10 @@ function searchBar(state) {
    * @returns {import("hyperapp").Dispatchable<State>}
    */
   function oninput(state, event) {
-    if (!editingBlock) return state;
     if (!event.target) return state;
     const value = /** @type {HTMLInputElement} */ (event.target).value;
 
-    return updateBlock(state, editingBlock.id, {
+    return updateBlock(state, block.id, {
       currentSrc: value,
     });
   }
@@ -439,19 +431,18 @@ function searchBar(state) {
    */
   function onsubmit(state, event) {
     event.preventDefault();
-    const editingBlock = getEditingBlock(state);
-    if (editingBlock && editingBlock.type === "webview") {
-      return updateBlock(state, editingBlock.id, {
-        initialSrc: editingBlock.currentSrc,
-      });
-    }
-    return state;
+    return updateBlock(state, block.id, {
+      initialSrc: block.currentSrc,
+    });
   }
 
   return h(
     "form",
     {
       onsubmit,
+
+      // stop keyboard shortcuts from triggering
+      onkeydown: stopPropagation,
       style: {
         width: "100%",
       },
@@ -459,20 +450,18 @@ function searchBar(state) {
     h("input", {
       type: "text",
       value: searchBarValue,
-      disabled: !editingBlock,
       style: {
-        width: "100%",
+        width: "30%",
         boxSizing: "border-box",
-        backgroundColor: "transparent",
-        border: "none",
+        borderRadius: "10px",
+        backgroundColor: "#F0F0F0",
+        border: "1px solid black",
+        fontSize: "2em",
         outline: "none", // disable orange editing border
       },
+      onsubmit,
       oninput,
-      // stop keyboard shortcuts from triggering
-      onkeydown: (state, event) => {
-        event.stopPropagation();
-        return state;
-      },
+      onpointerdown: stopPropagation,
     }),
   );
 }
