@@ -8,7 +8,11 @@ import {
   BLOCK_BORDER_RADIUS,
   BLOCK_CONTENTS_CLASS_NAME,
 } from "../constants.js";
-import { getCurrentBlocks, getCurrentPage } from "../pages.js";
+import {
+  getCurrentBlocks,
+  getCurrentPage,
+  updateCurrentPage,
+} from "../pages.js";
 import { getEditingBlock, getHoveredBlock } from "../selection.js";
 import { pipe } from "../utils.js";
 
@@ -140,7 +144,31 @@ export function webviewBlockContents(state, block) {
     currentPage.fullScreenState && currentPage.fullScreenState.id === block.id;
   const isDragging = currentPage.dragStart !== null;
 
-  return h("webview", {
+  const titleBar = h(
+    "div",
+    {
+      style: {
+        height: "50px",
+        background: "white",
+        padding: "6px 10px",
+      },
+    },
+    [text("url")],
+  );
+
+  /**
+   * @param {State} state
+   * @param {PointerEvent} event
+   * @returns {import("hyperapp").Dispatchable<State>}
+   */
+  function enableEditingMode(state, event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    return updateCurrentPage(state, { editingId: block.id });
+  }
+
+  const webview = h("webview", {
     style: {
       // this prevents the main process from lagging when attempting to do CSS transformations on webviews without domReady
       display: block.domReady ? "" : "none",
@@ -149,7 +177,6 @@ export function webviewBlockContents(state, block) {
       overflow: "hidden",
       border: "none",
       backgroundColor: "white",
-      borderRadius: `${BLOCK_BORDER_RADIUS}px`,
       boxShadow: isEditing ? "0 0px 10px 10px orange" : "",
       pointerEvents: `${(isEditing || isFullScreen) && !isDragging ? "" : "none"}`,
       ...(block.isPreview ? previewStyles : {}),
@@ -171,6 +198,18 @@ export function webviewBlockContents(state, block) {
     "onipc-message": (/** @type {State} */ state, /** @type {Event} */ event) =>
       handleIpcMessage(state, event),
   });
+  return h("div", { style: { height: "100%" } }, [
+    titleBar,
+    h(
+      "div",
+      {
+        style: { height: "100%" },
+
+        onpointerdown: enableEditingMode,
+      },
+      webview,
+    ),
+  ]);
 }
 
 /**

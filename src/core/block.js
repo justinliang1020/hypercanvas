@@ -10,6 +10,7 @@ import {
   BLOCK_PADDING,
   NEW_CHILD_BLOCK_OFFSET_X,
   BLOCK_OPEN_SPACE_PUSH_OFFSET,
+  BLOCK_BORDER_RADIUS,
 } from "./constants.js";
 import { saveMementoAndReturn } from "./memento.js";
 import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
@@ -201,11 +202,6 @@ export function blockView(state, block) {
         boxSizing: "border-box",
         touchAction: "none",
         transformOrigin: "top left",
-        padding: `${BLOCK_PADDING}px`,
-        backgroundColor:
-          (isHovering || isSelected || isResizing) && !isMultiSelect
-            ? "#a9ad974d"
-            : "transparent",
       },
       class: { block: true },
       onpointerover: onpointerover,
@@ -218,8 +214,11 @@ export function blockView(state, block) {
         {
           style: {
             height: "100%",
+
+            overflow: "hidden",
+            borderRadius: `${BLOCK_BORDER_RADIUS}px`,
           },
-          onpointerdown: wrapperOnpointerdown,
+          // onpointerdown: wrapperOnpointerdown,
           onpointerover: wrapperOnpointerover,
         },
         contents,
