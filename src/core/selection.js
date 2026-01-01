@@ -5,7 +5,7 @@ import {
   updateCurrentPage,
   getCurrentViewport,
 } from "./pages.js";
-import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
+import { RESIZE_HANDLERS, resizeHandle } from "./resize.js";
 import { saveMementoAndReturn } from "./memento.js";
 import { Z_INDEX_TOP } from "./constants.js";
 import { pipe, updateState } from "./utils.js";
@@ -427,7 +427,7 @@ export function selectionBoundingBox(state) {
     },
     // Add resize handles for multi-select
     Object.keys(RESIZE_HANDLERS).map((handle) =>
-      ResizeHandle({
+      resizeHandle({
         handle: /** @type{ResizeString} */ (handle),
         zoom: viewport.zoom,
         context: "multi",

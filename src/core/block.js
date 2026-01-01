@@ -7,7 +7,7 @@ import {
   NEW_CHILD_BLOCK_OFFSET_X,
 } from "./constants.js";
 import { saveMementoAndReturn } from "./memento.js";
-import { RESIZE_HANDLERS, ResizeHandle } from "./resize.js";
+import { RESIZE_HANDLERS, resizeHandle } from "./resize.js";
 import { getViewportCenterCoordinates } from "./viewport.js";
 import { clearUserClipboardEffect, pipe } from "./utils.js";
 import {
@@ -119,7 +119,7 @@ export function blockView(state, block) {
   })();
 
   const resizeHandles = Object.keys(RESIZE_HANDLERS).map((handle) =>
-    ResizeHandle({
+    resizeHandle({
       handle: /** @type{ResizeString} */ (handle),
       zoom: currentPage.zoom,
       context: "block",

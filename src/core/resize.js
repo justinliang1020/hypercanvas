@@ -152,7 +152,7 @@ function applyAspectRatioConstraint(dimensions, originalBlock, handle) {
  * }} props
  * @returns {import("hyperapp").ElementVNode<any>}
  */
-export function ResizeHandle({ handle, zoom, context }) {
+export function resizeHandle({ handle, zoom, context }) {
   const handleSize = 10 / zoom;
   // const handleOffset = 5 / zoom;
   const handleOffset = 5 / zoom;
