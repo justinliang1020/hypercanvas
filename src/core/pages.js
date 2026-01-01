@@ -3,10 +3,14 @@ import { saveMementoAndReturn } from "./memento.js";
 /**
  * Gets the current page from state
  * @param {State} state - Current application state
- * @returns {Page|undefined} Current page or undefined if not found
+ * @returns {Page} Current page or undefined if not found
  */
 export function getCurrentPage(state) {
-  return state.pages.find((page) => page.id === state.currentPageId);
+  const currentPage = state.pages.find(
+    (page) => page.id === state.currentPageId,
+  );
+  if (!currentPage) throw Error("no current page");
+  return currentPage;
 }
 
 /**

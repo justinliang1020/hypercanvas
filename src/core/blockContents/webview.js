@@ -13,7 +13,6 @@ import {
   getCurrentPage,
   updateCurrentPage,
 } from "../pages.js";
-import { getEditingBlock, getHoveredBlock } from "../selection.js";
 import { pipe } from "../utils.js";
 
 /**
@@ -35,11 +34,14 @@ export function webviewBlockContents(state, block) {
    * @param {PointerEvent} event
    * @returns {import("hyperapp").Dispatchable<State>}
    */
-  function enableEditingMode(state, event) {
+  function enableEditingAndSelectedMode(state, event) {
     event.preventDefault();
     event.stopPropagation();
 
-    return updateCurrentPage(state, { editingId: block.id });
+    return updateCurrentPage(state, {
+      editingId: block.id,
+      selectedIds: [block.id],
+    });
   }
 
   return h(
@@ -54,13 +56,13 @@ export function webviewBlockContents(state, block) {
       },
     },
     [
-      buttons(state, block),
+      toolbar(state, block),
       titleBar(state, block),
       h(
         "div",
         {
           style: { height: "100%" },
-          onpointerdown: enableEditingMode,
+          onpointerdown: enableEditingAndSelectedMode,
         },
         webview(state, block),
       ),
@@ -235,7 +237,10 @@ function stopPropagation(state, event) {
  * @param {WebviewBlock} block
  * @return {import("hyperapp").ElementVNode<State>}
  */
-function buttons(state, block) {
+function toolbar(state, block) {
+  const currentPage = getCurrentPage(state);
+  if (!currentPage) return h("div", {});
+  const isSelected = currentPage.selectedIds.includes(block.id);
   return h(
     "div",
     {
@@ -243,7 +248,7 @@ function buttons(state, block) {
         position: "absolute",
         top: "-80px",
         left: "50%",
-        display: "flex",
+        display: isSelected ? "flex" : "none",
         flexDirection: "row",
         background: "white",
         padding: "10px 10px",
