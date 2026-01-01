@@ -156,10 +156,6 @@ export function webviewBlockContents(state, block) {
     return updateCurrentPage(state, { editingId: block.id });
   }
 
-  const buttons = h("div", { style: { position: "absolute", top: "-50px" } }, [
-    h("div", { style: { background: "white" } }, text("hello world")),
-  ]);
-
   const webview = h("webview", {
     style: {
       // this prevents the main process from lagging when attempting to do CSS transformations on webviews without domReady
@@ -203,7 +199,7 @@ export function webviewBlockContents(state, block) {
       },
     },
     [
-      buttons,
+      buttons(state, block),
       titleBar(state, block),
       h(
         "div",
@@ -215,6 +211,17 @@ export function webviewBlockContents(state, block) {
       ),
     ],
   );
+}
+
+/**
+ * @param {State} state
+ * @param {WebviewBlock} block
+ * @return {import("hyperapp").ElementVNode<State>}
+ */
+function buttons(state, block) {
+  return h("div", { style: { position: "absolute", top: "-50px" } }, [
+    h("div", { style: { background: "white" } }, text("hello world")),
+  ]);
 }
 
 /**
