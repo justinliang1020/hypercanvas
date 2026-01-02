@@ -499,7 +499,8 @@ function drawBackgroundEffect(dispatch, props) {
       gradient.addColorStop(1, "#F3F4D7");
 
       ctx.fillStyle = gradient;
-      ctx.fillRect(x0, 0, x1 - x0, canvas.height);
+      // Extend by 1px to prevent gaps from floating-point rounding
+      ctx.fillRect(x0, 0, x1 - x0 + 1, canvas.height);
     }
   });
 }
