@@ -351,7 +351,7 @@ function titleBar(state, block) {
         [
           h("img", {
             src: block.faviconUrl,
-            style: { height: "100%" },
+            style: { height: "100%", pointerEvents: "none" },
           }),
           h(
             "div",
