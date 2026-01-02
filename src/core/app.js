@@ -3,9 +3,14 @@ import { STATE_SAVE_PATH } from "./constants.js";
 import { createMementoManager } from "./memento.js";
 import { viewport } from "./viewport.js";
 import { keydownSubscription, keyupSubscription } from "./keyboard.js";
-import { notification, saveApplication, updateState } from "./utils.js";
+import {
+  throttle,
+  notification,
+  saveApplication,
+  updateState,
+} from "./utils.js";
 import { defaultPage } from "./pages.js";
-import { dispatchMiddleware } from "../debugger/debugger.js";
+import { updateHyperappDebuggerState } from "../debugger/debugger.js";
 
 initialize();
 
@@ -82,6 +87,25 @@ function themeChangeSubscription(dispatch) {
   return () => {
     // @ts-ignore
     window.electronAPI.removeThemeListener(listener);
+  };
+}
+
+// Create throttled save function once at module level - saves at most once every 2 seconds
+const throttledSave = throttle(saveApplication, 2000);
+
+/**
+ * For now, i won't think about effects or manual dispatch. Only actions and state
+ * @type {(dispatch: import("hyperapp").Dispatch<State>) => import("hyperapp").Dispatch<State>}
+ */
+function dispatchMiddleware(dispatch) {
+  return (action, payload) => {
+    if (!Array.isArray(action) && typeof action !== "function") {
+      const state = /** @type {State} */ (action);
+
+      updateHyperappDebuggerState(state);
+      throttledSave(state);
+    }
+    dispatch(action, payload);
   };
 }
 

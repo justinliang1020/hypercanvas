@@ -284,6 +284,53 @@ export function updateState(state, newState) {
 }
 
 /**
+ * Creates a throttled version of a function that executes at most once per specified time period
+ * @template {(...args: any[]) => any} T
+ * @param {T} func - The function to throttle (can be async)
+ * @param {number} limit - The minimum time in milliseconds between executions
+ * @returns {(...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>>} The throttled async function
+ * @example
+ * const throttledSave = throttle(saveApplication, 2000);
+ * await throttledSave(state); // Will execute immediately, then at most once every 2 seconds
+ */
+export function throttle(func, limit) {
+  /** @type {number | null} */
+  let lastRun = null;
+  /** @type {number | null} */
+  let timeoutId = null;
+
+  return async function (...args) {
+    const now = Date.now();
+
+    if (lastRun === null || now - lastRun >= limit) {
+      // Execute immediately if enough time has passed
+      lastRun = now;
+      return await func(...args);
+    } else {
+      // Schedule execution for when the time limit is reached
+      return new Promise((resolve, reject) => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        timeoutId = setTimeout(
+          async () => {
+            lastRun = Date.now();
+            try {
+              const result = await func(...args);
+              resolve(result);
+            } catch (error) {
+              reject(error);
+            }
+            timeoutId = null;
+          },
+          limit - (now - lastRun),
+        );
+      });
+    }
+  };
+}
+
+/**
  * https://x.com/stevekrouse/status/1988257237442171071/photo/1
  * @template T
  * @param {T} value - Initial value to pipe through functions
