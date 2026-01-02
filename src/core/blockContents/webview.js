@@ -235,8 +235,8 @@ function webview(state, block) {
 
   return h("webview", {
     style: {
-      // this prevents the main process from lagging when attempting to do CSS transformations on webviews without domReady
-      display: block.domReady ? "" : "none",
+      display: block.domReady ? "" : "none", // this prevents the main process from lagging when attempting to do CSS transformations on webviews without domReady
+      willChange: "transform", // improves performance of rendered blocks. for now only put this on webview blocks to see if performance improves
       width: "100%",
       height: "100%",
       overflow: "hidden",

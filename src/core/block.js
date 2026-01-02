@@ -134,7 +134,6 @@ export function blockView(state, block) {
       "data-id": block.id,
       style: {
         // outline hides the background when in full screen mode
-        willChange: "transform", // improves performance of rendered blocks
         transform: `translate(${block.x}px, ${block.y}px)`,
         width: `${block.width}px`,
         height: `${block.height}px`,
