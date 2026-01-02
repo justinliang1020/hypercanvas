@@ -333,8 +333,8 @@ function titleBar(state, block) {
       style: {
         height: "50px",
         background: isSelected
-          ? "rgb(222,222,222,0.4)"
-          : "rgb(240,240,240,0.4)",
+          ? " linear-gradient(90deg, rgba(201, 201, 201, 0.25) 0%, rgba(177, 159, 159, 0.25) 100%)"
+          : "linear-gradient(90deg, rgba(240, 240, 240, 0.25) 0%, rgba(215, 212, 212, 0.25) 100%)",
         backdropFilter: "blur(5px)",
         padding: "6px 15px",
         borderBottomWidth: "2px",
