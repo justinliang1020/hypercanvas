@@ -37,13 +37,18 @@ export function webviewBlockContents(state, block) {
    * @param {PointerEvent} event
    * @returns {import("hyperapp").Dispatchable<State>}
    */
-  function enableSelectedMode(state, event) {
+  function webviewWrapperOnPointerDown(state, event) {
     event.preventDefault();
     event.stopPropagation();
 
-    return updateCurrentPage(state, {
-      selectedIds: [block.id],
-    });
+    return pipe(
+      state,
+      (state) =>
+        updateCurrentPage(state, {
+          selectedIds: [block.id],
+        }),
+      (state) => updateBlock(state, block.id, { isPreview: false }),
+    );
   }
 
   return h(
@@ -70,12 +75,12 @@ export function webviewBlockContents(state, block) {
         {
           style: {
             height: "100%",
-            cursor: "default",
+            cursor: block.isPreview ? "pointer" : "auto",
           },
           class: {
             "cursor-style-override": state.cursorStyleOverride !== null,
           },
-          onpointerdown: enableSelectedMode,
+          onpointerdown: webviewWrapperOnPointerDown,
         },
         webview(state, block),
       ),
