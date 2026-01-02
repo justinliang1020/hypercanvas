@@ -21,6 +21,14 @@ function webviewDomId(blockId) {
 }
 
 /**
+ * @param {number} blockId
+ * @returns {string}
+ */
+function webviewUrlBarId(blockId) {
+  return `webview-urlbar-${blockId}`;
+}
+
+/**
  * @param {State} state
  * @param {WebviewBlock} block
  * @return {import("hyperapp").ElementVNode<State>}
@@ -499,6 +507,23 @@ function urlBar(state, block) {
   }
 
   /**
+   * Effect to select text in the URL bar input
+   * @param {Function} dispatch
+   * @param {number} blockId
+   */
+  function selectUrlBarTextEffect(dispatch, blockId) {
+    // requestAnimationFrame in order to wait for the new input value to change before selecting it
+    requestAnimationFrame(() => {
+      const input = /** @type {HTMLInputElement | null} */ (
+        document.getElementById(webviewUrlBarId(blockId))
+      );
+      if (input) {
+        input.select();
+      }
+    });
+  }
+
+  /**
    * @param {State} state
    * @param {Event} event
    * @returns {import("hyperapp").Dispatchable<State>}
@@ -506,10 +531,15 @@ function urlBar(state, block) {
   function expandUrlBar(state, event) {
     event.stopPropagation();
 
+    if (block.isUrlBarExpanded) return state;
+
+    event.preventDefault();
+
     return [
       updateBlock(state, block.id, {
         isUrlBarExpanded: true,
       }),
+      [selectUrlBarTextEffect, block.id],
     ];
   }
 
@@ -534,6 +564,7 @@ function urlBar(state, block) {
     },
     h("input", {
       type: "text",
+      id: webviewUrlBarId(block.id),
       value: block.isUrlBarExpanded
         ? block.currentSrc
         : getDomainFromUrl(block.currentSrc),
