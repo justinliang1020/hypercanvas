@@ -327,7 +327,9 @@ function titleBar(state, block) {
     {
       style: {
         height: "50px",
-        background: isSelected ? "#DEDEDE" : "#F0F0F0",
+        background: isSelected
+          ? "rg(222,222,222,0.5)"
+          : "#RGB(240,240,240,0.5)",
         padding: "6px 10px",
         borderBottomWidth: "2px",
         borderBottomStyle: "solid",
