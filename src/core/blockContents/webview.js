@@ -553,9 +553,14 @@ function urlBar(state, block) {
     event.preventDefault();
 
     return [
-      updateBlock(state, block.id, {
-        isUrlBarExpanded: true,
-      }),
+      pipe(
+        state,
+        (state) =>
+          updateBlock(state, block.id, {
+            isUrlBarExpanded: true,
+          }),
+        (state) => updateCurrentPage(state, { selectedIds: [block.id] }),
+      ),
       [selectUrlBarTextEffect, block.id],
     ];
   }
