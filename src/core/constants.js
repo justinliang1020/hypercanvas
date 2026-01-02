@@ -33,5 +33,5 @@ export const NEW_CHILD_BLOCK_OFFSET_X = 100;
 
 export const Z_INDEX_TOP = 100000;
 export const Z_INDEX_BOTTOM = -100000;
-export const MIN_ZOOM = 0.2;
+export const MIN_ZOOM = 0.15;
 export const MAX_ZOOM = 1.4; // get performance issues from zooming in too much
