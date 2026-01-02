@@ -302,15 +302,15 @@ function toolbar(state, block) {
         flexDirection: "row",
         background:
           "linear-gradient(90deg, rgba(240, 240, 240, 0.25) 0%, rgba(215, 212, 212, 0.25) 100%)",
-        padding: "10px 30px",
+        padding: "10px 45px",
         borderRadius: "25px",
-        border: "2px solid black",
+        border: "2px solid grey",
         gap: "5px",
-        cursor: "default",
       },
-      onpointerdown: stopPropagation,
-      onpointerover: stopPropagation,
-      onpointerleave: stopPropagation,
+      // Allow toolbar to be draggable
+      // onpointerdown: stopPropagation,
+      // onpointerover: stopPropagation,
+      // onpointerleave: stopPropagation,
     },
     [
       backButton(state, block),
