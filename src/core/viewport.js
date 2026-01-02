@@ -453,6 +453,38 @@ function onwheel(state, event) {
 
   return state;
 }
+
+/**
+ * Effect to draw background gradient on canvas
+ * @param {Object} dispatch - Hyperapp dispatch function
+ * @param {Object} props - Props containing offsetX, offsetY, zoom
+ */
+function drawBackgroundEffect(dispatch, props) {
+  requestAnimationFrame(() => {
+    const canvas = document.getElementById("background-canvas");
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Set canvas size to window size
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Calculate gradient that pans with viewport
+    const panFactor = 0.5;
+    const x0 = canvas.width + props.offsetX * panFactor;
+    const x1 = 0 + props.offsetX * panFactor;
+
+    const gradient = ctx.createLinearGradient(x0, 0, x1, 0);
+    gradient.addColorStop(0, "#F3F4D7");
+    gradient.addColorStop(1, "#E5AFAF");
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  });
+}
+
 /**
  * @param {State} state
  * @returns {import("hyperapp").ElementVNode<State>}
@@ -463,6 +495,13 @@ export function viewport(state) {
   const currentViewport = getCurrentViewport(state);
   if (!currentViewport) return h("div", {}, text("no current viewport"));
   const isFullScreen = currentPage.fullScreenState !== null;
+
+  // Trigger canvas redraw effect
+  drawBackgroundEffect(null, {
+    offsetX: currentPage.offsetX,
+    offsetY: currentPage.offsetY,
+    zoom: currentPage.zoom,
+  });
 
   return h(
     "div",
@@ -484,6 +523,16 @@ export function viewport(state) {
       onwheel: isFullScreen ? undefined : onwheel,
     },
     [
+      // Background canvas with gradient
+      h("canvas", {
+        id: "background-canvas",
+        style: {
+          position: "absolute",
+          width: "100%",
+          height: "100%",
+          pointerEvents: "none",
+        },
+      }),
       h(
         "div",
         {
@@ -505,6 +554,18 @@ export function viewport(state) {
             {},
             getCurrentBlocks(state).map((block) => blockView(state, block)),
           ),
+
+          // h("div", {
+          //   style: {
+          //     position: "absolute",
+          //     width: "400vw",
+          //     height: "400vh",
+          //     background: "linear-gradient(270deg, #F3F4D7 0%, #E5AFAF 100%)",
+          //     transform: `translate(${currentPage.offsetX}px, ${currentPage.offsetY}px) scale(${currentPage.zoom}) translateZ(0)`,
+          //     transformOrigin: "top left",
+          //     pointerEvents: "none",
+          //   },
+          // }),
           ...currentPage.links.map(linkView(state)),
           selectionBoundingBox(state),
           selectionBoxComponent(state),
