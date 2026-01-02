@@ -301,7 +301,7 @@ function toolbar(state, block) {
         display: isSelected ? "flex" : "none",
         flexDirection: "row",
         background:
-          "linear-gradient(90deg, rgba(240, 240, 240, 0.25) 0%, rgba(215, 212, 212, 0.25) 100%)",
+          "linear-gradient(90deg, rgba(222, 222, 222, 0.25) 0%, rgba(195, 194, 194, 0.25) 100%)",
         padding: "10px 45px",
         borderRadius: "25px",
         border: "2px solid grey",
