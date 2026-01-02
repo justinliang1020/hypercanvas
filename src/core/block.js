@@ -500,12 +500,18 @@ export function updateBlock(state, blockId, newBlockConfig) {
 
 /**
  * @param {State} state
- * @param {number} blockId
+ * @param {number} targetBlockId
  * @returns {State}
  */
-export function deleteBlock(state, blockId) {
+export function deleteBlock(state, targetBlockId) {
+  const currentPage = getCurrentPage(state);
   const currentBlocks = getCurrentBlocks(state);
   return updateCurrentPage(state, {
-    blocks: currentBlocks.filter((block) => block.id !== blockId),
+    blocks: currentBlocks.filter((block) => block.id !== targetBlockId),
+    links: currentPage.links.filter(
+      (link) =>
+        link.childBlockId !== targetBlockId &&
+        link.parentBlockId !== targetBlockId,
+    ),
   });
 }
