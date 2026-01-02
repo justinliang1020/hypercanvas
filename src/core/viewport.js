@@ -493,9 +493,11 @@ function drawBackgroundEffect(dispatch, props) {
     const x1 = cycleWorldEnd * props.zoom + props.offsetX;
 
     const gradient = ctx.createLinearGradient(x0, 0, x1, 0);
-    gradient.addColorStop(0, "#F3F4D7");
-    gradient.addColorStop(0.5, "#E5AFAF");
-    gradient.addColorStop(1, "#F3F4D7");
+    const color1 = "#F1F1EC";
+    const color2 = "#E3C6C6";
+    gradient.addColorStop(0, color1);
+    gradient.addColorStop(0.5, color2);
+    gradient.addColorStop(1, color1);
 
     ctx.fillStyle = gradient;
     // Extend by 1px to prevent gaps from floating-point rounding
