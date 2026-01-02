@@ -38,8 +38,8 @@ export const OUTLINE_WIDTHS = {
 
 export const BLOCK_CONTENTS_CLASS_NAME = "block-contents";
 
-const blockContentsWidth = 500; // golden ratio lol
-const blockContentsHeight = 809; // golden ratio lol
+const blockContentsWidth = 1200;
+const blockContentsHeight = 1080;
 export const BLOCK_PADDING = 70;
 export const DEFAULT_BLOCK_WIDTH = blockContentsWidth + 2 * BLOCK_PADDING;
 export const DEFAULT_BLOCK_HEIGHT = blockContentsHeight + 2 * BLOCK_PADDING;
