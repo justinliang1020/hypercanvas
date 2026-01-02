@@ -460,49 +460,47 @@ function onwheel(state, event) {
  * @param {{offsetX: number, offsetY: number, zoom: number}} props - Props containing offsetX, offsetY, zoom
  */
 function drawBackgroundEffect(dispatch, props) {
-  requestAnimationFrame(() => {
-    const canvas = /** @type {HTMLCanvasElement | null} */ (
-      document.getElementById("background-canvas")
-    );
-    if (!canvas) return;
+  const canvas = /** @type {HTMLCanvasElement | null} */ (
+    document.getElementById("background-canvas")
+  );
+  if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
 
-    // Set canvas size to window size
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+  // Set canvas size to window size
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 
-    // Define one gradient cycle width in world coordinates
-    const repeatWidth = 10000;
+  // Define one gradient cycle width in world coordinates
+  const repeatWidth = 10000;
 
-    // Calculate visible world coordinate range
-    const visibleWorldStart = -props.offsetX / props.zoom;
-    const visibleWorldEnd = (canvas.width - props.offsetX) / props.zoom;
+  // Calculate visible world coordinate range
+  const visibleWorldStart = -props.offsetX / props.zoom;
+  const visibleWorldEnd = (canvas.width - props.offsetX) / props.zoom;
 
-    // Find which gradient cycles are visible
-    const firstCycle = Math.floor(visibleWorldStart / repeatWidth);
-    const lastCycle = Math.ceil(visibleWorldEnd / repeatWidth);
+  // Find which gradient cycles are visible
+  const firstCycle = Math.floor(visibleWorldStart / repeatWidth);
+  const lastCycle = Math.ceil(visibleWorldEnd / repeatWidth);
 
-    // Draw each visible gradient cycle
-    for (let i = firstCycle; i <= lastCycle; i++) {
-      const cycleWorldStart = i * repeatWidth;
-      const cycleWorldEnd = (i + 1) * repeatWidth;
+  // Draw each visible gradient cycle
+  for (let i = firstCycle; i <= lastCycle; i++) {
+    const cycleWorldStart = i * repeatWidth;
+    const cycleWorldEnd = (i + 1) * repeatWidth;
 
-      // Transform world coordinates to screen coordinates
-      const x0 = cycleWorldStart * props.zoom + props.offsetX;
-      const x1 = cycleWorldEnd * props.zoom + props.offsetX;
+    // Transform world coordinates to screen coordinates
+    const x0 = cycleWorldStart * props.zoom + props.offsetX;
+    const x1 = cycleWorldEnd * props.zoom + props.offsetX;
 
-      const gradient = ctx.createLinearGradient(x0, 0, x1, 0);
-      gradient.addColorStop(0, "#F3F4D7");
-      gradient.addColorStop(0.5, "#E5AFAF");
-      gradient.addColorStop(1, "#F3F4D7");
+    const gradient = ctx.createLinearGradient(x0, 0, x1, 0);
+    gradient.addColorStop(0, "#F3F4D7");
+    gradient.addColorStop(0.5, "#E5AFAF");
+    gradient.addColorStop(1, "#F3F4D7");
 
-      ctx.fillStyle = gradient;
-      // Extend by 1px to prevent gaps from floating-point rounding
-      ctx.fillRect(x0, 0, x1 - x0 + 1, canvas.height);
-    }
-  });
+    ctx.fillStyle = gradient;
+    // Extend by 1px to prevent gaps from floating-point rounding
+    ctx.fillRect(x0, 0, x1 - x0 + 1, canvas.height);
+  }
 }
 
 /**
