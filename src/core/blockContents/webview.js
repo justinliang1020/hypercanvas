@@ -1,5 +1,5 @@
 import { h, text } from "hyperapp";
-import { addChildBlock, updateBlock } from "../block.js";
+import { addChildBlock, deleteBlock, updateBlock } from "../block.js";
 import { BLOCK_CONTENTS_CLASS_NAME } from "../constants.js";
 import {
   getCurrentBlocks,
@@ -305,7 +305,11 @@ function toolbar(state, block) {
       onpointerover: stopPropagation,
       onpointerleave: stopPropagation,
     },
-    [backButton(state, block), forwardButton(state, block)],
+    [
+      backButton(state, block),
+      forwardButton(state, block),
+      deleteButton(state, block),
+    ],
   );
 }
 
@@ -418,6 +422,15 @@ function navigationButton(block, direction, display) {
   }
 
   return button(display, onclick, enabled);
+}
+
+/**
+ * @param {State} state
+ * @param {WebviewBlock} block
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function deleteButton(state, block) {
+  return button("X", (state) => deleteBlock(state, block.id), true);
 }
 
 /**
