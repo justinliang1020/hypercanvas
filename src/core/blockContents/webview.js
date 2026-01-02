@@ -464,8 +464,8 @@ function button(content, onclick, enabled) {
       style: {
         whiteSpace: "nowrap",
         backgroundColor: enabled
-          ? "rgba(255, 255, 255, 0.85)"
-          : "rgba(235, 235, 235, 0.12)",
+          ? "rgba(245, 245, 245, 0.7)"
+          : "rgba(220, 220, 220, 0.12)",
         border: enabled ? "2px solid black" : "2px solid grey",
         borderRadius: "20px",
         width: "60px",
@@ -473,6 +473,9 @@ function button(content, onclick, enabled) {
         fontSize: "2em",
         color: enabled ? "black" : "grey",
         cursor: enabled ? "pointer" : "",
+      },
+      class: {
+        "toolbar-button-enabled": enabled,
       },
     },
     text(content),

@@ -9,6 +9,10 @@ main {
   font-family: system-ui;
 }
 
+.toolbar-button-enabled:hover {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
 input {
   font-family: system-ui;
 }
