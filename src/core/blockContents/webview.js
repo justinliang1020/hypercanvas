@@ -74,7 +74,8 @@ export function webviewBlockContents(state, block) {
       },
     },
     [
-      toolbar(state, block),
+      toolbar(state, block, "top"),
+      toolbar(state, block, "bottom"),
       titleBar(state, block),
       h(
         "div",
@@ -290,9 +291,10 @@ function stopPropagation(state, event) {
 /**
  * @param {State} state
  * @param {WebviewBlock} block
+ * @param {"top" | "bottom"} position
  * @return {import("hyperapp").ElementVNode<State>}
  */
-function toolbar(state, block) {
+function toolbar(state, block, position) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return h("div", {});
   const isSelected = currentPage.selectedIds.includes(block.id);
@@ -309,7 +311,8 @@ function toolbar(state, block) {
     {
       style: {
         position: "absolute",
-        top: "-90px",
+        top: position === "top" ? "-90px" : "",
+        bottom: position === "bottom" ? "-90px" : "",
         left: "50%",
         transform: "translate(-50%, 0)",
         display: isSelected ? "flex" : "none",
