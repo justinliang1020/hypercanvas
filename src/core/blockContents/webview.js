@@ -1,9 +1,5 @@
 import { h, text } from "hyperapp";
-import {
-  addChildBlock,
-  updateBlock,
-  addWebviewBlockToViewportCenter,
-} from "../block.js";
+import { addChildBlock, updateBlock } from "../block.js";
 import { BLOCK_CONTENTS_CLASS_NAME } from "../constants.js";
 import {
   getCurrentBlocks,
@@ -370,7 +366,7 @@ function titleBar(state, block) {
  * @param {WebviewBlock} block
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-export function backButton(state, block) {
+function backButton(state, block) {
   return navigationButton(block, "back", "←");
 }
 
@@ -379,7 +375,7 @@ export function backButton(state, block) {
  * @param {WebviewBlock} block
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-export function forwardButton(state, block) {
+function forwardButton(state, block) {
   return navigationButton(block, "forward", "→");
 }
 
@@ -450,22 +446,6 @@ function button(content, onclick, enabled) {
     },
     text(content),
   );
-}
-
-/**
- * @param {State} state - Current application state
- * @returns {import("hyperapp").ElementVNode<State>}
- */
-export function newWebviewButton(state) {
-  /**
-   * @param {State} state
-   * @param {Event} event
-   * @returns {import("hyperapp").Dispatchable<State>}
-   */
-  function onclick(state, event) {
-    return addWebviewBlockToViewportCenter(state, "https://google.com", false);
-  }
-  return h("button", { onclick }, text("🌐"));
 }
 
 /** @type {BlockConfig<WebviewBlock>} */
