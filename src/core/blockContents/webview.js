@@ -464,8 +464,8 @@ function button(content, onclick, enabled) {
       style: {
         whiteSpace: "nowrap",
         backgroundColor: enabled
-          ? "rgba(245, 245, 245, 0.7)"
-          : "rgba(220, 220, 220, 0.12)",
+          ? "rgba(245, 245, 245, 0.9)"
+          : "rgba(220, 220, 220, 0.9)",
         border: enabled ? "2px solid black" : "2px solid grey",
         borderRadius: "20px",
         width: "60px",
