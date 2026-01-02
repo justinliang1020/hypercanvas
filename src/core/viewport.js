@@ -456,12 +456,14 @@ function onwheel(state, event) {
 
 /**
  * Effect to draw background gradient on canvas
- * @param {Object} dispatch - Hyperapp dispatch function
- * @param {Object} props - Props containing offsetX, offsetY, zoom
+ * @param {*} dispatch - Hyperapp dispatch function
+ * @param {{offsetX: number, offsetY: number, zoom: number}} props - Props containing offsetX, offsetY, zoom
  */
 function drawBackgroundEffect(dispatch, props) {
   requestAnimationFrame(() => {
-    const canvas = document.getElementById("background-canvas");
+    const canvas = /** @type {HTMLCanvasElement | null} */ (
+      document.getElementById("background-canvas")
+    );
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
@@ -497,7 +499,7 @@ export function viewport(state) {
   const isFullScreen = currentPage.fullScreenState !== null;
 
   // Trigger canvas redraw effect
-  drawBackgroundEffect(null, {
+  drawBackgroundEffect(undefined, {
     offsetX: currentPage.offsetX,
     offsetY: currentPage.offsetY,
     zoom: currentPage.zoom,
