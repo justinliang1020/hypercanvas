@@ -497,3 +497,15 @@ export function updateBlock(state, blockId, newBlockConfig) {
     ),
   });
 }
+
+/**
+ * @param {State} state
+ * @param {number} blockId
+ * @returns {State}
+ */
+export function deleteBlock(state, blockId) {
+  const currentBlocks = getCurrentBlocks(state);
+  return updateCurrentPage(state, {
+    blocks: currentBlocks.filter((block) => block.id !== blockId),
+  });
+}
