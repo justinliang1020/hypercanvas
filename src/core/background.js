@@ -17,7 +17,7 @@ export function drawBackgroundEffect(dispatch, props) {
   canvas.height = window.innerHeight;
 
   // Define one gradient cycle width in world coordinates
-  const repeatWidth = 10000;
+  const repeatWidth = 12000;
 
   // Calculate visible world coordinate range
   const visibleWorldStart = -props.offsetX / props.zoom;
@@ -38,7 +38,7 @@ export function drawBackgroundEffect(dispatch, props) {
 
     const gradient = ctx.createLinearGradient(x0, 0, x1, 0);
     const color1 = "#F1F1EC";
-    const color2 = "#E3C6C6";
+    const color2 = "#F6F8E5";
     gradient.addColorStop(0, color1);
     gradient.addColorStop(0.5, color2);
     gradient.addColorStop(1, color1);
@@ -47,4 +47,30 @@ export function drawBackgroundEffect(dispatch, props) {
     // Extend by 1px to prevent gaps from floating-point rounding
     ctx.fillRect(x0, 0, x1 - x0 + 1, canvas.height);
   }
+
+  // noise(ctx, 0.005);
+}
+
+/**
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} rate - Noise density (0-1), where 0 is no noise and 1 is maximum noise
+ */
+function noise(ctx, rate = 0.02) {
+  const w = ctx.canvas.width,
+    h = ctx.canvas.height,
+    iData = ctx.createImageData(w, h),
+    buffer32 = new Uint32Array(iData.data.buffer),
+    len = buffer32.length;
+  let i = 0;
+
+  for (; i < len; i++) if (Math.random() < rate) buffer32[i] = 0xffffffff;
+
+  // Use offscreen canvas so transparent pixels don't replace the gradient
+  const offscreen = document.createElement("canvas");
+  offscreen.width = w;
+  offscreen.height = h;
+  const offscreenCtx = offscreen.getContext("2d");
+  offscreenCtx.putImageData(iData, 0, 0);
+
+  ctx.drawImage(offscreen, 0, 0);
 }
