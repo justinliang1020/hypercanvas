@@ -603,7 +603,7 @@ function urlBar(state, block) {
         width: "100%",
         boxSizing: "border-box",
         borderRadius: "10px",
-        backgroundColor: block.isUrlBarExpanded ? "#DFDFDF" : "#EBEBEB",
+        backgroundColor: "rgb(250,250,250)",
         border: block.isUrlBarExpanded
           ? "1px solid black"
           : "1px solid #B6B6B6",
