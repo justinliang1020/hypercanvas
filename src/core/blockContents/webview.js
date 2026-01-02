@@ -296,6 +296,14 @@ function toolbar(state, block) {
   const currentPage = getCurrentPage(state);
   if (!currentPage) return h("div", {});
   const isSelected = currentPage.selectedIds.includes(block.id);
+  const divider = h("div", {
+    style: {
+      width: "2px",
+      background: "black",
+      height: "50px",
+      margin: "0 5px",
+    },
+  });
   return h(
     "div",
     {
@@ -323,6 +331,7 @@ function toolbar(state, block) {
       backButton(state, block),
       forwardButton(state, block),
       deleteButton(block),
+      divider,
       sendToBackButton(block),
       sendToFrontButton(block),
     ],
