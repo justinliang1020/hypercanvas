@@ -302,7 +302,7 @@ function toolbar(state, block) {
         backdropFilter: "blur(5px)",
         flexDirection: "row",
         background:
-          "linear-gradient(90deg, rgba(222, 222, 222, 0.25) 0%, rgba(195, 194, 194, 0.25) 100%)",
+          "linear-gradient(90deg,  rgba(195, 194, 194, 0.25) 0%, rgba(222, 222, 222, 0.25) 100%)",
         padding: "10px 45px",
         borderRadius: "25px",
         border: "2px solid grey",
@@ -335,9 +335,11 @@ function titleBar(state, block) {
     {
       style: {
         height: "50px",
+        // make sure the right side which contains title text without a background is readable.
+        // since the text is black, that means the bc should be more opaque and white
         background: isSelected
-          ? "linear-gradient(90deg, rgba(201, 201, 201, 0.25) 0%, rgba(177, 159, 159, 0.25) 100%)"
-          : "linear-gradient(90deg, rgba(240, 240, 240, 0.25) 0%, rgba(215, 212, 212, 0.25) 100%)",
+          ? "linear-gradient(90deg, rgb(102 102 102 / 25%) 0%, rgb(245 245 245 / 80%) 100%)"
+          : "linear-gradient(90deg, rgb(183 173 173 / 25%) 0%, rgb(255 255 255 / 60%) 100%)",
         backdropFilter: "blur(5px)",
         padding: "6px 15px",
         borderBottomWidth: "2px",
