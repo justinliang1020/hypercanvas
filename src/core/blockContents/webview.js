@@ -297,6 +297,7 @@ function toolbar(state, block) {
         position: "absolute",
         top: "-80px",
         left: "50%",
+        transform: "translate(-50%, 0)",
         display: isSelected ? "flex" : "none",
         flexDirection: "row",
         background: "white",
