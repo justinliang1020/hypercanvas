@@ -299,6 +299,7 @@ function toolbar(state, block) {
         left: "50%",
         transform: "translate(-50%, 0)",
         display: isSelected ? "flex" : "none",
+        backdropFilter: "blur(5px)",
         flexDirection: "row",
         background:
           "linear-gradient(90deg, rgba(222, 222, 222, 0.25) 0%, rgba(195, 194, 194, 0.25) 100%)",
@@ -464,8 +465,8 @@ function button(content, onclick, enabled) {
       style: {
         whiteSpace: "nowrap",
         backgroundColor: enabled
-          ? "rgba(245, 245, 245, 0.9)"
-          : "rgba(220, 220, 220, 0.9)",
+          ? "rgba(245, 245, 245, 0.8)"
+          : "rgba(220, 220, 220, 0.4)",
         border: enabled ? "2px solid black" : "2px solid grey",
         borderRadius: "20px",
         width: "60px",
