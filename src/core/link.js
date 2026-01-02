@@ -1,6 +1,7 @@
 import { h } from "hyperapp";
 import { getCurrentPage, updateCurrentPage } from "./pages.js";
 import { isPendingSelected, selectBlock } from "./selection.js";
+import { Z_INDEX_BOTTOM } from "./constants.js";
 
 /**
  * @param {State} state
@@ -55,6 +56,7 @@ export function linkView(state) {
           transform: `rotate(${angle}deg)`,
           pointerEvents: "auto",
           cursor: "pointer",
+          zIndex: `${Z_INDEX_BOTTOM}`,
         },
         key: `link-${link.id}`,
         onpointerdown: (state, event) => {
