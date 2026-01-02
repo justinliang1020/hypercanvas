@@ -371,7 +371,7 @@ function titleBar(state, block) {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 export function backButton(state, block) {
-  return navigationButton(state, block, "back", "←");
+  return navigationButton(block, "back", "←");
 }
 
 /**
@@ -380,17 +380,16 @@ export function backButton(state, block) {
  * @returns {import("hyperapp").ElementVNode<State>}
  */
 export function forwardButton(state, block) {
-  return navigationButton(state, block, "forward", "→");
+  return navigationButton(block, "forward", "→");
 }
 
 /**
- * @param {State} state
  * @param {WebviewBlock} block
  * @param {"back" | "forward"} direction
  * @param {string} display
  * @returns {import("hyperapp").ElementVNode<State>}
  */
-function navigationButton(state, block, direction, display) {
+function navigationButton(block, direction, display) {
   /** @type {Boolean} */
   const enabled = (() => {
     switch (direction) {
@@ -422,6 +421,16 @@ function navigationButton(state, block, direction, display) {
     return state;
   }
 
+  return button(display, onclick, enabled);
+}
+
+/**
+ * @param {string} content
+ * @param {(arg0: State) => import("hyperapp").Dispatchable<State>} onclick
+ * @param {boolean} enabled
+ * @returns {import("hyperapp").ElementVNode<State>}
+ */
+function button(content, onclick, enabled) {
   return h(
     "button",
     {
@@ -432,14 +441,14 @@ function navigationButton(state, block, direction, display) {
         backgroundColor: enabled ? "white" : "#f0f0f0",
         border: "2px solid black",
         borderRadius: "20px",
-        width: "34px",
-        height: "25px",
-        fontSize: "20px",
-        color: enabled ? "black" : "#999",
+        width: "60px",
+        height: "50px",
+        fontSize: "2em",
+        color: enabled ? "black" : "grey",
         cursor: enabled ? "pointer" : "",
       },
     },
-    text(display),
+    text(content),
   );
 }
 
