@@ -250,6 +250,7 @@ export function selectionBoxComponent(state) {
       backgroundColor: "rgba(0, 122, 204, 0.1)",
       position: "absolute",
       pointerEvents: "none",
+      zIndex: `${Z_INDEX_TOP}`,
     },
   });
 }
