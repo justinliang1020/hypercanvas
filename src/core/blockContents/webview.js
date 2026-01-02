@@ -63,8 +63,8 @@ export function webviewBlockContents(state, block) {
         borderStyle: "solid",
         borderColor: isSelected ? "#7F7F7F" : "#9A9A9A",
         boxShadow: isSelected
-          ? "0 0 40px 8px rgba(118, 215, 244, 0.25)"
-          : "0 0 20px 6px rgba(0, 0, 0, 0.25)",
+          ? "rgb(36 152 187 / 30%) 0px 0px 42px 12px"
+          : "rgb(0 0 0 / 25%) 0px 0px 20px 6px",
       },
     },
     [
@@ -339,7 +339,7 @@ function titleBar(state, block) {
         // since the text is black, that means the bc should be more opaque and white
         background: isSelected
           ? "linear-gradient(90deg, rgb(102 102 102 / 25%) 0%, rgb(245 245 245 / 80%) 100%)"
-          : "linear-gradient(90deg, rgb(183 173 173 / 25%) 0%, rgb(255 255 255 / 60%) 100%)",
+          : "linear-gradient(90deg, rgb(214 214 214 / 25%) 0%, rgb(255 255 255 / 60%) 100%)",
         backdropFilter: "blur(5px)",
         padding: "6px 15px",
         borderBottomWidth: "2px",
