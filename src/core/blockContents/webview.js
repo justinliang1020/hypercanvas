@@ -361,7 +361,7 @@ function titleBar(state, block) {
           ? "linear-gradient(90deg, rgb(102 102 102 / 25%) 0%, rgb(245 245 245 / 80%) 100%)"
           : "linear-gradient(90deg, rgb(214 214 214 / 25%) 0%, rgb(255 255 255 / 60%) 100%)",
         backdropFilter: "blur(5px)",
-        padding: "6px 15px",
+        padding: "10px 15px",
         borderBottomWidth: "2px",
         borderBottomStyle: "solid",
         borderBottomColor: isSelected ? "#7F7F7F" : "#9A9A9A",
@@ -381,12 +381,21 @@ function titleBar(state, block) {
             flexDirection: "row",
             gap: "10px",
             alignItems: "center",
+            maxWidth: "40%",
+            height: "100%",
           },
         },
         [
           h(
             "div",
-            { style: { fontSize: "28px", whiteSpace: "nowrap" } },
+            {
+              style: {
+                fontSize: "28px",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              },
+            },
             text(block.pageTitle),
           ),
           h("img", {
