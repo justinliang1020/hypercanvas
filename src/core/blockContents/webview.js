@@ -362,7 +362,7 @@ function titleBar(state, block) {
         [
           h(
             "div",
-            { style: { fontSize: "2em", whiteSpace: "nowrap" } },
+            { style: { fontSize: "28px", whiteSpace: "nowrap" } },
             text(block.pageTitle),
           ),
           h("img", {
@@ -593,7 +593,7 @@ function urlBar(state, block) {
         border: block.isUrlBarExpanded
           ? "1px solid black"
           : "1px solid #B6B6B6",
-        fontSize: "2em",
+        fontSize: "28px",
         cursor: block.isUrlBarExpanded ? "auto" : "text",
         outline: "none", // disable orange editing border
         padding: "2px 8px",

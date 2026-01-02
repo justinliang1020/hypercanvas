@@ -6,6 +6,11 @@ main {
   height: 100%;
   width: 100%;
   overscroll-behavior-x: none; /* disable swipe to go back a page */
+  font-family: system-ui;
+}
+
+input {
+  font-family: system-ui;
 }
 
 .cursor-style-override {
