@@ -155,7 +155,7 @@ function applyAspectRatioConstraint(dimensions, originalBlock, handle) {
 export function resizeHandle({ handle, zoom, context }) {
   const isEdge = ["n", "s", "e", "w"].includes(handle);
   const handleSize = isEdge ? 10 / zoom : 20 / zoom;
-  const handleOffset = 10 / zoom;
+  const handleOffset = 8 / zoom;
 
   /** @type {import("hyperapp").StyleProp} */
   const style = {
