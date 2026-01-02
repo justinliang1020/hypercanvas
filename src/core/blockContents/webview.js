@@ -58,7 +58,7 @@ export function webviewBlockContents(state, block) {
         borderStyle: "solid",
         borderColor: isSelected ? "#7F7F7F" : "#9A9A9A",
         boxShadow: isSelected
-          ? "0 0 40px 8px rgba(0, 0, 0, 0.25)"
+          ? "0 0 40px 8px rgba(118, 215, 244, 0.25)"
           : "0 0 20px 6px rgba(0, 0, 0, 0.25)",
       },
     },
