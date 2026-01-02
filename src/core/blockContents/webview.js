@@ -336,7 +336,7 @@ function titleBar(state, block) {
           ? "rgb(222,222,222,0.4)"
           : "rgb(240,240,240,0.4)",
         backdropFilter: "blur(5px)",
-        padding: "6px 10px",
+        padding: "6px 15px",
         borderBottomWidth: "2px",
         borderBottomStyle: "solid",
         borderBottomColor: isSelected ? "#7F7F7F" : "#9A9A9A",
@@ -354,18 +354,24 @@ function titleBar(state, block) {
           style: {
             display: "flex",
             flexDirection: "row",
+            gap: "10px",
+            alignItems: "center",
           },
         },
         [
-          h("img", {
-            src: block.faviconUrl,
-            style: { height: "100%", pointerEvents: "none" },
-          }),
           h(
             "div",
             { style: { fontSize: "2em", whiteSpace: "nowrap" } },
             text(block.pageTitle),
           ),
+          h("img", {
+            src: block.faviconUrl,
+            style: {
+              height: "100%",
+              pointerEvents: "none",
+              borderRadius: "3px",
+            },
+          }),
         ],
       ),
       ,
@@ -569,7 +575,7 @@ function urlBar(state, block) {
       onsubmit,
       onkeydown: stopPropagation, // stop keyboard shortcuts from triggering
       style: {
-        width: block.isUrlBarExpanded ? "60%" : "200px",
+        width: block.isUrlBarExpanded ? "60%" : "250px",
       },
     },
     h("input", {
@@ -582,11 +588,14 @@ function urlBar(state, block) {
         width: "100%",
         boxSizing: "border-box",
         borderRadius: "10px",
-        backgroundColor: "#F0F0F0",
-        border: "1px solid black",
+        backgroundColor: block.isUrlBarExpanded ? "#DFDFDF" : "#EBEBEB",
+        border: block.isUrlBarExpanded
+          ? "1px solid black"
+          : "1px solid #B6B6B6",
         fontSize: "2em",
-        cursor: block.isUrlBarExpanded ? "auto" : "default",
+        cursor: block.isUrlBarExpanded ? "auto" : "text",
         outline: "none", // disable orange editing border
+        padding: "2px 8px",
       },
       onsubmit,
       oninput,
