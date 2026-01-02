@@ -19,6 +19,7 @@ import {
   selectionBoxComponent,
 } from "./selection.js";
 import { drawBackgroundEffect } from "./background.js";
+import { MAX_ZOOM, MIN_ZOOM } from "./constants.js";
 
 /**
  * Calculates canvas coordinates from screen coordinates
@@ -429,7 +430,10 @@ function onwheel(state, event) {
   } else if (event.ctrlKey || event.metaKey) {
     // Zoom gesture (Ctrl/Cmd + scroll or trackpad pinch)
     const zoomDelta = -event.deltaY * 0.01 * page.zoom;
-    const newZoom = Math.max(0.1, Math.min(5, page.zoom + zoomDelta));
+    const newZoom = Math.max(
+      MIN_ZOOM,
+      Math.min(MAX_ZOOM, page.zoom + zoomDelta),
+    );
 
     // Get mouse position relative to viewport for zoom centering
     const rect = /** @type {HTMLElement} */ (
