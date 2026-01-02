@@ -642,7 +642,7 @@ function urlBar(state, block) {
         fontSize: "28px",
         cursor: block.isUrlBarExpanded ? "auto" : "text",
         outline: "none", // disable orange editing border
-        padding: "2px 8px",
+        padding: "5px 8px",
       },
       onsubmit,
       oninput,
