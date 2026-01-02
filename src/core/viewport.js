@@ -473,22 +473,34 @@ function drawBackgroundEffect(dispatch, props) {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // Define gradient in world coordinates
-    const worldGradientStart = 0;
-    const worldGradientEnd = 2000;
+    // Define one gradient cycle width in world coordinates
+    const repeatWidth = 10000;
 
-    // Transform world coordinates to screen coordinates using affine transformation
-    // Screen = World * zoom + offset
-    const x0 = worldGradientStart * props.zoom + props.offsetX;
-    const x1 = worldGradientEnd * props.zoom + props.offsetX;
-    console.table({ x0, x1 });
+    // Calculate visible world coordinate range
+    const visibleWorldStart = -props.offsetX / props.zoom;
+    const visibleWorldEnd = (canvas.width - props.offsetX) / props.zoom;
 
-    const gradient = ctx.createLinearGradient(x0, 0, x1, 0);
-    gradient.addColorStop(0, "#F3F4D7");
-    gradient.addColorStop(1, "#E5AFAF");
+    // Find which gradient cycles are visible
+    const firstCycle = Math.floor(visibleWorldStart / repeatWidth);
+    const lastCycle = Math.ceil(visibleWorldEnd / repeatWidth);
 
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Draw each visible gradient cycle
+    for (let i = firstCycle; i <= lastCycle; i++) {
+      const cycleWorldStart = i * repeatWidth;
+      const cycleWorldEnd = (i + 1) * repeatWidth;
+
+      // Transform world coordinates to screen coordinates
+      const x0 = cycleWorldStart * props.zoom + props.offsetX;
+      const x1 = cycleWorldEnd * props.zoom + props.offsetX;
+
+      const gradient = ctx.createLinearGradient(x0, 0, x1, 0);
+      gradient.addColorStop(0, "#F3F4D7");
+      gradient.addColorStop(0.5, "#E5AFAF");
+      gradient.addColorStop(1, "#F3F4D7");
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(x0, 0, x1 - x0, canvas.height);
+    }
   });
 }
 
