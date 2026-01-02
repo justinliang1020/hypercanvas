@@ -561,7 +561,7 @@ function urlBar(state, block) {
       onsubmit,
       onkeydown: stopPropagation, // stop keyboard shortcuts from triggering
       style: {
-        width: block.isUrlBarExpanded ? "60%" : "20%",
+        width: block.isUrlBarExpanded ? "60%" : "200px",
       },
     },
     h("input", {
