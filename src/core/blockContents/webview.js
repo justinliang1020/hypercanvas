@@ -295,13 +295,14 @@ function toolbar(state, block) {
     {
       style: {
         position: "absolute",
-        top: "-80px",
+        top: "-90px",
         left: "50%",
         transform: "translate(-50%, 0)",
         display: isSelected ? "flex" : "none",
         flexDirection: "row",
-        background: "white",
-        padding: "10px 10px",
+        background:
+          "linear-gradient(90deg, rgba(240, 240, 240, 0.25) 0%, rgba(215, 212, 212, 0.25) 100%)",
+        padding: "10px 30px",
         borderRadius: "25px",
         border: "2px solid black",
         gap: "5px",
@@ -334,7 +335,7 @@ function titleBar(state, block) {
       style: {
         height: "50px",
         background: isSelected
-          ? " linear-gradient(90deg, rgba(201, 201, 201, 0.25) 0%, rgba(177, 159, 159, 0.25) 100%)"
+          ? "linear-gradient(90deg, rgba(201, 201, 201, 0.25) 0%, rgba(177, 159, 159, 0.25) 100%)"
           : "linear-gradient(90deg, rgba(240, 240, 240, 0.25) 0%, rgba(215, 212, 212, 0.25) 100%)",
         backdropFilter: "blur(5px)",
         padding: "6px 15px",
@@ -462,8 +463,10 @@ function button(content, onclick, enabled) {
       onclick,
       style: {
         whiteSpace: "nowrap",
-        backgroundColor: enabled ? "white" : "#f0f0f0",
-        border: "2px solid black",
+        backgroundColor: enabled
+          ? "rgba(255, 255, 255, 0.85)"
+          : "rgba(235, 235, 235, 0.12)",
+        border: enabled ? "2px solid black" : "2px solid grey",
         borderRadius: "20px",
         width: "60px",
         height: "50px",
