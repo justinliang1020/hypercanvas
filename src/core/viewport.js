@@ -473,10 +473,15 @@ function drawBackgroundEffect(dispatch, props) {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // Calculate gradient that pans with viewport
-    const panFactor = 0.5;
-    const x0 = canvas.width + props.offsetX * panFactor;
-    const x1 = 0 + props.offsetX * panFactor;
+    // Define gradient in world coordinates
+    const worldGradientStart = 0;
+    const worldGradientEnd = 2000;
+
+    // Transform world coordinates to screen coordinates using affine transformation
+    // Screen = World * zoom + offset
+    const x0 = worldGradientStart * props.zoom + props.offsetX;
+    const x1 = worldGradientEnd * props.zoom + props.offsetX;
+    console.table({ x0, x1 });
 
     const gradient = ctx.createLinearGradient(x0, 0, x1, 0);
     gradient.addColorStop(0, "#F3F4D7");
