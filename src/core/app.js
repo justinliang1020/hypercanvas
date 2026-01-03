@@ -128,7 +128,7 @@ async function initialize() {
     state.mementoManager = createMementoManager();
   } catch (error) {
     alert(
-      "State file could not be safely loaded. Please restart the application",
+      `State file could not be safely loaded. Please restart the application. ${error}`,
     );
     throw error;
   }
