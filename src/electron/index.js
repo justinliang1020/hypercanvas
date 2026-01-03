@@ -258,13 +258,7 @@ async function readFile(filename) {
   try {
     const filePath = getFilePath(filename);
     const data = await fs.readFile(filePath, "utf8");
-
-    // Try to parse as JSON, return as string if parsing fails
-    try {
-      return JSON.parse(data);
-    } catch (parseError) {
-      return data;
-    }
+    return data;
   } catch (error) {
     if (error.code === "ENOENT") {
       console.log(`File not found: ${filename}`);

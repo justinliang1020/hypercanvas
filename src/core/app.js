@@ -118,13 +118,18 @@ async function initialize() {
   let state;
   try {
     // @ts-ignore
-    state = await window.fileAPI.readFile(STATE_SAVE_PATH);
-    if (!state) {
+    const stateString = await window.fileAPI.readFile(STATE_SAVE_PATH);
+    if (stateString === null) {
       state = initialState();
+    } else {
+      state = JSON.parse(stateString);
     }
     state.mementoManager = createMementoManager();
-  } catch {
-    state = initialState();
+  } catch (error) {
+    alert(
+      "State file could not be safely loaded. Please restart the application",
+    );
+    throw error;
   }
 
   // Initialize dark mode based on system theme
