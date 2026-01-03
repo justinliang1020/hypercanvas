@@ -15,19 +15,37 @@ export function contextMenuView(state) {
   function disableContextMenu(state) {
     return updateState(state, { contextMenu: null });
   }
+
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+
+  const MENU_WIDTH = 150;
+  const MENU_HEIGHT = 200;
+  const PADDING = 50;
+
+  const adjustedX = Math.min(
+    state.contextMenu.x,
+    viewportWidth - MENU_WIDTH - PADDING,
+  );
+  const adjustedY = Math.min(
+    state.contextMenu.y,
+    viewportHeight - MENU_HEIGHT - PADDING,
+  );
+
   return h(
     "form",
     {
       id: "context-menu",
       tabindex: "-1",
       style: {
-        transform: `translate(${state.contextMenu.x}px, ${state.contextMenu.y}px)`,
-        width: "200px",
-        height: "400px",
+        transform: `translate(${adjustedX}px, ${adjustedY}px)`,
+        width: `${MENU_WIDTH}px`,
+        height: `${MENU_HEIGHT}px`,
         background: "white",
         zIndex: `${Z_INDEX_TOP_2}`,
         position: "absolute",
         outline: "none",
+        overflow: "hidden",
       },
       onblur: disableContextMenu,
       // oncreate: [focusEffect, { id: "context-menu" }],
@@ -41,16 +59,10 @@ export function contextMenuView(state) {
  * @param {PointerEvent} event
  * @returns {import("hyperapp").Dispatchable<State>}
  */
-export function enableContextMenu(state, event) {
-  const { canvasX, canvasY } = getCanvasCoordinates(
-    event.clientX,
-    event.clientY,
-    state,
-  );
-
+export function enableViewportContextMenu(state, event) {
   return [
     updateState(state, {
-      contextMenu: { x: canvasX, y: canvasY },
+      contextMenu: { x: event.clientX, y: event.clientY, type: "viewport" },
     }),
     [focusEffect, { id: "context-menu" }],
   ];

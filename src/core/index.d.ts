@@ -132,10 +132,16 @@ interface State {
   contextMenu: ContextMenu | null;
 }
 
-interface ContextMenu {
+interface BaseContextMenu {
   x: number;
   y: number;
 }
+
+interface ViewportContextMenu extends BaseContextMenu {
+  type: "viewport";
+}
+
+type ContextMenu = ViewportContextMenu;
 
 type ResizeHandler = (
   block: BaseBlock,
