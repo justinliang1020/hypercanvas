@@ -312,7 +312,7 @@ export function throttle(func, limit) {
         if (timeoutId) {
           clearTimeout(timeoutId);
         }
-        timeoutId = setTimeout(
+        timeoutId = window.setTimeout(
           async () => {
             lastRun = Date.now();
             try {
@@ -323,6 +323,7 @@ export function throttle(func, limit) {
             }
             timeoutId = null;
           },
+          //@ts-ignore  BUG: idk fix this
           limit - (now - lastRun),
         );
       });

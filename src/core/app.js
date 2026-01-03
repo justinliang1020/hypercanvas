@@ -59,6 +59,7 @@ function initialState() {
     clipboard: null,
     notification: null,
     notificationVisible: false,
+    contextMenu: null,
   };
 
   // Set currentPageId to the first page
