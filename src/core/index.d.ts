@@ -141,12 +141,12 @@ interface ViewportContextMenu extends BaseContextMenu {
   type: "viewport";
 }
 
-interface BlockContextMenu extends BaseContextMenu {
-  type: "block";
+interface WebviewContextMenu extends BaseContextMenu {
+  type: "webview";
   blockId: string;
 }
 
-type ContextMenu = ViewportContextMenu | BlockContextMenu;
+type ContextMenu = ViewportContextMenu | WebviewContextMenu;
 
 type ResizeHandler = (
   block: BaseBlock,

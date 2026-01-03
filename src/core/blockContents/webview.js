@@ -426,7 +426,7 @@ function forwardButton(state, block) {
  * @param {WebviewBlock} block
  * @returns {State}
  */
-function webviewGoBack(state, block) {
+export function webviewGoBack(state, block) {
   const webviewElement = getWebviewElementIfDomReady(block);
   if (!webviewElement) return state;
   webviewElement.goBack();
@@ -438,7 +438,7 @@ function webviewGoBack(state, block) {
  * @param {WebviewBlock} block
  * @returns {State}
  */
-function webviewGoForward(state, block) {
+export function webviewGoForward(state, block) {
   const webviewElement = getWebviewElementIfDomReady(block);
   if (!webviewElement) return state;
   webviewElement.goForward();

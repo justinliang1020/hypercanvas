@@ -46,7 +46,7 @@ export function contextMenuView(state) {
       case "viewport": {
         return viewportContextMenuContents(state);
       }
-      case "block": {
+      case "webview": {
         //TODO: implement
         return [];
       }
@@ -151,7 +151,7 @@ export function enableBlockContextMenu(state, event, blockId) {
         x: event.clientX,
         y: event.clientY,
         blockId: blockId,
-        type: "block",
+        type: "webview",
       },
     }),
     [focusEffect, { id: "context-menu" }],
