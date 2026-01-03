@@ -475,6 +475,7 @@ export function viewport(state) {
     offsetX: currentPage.offsetX,
     offsetY: currentPage.offsetY,
     zoom: currentPage.zoom,
+    isDarkMode: state.isDarkMode,
   });
 
   return h(
