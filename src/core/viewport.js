@@ -529,18 +529,6 @@ export function viewport(state) {
             {},
             getCurrentBlocks(state).map((block) => blockView(state, block)),
           ),
-
-          // h("div", {
-          //   style: {
-          //     position: "absolute",
-          //     width: "400vw",
-          //     height: "400vh",
-          //     background: "linear-gradient(270deg, #F3F4D7 0%, #E5AFAF 100%)",
-          //     transform: `translate(${currentPage.offsetX}px, ${currentPage.offsetY}px) scale(${currentPage.zoom}) translateZ(0)`,
-          //     transformOrigin: "top left",
-          //     pointerEvents: "none",
-          //   },
-          // }),
           ...currentPage.links.map(linkView(state)),
           selectionBoundingBox(state),
           selectionBoxComponent(state),
