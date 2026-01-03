@@ -88,6 +88,7 @@ export async function saveApplication(state) {
     // Don't need to save mementoManager which is session undo/redo history
     state = setBlocksDomReadyFalse(state);
     state = syncBlocksSrc(state);
+    state = resetAllWebviewBlockHistory(state);
     const {
       mementoManager,
       notification,
@@ -100,6 +101,25 @@ export async function saveApplication(state) {
   } catch (error) {
     console.error("Failed to save application state:", error);
   }
+}
+
+/**
+ * @param {State} state - Current application state to save
+ * @returns {State}
+ */
+function resetAllWebviewBlockHistory(state) {
+  return {
+    ...state,
+    pages: state.pages.map((page) => ({
+      ...page,
+      blocks: page.blocks.map((block) => {
+        if (block.type === "webview") {
+          return { ...block, canGoBack: false, canGoForward: false };
+        }
+        return block;
+      }),
+    })),
+  };
 }
 
 /**
