@@ -46,6 +46,10 @@ export function contextMenuView(state) {
       case "viewport": {
         return viewportContextMenuContents(state);
       }
+      case "block": {
+        //TODO: implement
+        return [];
+      }
     }
   })();
 
@@ -124,6 +128,26 @@ export function enableViewportContextMenu(state, event) {
   return [
     updateState(state, {
       contextMenu: { x: event.clientX, y: event.clientY, type: "viewport" },
+    }),
+    [focusEffect, { id: "context-menu" }],
+  ];
+}
+
+/**
+ * @param {State} state
+ * @param {PointerEvent} event
+ * @param {string} blockId
+ * @returns {import("hyperapp").Dispatchable<State>}
+ */
+export function enableBlockContextMenu(state, event, blockId) {
+  return [
+    updateState(state, {
+      contextMenu: {
+        x: event.clientX,
+        y: event.clientY,
+        blockId: blockId,
+        type: "block",
+      },
     }),
     [focusEffect, { id: "context-menu" }],
   ];
