@@ -22,6 +22,17 @@ if (process.platform === "darwin") {
   menu.append(appMenu);
 }
 
+// Add Edit menu with copy/paste shortcuts
+const editMenu = new MenuItem({
+  label: "Edit",
+  submenu: [
+    { role: "cut" },
+    { role: "copy" },
+    { role: "paste" },
+  ],
+});
+menu.append(editMenu);
+
 // Add View menu with DevTools toggle shortcuts
 const viewMenu = new MenuItem({
   label: "View",
