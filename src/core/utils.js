@@ -376,3 +376,17 @@ export function getDomainFromUrl(urlString) {
     return urlString;
   }
 }
+
+/**
+ * Effect to focus an element
+ * @param {Function} dispatch
+ * @param {{id: string}} props
+ */
+export function focusEffect(dispatch, props) {
+  requestAnimationFrame(() => {
+    const element = document.getElementById(props.id);
+    if (element) {
+      element.focus();
+    }
+  });
+}

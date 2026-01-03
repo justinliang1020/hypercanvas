@@ -1,21 +1,7 @@
 import { h, text } from "hyperapp";
 import { Z_INDEX_TOP_2 } from "./constants.js";
-import { updateState } from "./utils.js";
+import { focusEffect, updateState } from "./utils.js";
 import { getCanvasCoordinates } from "./viewport.js";
-
-/**
- * Effect to focus an element
- * @param {Function} dispatch
- * @param {Object} props
- */
-function focusEffect(dispatch, props) {
-  requestAnimationFrame(() => {
-    const element = document.getElementById(props.id);
-    if (element) {
-      element.focus();
-    }
-  });
-}
 
 /**
  * @param {State} state
