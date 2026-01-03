@@ -143,7 +143,7 @@ interface ViewportContextMenu extends BaseContextMenu {
 
 interface WebviewContextMenu extends BaseContextMenu {
   type: "webview";
-  blockId: string;
+  block: WebviewBlock;
 }
 
 type ContextMenu = ViewportContextMenu | WebviewContextMenu;

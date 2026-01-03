@@ -13,6 +13,7 @@ import {
   updateCurrentPage,
 } from "../pages.js";
 import { getDomainFromUrl, pipe, stopPropagation } from "../utils.js";
+import { enableWebviewContextMenu } from "../contextMenu.js";
 
 /**
  * @param {number} blockId
@@ -72,6 +73,8 @@ export function webviewBlockContents(state, block) {
           ? "rgb(36 152 187 / 30%) 0px 0px 42px 12px"
           : "rgb(0 0 0 / 25%) 0px 0px 20px 6px",
       },
+      oncontextmenu: (state, event) =>
+        enableWebviewContextMenu(state, event, block),
     },
     [
       toolbar(state, block, "top"),

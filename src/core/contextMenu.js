@@ -7,6 +7,7 @@ import {
   updateState,
 } from "./utils.js";
 import { addWebviewBlockToViewportCenter } from "./block.js";
+import { webviewGoBack, webviewGoForward } from "./blockContents/webview.js";
 
 /**
  * @param {State} state
@@ -48,7 +49,7 @@ export function contextMenuView(state) {
       }
       case "webview": {
         //TODO: implement
-        return [];
+        return webviewContextMenuContents(state, state.contextMenu.block);
       }
     }
   })();
@@ -99,6 +100,25 @@ function viewportContextMenuContents(state) {
 }
 
 /**
+ * @param {State} state
+ * @param {WebviewBlock} block
+ * @returns {import("hyperapp").ElementVNode<State>[]} Block renderer function
+ */
+function webviewContextMenuContents(state, block) {
+  //TODO: add disabled
+  return [
+    contextMenuButton(
+      (state, event) => webviewGoBack(state, block),
+      "go back a page",
+    ),
+    contextMenuButton(
+      (state, event) => webviewGoForward(state, block),
+      "go forward a page",
+    ),
+  ];
+}
+
+/**
  * @param {(state: State, event: Event) => State} action - new state to transition to after button press. TODO: make this work with Dispatchable
  * @param {string} value
  * @param {string} [hint]
@@ -130,6 +150,7 @@ function contextMenuButton(action, value, hint) {
  * @returns {import("hyperapp").Dispatchable<State>}
  */
 export function enableViewportContextMenu(state, event) {
+  event.stopPropagation();
   return [
     updateState(state, {
       contextMenu: { x: event.clientX, y: event.clientY, type: "viewport" },
@@ -141,16 +162,17 @@ export function enableViewportContextMenu(state, event) {
 /**
  * @param {State} state
  * @param {PointerEvent} event
- * @param {string} blockId
+ * @param {WebviewBlock} block
  * @returns {import("hyperapp").Dispatchable<State>}
  */
-export function enableBlockContextMenu(state, event, blockId) {
+export function enableWebviewContextMenu(state, event, block) {
+  event.stopPropagation();
   return [
     updateState(state, {
       contextMenu: {
         x: event.clientX,
         y: event.clientY,
-        blockId: blockId,
+        block: block,
         type: "webview",
       },
     }),
