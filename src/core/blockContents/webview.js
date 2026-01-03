@@ -422,6 +422,30 @@ function forwardButton(state, block) {
 }
 
 /**
+ * @param {State} state
+ * @param {WebviewBlock} block
+ * @returns {State}
+ */
+function webviewGoBack(state, block) {
+  const webviewElement = getWebviewElementIfDomReady(block);
+  if (!webviewElement) return state;
+  webviewElement.goBack();
+  return state;
+}
+
+/**
+ * @param {State} state
+ * @param {WebviewBlock} block
+ * @returns {State}
+ */
+function webviewGoForward(state, block) {
+  const webviewElement = getWebviewElementIfDomReady(block);
+  if (!webviewElement) return state;
+  webviewElement.goForward();
+  return state;
+}
+
+/**
  * @param {WebviewBlock} block
  * @param {"back" | "forward"} direction
  * @param {string} display
@@ -443,16 +467,12 @@ function navigationButton(block, direction, display) {
    * @returns {import("hyperapp").Dispatchable<State>}
    */
   function onclick(state) {
-    const webviewElement = getWebviewElementIfDomReady(block);
-
-    if (!webviewElement) return state;
-
     switch (direction) {
       case "back":
-        webviewElement.goBack();
+        webviewGoBack(state, block);
         break;
       case "forward":
-        webviewElement.goForward();
+        webviewGoForward(state, block);
         break;
     }
 
