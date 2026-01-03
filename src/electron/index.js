@@ -3,14 +3,24 @@ const {
   app,
   BrowserWindow,
   ipcMain,
-  dialog,
   nativeTheme,
+  Menu,
+  MenuItem,
 } = require("electron");
 const path = require("node:path");
 const fs = require("fs").promises;
 const reloader = require("electron-reloader");
 
 reloader(module, { ignore: "**/local/**" });
+
+// Create a dummy menu to remove default keyboard shortcuts. can add our own shortcuts later
+const menu = new Menu();
+// The first submenu needs to be the app menu on macOS
+if (process.platform === "darwin") {
+  const appMenu = new MenuItem({ role: "appMenu" });
+  menu.append(appMenu);
+}
+Menu.setApplicationMenu(menu);
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
