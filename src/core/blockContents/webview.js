@@ -352,8 +352,58 @@ function toolbar(state, block, position) {
       divider,
       sendToBackButton(block),
       sendToFrontButton(block),
+      divider,
+      webviewZoomLabel(block),
+      zoomOutButton(block),
+      zoomInButton(block),
     ],
   );
+}
+
+/**
+ * @param {WebviewBlock} block
+ * @return {import("hyperapp").ElementVNode<State>}
+ */
+function webviewZoomLabel(block) {
+  const webviewElement = getWebviewElementIfDomReady(block);
+  const zoomLevel = webviewElement ? webviewElement.getZoomLevel() : "null";
+  return h("div", {}, text(zoomLevel));
+}
+
+/**
+ * @param {WebviewBlock} block
+ * @return {import("hyperapp").ElementVNode<State>}
+ */
+function zoomOutButton(block) {
+  /**
+   * @param {State} state
+   */
+  function onclick(state) {
+    const webviewElement = getWebviewElementIfDomReady(block);
+    if (!webviewElement) return state;
+    const zoomLevel = webviewElement.getZoomLevel();
+    webviewElement.setZoomLevel(zoomLevel - 0.5);
+    return state;
+  }
+  return button("-", onclick, true);
+}
+
+/**
+ * @param {WebviewBlock} block
+ * @return {import("hyperapp").ElementVNode<State>}
+ */
+function zoomInButton(block) {
+  /**
+   * @param {State} state
+   */
+  function onclick(state) {
+    const webviewElement = getWebviewElementIfDomReady(block);
+    if (!webviewElement) return state;
+    const zoomLevel = webviewElement.getZoomLevel();
+    webviewElement.setZoomLevel(zoomLevel + 0.5);
+    return state;
+  }
+  return button("+", onclick, true);
 }
 
 /**
