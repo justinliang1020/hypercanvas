@@ -96,14 +96,20 @@ export function blockView(state, block) {
       return toggleBlockSelection(state, block.id);
     }
 
-    return updateCurrentPage(state, {
-      dragStart: {
-        id: block.id,
-        startX: block.x,
-        startY: block.y,
-      },
-      selectedIds: [block.id],
-    });
+    return pipe(
+      state,
+
+      (state) =>
+        updateCurrentPage(state, {
+          dragStart: {
+            id: block.id,
+            startX: block.x,
+            startY: block.y,
+          },
+          selectedIds: [block.id],
+        }),
+      (state) => sendToFront(state, block.id),
+    );
   }
 
   const contents = (() => {
@@ -169,7 +175,7 @@ export function blockView(state, block) {
  * Sends a block to the front (highest z-index)
  * @param {State} currentState - Current application state
  * @param {number} blockId - ID of block to bring to front
- * @returns {import("hyperapp").Dispatchable<State>} Updated state
+ * @returns {State} Updated state
  */
 export function sendToFront(currentState, blockId) {
   const blocks = getCurrentBlocks(currentState);
