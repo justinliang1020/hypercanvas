@@ -179,3 +179,24 @@ export function enableWebviewContextMenu(state, event, block) {
     [focusEffect, { id: "context-menu" }],
   ];
 }
+
+/**
+ * @param {State} state
+ * @param {number} x
+ * @param {number} y
+ * @param {WebviewBlock} block
+ * @returns {import("hyperapp").Dispatchable<State>}
+ */
+export function enableWebviewContextMenuManual(state, x, y, block) {
+  return [
+    updateState(state, {
+      contextMenu: {
+        x,
+        y,
+        block: block,
+        type: "webview",
+      },
+    }),
+    [focusEffect, { id: "context-menu" }],
+  ];
+}

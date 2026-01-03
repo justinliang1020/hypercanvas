@@ -28,6 +28,15 @@ document.addEventListener("keyup", (event) => {
   });
 });
 
+document.addEventListener("contextmenu", (event) => {
+  ipcRenderer.sendToHost("contextmenu", {
+    x: event.x,
+    y: event.y,
+
+    dpi: window.devicePixelRatio,
+  });
+});
+
 // Helper function to get absolute href
 /**
  * @param {string} href

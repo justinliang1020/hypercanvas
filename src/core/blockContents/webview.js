@@ -13,7 +13,10 @@ import {
   updateCurrentPage,
 } from "../pages.js";
 import { getDomainFromUrl, pipe, stopPropagation } from "../utils.js";
-import { enableWebviewContextMenu } from "../contextMenu.js";
+import {
+  enableWebviewContextMenu,
+  enableWebviewContextMenuManual,
+} from "../contextMenu.js";
 
 /**
  * @param {number} blockId
@@ -117,7 +120,7 @@ function webview(state, block) {
   /**
    * @param {State} state
    * @param {Event} event
-   * @return {State}
+   * @return {import("hyperapp").Dispatchable<State>}
    */
   function handleIpcMessage(state, /** @type {any} */ event) {
     const channel = event.channel;
@@ -143,7 +146,7 @@ function webview(state, block) {
         }
         return state;
 
-      case "anchor-hover":
+      case "anchor-hover": {
         const hoverHref = args[0]?.href;
         const block = getCurrentBlocks(state).find(
           (b) => b.id === parentBlockId,
@@ -159,6 +162,7 @@ function webview(state, block) {
           });
         }
         return addChildBlock(state, block.id, hoverHref, true);
+      }
 
       case "anchor-click":
         const clickHref = args[0]?.href;
@@ -188,6 +192,24 @@ function webview(state, block) {
           }
         }
         return state;
+
+      case "contextmenu": {
+        const x = args[0].x;
+        const y = args[0].y;
+        const webviewDpi = args[0].dpi;
+        const windowDpi = window.devicePixelRatio;
+        const zoom = state.pages[0].zoom;
+        const webviewElement = /** @type {import("electron").WebviewTag} */ (
+          document.getElementById(webviewDomId(block.id))
+        );
+        const webviewElementLeft = webviewElement.getBoundingClientRect().left;
+        const webviewElementTop = webviewElement.getBoundingClientRect().top;
+
+        const realX = x * zoom * (webviewDpi / windowDpi) + webviewElementLeft;
+        const realY = y * zoom * (webviewDpi / windowDpi) + webviewElementTop;
+        console.table({ realY });
+        return enableWebviewContextMenuManual(state, realX, realY, block);
+      }
 
       default:
         console.error("Unknown IPC channel:", channel);
