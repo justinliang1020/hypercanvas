@@ -13,13 +13,33 @@ const reloader = require("electron-reloader");
 
 reloader(module, { ignore: "**/local/**" });
 
-// Create a dummy menu to remove default keyboard shortcuts. can add our own shortcuts later
+// Create a minimal menu to remove most default keyboard shortcuts
 const menu = new Menu();
+
 // The first submenu needs to be the app menu on macOS
 if (process.platform === "darwin") {
   const appMenu = new MenuItem({ role: "appMenu" });
   menu.append(appMenu);
 }
+
+// Add View menu with DevTools toggle shortcuts
+const viewMenu = new MenuItem({
+  label: "View",
+  submenu: [
+    {
+      label: "Toggle Developer Tools",
+      role: "toggleDevTools",
+      accelerator: process.platform === "darwin" ? "Cmd+Option+I" : "Ctrl+Shift+I",
+    },
+    {
+      label: "Toggle Developer Tools (Console)",
+      role: "toggleDevTools",
+      accelerator: process.platform === "darwin" ? "Cmd+Option+J" : "Ctrl+Shift+J",
+    },
+  ],
+});
+menu.append(viewMenu);
+
 Menu.setApplicationMenu(menu);
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
