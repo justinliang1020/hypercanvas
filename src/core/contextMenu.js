@@ -24,6 +24,7 @@ export function contextMenuView(state) {
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
 
+  //TODO: dynamic dimensions based on number of buttons
   const MENU_WIDTH = 150;
   const MENU_HEIGHT = 200;
   const PADDING = 50;
@@ -57,11 +58,15 @@ export function contextMenuView(state) {
         transform: `translate(${adjustedX}px, ${adjustedY}px)`,
         width: `${MENU_WIDTH}px`,
         height: `${MENU_HEIGHT}px`,
-        background: "white",
+        background: "#707070",
         zIndex: `${Z_INDEX_TOP_2}`,
         position: "absolute",
         outline: "none",
         overflow: "hidden",
+        padding: "12px 9px",
+        border: "2px solid #949494",
+        boxShadow: "0 7px 6.2px 7px rgba(0, 0, 0, 0.25)",
+        borderRadius: "20px",
       },
       onblur: disableContextMenu,
       onpointerdown: stopPropagation,
@@ -96,10 +101,15 @@ function contextMenuButton(newState, value, hint) {
   return h(
     "div",
     {
-      //@ts-ignore
+      style: {
+        padding: "6px 9px",
+        borderRadius: "11px",
+        color: "#E5E5E5",
+      },
       onpointerdown: (state, event) => {
         return [newState, [blurEffect, { id: "context-menu" }]];
       },
+      class: "context-menu-button",
     },
     text(value),
   );

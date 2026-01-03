@@ -21,6 +21,10 @@ input {
   cursor: var(--override-cursor) !important;
 }
 
+.context-menu-button:hover {
+  background: #4ea4e3;
+}
+
 #viewport {
   background-color: #d9d9d9;
 }
