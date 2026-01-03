@@ -129,6 +129,12 @@ interface State {
   clipboard: Block[] | null;
   notification: string | null;
   notificationVisible: boolean;
+  contextMenu: ContextMenu | null;
+}
+
+interface ContextMenu {
+  x: number;
+  y: number;
 }
 
 type ResizeHandler = (

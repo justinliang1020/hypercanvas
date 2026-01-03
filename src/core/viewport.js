@@ -20,6 +20,8 @@ import {
 } from "./selection.js";
 import { drawBackgroundEffect } from "./background.js";
 import { MAX_ZOOM, MIN_ZOOM } from "./constants.js";
+import { contextMenuView, enableContextMenu } from "./contextMenu.js";
+import { updateState } from "./utils.js";
 
 /**
  * Calculates canvas coordinates from screen coordinates
@@ -493,6 +495,7 @@ export function viewport(state) {
       },
       onselectstart: isFullScreen ? undefined : onselectstart,
       onpointerdown: isFullScreen ? undefined : onpointerdown,
+      oncontextmenu: enableContextMenu,
       onpointermove: isFullScreen ? undefined : onpointermove,
       onpointerup: isFullScreen ? undefined : onpointerup,
       onwheel: isFullScreen ? undefined : onwheel,
@@ -532,6 +535,7 @@ export function viewport(state) {
           ...currentPage.links.map(linkView(state)),
           selectionBoundingBox(state),
           selectionBoxComponent(state),
+          contextMenuView(state),
         ].filter(Boolean),
       ),
     ],
