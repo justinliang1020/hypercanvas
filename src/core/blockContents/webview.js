@@ -12,7 +12,7 @@ import {
   getCurrentPage,
   updateCurrentPage,
 } from "../pages.js";
-import { getDomainFromUrl, pipe } from "../utils.js";
+import { getDomainFromUrl, pipe, stopPropagation } from "../utils.js";
 
 /**
  * @param {number} blockId
@@ -276,16 +276,6 @@ function webview(state, block) {
     "onpage-title-updated": handlePageTitleUpdated,
     "onpage-favicon-updated": handlePageFaviconUpdated,
   });
-}
-
-/**
- * @param {State} state
- * @param {Event} event
- * @returns {import("hyperapp").Dispatchable<State>}
- */
-function stopPropagation(state, event) {
-  event.stopPropagation();
-  return state;
 }
 
 /**

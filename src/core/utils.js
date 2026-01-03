@@ -390,3 +390,13 @@ export function focusEffect(dispatch, props) {
     }
   });
 }
+
+/**
+ * @param {State} state
+ * @param {Event} event
+ * @returns {import("hyperapp").Dispatchable<State>}
+ */
+export function stopPropagation(state, event) {
+  event.stopPropagation();
+  return state;
+}

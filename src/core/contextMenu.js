@@ -1,7 +1,8 @@
 import { h, text } from "hyperapp";
 import { Z_INDEX_TOP_2 } from "./constants.js";
-import { focusEffect, updateState } from "./utils.js";
+import { focusEffect, pipe, stopPropagation, updateState } from "./utils.js";
 import { getCanvasCoordinates } from "./viewport.js";
+import { addWebviewBlockToViewportCenter } from "./block.js";
 
 /**
  * @param {State} state
@@ -32,8 +33,19 @@ export function contextMenuView(state) {
     viewportHeight - MENU_HEIGHT - PADDING,
   );
 
+  const contextMenuType = state.contextMenu.type;
+
+  /** @type {import("hyperapp").ElementVNode<State>[]} */
+  const contents = (() => {
+    switch (contextMenuType) {
+      case "viewport": {
+        return viewportContextMenuContents(state);
+      }
+    }
+  })();
+
   return h(
-    "form",
+    "div",
     {
       id: "context-menu",
       tabindex: "-1",
@@ -48,9 +60,43 @@ export function contextMenuView(state) {
         overflow: "hidden",
       },
       onblur: disableContextMenu,
-      // oncreate: [focusEffect, { id: "context-menu" }],
+      onpointerdown: stopPropagation,
     },
-    text("hello world"),
+    contents,
+  );
+}
+
+/**
+ * @param {State} state
+ * @returns {import("hyperapp").ElementVNode<State>[]} Block renderer function
+ */
+function viewportContextMenuContents(state) {
+  return [
+    contextMenuButton(
+      addWebviewBlockToViewportCenter(state, "https://www.google.com/", false),
+      "add new block",
+      "cmd + t",
+    ),
+  ];
+}
+
+/**
+ * @param {import("hyperapp").Dispatchable<State>} dispatchable
+ * @param {string} value
+ * @param {string} [hint]
+ * @returns {import("hyperapp").ElementVNode<State>} Block renderer function
+ */
+function contextMenuButton(dispatchable, value, hint) {
+  //this can't be an actual <button> because clicking it would take away focus from the context menu div
+  //thus we just use a regular div and pointerdown instead
+  return h(
+    "div",
+    {
+      onpointerdown: (state, event) => {
+        return dispatchable;
+      },
+    },
+    text(value),
   );
 }
 
