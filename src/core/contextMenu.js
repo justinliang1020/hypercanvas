@@ -1,7 +1,11 @@
 import { h, text } from "hyperapp";
 import { Z_INDEX_TOP_2 } from "./constants.js";
-import { focusEffect, pipe, stopPropagation, updateState } from "./utils.js";
-import { getCanvasCoordinates } from "./viewport.js";
+import {
+  blurEffect,
+  focusEffect,
+  stopPropagation,
+  updateState,
+} from "./utils.js";
 import { addWebviewBlockToViewportCenter } from "./block.js";
 
 /**
@@ -81,19 +85,20 @@ function viewportContextMenuContents(state) {
 }
 
 /**
- * @param {import("hyperapp").Dispatchable<State>} dispatchable
+ * @param {State} newState - new state to transition to after button press. TODO: make this work with Dispatchable
  * @param {string} value
  * @param {string} [hint]
  * @returns {import("hyperapp").ElementVNode<State>} Block renderer function
  */
-function contextMenuButton(dispatchable, value, hint) {
+function contextMenuButton(newState, value, hint) {
   //this can't be an actual <button> because clicking it would take away focus from the context menu div
   //thus we just use a regular div and pointerdown instead
   return h(
     "div",
     {
+      //@ts-ignore
       onpointerdown: (state, event) => {
-        return dispatchable;
+        return [newState, [blurEffect, { id: "context-menu" }]];
       },
     },
     text(value),

@@ -392,6 +392,20 @@ export function focusEffect(dispatch, props) {
 }
 
 /**
+ * Effect to focus an element
+ * @param {Function} dispatch
+ * @param {{id: string}} props
+ */
+export function blurEffect(dispatch, props) {
+  requestAnimationFrame(() => {
+    const element = document.getElementById(props.id);
+    if (element) {
+      element.blur();
+    }
+  });
+}
+
+/**
  * @param {State} state
  * @param {Event} event
  * @returns {import("hyperapp").Dispatchable<State>}
