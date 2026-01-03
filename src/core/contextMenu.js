@@ -86,7 +86,12 @@ export function contextMenuView(state) {
 function viewportContextMenuContents(state) {
   return [
     contextMenuButton(
-      addWebviewBlockToViewportCenter(state, "https://www.google.com/", false),
+      (state, event) =>
+        addWebviewBlockToViewportCenter(
+          state,
+          "https://www.google.com/",
+          false,
+        ),
       "add new block",
       "cmd + t",
     ),
@@ -94,12 +99,12 @@ function viewportContextMenuContents(state) {
 }
 
 /**
- * @param {State} newState - new state to transition to after button press. TODO: make this work with Dispatchable
+ * @param {(state: State, event: Event) => State} action - new state to transition to after button press. TODO: make this work with Dispatchable
  * @param {string} value
  * @param {string} [hint]
  * @returns {import("hyperapp").ElementVNode<State>} Block renderer function
  */
-function contextMenuButton(newState, value, hint) {
+function contextMenuButton(action, value, hint) {
   //this can't be an actual <button> because clicking it would take away focus from the context menu div
   //thus we just use a regular div and pointerdown instead
   return h(
@@ -111,7 +116,7 @@ function contextMenuButton(newState, value, hint) {
         color: "#E5E5E5",
       },
       onpointerdown: (state, event) => {
-        return [newState, [blurEffect, { id: "context-menu" }]];
+        return [action(state, event), [blurEffect, { id: "context-menu" }]];
       },
       class: "context-menu-button",
     },
