@@ -422,6 +422,9 @@ function onwheel(state, event) {
   const page = getCurrentPage(state);
   if (!page) return state;
 
+  // if a context menu is open, we don't want the user to be able to pan the viewport
+  if (state.contextMenu) return state;
+
   if (isPanGesture) {
     // Trackpad pan gesture - use deltaX and deltaY directly
     // Invert the delta values to match Figma-like behavior
