@@ -186,6 +186,10 @@ function webview(state, block) {
                     blockPreviewChildId,
                   ],
                 }),
+              (s) =>
+                updateCurrentPage(s, {
+                  selectedIds: [blockPreviewChildId],
+                }),
             );
           } else {
             return addChildBlock(state, parentBlockId, clickHref, false);
