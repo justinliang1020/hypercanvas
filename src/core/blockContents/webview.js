@@ -193,10 +193,11 @@ function webview(state, block) {
         }
         return state;
 
-      case "contextmenu": {
+      //TODO: consolidate "contextmenu-anchor" and "contextmenu"
+      case "contextmenu-anchor": {
         const x = args[0].x;
         const y = args[0].y;
-        const anchorHref = args[0].anchorHref;
+        const anchorHref = args[0].anchorHref ?? null;
         const webviewDpi = args[0].dpi;
         const windowDpi = window.devicePixelRatio;
         const zoom = state.pages[0].zoom;
@@ -215,6 +216,22 @@ function webview(state, block) {
           block,
           anchorHref,
         );
+      }
+      case "contextmenu": {
+        const x = args[0].x;
+        const y = args[0].y;
+        const webviewDpi = args[0].dpi;
+        const windowDpi = window.devicePixelRatio;
+        const zoom = state.pages[0].zoom;
+        const webviewElement = /** @type {import("electron").WebviewTag} */ (
+          document.getElementById(webviewDomId(block.id))
+        );
+        const webviewElementLeft = webviewElement.getBoundingClientRect().left;
+        const webviewElementTop = webviewElement.getBoundingClientRect().top;
+
+        const realX = x * zoom * (webviewDpi / windowDpi) + webviewElementLeft;
+        const realY = y * zoom * (webviewDpi / windowDpi) + webviewElementTop;
+        return enableWebviewContextMenuManual(state, realX, realY, block, null);
       }
 
       default:

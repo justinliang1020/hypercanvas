@@ -197,7 +197,7 @@ export function enableWebviewContextMenu(state, event, block) {
  * @param {number} x
  * @param {number} y
  * @param {WebviewBlock} block
- * @param {string} anchorHref
+ * @param {string | null} anchorHref
  * @returns {import("hyperapp").Dispatchable<State>}
  */
 export function enableWebviewContextMenuManual(state, x, y, block, anchorHref) {

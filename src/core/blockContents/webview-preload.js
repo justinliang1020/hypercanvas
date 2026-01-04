@@ -29,18 +29,9 @@ document.addEventListener("keyup", (event) => {
 });
 
 document.addEventListener("contextmenu", (event) => {
-  //TODO: get the case where the anchor element is not directly under the target html element, i.e. youtube shorts links
-  const anchorHref = (() => {
-    const target = event.target;
-    if (target === null || !(target instanceof HTMLAnchorElement)) {
-      return null;
-    }
-    return getAbsoluteHref(target.href);
-  })();
   ipcRenderer.sendToHost("contextmenu", {
     x: event.x,
     y: event.y,
-    anchorHref: anchorHref,
     dpi: window.devicePixelRatio,
   });
 });
@@ -98,6 +89,24 @@ function setupAnchorHandling() {
       const finalHref = getAbsoluteHref(href);
       event.preventDefault();
       ipcRenderer.sendToHost("anchor-click", { href: finalHref });
+    });
+
+    aEl.addEventListener("contextmenu", (event) => {
+      // if (!(event.metaKey || aEl.getAttribute("target") === "_blank")) return;
+      const href = aEl.getAttribute("href");
+      if (!href) return;
+
+      const finalHref = getAbsoluteHref(href);
+      event.preventDefault();
+      // prevent the document-level contextmenu script from triggering, which would cause a race with this anchor-level contextmenu event and prevent the IPC message handler from working
+      event.stopPropagation();
+
+      ipcRenderer.sendToHost("contextmenu-anchor", {
+        x: event.x,
+        y: event.y,
+        anchorHref: finalHref,
+        dpi: window.devicePixelRatio,
+      });
     });
   });
 }
