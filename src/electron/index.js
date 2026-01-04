@@ -13,44 +13,27 @@ const reloader = require("electron-reloader");
 
 reloader(module, { ignore: "**/local/**" });
 
-// Create a minimal menu to remove most default keyboard shortcuts
-const menu = new Menu();
+// Build default menu but remove zoom keyboard shortcuts
+const template = [
+  ...(process.platform === "darwin" ? [{ role: "appMenu" }] : []),
+  { role: "fileMenu" },
+  { role: "editMenu" },
+  {
+    label: "View",
+    // Remove zoomIn, zoomOut, resetZoom shortcuts
+    submenu: [
+      { role: "reload" },
+      { role: "forceReload" },
+      { role: "toggleDevTools" },
+      { type: "separator" },
+      { type: "separator" },
+      { role: "togglefullscreen" },
+    ],
+  },
+  { role: "windowMenu" },
+];
 
-// The first submenu needs to be the app menu on macOS
-if (process.platform === "darwin") {
-  const appMenu = new MenuItem({ role: "appMenu" });
-  menu.append(appMenu);
-}
-
-// Add Edit menu with copy/paste shortcuts
-const editMenu = new MenuItem({
-  label: "Edit",
-  submenu: [
-    { role: "cut" },
-    { role: "copy" },
-    { role: "paste" },
-  ],
-});
-menu.append(editMenu);
-
-// Add View menu with DevTools toggle shortcuts
-const viewMenu = new MenuItem({
-  label: "View",
-  submenu: [
-    {
-      label: "Toggle Developer Tools",
-      role: "toggleDevTools",
-      accelerator: process.platform === "darwin" ? "Cmd+Option+I" : "Ctrl+Shift+I",
-    },
-    {
-      label: "Toggle Developer Tools (Console)",
-      role: "toggleDevTools",
-      accelerator: process.platform === "darwin" ? "Cmd+Option+J" : "Ctrl+Shift+J",
-    },
-  ],
-});
-menu.append(viewMenu);
-
+const menu = Menu.buildFromTemplate(template);
 Menu.setApplicationMenu(menu);
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
