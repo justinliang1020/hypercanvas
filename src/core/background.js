@@ -6,8 +6,8 @@
 export function drawBackgroundEffect(dispatch, props) {
   // Define one gradient cycle width in world coordinates
   const REPEAT_WIDTH = 12000;
-  const COLOR_1 = props.isDarkMode ? "#4B3A4C" : "#F1F1EC";
-  const COLOR_2 = props.isDarkMode ? "#3B3B3B" : "#F6F8E5";
+  const COLOR_1 = props.isDarkMode ? "#4B3A4C" : "#F0F0E7";
+  const COLOR_2 = props.isDarkMode ? "#3B3B3B" : "#F3DEDE";
   const canvas = /** @type {HTMLCanvasElement | null} */ (
     document.getElementById("background-canvas")
   );
