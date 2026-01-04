@@ -338,14 +338,16 @@ export function addWebviewBlockToViewportCenter(
   const x = viewportCenter.x - width / 2; // Center the block
   const y = viewportCenter.y - height / 2; // Center the block
 
-  return addWebviewBlock(
+  const { state: newState, newBlockId } = addWebviewBlock(
     state,
     { initialSrc: src, isPreview },
     x,
     y,
     width,
     height,
-  ).state;
+  );
+
+  return updateCurrentPage(newState, { selectedIds: [newBlockId] });
 }
 
 /**
