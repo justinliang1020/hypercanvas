@@ -144,6 +144,7 @@ interface ViewportContextMenu extends BaseContextMenu {
 interface WebviewContextMenu extends BaseContextMenu {
   type: "webview";
   block: WebviewBlock;
+  anchorHref: string | null;
 }
 
 type ContextMenu = ViewportContextMenu | WebviewContextMenu;

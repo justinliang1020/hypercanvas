@@ -6,7 +6,7 @@ import {
   stopPropagation,
   updateState,
 } from "./utils.js";
-import { addWebviewBlockToViewportCenter } from "./block.js";
+import { addChildBlock, addWebviewBlockToViewportCenter } from "./block.js";
 import { webviewGoBack, webviewGoForward } from "./blockContents/webview.js";
 
 /**
@@ -49,7 +49,11 @@ export function contextMenuView(state) {
       }
       case "webview": {
         //TODO: implement
-        return webviewContextMenuContents(state, state.contextMenu.block);
+        return webviewContextMenuContents(
+          state,
+          state.contextMenu.block,
+          state.contextMenu.anchorHref,
+        );
       }
     }
   })();
@@ -102,9 +106,10 @@ function viewportContextMenuContents(state) {
 /**
  * @param {State} state
  * @param {WebviewBlock} block
+ * @param {string | null} anchorHref - href of anchor tag from the context menu event. if it doesn't exist, use null
  * @returns {import("hyperapp").ElementVNode<State>[]} Block renderer function
  */
-function webviewContextMenuContents(state, block) {
+function webviewContextMenuContents(state, block, anchorHref) {
   //TODO: add disabled
   return [
     contextMenuButton(
@@ -115,7 +120,13 @@ function webviewContextMenuContents(state, block) {
       (state, event) => webviewGoForward(state, block),
       "go forward a page",
     ),
-  ];
+    anchorHref
+      ? contextMenuButton(
+          (state, event) => addChildBlock(state, block.id, anchorHref, false),
+          "open link in new block",
+        )
+      : null,
+  ].filter((item) => item !== null);
 }
 
 /**
@@ -174,6 +185,7 @@ export function enableWebviewContextMenu(state, event, block) {
         y: event.clientY,
         block: block,
         type: "webview",
+        anchorHref: null,
       },
     }),
     [focusEffect, { id: "context-menu" }],
@@ -185,9 +197,10 @@ export function enableWebviewContextMenu(state, event, block) {
  * @param {number} x
  * @param {number} y
  * @param {WebviewBlock} block
+ * @param {string} anchorHref
  * @returns {import("hyperapp").Dispatchable<State>}
  */
-export function enableWebviewContextMenuManual(state, x, y, block) {
+export function enableWebviewContextMenuManual(state, x, y, block, anchorHref) {
   return [
     updateState(state, {
       contextMenu: {
@@ -195,6 +208,7 @@ export function enableWebviewContextMenuManual(state, x, y, block) {
         y,
         block: block,
         type: "webview",
+        anchorHref: anchorHref,
       },
     }),
     [focusEffect, { id: "context-menu" }],

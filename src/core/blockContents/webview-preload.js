@@ -29,10 +29,18 @@ document.addEventListener("keyup", (event) => {
 });
 
 document.addEventListener("contextmenu", (event) => {
+  //TODO: get the case where the anchor element is not directly under the target html element, i.e. youtube shorts links
+  const anchorHref = (() => {
+    const target = event.target;
+    if (target === null || !(target instanceof HTMLAnchorElement)) {
+      return null;
+    }
+    return getAbsoluteHref(target.href);
+  })();
   ipcRenderer.sendToHost("contextmenu", {
     x: event.x,
     y: event.y,
-
+    anchorHref: anchorHref,
     dpi: window.devicePixelRatio,
   });
 });

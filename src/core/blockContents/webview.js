@@ -196,6 +196,7 @@ function webview(state, block) {
       case "contextmenu": {
         const x = args[0].x;
         const y = args[0].y;
+        const anchorHref = args[0].anchorHref;
         const webviewDpi = args[0].dpi;
         const windowDpi = window.devicePixelRatio;
         const zoom = state.pages[0].zoom;
@@ -207,8 +208,13 @@ function webview(state, block) {
 
         const realX = x * zoom * (webviewDpi / windowDpi) + webviewElementLeft;
         const realY = y * zoom * (webviewDpi / windowDpi) + webviewElementTop;
-        console.table({ realY });
-        return enableWebviewContextMenuManual(state, realX, realY, block);
+        return enableWebviewContextMenuManual(
+          state,
+          realX,
+          realY,
+          block,
+          anchorHref,
+        );
       }
 
       default:
